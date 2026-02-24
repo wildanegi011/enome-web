@@ -1,0 +1,316 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Search, ShoppingBag, User, Settings, LogOut, Package, Wallet, ChevronDown, Menu, X, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import AuthModal from "./AuthModal";
+import { useAuth } from "@/hooks/use-auth";
+import { useCart } from "@/hooks/use-cart";
+import { cn } from "@/lib/utils";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+
+export default function Navbar() {
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [authModal, setAuthModal] = useState<{ open: boolean; tab: "login" | "register" }>({ open: false, tab: "login" });
+    const pathname = usePathname();
+    const { user, isAuthenticated, logout } = useAuth();
+    const { count: cartCount } = useCart();
+
+    useEffect(() => {
+        const handleOpenAuth = (e: any) => {
+            setAuthModal({ open: true, tab: e.detail?.tab || "login" });
+        };
+        window.addEventListener("open-auth-modal", handleOpenAuth);
+        return () => window.removeEventListener("open-auth-modal", handleOpenAuth);
+    }, []);
+
+    const navLinks = [
+        { name: "Home", path: "/" },
+        { name: "Products", path: "/products" },
+        { name: "About", path: "/about" },
+    ];
+
+    return (
+        <motion.header
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100"
+        >
+            <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
+                <div className="flex items-center justify-between h-[80px]">
+                    {/* Left - Logo with original decorative frame */}
+                    <Link href="/" className="relative flex items-center">
+                        <div className="relative px-6 py-2">
+                            <svg
+                                viewBox="0 0 180 64"
+                                className="absolute inset-0 w-full h-full"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <ellipse cx="90" cy="32" rx="86" ry="28" stroke="#8B6914" strokeWidth="1.5" fill="none" />
+                                <ellipse cx="90" cy="32" rx="80" ry="24" stroke="#8B6914" strokeWidth="0.5" fill="none" />
+                                <path d="M72 5 Q80 1 90 4 Q100 1 108 5" stroke="#8B6914" strokeWidth="1" fill="none" />
+                                <circle cx="90" cy="2" r="1.5" fill="#8B6914" />
+                                <path d="M72 59 Q80 63 90 60 Q100 63 108 59" stroke="#8B6914" strokeWidth="1" fill="none" />
+                                <circle cx="90" cy="62" r="1.5" fill="#8B6914" />
+                            </svg>
+                            <span className="font-heading text-xl md:text-2xl font-bold tracking-[0.2em] text-neutral-base-900 relative z-10">
+                                ÉNOMÉ
+                            </span>
+                        </div>
+                    </Link>
+
+                    {/* Right - Navigation + Actions */}
+                    <div className="hidden md:flex items-center gap-8">
+                        {/* Nav Links */}
+                        <nav className="flex items-center gap-10">
+                            {navLinks.map((link) => {
+                                const isActive = pathname === link.path;
+                                return (
+                                    <Link
+                                        key={link.name}
+                                        href={link.path}
+                                        className={cn(
+                                            "text-[12px] font-bold tracking-[0.1em] uppercase transition-all duration-300 relative",
+                                            isActive ? "text-neutral-base-900" : "text-neutral-base-500 hover:text-amber-800"
+                                        )}
+                                    >
+                                        {link.name}
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="activeNav"
+                                                className="absolute -bottom-2 left-0 right-0 h-[2px] bg-neutral-base-900"
+                                                initial={false}
+                                                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                                            />
+                                        )}
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+
+                        {/* Separator */}
+                        <div className="w-px h-5 bg-gray-200" />
+
+                        {/* Cart Action */}
+                        <div className="flex items-center gap-5">
+                            <Link
+                                href="/cart"
+                                className="text-neutral-base-500 hover:text-neutral-base-900 transition-colors p-1 relative"
+                                aria-label="Cart"
+                            >
+                                <ShoppingBag className="w-[18px] h-[18px]" strokeWidth={1.2} />
+                                <AnimatePresence>
+                                    {cartCount > 0 && (
+                                        <motion.span
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            exit={{ scale: 0 }}
+                                            className="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
+                                        >
+                                            {cartCount}
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
+                            </Link>
+                        </div>
+
+                        {/* Separator */}
+                        <div className="w-px h-5 bg-gray-200" />
+
+                        {/* Account Action */}
+                        <div className="flex items-center gap-3">
+                            {isAuthenticated ? (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button className="flex items-center gap-2 group outline-none">
+                                            <div className="w-9 h-9 rounded-full bg-neutral-base-100 flex items-center justify-center border-2 border-white shadow-sm group-hover:bg-neutral-base-200 transition-all overflow-hidden">
+                                                <User className="w-5 h-5 text-neutral-base-600" />
+                                            </div>
+                                            <div className="text-left hidden lg:block">
+                                                <p className="text-[11px] font-bold text-neutral-base-900 leading-none truncate max-w-[100px] mb-0.5">{user?.name}</p>
+                                                <p className="text-[9px] text-neutral-base-400 font-bold uppercase tracking-widest flex items-center gap-1">
+                                                    Account <ChevronDown className="w-2.5 h-2.5" />
+                                                </p>
+                                            </div>
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-[240px] mt-4 p-2 rounded-[24px] shadow-2xl border-neutral-base-100/60 bg-white/95 backdrop-blur-xl">
+                                        <div className="px-4 py-4 mb-2 bg-neutral-base-50 rounded-[20px]">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-base-400 mb-1">Signed in as</p>
+                                            <p className="text-[14px] font-bold text-neutral-base-900 truncate">{user?.email}</p>
+                                        </div>
+
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/account/profile" className="flex items-center gap-3 p-3 rounded-xl cursor-pointer focus:bg-neutral-base-50">
+                                                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                                                    <Settings className="w-4 h-4 text-blue-600" />
+                                                </div>
+                                                <span className="text-[13px] font-bold">Pengaturan Profil</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+
+                                        <Link href="/account/addresses">
+                                            <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer focus:bg-emerald-50/50">
+                                                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                                                    <MapPin className="w-4 h-4 text-emerald-600" />
+                                                </div>
+                                                <span className="text-[13px] font-bold">Daftar Alamat</span>
+                                            </DropdownMenuItem>
+                                        </Link>
+
+                                        <Link href="/account/orders">
+                                            <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer focus:bg-amber-50/50">
+                                                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                                                    <Package className="w-4 h-4 text-amber-800" />
+                                                </div>
+                                                <span className="text-[13px] font-bold">Riwayat Pesanan</span>
+                                            </DropdownMenuItem>
+                                        </Link>
+
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/account/wallet" className="flex items-center gap-3 p-3 rounded-xl cursor-not-allowed opacity-50">
+                                                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                                                    <Wallet className="w-4 h-4 text-indigo-600" />
+                                                </div>
+                                                <span className="text-[13px] font-bold">Dompet Saya</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuSeparator className="my-2 bg-neutral-base-100/60" />
+
+                                        <DropdownMenuItem
+                                            onClick={() => logout()}
+                                            className="flex items-center gap-3 p-3 rounded-xl cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700"
+                                        >
+                                            <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
+                                                <LogOut className="w-4 h-4 text-red-600" />
+                                            </div>
+                                            <span className="text-[13px] font-bold">Keluar Akun</span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => setAuthModal({ open: true, tab: "login" })}
+                                        className="text-[13px] font-medium text-neutral-base-500 hover:text-neutral-base-900 transition-colors"
+                                    >
+                                        SIGN IN
+                                    </button>
+                                    <span className="text-neutral-base-200 text-xs">/</span>
+                                    <button
+                                        onClick={() => setAuthModal({ open: true, tab: "register" })}
+                                        className="text-[12px] font-bold bg-neutral-base-900 text-white px-6 py-2.5 hover:bg-neutral-base-800 transition-all tracking-widest uppercase shadow-lg shadow-neutral-base-900/10"
+                                    >
+                                        SIGN UP
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Mobile section */}
+                    <div className="flex md:hidden items-center gap-4">
+                        <Link href="/cart" className="p-1 hover:text-neutral-base-900 transition-colors relative">
+                            <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
+                            {cartCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-black min-w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-white shadow-sm px-1">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </Link>
+                        <button
+                            className="p-1 hover:text-neutral-base-900 transition-colors"
+                            onClick={() => setMobileOpen(!mobileOpen)}
+                        >
+                            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Nav */}
+            <AnimatePresence>
+                {mobileOpen && (
+                    <motion.nav
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="md:hidden overflow-hidden border-t border-gray-100 bg-white"
+                    >
+                        <div className="px-8 py-6 flex flex-col gap-4">
+                            {navLinks.map((link) => (
+                                <Link
+                                    key={link.name}
+                                    href={link.path}
+                                    className={cn(
+                                        "text-sm font-bold uppercase tracking-widest py-2 px-4 rounded-xl transition-all",
+                                        pathname === link.path ? "text-neutral-base-900 bg-neutral-base-50" : "text-neutral-base-400"
+                                    )}
+                                >
+                                    {link.name}
+                                </Link>
+                            ))}
+                            <div className="h-px bg-neutral-base-100/60 my-2" />
+                            {isAuthenticated ? (
+                                <div className="space-y-4 px-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-neutral-base-100 flex items-center justify-center">
+                                            <User className="w-5 h-5 text-neutral-base-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-neutral-base-900">{user?.name}</p>
+                                            <p className="text-[10px] text-neutral-base-400 font-bold uppercase tracking-widest">{user?.email}</p>
+                                        </div>
+                                    </div>
+                                    <Link href="/account/orders" className="flex items-center gap-3 text-[12px] font-black uppercase tracking-widest text-neutral-base-900">
+                                        <Package className="w-4 h-4 text-amber-800" /> My Orders
+                                    </Link>
+                                    <button
+                                        onClick={() => logout()}
+                                        className="text-[12px] font-black uppercase tracking-widest text-red-600"
+                                    >
+                                        Sign Out
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-3">
+                                    <button
+                                        onClick={() => { setMobileOpen(false); setAuthModal({ open: true, tab: "login" }); }}
+                                        className="text-[12px] font-bold uppercase tracking-widest text-neutral-base-900 py-3 border border-neutral-base-200 rounded-xl"
+                                    >
+                                        Sign In
+                                    </button>
+                                    <button
+                                        onClick={() => { setMobileOpen(false); setAuthModal({ open: true, tab: "register" }); }}
+                                        className="text-[12px] font-bold uppercase tracking-widest text-white py-3 bg-neutral-base-900 rounded-xl shadow-lg shadow-neutral-base-900/10"
+                                    >
+                                        Sign Up
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </motion.nav>
+                )}
+            </AnimatePresence>
+
+            <AuthModal
+                isOpen={authModal.open}
+                onClose={() => setAuthModal({ ...authModal, open: false })}
+                defaultTab={authModal.tab}
+            />
+        </motion.header>
+    );
+}

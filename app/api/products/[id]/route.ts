@@ -1,0 +1,225 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { produk, produkDetail, warna, size, customer, flashSale, flashSaleDetail, customerKategori } from "@/lib/db/schema";
+import { eq, and, sql, not, min, max } from "drizzle-orm";
+import { getSession } from "@/lib/auth-utils";
+import logger from "@/lib/logger";
+import { CONFIG } from "@/lib/config";
+
+/**
+ * Handler untuk mengambil data detail satu produk berdasarkan ID.
+ * Mencakup data varian (warna, size), stok per varian, matrix harga,
+ * status diskon Flash Sale/Pre-Order, dan daftar produk terkait.
+ */
+export async function GET(
+    request: NextRequest,
+    props: { params: Promise<{ id: string }> }
+) {
+    const params = await props.params;
+    const { id } = params;
+
+    logger.info("API Request: GET /api/products/[id]", { productId: id });
+
+    try {
+        const session = await getSession();
+        let kategoriId = CONFIG.DEFAULT_KATEGORI_CUSTOMER_ID;
+
+        if (session?.user?.id) {
+            const customerData = await db.select()
+                .from(customer)
+                .where(eq(customer.userId, session.user.id))
+                .limit(1);
+            if (customerData.length > 0) {
+                kategoriId = customerData[0].kategoriCustomerId || CONFIG.DEFAULT_KATEGORI_CUSTOMER_ID;
+            }
+        }
+
+        // Map kategori ke kolom harga menggunakan CONFIG
+        const priceColumnName = CONFIG.PRICE_COLUMNS[kategoriId] || CONFIG.PRICE_COLUMNS[CONFIG.DEFAULT_KATEGORI_CUSTOMER_ID];
+        const priceColumn = (produkDetail as any)[priceColumnName] || sql.raw(priceColumnName);
+        const now = new Date();
+
+        // 1. Ambil detail utama produk
+        const productData = await db
+            .select({
+                product: produk,
+                flashSaleId: sql<number>`(SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = ${produk.produkId} AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
+                preOrderId: sql<number>`(SELECT po.pre_order_id FROM pre_order po INNER JOIN pre_order_detail pod ON po.pre_order_id = pod.pre_order_id WHERE po.is_aktif = 1 AND pod.produk_id = ${produk.produkId} AND po.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
+                flashSaleDiscount: sql<number>`(SELECT ck.diskon_flash_sale FROM customer_kategori ck WHERE ck.id = ${kategoriId} LIMIT 1)`,
+            })
+            .from(produk)
+            .where(and(eq(produk.produkId, id), eq(produk.isOnline, 1)))
+            .limit(1);
+
+        if (productData.length === 0) {
+            logger.warn("Product Detail: Product not found or offline", { productId: id });
+            return NextResponse.json({ error: "Product not found" }, { status: 404 });
+        }
+
+        const mainProduct = productData[0].product;
+        const isOnFlashSale = !!productData[0].flashSaleId;
+        const isOnPreOrder = !!productData[0].preOrderId;
+        const flashSaleDiscount = productData[0].flashSaleDiscount || 0;
+
+        // 2. Ambil statistik harga (min/max) dan total stok
+        const priceStats = await db
+            .select({
+                minPrice: min(priceColumn),
+                maxPrice: max(priceColumn),
+                baseMinPrice: min(produkDetail.hargaJual),
+                baseMaxPrice: max(produkDetail.hargaJual),
+                totalStock: sql<string>`SUM(${produkDetail.stokNormal})`,
+            })
+            .from(produkDetail)
+            .where(eq(produkDetail.produkId, id));
+
+        const stats = priceStats[0];
+
+        // Terapkan logika diskon Flash Sale ke statistik harga
+        const finalMinPrice = isOnFlashSale
+            ? Number(stats.baseMinPrice) - (Number(stats.baseMinPrice) * (Number(flashSaleDiscount) / 100))
+            : Number(stats.minPrice);
+
+        const finalMaxPrice = isOnFlashSale
+            ? Number(stats.baseMaxPrice) - (Number(stats.baseMaxPrice) * (Number(flashSaleDiscount) / 100))
+            : Number(stats.maxPrice);
+
+        const commissionMin = Number(stats.baseMinPrice) - finalMinPrice;
+        const commissionMax = Number(stats.baseMaxPrice) - finalMaxPrice;
+
+        // 3. Ambil data detail varian untuk matrix pemilihan (warna & size)
+        const details = await db
+            .select({
+                color: warna.warna,
+                size: produkDetail.size,
+                stock: produkDetail.stokNormal,
+                price: priceColumn,
+                image: produkDetail.gambar,
+            })
+            .from(produkDetail)
+            .innerJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
+            .where(eq(produkDetail.produkId, id));
+
+        // 4. Ekstrak warna unik yang tersedia
+        const colorMap: Record<string, { name: string; value: string; image: string | null; totalStock: number }> = {};
+        const rawColors = await db
+            .selectDistinct({
+                name: warna.warna,
+                value: warna.kodeWarna,
+            })
+            .from(produkDetail)
+            .innerJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
+            .where(eq(produkDetail.produkId, id));
+
+        rawColors.forEach(c => {
+            colorMap[c.name] = { name: c.name, value: c.value || "", image: null, totalStock: 0 };
+        });
+
+        details.forEach(d => {
+            if (colorMap[d.color]) {
+                colorMap[d.color].totalStock += d.stock || 0;
+                if (d.image && !colorMap[d.color].image) {
+                    colorMap[d.color].image = d.image;
+                }
+            }
+        });
+
+        const colors = Object.values(colorMap);
+
+        // 5. Ambil daftar size yang tersedia
+        const sizes = await db
+            .selectDistinct({
+                name: size.size,
+                id: size.sizeId,
+            })
+            .from(produkDetail)
+            .innerJoin(size, eq(produkDetail.size, size.size))
+            .where(eq(produkDetail.produkId, id))
+            .orderBy(size.sizeId);
+
+        // 6. Kumpulkan semua gambar produk (gambar utama + gambar size + gambar per varian warna)
+        const allImages = [
+            mainProduct.gambar,
+            mainProduct.gambarSize,
+            ...colors.map(c => c.image).filter(Boolean)
+        ].filter((v, i, a) => v && a.indexOf(v) === i);
+
+        // 7. Ambil daftar produk terkait dalam kategori yang sama
+        const related = await db
+            .select({
+                produkId: produk.produkId,
+                namaProduk: produk.namaProduk,
+                gambar: produk.gambar,
+                kategori: produk.kategori,
+                minPrice: min(priceColumn),
+                maxPrice: max(priceColumn),
+                baseMinPrice: min(produkDetail.hargaJual),
+                baseMaxPrice: max(produkDetail.hargaJual),
+                totalStock: sql<string>`SUM(${produkDetail.stokNormal})`,
+                colors: sql<string>`GROUP_CONCAT(DISTINCT CONCAT(${warna.warna}, '|', ${warna.kodeWarna}) SEPARATOR ',')`,
+                flashSaleId: sql<number>`(SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = ${produk.produkId} AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
+                flashSaleDiscount: sql<number>`(SELECT ck.diskon_flash_sale FROM customer_kategori ck WHERE ck.id = ${kategoriId} LIMIT 1)`,
+            })
+            .from(produk)
+            .innerJoin(produkDetail, eq(produk.produkId, produkDetail.produkId))
+            .innerJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
+            .where(
+                and(
+                    eq(produk.kategori, mainProduct.kategori),
+                    not(eq(produk.produkId, id)),
+                    eq(produk.isOnline, 1)
+                )
+            )
+            .groupBy(produk.produkId)
+            .limit(8);
+
+        const processRelated = related.map((p: any) => {
+            const hasFS = !!p.flashSaleId;
+            const fMin = hasFS ? Number(p.baseMinPrice) - (Number(p.baseMinPrice) * (Number(p.flashSaleDiscount || 0) / 100)) : Number(p.minPrice);
+            const fMax = hasFS ? Number(p.baseMaxPrice) - (Number(p.baseMaxPrice) * (Number(p.flashSaleDiscount || 0) / 100)) : Number(p.maxPrice);
+            return {
+                ...p,
+                isOnFlashSale: hasFS,
+                finalMinPrice: fMin,
+                finalMaxPrice: fMax,
+                baseMinPrice: Number(p.baseMinPrice),
+                baseMaxPrice: Number(p.baseMaxPrice),
+                totalStock: Number(p.totalStock),
+            };
+        });
+
+        logger.info("Product Detail: Fetch success", { productId: id, totalStock: Number(stats.totalStock) });
+        return NextResponse.json({
+            product: mainProduct,
+            stats: {
+                ...stats,
+                finalMinPrice,
+                finalMaxPrice,
+                commissionMin,
+                commissionMax,
+                hasCommission: commissionMin > 0 || commissionMax > 0,
+                isOnFlashSale,
+                isOnPreOrder,
+                totalStock: Number(stats.totalStock)
+            },
+            variants: {
+                colors,
+                sizes: sizes.map(s => s.name),
+                matrix: details.map(d => {
+                    const dPrice = isOnFlashSale
+                        ? Number(d.price) - (Number(d.price) * (Number(flashSaleDiscount) / 100))
+                        : d.price;
+                    return { ...d, finalPrice: dPrice };
+                }),
+            },
+            images: allImages,
+            relatedProducts: processRelated,
+        });
+
+    } catch (error: any) {
+        logger.error("API Error: /api/products/[id]", { error: error.message, productId: id });
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
+
+
