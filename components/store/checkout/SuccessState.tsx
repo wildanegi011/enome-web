@@ -120,7 +120,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
                                             </div>
                                             <p className="text-[12px] font-medium text-emerald-800">
-                                                Pesanan akan <span className="font-bold">diverifikasi secara otomatis</span> dalam <span className="font-bold">{formatTime(timeLeft)}</span> menit setelah transfer diterima.
+                                                Pembayaran akan <span className="font-bold">diverifikasi secara otomatis</span> dalam <span className="font-bold">{formatTime(timeLeft)}</span> menit setelah transfer diterima.
                                             </p>
                                         </div>
                                     </div>
