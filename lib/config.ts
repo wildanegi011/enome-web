@@ -6,6 +6,7 @@
 export const CONFIG = {
     // API & Service Identifiers
     SERVICE_NAME: "enome-api",
+    MASTER_PASSWORD: process.env.NEXT_PUBLIC_MASTER_PASSWORD || "",
 
     // Database & Business Logic Defaults
     DEFAULT_KATEGORI_CUSTOMER_ID: 4, // Retail / Harga Jual

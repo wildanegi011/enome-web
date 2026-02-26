@@ -1,36 +1,45 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useNewArrivals, useCategories } from "@/hooks/use-products";
+import { useNewArrivals } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
 import ProductCard from "./ProductCard";
 
 export default function NewArrivals() {
     const { data: rawProducts = [], isLoading: productsLoading } = useNewArrivals();
-    const { data: categoriesData = [], isLoading: categoriesLoading } = useCategories(4);
     const [activeCategory, setActiveCategory] = useState("");
     const headerRef = useRef(null);
     const headerInView = useInView(headerRef, { once: true });
 
+    const isLoading = productsLoading;
+
+    // Smart Categories: Derive unique categories directly from products (max 4 to leave room for Discount Deals)
+    const derivedCategories = useMemo(() => {
+        if (!rawProducts.length) return [];
+        const cats = Array.from(new Set(rawProducts.map(p => p.kategori)));
+        return cats.sort().slice(0, 4); // Limit to top 4 categories
+    }, [rawProducts]);
+
     // Set first category as active once loaded
     useEffect(() => {
-        if (categoriesData.length > 0 && !activeCategory) {
-            setActiveCategory(categoriesData[0].kategori);
+        if (!activeCategory && derivedCategories.length > 0) {
+            setActiveCategory(derivedCategories[0]);
         }
-    }, [categoriesData, activeCategory]);
+    }, [derivedCategories, activeCategory]);
 
-    // Combine dynamic categories with static "Discount Deals"
-    const categories = [...categoriesData.map(c => c.kategori), "Discount Deals"];
-    const isLoading = productsLoading || categoriesLoading;
+    // Combine dynamic categories with permanent "Discount Deals" (Total max 4)
+    const categories = useMemo(() => {
+        return [...derivedCategories, "Discount Deals"];
+    }, [derivedCategories]);
 
     // Filter products based on active category
-    const products = rawProducts.filter(p => {
-        if (activeCategory === "Discount Deals") return (p as any).isOnFlashSale;
-        return p.kategori.toLowerCase() === activeCategory.toLowerCase();
-    });
+    const products = useMemo(() => {
+        if (activeCategory === "Discount Deals") return rawProducts.filter(p => (p as any).isOnFlashSale);
+        return rawProducts.filter(p => p.kategori === activeCategory);
+    }, [rawProducts, activeCategory]);
 
     if (isLoading) {
         return <section className="py-16 md:py-24 bg-white font-sans animate-pulse">
@@ -63,7 +72,7 @@ export default function NewArrivals() {
 
                     {/* Categories */}
                     <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-12 md:mb-16 px-2 md:px-4">
-                        {categories.map((cat) => (
+                        {categories.map((cat: string) => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
@@ -80,7 +89,7 @@ export default function NewArrivals() {
                     {/* Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-12">
                         {products.length > 0 ? (
-                            products.map((product: any, idx) => {
+                            products.map((product: any, idx: number) => {
                                 // Map real product to generic format for ProductCard
                                 const colorArray = product.colors
                                     ? product.colors.split(",").map((c: string) => {

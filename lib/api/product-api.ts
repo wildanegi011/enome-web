@@ -84,6 +84,7 @@ export const productApi = {
         return apiClient<Product[]>(url);
     },
     getNewArrivals: () => apiClient<Product[]>("/api/products/new-arrivals"),
+    getHighlights: () => apiClient<Product[]>("/api/products/highlights"),
     getById: (id: string) => apiClient<ProductDetailResponse>(`/api/products/${id}`),
     getCategories: (limit?: number) => apiClient<Category[]>(`/api/categories${limit ? `?limit=${limit}` : ""}`),
     getColors: () => apiClient<Color[]>("/api/colors"),

@@ -25,6 +25,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+interface LocationResult {
+    label: string;
+    province: string;
+    provinceId: string;
+    city: string;
+    cityId: string;
+    subdistrict: string;
+    subdistrictId: string;
+}
+
 interface Address {
     id: number;
     label: string;
@@ -50,7 +60,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData }: Add
     const mode = initialData ? "edit" : "add";
 
     const [locationQuery, setLocationQuery] = useState("");
-    const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+    const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null);
     const [showResults, setShowResults] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -74,9 +84,10 @@ export default function AddAddressModal({ open, onOpenChange, initialData }: Add
                 kodePos: initialData.postalCode,
                 isPrimary: initialData.isPrimary === 1 ? 1 : 0
             });
-            const loc = `${initialData.province}, ${initialData.city}, ${initialData.district}`;
-            setSelectedLocation(loc);
-            setLocationQuery(loc);
+            const locStr = `${initialData.province}, ${initialData.city}, ${initialData.district}`;
+            setLocationQuery(locStr);
+            // We don't set selectedLocation object here because we only have labels from initialData
+            // User must re-select if they want to update the location with accurate IDs
         } else if (!open) {
             resetForm();
         }
@@ -89,9 +100,9 @@ export default function AddAddressModal({ open, onOpenChange, initialData }: Add
             const res = await fetch(`/api/locations?q=${encodeURIComponent(locationQuery)}`);
             if (!res.ok) throw new Error("Failed to fetch locations");
             const data = await res.json();
-            return data.locations as string[];
+            return data.locations as LocationResult[];
         },
-        enabled: locationQuery.length >= 2 && locationQuery !== selectedLocation,
+        enabled: locationQuery.length >= 2 && locationQuery !== selectedLocation?.label,
     });
 
     const mutation = useMutation({
@@ -133,28 +144,32 @@ export default function AddAddressModal({ open, onOpenChange, initialData }: Add
         setSelectedLocation(null);
     };
 
-    const handleSelectLocation = (loc: string) => {
+    const handleSelectLocation = (loc: LocationResult) => {
         setSelectedLocation(loc);
-        setLocationQuery(loc);
+        setLocationQuery(loc.label);
         setShowResults(false);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!selectedLocation) {
+        // If in edit mode and user hasn't touched the location, we can use existing labels
+        // But the user's requirement says "idnya yg di insert", so we should ideally force selection
+        // For compatibility with previous implementation that might have strings:
+        if (!selectedLocation && mode === "add") {
             toast.error("Silakan pilih lokasi (Provinsi, Kota, Kecamatan)");
             return;
         }
 
-        const [provinsi, kota, kecamatan] = selectedLocation.split(", ").map(s => s.trim());
+        const payload: any = { ...formData };
 
-        mutation.mutate({
-            ...formData,
-            provinsi,
-            kota,
-            kecamatan
-        });
+        if (selectedLocation) {
+            payload.provinsi = selectedLocation.provinceId;
+            payload.kota = selectedLocation.cityId;
+            payload.kecamatan = selectedLocation.subdistrictId;
+        }
+
+        mutation.mutate(payload);
     };
 
     return (
@@ -288,9 +303,9 @@ export default function AddAddressModal({ open, onOpenChange, initialData }: Add
                                                                 <div className="w-8 h-8 rounded-full bg-neutral-base-50 flex items-center justify-center group-hover:bg-white transition-colors">
                                                                     <Navigation2 className="w-3.5 h-3.5 text-neutral-base-400 group-hover:text-amber-800 transition-colors" />
                                                                 </div>
-                                                                <span className="text-[13px] font-bold text-neutral-base-900">{loc}</span>
+                                                                <span className="text-[13px] font-bold text-neutral-base-900">{loc.label}</span>
                                                             </div>
-                                                            {selectedLocation === loc && (
+                                                            {selectedLocation?.subdistrictId === loc.subdistrictId && (
                                                                 <div className="w-5 h-5 rounded-full bg-amber-800 flex items-center justify-center">
                                                                     <Check className="w-3 h-3 text-white" />
                                                                 </div>

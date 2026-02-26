@@ -11,6 +11,13 @@ export function useNewArrivals() {
     });
 }
 
+export function useHighlights() {
+    return useQuery<Product[]>({
+        queryKey: queryKeys.products.highlights,
+        queryFn: productApi.getHighlights,
+    });
+}
+
 export function useProduct(id: string) {
     return useQuery<ProductDetailResponse>({
         queryKey: queryKeys.products.detail(id),

@@ -30,6 +30,7 @@ export class ProductService {
                 namaProduk: produk.namaProduk,
                 kategori: produk.kategori,
                 gambar: produk.gambar,
+                deskripsi: produk.deskripsi,
                 tglRilis: produk.tglRilis,
                 minPrice: min(priceColumn),
                 maxPrice: max(priceColumn),

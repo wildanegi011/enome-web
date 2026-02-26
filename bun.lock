@@ -23,6 +23,7 @@
         "mysql2": "^3.17.4",
         "next": "16.1.6",
         "next-themes": "^0.4.6",
+        "nodemailer": "^8.0.1",
         "radix-ui": "^1.4.3",
         "react": "19.2.3",
         "react-day-picker": "^9.13.2",
@@ -42,6 +43,7 @@
         "@types/bcryptjs": "^3.0.0",
         "@types/lodash": "^4.17.24",
         "@types/node": "^20",
+        "@types/nodemailer": "^7.0.11",
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "drizzle-kit": "^0.31.9",
@@ -553,6 +555,8 @@
     "@types/lodash": ["@types/lodash@4.17.24", "", {}, "sha512-gIW7lQLZbue7lRSWEFql49QJJWThrTFFeIMJdp3eH4tKoxm1OvEPg02rm4wCCSHS0cL3/Fizimb35b7k8atwsQ=="],
 
     "@types/node": ["@types/node@20.19.33", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-Rs1bVAIdBs5gbTIKza/tgpMuG1k3U/UMJLWecIMxNdJFDMzcM5LOiLVRYh3PilWEYDIeUDv7bpiHPLPsbydGcw=="],
+
+    "@types/nodemailer": ["@types/nodemailer@7.0.11", "", { "dependencies": { "@types/node": "*" } }, "sha512-E+U4RzR2dKrx+u3N4DlsmLaDC6mMZOM/TPROxA0UAPiTgI0y4CEFBmZE+coGWTjakDriRsXG368lNk1u9Q0a2g=="],
 
     "@types/react": ["@types/react@19.2.14", "", { "dependencies": { "csstype": "^3.2.2" } }, "sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w=="],
 
@@ -1315,6 +1319,8 @@
     "node-fetch": ["node-fetch@3.3.2", "", { "dependencies": { "data-uri-to-buffer": "^4.0.0", "fetch-blob": "^3.1.4", "formdata-polyfill": "^4.0.10" } }, "sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA=="],
 
     "node-releases": ["node-releases@2.0.27", "", {}, "sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA=="],
+
+    "nodemailer": ["nodemailer@8.0.1", "", {}, "sha512-5kcldIXmaEjZcHR6F28IKGSgpmZHaF1IXLWFTG+Xh3S+Cce4MiakLtWY+PlBU69fLbRa8HlaGIrC/QolUpHkhg=="],
 
     "npm-run-path": ["npm-run-path@6.0.0", "", { "dependencies": { "path-key": "^4.0.0", "unicorn-magic": "^0.3.0" } }, "sha512-9qny7Z9DsQU8Ou39ERsPU4OZQlSTP47ShQzuKZ6PRXpYLtIFgl/DEBYEXKlvcEa+9tHVcK8CF81Y2V72qaZhWA=="],
 

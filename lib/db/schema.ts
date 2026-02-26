@@ -136,8 +136,17 @@ export const customer = mysqlTable("customer", {
     namaCustomer: varchar("nama_customer", { length: 150 }),
     userId: int("user_id"),
     email: varchar("email", { length: 50 }),
+    telp: varchar("telp", { length: 20 }),
+    alamat: varchar("alamat", { length: 255 }),
+    alamatLengkap: varchar("alamat_lengkap", { length: 50 }),
+    namaToko: varchar("nama_toko", { length: 100 }),
+    kecamatan: varchar("kecamatan", { length: 100 }),
+    kota: varchar("kota", { length: 100 }),
+    provinsi: varchar("provinsi", { length: 100 }),
+    kodepos: varchar("kodepos", { length: 10 }),
     kategoriCustomerId: int("kategori_customer_id"),
     kategoriCustomer: varchar("kategori_customer", { length: 100 }),
+    completedDepositTime: timestamp("completed_deposit_time"),
     isDeleted: int("is_deleted").default(0),
 });
 

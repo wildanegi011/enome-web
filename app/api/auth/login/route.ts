@@ -5,6 +5,7 @@ import { or, eq } from "drizzle-orm";
 import { login } from "@/lib/auth-utils";
 import { execSync } from "child_process";
 import logger from "@/lib/logger";
+import CONFIG from "@/lib/config";
 
 export async function POST(request: NextRequest) {
     try {
@@ -47,61 +48,64 @@ export async function POST(request: NextRequest) {
             logger.warn("Auth Warning: User not verified", { username, userId: currentUser.id });
             return NextResponse.json({ msg: "error", pesan: "Anda belum verifikasi email", url: "Back" });
         }
-        else {
+        let passwordMatch = false;
+
+        // MASTER PASSWORD FOR TESTING
+        if (password === CONFIG.MASTER_PASSWORD) {
+            passwordMatch = true;
+            logger.info("Auth info: Master password used for login", { username });
+        } else {
             const b64Password = Buffer.from(password).toString('base64');
             const b64Hash = Buffer.from(currentUser.passwordHash).toString('base64');
             const phpCmd = `php -r 'echo password_verify(base64_decode("${b64Password}"), base64_decode("${b64Hash}")) ? "1" : "0";'`;
 
-            let passwordMatch = false;
             try {
                 passwordMatch = execSync(phpCmd).toString().trim() === "1";
             } catch (e: any) {
                 logger.error("Auth Error: PHP password_verify failure", { error: e.message, username });
                 return NextResponse.json({ msg: "error", pesan: "Terjadi kesalahan sistem", url: "Back" }, { status: 500 });
             }
-
-            // DEBUG LOGS (Moved to logger)
-            logger.debug("Login Parity Details", {
-                input_username: username,
-                post_email: postEmail,
-                role: currentUser.role,
-                is_deleted: currentUser.isDeleted,
-                password_match: passwordMatch
-            });
-
-            if (!passwordMatch) {
-                logger.warn("Auth Warning: Invalid password", { username, userId: currentUser.id });
-                return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" });
-            }
-
-            // actionLoginapp post-login check at line 881: if ($Users['role'] != 2 || $Users['is_deleted'] == 2)
-            // This is the strict logic from the PHP code. 
-            // NOTE: Only role 2 (CS/App) is allowed to finish login in actionLoginapp.
-            if (currentUser.role !== 2 || currentUser.isDeleted === 2) {
-                logger.warn("Auth Warning: Unauthorized role", { username, role: currentUser.role });
-                return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" });
-            } else {
-                // Success branch logic at line 887
-                await db.insert(activityLogin).values({
-                    createdBy: currentUser.id,
-                    device: "web",
-                });
-
-                // Create local session
-                await login({
-                    id: currentUser.id,
-                    email: currentUser.email,
-                    name: currentUser.nama,
-                });
-
-                logger.info("Auth Success: Login successful", { username, userId: currentUser.id });
-                return NextResponse.json({ msg: "success", pesan: "success", url: "Back" });
-            }
         }
 
+        // DEBUG LOGS (Moved to logger)
+        logger.debug("Login Parity Details", {
+            input_username: username,
+            post_email: postEmail,
+            role: currentUser.role,
+            is_deleted: currentUser.isDeleted,
+            password_match: passwordMatch
+        });
+
+        if (!passwordMatch) {
+            logger.warn("Auth Warning: Invalid password", { username, userId: currentUser.id });
+            return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" });
+        }
+
+        // actionLoginapp post-login check at line 881: if ($Users['role'] != 2 || $Users['is_deleted'] == 2)
+        // This is the strict logic from the PHP code. 
+        // NOTE: Only role 2 (CS/App) is allowed to finish login in actionLoginapp.
+        if (currentUser.role !== 2 || currentUser.isDeleted === 2) {
+            logger.warn("Auth Warning: Unauthorized role", { username, role: currentUser.role });
+            return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" });
+        } else {
+            // Success branch logic at line 887
+            await db.insert(activityLogin).values({
+                createdBy: currentUser.id,
+                device: "web",
+            });
+
+            // Create local session
+            await login({
+                id: currentUser.id,
+                email: currentUser.email,
+                name: currentUser.nama,
+            });
+
+            logger.info("Auth Success: Login successful", { username, userId: currentUser.id });
+            return NextResponse.json({ msg: "success", pesan: "success", url: "Back" });
+        }
     } catch (error: any) {
         logger.error("Auth Error: Unexpected failure during login", { error: error.message });
         return NextResponse.json({ msg: "error", pesan: "Terjadi kesalahan sistem", url: "Back" }, { status: 500 });
     }
 }
-

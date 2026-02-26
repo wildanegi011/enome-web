@@ -21,7 +21,7 @@ export async function GET() {
 
         const processData = await ProductService.getProducts({
             kategoriId,
-            limit: 6,
+            limit: 20,
             // Urutkan dari yang terbaru dirilis
             orderBy: desc(produk.tglRilis)
         });

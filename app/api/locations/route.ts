@@ -25,8 +25,11 @@ export async function GET(request: NextRequest) {
         const results = await db
             .select({
                 province: provinsi.province,
+                provinceId: provinsi.provinceId,
                 city: kota.cityName,
+                cityId: kota.cityId,
                 subdistrict: kecamatan.subdistrictName,
+                subdistrictId: kecamatan.subdistrictId,
             })
             .from(kecamatan)
             .innerJoin(kota, eq(kecamatan.cityId, kota.cityId))
@@ -39,8 +42,16 @@ export async function GET(request: NextRequest) {
             )
             .limit(20);
 
-        // Memformat hasil pencarian menjadi string gabungan
-        const locations = results.map(r => `${r.province}, ${r.city}, ${r.subdistrict}`);
+        // Memformat hasil pencarian menjadi objek terstruktur
+        const locations = results.map(r => ({
+            label: `${r.province}, ${r.city}, ${r.subdistrict}`,
+            province: r.province,
+            provinceId: r.provinceId,
+            city: r.city,
+            cityId: r.cityId,
+            subdistrict: r.subdistrict,
+            subdistrictId: r.subdistrictId
+        }));
 
         logger.info("API Response: 200 /api/locations", { results: locations.length });
         return NextResponse.json({ locations });

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Search, ShoppingBag, User, Settings, LogOut, Package, Wallet, ChevronDown, Menu, X, MapPin, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,11 +18,13 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import router from "next/router";
 
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [authModal, setAuthModal] = useState<{ open: boolean; tab: "login" | "register" }>({ open: false, tab: "login" });
     const pathname = usePathname();
+    const router = useRouter();
     const { user, isAuthenticated, logout } = useAuth();
     const { count: cartCount } = useCart();
     const { data: wishlistData } = useWishlist();
@@ -222,14 +224,14 @@ export default function Navbar() {
                             ) : (
                                 <>
                                     <button
-                                        onClick={() => setAuthModal({ open: true, tab: "login" })}
+                                        onClick={() => router.push("/login")}
                                         className="text-[13px] font-medium text-neutral-base-500 hover:text-neutral-base-900 transition-colors"
                                     >
                                         SIGN IN
                                     </button>
                                     <span className="text-neutral-base-200 text-xs">/</span>
                                     <button
-                                        onClick={() => setAuthModal({ open: true, tab: "register" })}
+                                        onClick={() => router.push("/register")}
                                         className="text-[12px] font-bold bg-neutral-base-900 text-white px-6 py-2.5 hover:bg-neutral-base-800 transition-all tracking-widest uppercase shadow-lg shadow-neutral-base-900/10"
                                     >
                                         SIGN UP
