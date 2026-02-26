@@ -1,135 +1,115 @@
-"use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
     User,
     ShoppingBag,
-    Wallet,
-    History,
+    Heart,
+    Bell,
     MapPin,
     LogOut,
-    ChevronRight
+    ChevronRight,
+    Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
     {
-        title: "Profil & Alamat",
+        title: "Profil Saya",
         icon: User,
         href: "/account/profile",
-        description: "Kelola informasi pribadi"
     },
     {
         title: "Daftar Alamat",
         icon: MapPin,
         href: "/account/addresses",
-        description: "Atur alamat pengiriman"
     },
     {
-        title: "Riwayat Pesanan",
+        title: "Riwayat Transaksi",
         icon: ShoppingBag,
         href: "/account/orders",
-        description: "Cek status pesanan kamu"
     },
     {
-        title: "Dompet Saya",
-        icon: Wallet,
-        href: "/account/wallet",
-        description: "Saldo & pembayaran"
+        title: "Wishlist",
+        icon: Heart,
+        href: "/account/wishlist",
     },
-    {
-        title: "Riwayat Topup",
-        icon: History,
-        href: "/account/topup-history",
-        description: "Catatan pengisian saldo"
-    },
+    // {
+    //     title: "Notifikasi",
+    //     icon: Bell,
+    //     href: "/account/notifications",
+    // },
 ];
 
 export default function UserSidebar() {
     const pathname = usePathname();
 
     return (
-        <aside className="w-full md:w-[320px] shrink-0">
-            <div className="sticky top-24 space-y-6">
-                {/* User Profile Summary */}
-                <div className="bg-white rounded-[32px] p-8 border border-neutral-base-100/60 shadow-sm overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50/50 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-amber-100/50 transition-colors duration-700" />
+        <aside className="w-full md:w-[280px] shrink-0">
+            <div className="sticky top-24 space-y-8">
 
-                    <div className="relative flex flex-col items-center text-center">
-                        <div className="w-20 h-20 bg-neutral-base-900 rounded-[24px] flex items-center justify-center text-white mb-4 shadow-xl shadow-neutral-base-900/10 group-hover:scale-105 transition-transform duration-500">
-                            <User className="w-10 h-10" />
-                        </div>
-                        <h3 className="text-[18px] font-heading font-bold text-neutral-base-900">Wildan Pratama</h3>
-                        <p className="text-[12px] text-neutral-base-400 font-bold uppercase tracking-widest mt-1">End User</p>
+                {/* Brand Logo or App Icon Placeholder (Matches circle in mockup) */}
+                <div className="hidden md:flex justify-start mb-10 pl-4">
+                    <div className="w-12 h-12 bg-neutral-base-900 rounded-[14px] flex items-center justify-center text-white font-black text-xl shadow-lg shadow-neutral-base-900/10">
+                        É
+                    </div>
+                </div>
+
+                {/* User Profile Summary - Mockup Style */}
+                <div className="flex items-center gap-4 px-4 py-2">
+                    <div className="w-12 h-12 bg-neutral-base-900 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg shadow-neutral-base-900/10">
+                        <User className="w-6 h-6" />
+                    </div>
+                    <div className="min-w-0">
+                        <h3 className="text-[14px] font-bold text-neutral-base-900 truncate">Budi Santoso</h3>
+                        <p className="text-[11px] text-neutral-base-400 font-medium truncate">budi.s@enome.com</p>
                     </div>
                 </div>
 
                 {/* Navigation Menu */}
-                <nav className="bg-white rounded-[32px] p-4 border border-neutral-base-100/60 shadow-sm">
-                    <div className="space-y-1">
-                        {menuItems.map((item) => {
-                            const isActive = pathname === item.href;
-                            const Icon = item.icon;
+                <nav className="space-y-1">
+                    {menuItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        const Icon = item.icon;
 
-                            return (
-                                <Link key={item.href} href={item.href} className="block">
-                                    <div
-                                        className={cn(
-                                            "group flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 relative overflow-hidden",
-                                            isActive
-                                                ? "bg-neutral-base-900 text-white shadow-lg shadow-neutral-base-900/10"
-                                                : "hover:bg-neutral-base-50 text-neutral-base-500 hover:text-neutral-base-900"
-                                        )}
-                                    >
-                                        <div className={cn(
-                                            "w-11 h-11 rounded-xl flex items-center justify-center transition-colors duration-300",
-                                            isActive ? "bg-white/10" : "bg-neutral-base-50 group-hover:bg-white shadow-sm"
-                                        )}>
-                                            <Icon className={cn("w-5 h-5", isActive ? "text-white" : "text-neutral-base-400 group-hover:text-amber-800")} />
-                                        </div>
-
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-[13px] font-bold leading-none">{item.title}</p>
-                                            <p className={cn(
-                                                "text-[10px] font-medium mt-1 truncate transition-colors",
-                                                isActive ? "text-white/60" : "text-neutral-base-300"
-                                            )}>
-                                                {item.description}
-                                            </p>
-                                        </div>
-
-                                        <ChevronRight className={cn(
-                                            "w-4 h-4 transition-transform duration-300",
-                                            isActive ? "text-white" : "text-neutral-base-200 group-hover:translate-x-1"
-                                        )} />
-
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="activeTab"
-                                                className="absolute inset-0 bg-neutral-base-900 -z-10"
-                                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                            />
-                                        )}
+                        return (
+                            <Link key={item.href} href={item.href} className="block relative group">
+                                {isActive && (
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-neutral-base-900 rounded-r-full" />
+                                )}
+                                <div
+                                    className={cn(
+                                        "flex items-center gap-4 px-6 py-3 rounded-[18px] transition-all duration-300",
+                                        isActive
+                                            ? "bg-neutral-base-50 text-neutral-base-900"
+                                            : "text-neutral-base-400 hover:text-neutral-base-900 hover:bg-neutral-base-50/50"
+                                    )}
+                                >
+                                    <div className={cn(
+                                        "w-6 h-6 flex items-center justify-center",
+                                        isActive ? "text-neutral-base-900" : "text-neutral-base-300 group-hover:text-neutral-base-900"
+                                    )}>
+                                        <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
                                     </div>
-                                </Link>
-                            );
-                        })}
 
-                        <div className="pt-2 mt-2 border-t border-neutral-base-100/60">
-                            <button className="w-full group flex items-center gap-4 p-4 rounded-2xl hover:bg-red-50 text-neutral-base-500 hover:text-red-700 transition-all duration-300">
-                                <div className="w-11 h-11 rounded-xl bg-neutral-base-50 group-hover:bg-white flex items-center justify-center shadow-sm transition-colors">
-                                    <LogOut className="w-5 h-5 text-neutral-base-400 group-hover:text-red-600" />
+                                    <span className={cn(
+                                        "text-[13px] font-bold",
+                                        isActive ? "text-neutral-base-900" : "text-neutral-base-500"
+                                    )}>
+                                        {item.title}
+                                    </span>
                                 </div>
-                                <div className="text-left">
-                                    <p className="text-[13px] font-bold">Keluar</p>
-                                    <p className="text-[10px] font-medium text-neutral-base-300 group-hover:text-red-400 mt-1">Selesaikan sesi</p>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
+                            </Link>
+                        );
+                    })}
                 </nav>
+
+                <div className="pt-6 mt-6 border-t border-neutral-base-100/50 pl-4">
+                    <button className="flex items-center gap-4 p-2 text-neutral-base-400 hover:text-red-500 transition-colors group">
+                        <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-[13px] font-bold">Keluar</span>
+                    </button>
+                </div>
             </div>
         </aside>
     );

@@ -98,3 +98,18 @@ export function nowJakartaDate(): string {
 export function nowJakartaYYMMDD(): string {
     return formatJakarta(new Date(), 'yymmdd');
 }
+
+/**
+ * Formats a given Date into the e-Nome UI format (e.g. 14 Agu 2026 • 14:05 WIB) in Jakarta time
+ */
+export function formatJakartaUI(date: Date): string {
+    return new Intl.DateTimeFormat("id-ID", {
+        timeZone: JAKARTA_TZ,
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+    }).format(date).replace(',', ' •') + " WIB";
+}

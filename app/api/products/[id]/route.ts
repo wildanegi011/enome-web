@@ -69,7 +69,7 @@ export async function GET(
                 maxPrice: max(priceColumn),
                 baseMinPrice: min(produkDetail.hargaJual),
                 baseMaxPrice: max(produkDetail.hargaJual),
-                totalStock: sql<string>`SUM(${produkDetail.stokNormal})`,
+                totalStock: sql<string>`COALESCE(SUM(${produkDetail.stokNormal}), 0)`,
             })
             .from(produkDetail)
             .where(eq(produkDetail.produkId, id));
@@ -91,25 +91,25 @@ export async function GET(
         // 3. Ambil data detail varian untuk matrix pemilihan (warna & size)
         const details = await db
             .select({
-                color: warna.warna,
+                color: sql<string>`COALESCE(${warna.warna}, ${produkDetail.warnaId})`,
                 size: produkDetail.size,
                 stock: produkDetail.stokNormal,
                 price: priceColumn,
                 image: produkDetail.gambar,
             })
             .from(produkDetail)
-            .innerJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
+            .leftJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
             .where(eq(produkDetail.produkId, id));
 
         // 4. Ekstrak warna unik yang tersedia
         const colorMap: Record<string, { name: string; value: string; image: string | null; totalStock: number }> = {};
         const rawColors = await db
             .selectDistinct({
-                name: warna.warna,
-                value: warna.kodeWarna,
+                name: sql<string>`COALESCE(${warna.warna}, ${produkDetail.warnaId})`,
+                value: sql<string>`COALESCE(${warna.kodeWarna}, '#cccccc')`,
             })
             .from(produkDetail)
-            .innerJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
+            .leftJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
             .where(eq(produkDetail.produkId, id));
 
         rawColors.forEach(c => {
@@ -118,7 +118,7 @@ export async function GET(
 
         details.forEach(d => {
             if (colorMap[d.color]) {
-                colorMap[d.color].totalStock += d.stock || 0;
+                colorMap[d.color].totalStock += Number(d.stock || 0);
                 if (d.image && !colorMap[d.color].image) {
                     colorMap[d.color].image = d.image;
                 }
@@ -156,8 +156,8 @@ export async function GET(
                 maxPrice: max(priceColumn),
                 baseMinPrice: min(produkDetail.hargaJual),
                 baseMaxPrice: max(produkDetail.hargaJual),
-                totalStock: sql<string>`SUM(${produkDetail.stokNormal})`,
-                colors: sql<string>`GROUP_CONCAT(DISTINCT CONCAT(${warna.warna}, '|', ${warna.kodeWarna}) SEPARATOR ',')`,
+                totalStock: sql<string>`(SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail WHERE produk_id = ${produk.produkId})`,
+                colors: sql<string>`GROUP_CONCAT(DISTINCT CONCAT(COALESCE(${warna.warna}, ${produkDetail.warnaId}), '|', COALESCE(${warna.kodeWarna}, '#cccccc')) SEPARATOR ',')`,
                 flashSaleId: sql<number>`(SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = ${produk.produkId} AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
                 flashSaleDiscount: sql<number>`(SELECT ck.diskon_flash_sale FROM customer_kategori ck WHERE ck.id = ${kategoriId} LIMIT 1)`,
             })
@@ -185,7 +185,7 @@ export async function GET(
                 finalMaxPrice: fMax,
                 baseMinPrice: Number(p.baseMinPrice),
                 baseMaxPrice: Number(p.baseMaxPrice),
-                totalStock: Number(p.totalStock),
+                totalStock: Number(p.totalStock || 0),
             };
         });
 
@@ -201,7 +201,7 @@ export async function GET(
                 hasCommission: commissionMin > 0 || commissionMax > 0,
                 isOnFlashSale,
                 isOnPreOrder,
-                totalStock: Number(stats.totalStock)
+                totalStock: Number(stats.totalStock || 0)
             },
             variants: {
                 colors,

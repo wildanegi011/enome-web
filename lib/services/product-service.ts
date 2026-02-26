@@ -31,11 +31,11 @@ export class ProductService {
                 maxPrice: max(priceColumn),
                 baseMinPrice: min(produkDetail.hargaJual),
                 baseMaxPrice: max(produkDetail.hargaJual),
-                totalStock: sql<number>`SUM(${produkDetail.stokNormal})`,
+                totalStock: sql<number>`(SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail WHERE produk_id = ${produk.produkId})`,
                 isOnline: produk.isOnline,
                 isAktif: produk.isAktif,
                 isHighlighted: produk.isHighlighted,
-                colors: sql<string>`GROUP_CONCAT(DISTINCT CONCAT(${warna.warna}, '|', ${warna.kodeWarna}) SEPARATOR ',')`,
+                colors: sql<string>`GROUP_CONCAT(DISTINCT CONCAT(COALESCE(${warna.warna}, ${produkDetail.warnaId}), '|', COALESCE(${warna.kodeWarna}, '#cccccc')) SEPARATOR ',')`,
                 flashSaleId: sql<number>`(SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = ${produk.produkId} AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
                 preOrderId: sql<number>`(SELECT po.pre_order_id FROM pre_order po INNER JOIN pre_order_detail pod ON po.pre_order_id = pod.pre_order_id WHERE po.is_aktif = 1 AND pod.produk_id = ${produk.produkId} AND po.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
                 flashSaleDiscount: sql<number>`(SELECT ck.diskon_flash_sale FROM customer_kategori ck WHERE ck.id = ${kategoriId} LIMIT 1)`,
@@ -88,6 +88,7 @@ export class ProductService {
                 finalMaxPrice,
                 commissionMin,
                 commissionMax,
+                totalStock: Number(p.totalStock || 0),
                 hasCommission: commissionMin > 0 || commissionMax > 0
             };
         });

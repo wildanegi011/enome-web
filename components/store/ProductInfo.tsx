@@ -101,7 +101,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 // Invalidate cart queries
                 window.dispatchEvent(new CustomEvent("cart-updated", { detail: { count: data.totalinlove } }));
             } else {
-                toast.error(data.pesan || "Terjadi kesalahan saat menambah ke keranjang");
+                toast.error(data.detail || data.pesan || "Terjadi kesalahan saat menambah ke keranjang");
             }
         } catch (error) {
             toast.error("Gagal terhubung ke server");
@@ -171,13 +171,14 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                             </p>
                         </div>
                     </div>
-                    {product.hasCommission && product.commission && (
+                    {/* TODO: uncomment if need Potensi Komisi */}
+                    {/* {product.hasCommission && product.commission && (
                         <div className="bg-red-50/50 border-l-2 border-red-500 px-4 py-2 w-fit">
                             <p className="text-[13px] text-red-600 font-bold italic tracking-wide">
                                 Potensi Komisi Anda: {product.commission}
                             </p>
                         </div>
-                    )}
+                    )} */}
                 </div>
             </div>
 

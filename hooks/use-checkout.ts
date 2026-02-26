@@ -14,6 +14,7 @@ import CONFIG from "@/lib/config";
 
 export function useCheckout() {
     const searchParams = useSearchParams();
+    const queryClient = useQueryClient();
     const selectedIds = useMemo(() =>
         searchParams.get("ids")?.split(",").map(id => parseInt(id)) || [],
         [searchParams]
@@ -73,7 +74,21 @@ export function useCheckout() {
     const [isLoadingPayments, setIsLoadingPayments] = useState(false);
 
     // Order Result
-    const [orderResult, setOrderResult] = useState<{ orderId: string, total: number } | null>(null);
+    const [orderResult, setOrderResult] = useState<{
+        orderId: string,
+        total: number,
+        paymentMethod?: string,
+        uniqueCode?: number,
+        bankAccount?: string,
+        bankOwner?: string,
+        bankName?: string,
+        // Added breakdown fields for SuccessState:
+        subtotal?: number,
+        shippingPrice?: number,
+        packingFee?: number,
+        voucherDiscount?: number,
+        walletDeduction?: number
+    } | null>(null);
     const [lastOrderedItems, setLastOrderedItems] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVoucherLoading, setIsVoucherLoading] = useState(false);
@@ -229,7 +244,8 @@ export function useCheckout() {
     }, [fetchCartQuery, fetchWalletQuery, fetchPaymentMethodsQuery, fetchCouriersQuery]);
 
     useEffect(() => {
-        // Initial fetch is handled by react-query, but we might need manual refresh logic
+        // Force refresh cart on mount to avoid stale empty cache
+        fetchCartQuery.refetch();
     }, []);
 
     // Auto-fill form when addresses are loaded
@@ -285,8 +301,10 @@ export function useCheckout() {
     const updateQuantity = async (id: number, currentQty: number, delta: number, stock: number) => {
         const newQty = currentQty + delta;
         if (newQty < 1) return;
-        if (newQty > (stock || 999)) {
-            toast.error(`Stok tidak mencukupi (Maks. ${stock})`);
+
+        // Hanya cek stok jika sedang menambah jumlah
+        if (delta > 0 && newQty > (stock || 0)) {
+            toast.error(`Stok tidak mencukupi (Maks. ${stock || 0})`);
             return;
         }
 
@@ -388,13 +406,33 @@ export function useCheckout() {
 
             const data = await response.json();
             if (response.ok) {
-                setOrderResult({ orderId: data.orderId, total: data.totalAmount });
+                setOrderResult({
+                    orderId: data.orderId,
+                    total: data.meta?.totalTagihan || data.totalAmount || (totalAmount + shippingPrice + packingFee - voucherDiscount - appliedWalletAmount),
+                    paymentMethod: data.paymentMethod,
+                    uniqueCode: data.uniqueCode,
+                    bankAccount: data.bankAccount,
+                    bankOwner: data.bankOwner,
+                    bankName: data.bankName,
+                    subtotal: data.subtotal || totalAmount,
+                    shippingPrice: data.meta?.shippingCost || shippingPrice,
+                    packingFee: data.meta?.packingFee || packingFee,
+                    voucherDiscount: data.meta?.discountAmount || voucherDiscount,
+                    walletDeduction: data.meta?.finalWalletAmount || appliedWalletAmount
+                });
                 setLastOrderedItems([...cartItems]);
                 refreshCart();
                 toast.success("Pesanan berhasil dibuat!");
                 window.scrollTo({ top: 0, behavior: "smooth" });
             } else {
-                toast.error(data.message || "Gagal membuat pesanan");
+                // Jika gagal karena stok atau ketersediaan, refresh seluruh data keranjang
+                // agar highlight merah dan info stok terbaru muncul di tiap item
+                if (data.desc?.includes("stok") || data.desc?.includes("tersedia") || data.message?.includes("stok")) {
+                    queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+                    // Scroll ke atas agar user langsung melihat item yang ditandai merah
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+                toast.error(data.desc || data.message || "Gagal membuat pesanan");
             }
         } catch (error) {
             toast.error("Terjadi kesalahan sistem");

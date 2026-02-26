@@ -38,6 +38,40 @@ export const CONFIG = {
         6: "harga_sub_agen",
         7: "harga_marketer",
     } as Record<number, string>,
+
+    // Order Status Configurations
+    ORDER_STATUS: {
+        EXCLUDED: ["PROSES PRODUKSI"],
+        TABS: [
+            { id: "OPEN", label: "Belum Bayar", dbStatus: "OPEN" },
+            { id: "PROSES", label: "Dikemas", dbStatus: "PROSES PACKING" },
+            { id: "KIRIM", label: "Dikirim", dbStatus: "PESANAN DIKIRIM" },
+            { id: "SELESAI", label: "Selesai", dbStatus: "CLOSE" },
+            { id: "BATAL", label: "Batal", dbStatus: "BATAL" },
+        ],
+        STYLES: {
+            "OPEN": { label: "Belum Bayar", color: "text-amber-600", bg: "bg-amber-50" },
+            "BAYAR": { label: "Dibayar", color: "text-emerald-600", bg: "bg-emerald-50" },
+            "PROSES PACKING": { label: "Dikemas", color: "text-blue-600", bg: "bg-blue-50" },
+            "PESANAN DIPROSES": { label: "Dikemas", color: "text-blue-600", bg: "bg-blue-50" },
+            "PROSES PRODUKSI": { label: "Dikemas", color: "text-blue-600", bg: "bg-blue-50" },
+            "PRODUKSI SELESAI": { label: "Dikemas", color: "text-blue-600", bg: "bg-blue-50" },
+            "PESANAN DIKIRIM": { label: "Dikirim", color: "text-indigo-600", bg: "bg-indigo-50" },
+            "CLOSE": { label: "Selesai", color: "text-emerald-600", bg: "bg-emerald-50" },
+            "BATAL": { label: "Batal", color: "text-rose-600", bg: "bg-rose-50" },
+        } as Record<string, { label: string, color: string, bg: string }>,
+    },
+
+    // Order History Settings
+    ORDER_HISTORY: {
+        PAGINATION_LIMIT: 5,
+        DATE_PRESETS: [
+            { id: "today", label: "Hari Ini" },
+            { id: "yesterday", label: "Kemarin" },
+            { id: "7days", label: "7 Hari Terakhir" },
+            { id: "3months", label: "3 Bulan Terakhir" },
+        ],
+    },
 };
 
 export default CONFIG;

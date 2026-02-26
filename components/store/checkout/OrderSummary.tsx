@@ -91,8 +91,9 @@ export default function OrderSummary({
 
                     <div className="h-px bg-neutral-base-50 my-2" />
 
+                    {/* TODO: uncomment for next feature */}
                     {/* Wallet Section */}
-                    <div className={`p-5 rounded-[24px] border transition-all duration-300 ${useWallet ? "bg-linear-to-br from-emerald-50 to-teal-50 border-emerald-100 shadow-sm" : "bg-neutral-base-50/50 border-neutral-base-100"}`}>
+                    {/* <div className={`p-5 rounded-[24px] border transition-all duration-300 ${useWallet ? "bg-linear-to-br from-emerald-50 to-teal-50 border-emerald-100 shadow-sm" : "bg-neutral-base-50/50 border-neutral-base-100"}`}>
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
                                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-xs ${useWallet ? "bg-white text-emerald-600" : "bg-white text-neutral-base-300"}`}>
@@ -121,7 +122,7 @@ export default function OrderSummary({
                                 <span className="text-[12px] font-black text-emerald-700">-{formatPrice(appliedWalletAmount)}</span>
                             </div>
                         )}
-                    </div>
+                    </div> */}
 
                     {/* Voucher Section */}
                     {isVoucherApplied ? (

@@ -4,10 +4,11 @@ import { user, customer, customerKategori, customerAlamat } from "@/lib/db/schem
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth-utils";
 import logger from "@/lib/logger";
+import { promises as fs } from "fs";
+import { join } from "path";
 
 /**
  * Handler untuk mengambil data profil lengkap user.
- * Melakukan join antara tabel user, customer, kategori customer, dan alamat.
  */
 export async function GET(request: NextRequest) {
     logger.info("API Request: GET /api/user/profile");
@@ -20,7 +21,6 @@ export async function GET(request: NextRequest) {
 
         const userId = session.user.id;
 
-        // Query data profil gabungan
         const profileData = await db.select({
             id: user.id,
             username: user.username,
@@ -30,6 +30,10 @@ export async function GET(request: NextRequest) {
             namaTipeCustomer: customerKategori.namaTipeCustomer,
             namaToko: customerAlamat.namaToko,
             noHandphone: customerAlamat.noHandphone,
+            gender: user.gender,
+            brithdate: user.brithdate,
+            photo: user.photo,
+            urlphoto: user.urlphoto,
         })
             .from(user)
             .leftJoin(customer, eq(user.id, customer.userId))
@@ -43,7 +47,6 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        // Menambahkan placeholder voucher (untuk pengembangan mendatang)
         const response = {
             ...profileData[0],
             vouchers: []
@@ -53,8 +56,90 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(response);
 
     } catch (error: any) {
-        logger.error("API Error: /api/user/profile", { error: error.message });
+        logger.error("API Error: GET /api/user/profile", { error: error.message });
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
 
+/**
+ * Handler untuk memperbarui data profil user.
+ */
+export async function POST(request: NextRequest) {
+    logger.info("API Request: POST /api/user/profile");
+    try {
+        const session = await getSession();
+        if (!session || !session.user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const userId = session.user.id;
+        const formData = await request.formData();
+
+        const nama = formData.get("nama") as string;
+        const gender = formData.get("gender") as string;
+        const brithdateStr = formData.get("brithdate") as string;
+        const noHandphone = formData.get("noHandphone") as string;
+        const photo = formData.get("photo") as File | null;
+
+        // Convert brithdate string to Date object or null
+        const brithdate = brithdateStr ? new Date(brithdateStr) : null;
+
+        // 1. Update User Table
+        await db.update(user)
+            .set({
+                nama: nama,
+                gender: parseInt(gender),
+                brithdate: brithdate,
+                updatedAt: Math.floor(Date.now() / 1000)
+            })
+            .where(eq(user.id, userId));
+
+        // 2. Update Phone Number in Customer Alamat
+        const customerData = await db.select({ custId: customer.custId })
+            .from(customer)
+            .where(eq(customer.userId, userId))
+            .limit(1);
+
+        if (customerData.length > 0) {
+            await db.update(customerAlamat)
+                .set({ noHandphone })
+                .where(eq(customerAlamat.custId, customerData[0].custId));
+        }
+
+        // 3. Handle Photo Upload (Matching PHP Logic)
+        if (photo && photo.size > 0) {
+            const ext = photo.name.split('.').pop() || "jpg";
+            const fileName = `${userId}.${ext}`;
+            const buffer = Buffer.from(await photo.arrayBuffer());
+
+            const uploadDir = join(process.cwd(), "public/img/user");
+            try {
+                await fs.access(uploadDir);
+            } catch {
+                await fs.mkdir(uploadDir, { recursive: true });
+            }
+
+            const filePath = join(uploadDir, fileName);
+            await fs.writeFile(filePath, buffer);
+
+            const assetUrl = process.env.NEXT_PUBLIC_URL || "";
+            const fullUrl = `${assetUrl}/img/user/${fileName}`;
+
+            await db.update(user)
+                .set({
+                    photo: fileName,
+                    urlphoto: fullUrl
+                })
+                .where(eq(user.id, userId));
+
+            logger.info("Profile Photo: Updated successfully", { userId, fileName });
+        }
+
+        logger.info("Profile Update: Success", { userId });
+        return NextResponse.json({ success: true, message: "Profil berhasil diperbarui" });
+
+    } catch (error: any) {
+        logger.error("API Error: POST /api/user/profile", { error: error.message });
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}

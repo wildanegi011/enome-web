@@ -11,7 +11,7 @@ export class CartService {
             id: keranjang.id,
             produkId: keranjang.produkId,
             namaProduk: produk.namaProduk,
-            warnaId: keranjang.warna,
+            warna: keranjang.warna,
             warnaName: warna.warna,
             size: keranjang.size,
             qty: keranjang.qtyProduk,
@@ -20,6 +20,7 @@ export class CartService {
             keterangan: keranjang.keterangan,
             isFlashsale: keranjang.isFlashsale,
             isPreorder: keranjang.isPreorder,
+            isOnline: produk.isOnline,
             stock: produkDetail.stokNormal,
             berat: produkDetail.berat,
         })

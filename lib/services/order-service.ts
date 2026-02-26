@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import {
-    keranjang, orders, orderdetail, produkDetail,
+    keranjang, orders, orderdetail, produk, produkDetail,
     preOrder, wallet, voucher
 } from "@/lib/db/schema";
 import { eq, and, sql, desc, like } from "drizzle-orm";
@@ -9,9 +9,38 @@ import logger from "@/lib/logger";
 import { nowJakartaYYMMDD, nowJakartaDate, nowJakartaFull } from "@/lib/date-utils";
 
 export class OrderService {
+    static async generateUniqueCode() {
+        // Generate a random 3-digit number between 100 and 999
+        let code = Math.floor(Math.random() * 900) + 100;
+        let isUnique = false;
+        let attempts = 0;
+
+        while (!isUnique && attempts < 10) {
+            // Check if this code is currently used by a pending order 
+            // We use simple like filter as unique code is usually appended at the end of the total price
+            const [recentCode] = await db.select({ orderId: orders.orderId })
+                .from(orders)
+                .where(
+                    and(
+                        eq(orders.statusOrder, "Menunggu Pembayaran"),
+                        sql`MOD(${orders.totalTagihan}, 1000) = ${code}`
+                    )
+                )
+                .limit(1);
+
+            if (!recentCode) {
+                isUnique = true;
+            } else {
+                code = Math.floor(Math.random() * 900) + 100;
+                attempts++;
+            }
+        }
+
+        return code;
+    }
+
     static async generateOrderId() {
         logger.info("OrderService: Generating Order ID");
-        // ...
         const yymmdd = nowJakartaYYMMDD();
         const prefix = `PO#N${yymmdd}`;
 
@@ -36,8 +65,12 @@ export class OrderService {
         const verifiedItems: any[] = [];
 
         for (const item of cartItems) {
-            const [detail]: any = await db.select()
+            const [result]: any = await db.select({
+                detail: produkDetail,
+                isOnline: produk.isOnline
+            })
                 .from(produkDetail)
+                .leftJoin(produk, eq(produk.produkId, produkDetail.produkId))
                 .where(and(
                     eq(produkDetail.produkId, item.produkId!),
                     eq(produkDetail.warnaId, item.warna!),
@@ -45,13 +78,29 @@ export class OrderService {
                 ))
                 .limit(1);
 
+            if (!result || !result.detail) {
+                return {
+                    success: false,
+                    error: `Mohon maaf, varian produk ${item.namaProduk || item.produkId} yang kamu pilih sepertinya sudah tidak tersedia.`
+                };
+            }
+
+            if (result.isOnline === 0) {
+                return {
+                    success: false,
+                    error: `Mohon maaf, saat ini toko kami sedang tutup atau produk ${item.namaProduk || item.produkId} sedang tidak tersedia.`
+                };
+            }
+
+            const detail = result.detail;
+
             // Use mapped field 'qty' or database field 'qtyProduk'
             const qty = item.qty || item.qtyProduk || 0;
 
-            if (!detail || (detail.stokNormal || 0) < qty) {
+            if ((detail.stokNormal || 0) < qty) {
                 return {
                     success: false,
-                    error: `Stok produk ${item.produkId} (${item.warna}, ${item.size}) tidak mencukupi.`
+                    error: "Mohon maaf, stok produk di keranjang Anda sudah tidak tersedia atau jumlahnya berubah."
                 };
             }
 
@@ -63,14 +112,16 @@ export class OrderService {
         return { success: true, verifiedItems, totalWeight, totalHpp };
     }
 
-    static async createOrder(orderData: any, verifiedItems: any[], walletAdjustment: number) {
-        logger.info("OrderService: Creating Order", { orderId: orderData.orderId, userId: orderData.userId });
+    static async createOrder(orderData: any, verifiedItems: any[], walletAdjustment: number, uniqueCode: number = 0) {
+        logger.info("OrderService: Creating Order", { orderId: orderData.orderId, userId: orderData.userId, uniqueCode });
         const ymd = nowJakartaDate();
         const dhms = nowJakartaFull();
 
         const { orderId, userId, customerData, totalAmount, shipping, payment, costs, meta } = orderData;
         const { totalWeight, totalHpp } = costs;
-        const { shippingCost, packingFee, discountAmount, totalTagihan, finalWalletAmount, finalBankAmount } = meta;
+        let { shippingCost, packingFee, discountAmount, totalTagihan, finalWalletAmount, finalBankAmount } = meta;
+
+        // Unique code is already added to totalTagihan and finalBankAmount before calling this method
 
         // Check active pre-order
         const [activePreOrder]: any = await db.select().from(preOrder).where(eq(preOrder.isAktif, 1)).limit(1);
@@ -84,7 +135,7 @@ export class OrderService {
                 const orderValues: any = {
                     orderId,
                     customer: customerData.custId || null,
-                    userId: userId.toString(),
+                    userId: customerData.custId || null,
                     statusCustomer: customerData.kategoriCustomer || null,
                     tglOrder: sql`${ymd}`,
                     totalOrder: verifiedItems.length,
@@ -103,7 +154,9 @@ export class OrderService {
                     proses3: "N",
                     proses4: "N",
                     noResi: orderData.resi || "",
-                    keterangan: orderData.catatan || "",
+                    keterangan: uniqueCode > 0
+                        ? `${orderData.catatan || ""} (Kode Unik: ${uniqueCode})`.trim()
+                        : (orderData.catatan || ""),
                     metodebayar: finalWalletAmount > 0 && finalBankAmount > 0 ? "SPLIT" : (finalWalletAmount > 0 ? "WALLET" : payment),
                     orderTipe,
                     preorderId: activePreOrder?.preOrderId ? Number(activePreOrder.preOrderId) : null,
@@ -159,7 +212,35 @@ export class OrderService {
             // B. Insert Details & Update Stock
             logger.info("OrderService: Step B - Inserting Details & Updating Stock");
             for (const item of verifiedItems) {
+                // 1. KUNCI BARIS STOK: Gunakan FOR UPDATE pada produkDetail agar tidak ada 
+                // transaksi lain yang bisa mengubah stok varian ini secara bersamaan.
+                const [lockedDetailRows]: any = await tx.execute(sql`
+                    SELECT stok_normal as stokNormal, produk_id as produkId 
+                    FROM produkdetail 
+                    WHERE detail_id = ${item.detail.detailId} 
+                    FOR UPDATE
+                `);
+                const lockedDetail = lockedDetailRows[0];
+
+                if (!lockedDetail) {
+                    throw new Error(`Maaf, data stok untuk ${item.namaProduk} tidak ditemukan.`);
+                }
+
+                // 2. CEK STATUS ONLINE: Ambil status produk secara fresh
+                const [productInfo]: any = await tx.select({ isOnline: produk.isOnline })
+                    .from(produk)
+                    .where(eq(produk.produkId, lockedDetail.produkId))
+                    .limit(1);
+
+                if (!productInfo || productInfo.isOnline === 0) {
+                    throw new Error(`Mohon maaf, produk ${item.namaProduk} sedang tidak tersedia atau toko kami sedang tutup.`);
+                }
+
                 const qty = item.qty || 0;
+                if ((lockedDetail.stokNormal || 0) < qty) {
+                    throw new Error("Mohon maaf, stok produk di keranjang Anda baru saja berkurang atau tidak tersedia lagi.");
+                }
+
                 const harga = item.harga || item.hargaPoduk || 0;
 
                 const detailValues: any = {

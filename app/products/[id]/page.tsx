@@ -1,6 +1,7 @@
 "use client";
 
 import { use } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import Navbar from "@/components/store/Navbar";
 import Footer from "@/components/store/Footer";
 import ProductGallery from "@/components/store/ProductGallery";
@@ -62,76 +63,78 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
     };
 
     return (
-        <main className="min-h-screen bg-white">
-            <Navbar />
+        <TooltipProvider>
+            <main className="min-h-screen bg-white">
+                <Navbar />
 
-            {/* Breadcrumbs */}
-            <div className="border-b border-neutral-base-100 bg-neutral-base-50/50">
-                <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-4">
-                    <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-neutral-base-400 font-sans">
-                        Home <span className="mx-2">/</span> Products <span className="mx-2">/</span> <span className="text-neutral-base-900">{product.namaProduk}</span>
-                    </p>
-                </div>
-            </div>
-
-            <section className="py-12 md:py-20 lg:py-24">
-                <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
-                    <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-
-                        {/* Left Side - Image Gallery */}
-                        <div className="lg:col-span-7">
-                            <ProductGallery
-                                images={galleryImages}
-                                isSoldOut={parseInt(stats.totalStock) === 0}
-                            />
-                        </div>
-
-                        {/* Right Side - Product Info */}
-                        <div className="lg:col-span-5">
-                            <ProductInfo product={{ ...infoProduct, id: product.produkId } as any} />
-                        </div>
-
+                {/* Breadcrumbs */}
+                <div className="border-b border-neutral-base-100 bg-neutral-base-50/50">
+                    <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-4">
+                        <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-neutral-base-400 font-sans">
+                            Home <span className="mx-2">/</span> Products <span className="mx-2">/</span> <span className="text-neutral-base-900">{product.namaProduk}</span>
+                        </p>
                     </div>
                 </div>
-            </section>
 
-            {/* Related Products Section */}
-            {relatedProducts.length > 0 && (
-                <section className="py-20 border-t border-neutral-base-100">
+                <section className="py-12 md:py-20 lg:py-24">
                     <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
-                        <div className="mb-12">
-                            <h2 className="font-serif text-[32px] text-neutral-base-900 italic">You Might Also Love</h2>
-                            <p className="text-neutral-base-500 mt-2">More pieces from the {product.kategori} collection.</p>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                            {relatedProducts.map((p: any, idx: number) => {
-                                const relColorArray = p.colors
-                                    ? p.colors.split(",").map((c: string) => {
-                                        const [name, value] = c.split("|");
-                                        return { name, value };
-                                    })
-                                    : [];
+                        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
 
-                                const mappedRelProduct = {
-                                    id: p.produkId,
-                                    name: p.namaProduk,
-                                    image: p.gambar ? `${ASSET_URL}/img/produk/${p.gambar}` : "/placeholder.jpg",
-                                    colors: relColorArray,
-                                    price: formatPriceRange(p.finalMinPrice, p.finalMaxPrice),
-                                    originalPrice: (p.finalMinPrice !== p.baseMinPrice || p.finalMaxPrice !== p.baseMaxPrice)
-                                        ? formatPriceRange(p.baseMinPrice, p.baseMaxPrice)
-                                        : undefined,
-                                    designer: "Handmade Batik by Énome",
-                                    totalStock: p.totalStock
-                                };
-                                return <ProductCard key={p.produkId} product={mappedRelProduct as any} index={idx} />;
-                            })}
+                            {/* Left Side - Image Gallery */}
+                            <div className="lg:col-span-7">
+                                <ProductGallery
+                                    images={galleryImages}
+                                    isSoldOut={parseInt(stats.totalStock) === 0}
+                                />
+                            </div>
+
+                            {/* Right Side - Product Info */}
+                            <div className="lg:col-span-5">
+                                <ProductInfo product={{ ...infoProduct, id: product.produkId } as any} />
+                            </div>
+
                         </div>
                     </div>
                 </section>
-            )}
 
-            <Footer />
-        </main>
+                {/* Related Products Section */}
+                {relatedProducts.length > 0 && (
+                    <section className="py-20 border-t border-neutral-base-100">
+                        <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
+                            <div className="mb-12">
+                                <h2 className="font-serif text-[32px] text-neutral-base-900 italic">You Might Also Love</h2>
+                                <p className="text-neutral-base-500 mt-2">More pieces from the {product.kategori} collection.</p>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                                {relatedProducts.map((p: any, idx: number) => {
+                                    const relColorArray = p.colors
+                                        ? p.colors.split(",").map((c: string) => {
+                                            const [name, value] = c.split("|");
+                                            return { name, value };
+                                        })
+                                        : [];
+
+                                    const mappedRelProduct = {
+                                        id: p.produkId,
+                                        name: p.namaProduk,
+                                        image: p.gambar ? `${ASSET_URL}/img/produk/${p.gambar}` : "/placeholder.jpg",
+                                        colors: relColorArray,
+                                        price: formatPriceRange(p.finalMinPrice, p.finalMaxPrice),
+                                        originalPrice: (p.finalMinPrice !== p.baseMinPrice || p.finalMaxPrice !== p.baseMaxPrice)
+                                            ? formatPriceRange(p.baseMinPrice, p.baseMaxPrice)
+                                            : undefined,
+                                        designer: "Handmade Batik by Énome",
+                                        totalStock: p.totalStock
+                                    };
+                                    return <ProductCard key={p.produkId} product={mappedRelProduct as any} index={idx} />;
+                                })}
+                            </div>
+                        </div>
+                    </section>
+                )}
+
+                <Footer />
+            </main>
+        </TooltipProvider>
     );
 }

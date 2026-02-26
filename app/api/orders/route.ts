@@ -57,7 +57,14 @@ export async function POST(request: NextRequest) {
         const shippingCost = shippingPrice || 0;
         const packingFee = CONFIG.PACKING_FEE;
         const discountAmount = voucherDiscount || 0;
-        const totalTagihan = totalAmount + shippingCost + packingFee - discountAmount;
+        let totalTagihan = totalAmount + shippingCost + packingFee - discountAmount;
+
+        // 5. Generate Unique Code for BCA Transfer if applicable and add it to totalTagihan natively
+        const isBcaTransfer = payment.toUpperCase().includes("BCA") && !payment.toUpperCase().includes("VIRTUAL");
+        const uniqueCode = isBcaTransfer ? await OrderService.generateUniqueCode() : 0;
+
+        totalTagihan += uniqueCode;
+
         const finalWalletAmount = Math.min(walletAmount || 0, totalTagihan);
         const finalBankAmount = totalTagihan - finalWalletAmount;
 
@@ -68,6 +75,8 @@ export async function POST(request: NextRequest) {
         const finalKeterangan = voucherCode
             ? `${catatan || ""} (Voucher: ${voucherCode} -${discountAmount})`.trim()
             : (catatan || "");
+
+        // Unique code was already calculated and added to totalTagihan above
 
         const orderData = {
             ...body,
@@ -81,13 +90,26 @@ export async function POST(request: NextRequest) {
             service: serviceName
         };
 
-        // 5. Create Order
-        const result = await OrderService.createOrder(orderData, stockResult.verifiedItems || [], finalWalletAmount);
+        // 6. Create Order
+        const result: any = await OrderService.createOrder(orderData, stockResult.verifiedItems || [], finalWalletAmount, uniqueCode);
+
+        // Add unique code and bank info to result for frontend
+        if (uniqueCode > 0) {
+            result.uniqueCode = uniqueCode;
+            result.paymentMethod = "BCA";
+            result.bankAccount = "2810377740";
+            result.bankOwner = "TRYSETYO0603";
+            result.bankName = "Bank BCA";
+        }
+
+        // Attach breakdown details for success page
+        result.meta = orderData.meta;
+        result.subtotal = totalAmount;
 
         return NextResponse.json(result);
 
     } catch (error: any) {
         logger.error("API Error: 500 /api/orders", { error: error.message, stack: error.stack });
-        return NextResponse.json({ message: "Gagal membuat order", error: error.message }, { status: 500 });
+        return NextResponse.json({ message: "error", desc: error.message }, { status: 500 });
     }
 }

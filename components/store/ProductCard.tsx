@@ -65,7 +65,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
 
                     {/* Status Badges */}
                     <div className="absolute top-3 left-3 flex flex-col gap-2">
-                        {product.totalStock === 0 && (
+                        {(Number(product.totalStock) || 0) === 0 && (
                             <span className="bg-red-500/90 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-sm">
                                 Sold Out
                             </span>

@@ -45,120 +45,141 @@ export async function POST(request: NextRequest) {
             kategoriId = customerData[0].kategoriCustomerId || CONFIG.DEFAULT_KATEGORI_CUSTOMER_ID;
         }
 
-        // 2. Map kategori ke kolom harga database menggunakan CONFIG
-        const priceColumnName = CONFIG.PRICE_COLUMNS[kategoriId] || CONFIG.PRICE_COLUMNS[CONFIG.DEFAULT_KATEGORI_CUSTOMER_ID];
-        const priceColumn = (produkDetail as any)[priceColumnName] || sql.raw(priceColumnName);
+        // Jalankan seluruh logika penambahan ke keranjang dalam satu transaksi database
+        // untuk menjamin konsistensi data (Double Check STOCK & ONLINE)
+        const result = await db.transaction(async (tx) => {
+            // 2. Map kategori ke kolom harga database menggunakan CONFIG
+            const priceColumnName = CONFIG.PRICE_COLUMNS[kategoriId] || CONFIG.PRICE_COLUMNS[CONFIG.DEFAULT_KATEGORI_CUSTOMER_ID];
 
-        // 3. Pastikan produk tersedia secara online
-        const productData = await db.select()
-            .from(produk)
-            .where(and(eq(produk.produkId, id_produk), eq(produk.isOnline, 1)))
-            .limit(1);
+            // 3. RE-CHECK: Pastikan produk tersedia secara online (Fresh Fetch + LOCK)
+            const [freshProductRows]: any = await tx.execute(sql`
+                SELECT produk_id as produkId, is_online as isOnline 
+                FROM produk 
+                WHERE produk_id = ${id_produk} AND is_online = 1 
+                FOR UPDATE
+            `);
+            const freshProduct = freshProductRows[0];
 
-        if (productData.length === 0) {
-            logger.warn("Cart Add: Product not available", { id_produk });
-            return NextResponse.json({ message: "not_available", error: "3" });
-        }
+            if (!freshProduct) {
+                return { error: "not_available", detail: "Produk sudah tidak tersedia atau offline." };
+            }
 
-        // Ambil detail spesifik varian (warna & size)
-        const detail = await db.select()
-            .from(produkDetail)
-            .where(and(
-                eq(produkDetail.produkId, id_produk),
-                eq(produkDetail.warnaId, color_sylla),
-                eq(produkDetail.size, size_sylla)
-            ))
-            .limit(1);
+            // RE-CHECK: Ambil detail spesifik varian (warna & size) dari transaksi (LOCK)
+            const [freshDetailRows]: any = await tx.execute(sql`
+                SELECT 
+                    stok_normal as stokNormal, 
+                    harga_distributor as hargaDistributor,
+                    harga_agen as hargaAgen,
+                    harga_reseller as hargaReseller,
+                    harga_jual as hargaJual,
+                    harga_super_gold,
+                    harga_sub_agen,
+                    harga_marketer
+                FROM produkdetail 
+                WHERE produk_id = ${id_produk} AND warna = ${color_sylla} AND size = ${size_sylla} 
+                FOR UPDATE
+            `);
+            const freshDetail = freshDetailRows[0];
 
-        if (detail.length === 0) {
-            logger.warn("Cart Add: Variant not found", { id_produk, color_sylla, size_sylla });
-            return NextResponse.json({ message: "stok_empty", error: "3" });
-        }
+            if (!freshDetail) {
+                return { error: "not_available", detail: "Varian produk (warna/ukuran) tidak ditemukan." };
+            }
 
-        const currentDetail = detail[0];
-        // Validasi ketersediaan stok
-        if ((currentDetail.stokNormal || 0) < parseInt(qty_produk || "1")) {
-            logger.warn("Cart Add: Insufficient stock", { id_produk, stock: currentDetail.stokNormal, requested: qty_produk });
-            return NextResponse.json({ message: "stok_empty", error: "3" });
-        }
+            // Validasi ketersediaan stok terbaru
+            const requestedQty = parseInt(qty_produk || "1");
+            if ((freshDetail.stokNormal || 0) < requestedQty) {
+                return { error: "stok_empty", detail: `Stok produk tidak mencukupi (Sisa: ${freshDetail.stokNormal || 0}).` };
+            }
 
-        // 4. Cek apakah produk sedang dalam periode Flash Sale aktif
-        const now = getJakartaDate();
-        const activeFlashSale = await db.select({
-            flashSaleId: flashSale.id,
-            waktuSelesai: flashSale.waktuSelesai,
-            diskonFlashSale: customerKategori.diskonFlashSale
-        })
-            .from(flashSale)
-            .innerJoin(flashSaleDetail, eq(flashSale.id, flashSaleDetail.flashSaleId))
-            .innerJoin(customerKategori, eq(customerKategori.id, kategoriId))
-            .where(and(
-                eq(flashSale.isAktif, 1),
-                eq(flashSaleDetail.produkId, id_produk),
-                sql`${now} BETWEEN ${flashSale.waktuMulai} AND ${flashSale.waktuSelesai}`,
-                sql`${flashSale.customerKategoriId} LIKE ${"%" + kategoriId + "%"}`
-            ))
-            .limit(1);
+            // 4. Cek apakah produk sedang dalam periode Flash Sale aktif
+            const now = getJakartaDate();
+            // Flash sale data biasanya statis/periodik, tidak perlu FOR UPDATE 
+            // kecuali jika stok flash sale dikelola secara terpisah.
+            const activeFlashSale = await tx.select({
+                flashSaleId: flashSale.id,
+                waktuSelesai: flashSale.waktuSelesai,
+                diskonFlashSale: customerKategori.diskonFlashSale
+            })
+                .from(flashSale)
+                .innerJoin(flashSaleDetail, eq(flashSale.id, flashSaleDetail.flashSaleId))
+                .innerJoin(customerKategori, eq(customerKategori.id, kategoriId))
+                .where(and(
+                    eq(flashSale.isAktif, 1),
+                    eq(flashSaleDetail.produkId, id_produk),
+                    sql`${now} BETWEEN ${flashSale.waktuMulai} AND ${flashSale.waktuSelesai}`,
+                    sql`${flashSale.customerKategoriId} LIKE ${"%" + kategoriId + "%"}`
+                ))
+                .limit(1);
 
-        const isFlashSale = activeFlashSale.length > 0;
-        const isPreOrder = false; // Implementasi pre-order menyusul
+            const isFlashSale = activeFlashSale.length > 0;
+            const isPreOrder = false;
 
-        // 5. Kalkulasi harga akhir setelah diskon (jika flash sale)
-        // Penentuan harga dasar menggunakan nama kolom dari mapping (fallbacks to hargaJual)
-        let basePrice = Number(currentDetail[priceColumnName as keyof typeof currentDetail] || currentDetail.hargaJual);
-        let finalPrice = basePrice;
+            // 5. Kalkulasi harga akhir (freshDetail.stok_normal uses snake_case in raw execute)
+            let basePrice = Number(freshDetail[priceColumnName as keyof typeof freshDetail] || freshDetail.harga_jual);
+            let finalPrice = basePrice;
 
-        if (isFlashSale) {
-            const discount = parseInt(activeFlashSale[0].diskonFlashSale || "0");
-            finalPrice = basePrice - (basePrice * (discount / 100));
-            logger.info("Cart Add: Flash Sale applied", { id_produk, discount });
-        }
+            if (isFlashSale) {
+                const discount = parseInt(activeFlashSale[0].diskonFlashSale || "0");
+                finalPrice = basePrice - (basePrice * (discount / 100));
+            }
 
-        // 6. Cek apakah item yang persis sama sudah ada di keranjang belanja
-        const existingCart = await db.select()
-            .from(keranjang)
-            .where(and(
-                eq(keranjang.custId, userId),
-                eq(keranjang.produkId, id_produk),
-                eq(keranjang.warna, color_sylla),
-                eq(keranjang.size, size_sylla),
-                eq(keranjang.isDeleted, 0),
-                eq(keranjang.isFlashsale, isFlashSale ? 1 : 0),
-                eq(keranjang.isPreorder, isPreOrder ? 1 : 0),
-                eq(keranjang.hargaPoduk, Math.floor(finalPrice))
-            ))
-            .limit(1);
+            // 6. Cek apakah item yang persis sama sudah ada di keranjang (LOCK)
+            const [existingCartRows]: any = await tx.execute(sql`
+                SELECT 
+                    id, 
+                    qty_produk as qtyProduk, 
+                    harga_poduk as hargaPoduk 
+                FROM keranjang 
+                WHERE cust_id = ${userId} 
+                AND produk_id = ${id_produk} 
+                AND warna = ${color_sylla} 
+                AND size = ${size_sylla} 
+                AND is_deleted = 0 
+                AND is_flashsale = ${isFlashSale ? 1 : 0} 
+                AND is_preorder = ${isPreOrder ? 1 : 0} 
+                AND harga_poduk = ${Math.floor(finalPrice)} 
+                FOR UPDATE
+            `);
+            const existingCart = existingCartRows[0];
 
-        if (existingCart.length > 0) {
-            // Update jumlah (Qty) jika item sudah ada
-            await db.update(keranjang)
-                .set({
-                    qtyProduk: (existingCart[0].qtyProduk || 0) + parseInt(qty_produk || "1"),
-                    updatedAt: now
-                })
-                .where(eq(keranjang.id, existingCart[0].id));
-            logger.info("Cart Add: Item quantity updated", { cartId: existingCart[0].id });
-        } else {
-            // Tambah baris baru jika item belum ada
-            await db.insert(keranjang).values({
-                custId: userId,
-                produkId: id_produk,
-                warna: color_sylla,
-                size: size_sylla,
-                qtyProduk: parseInt(qty_produk || "1"),
-                hargaPoduk: Math.floor(finalPrice),
-                gambarProduk: currentDetail.gambar || productData[0].gambar,
-                isFlashsale: isFlashSale ? 1 : 0,
-                flashsaleId: isFlashSale ? String(activeFlashSale[0].flashSaleId) : null,
-                flashsaleExpired: isFlashSale ? activeFlashSale[0].waktuSelesai : null,
-                isPreorder: 0,
-                preorderId: null,
-                createdAt: now,
-                status: 0,
-                tipeDiskon: "allin",
-                keterangan: ""
-            });
-            logger.info("Cart Add: New item inserted");
+            if (existingCart) {
+                const currentCartQty = existingCart.qtyProduk || 0;
+                const newQty = currentCartQty + requestedQty;
+
+                if ((freshDetail.stokNormal || 0) < newQty) {
+                    return { error: "stok_empty", detail: "Stok tidak mencukupi untuk penambahan ini" };
+                }
+
+                await tx.update(keranjang)
+                    .set({ qtyProduk: newQty, updatedAt: now })
+                    .where(eq(keranjang.id, existingCart.id));
+            } else {
+                await tx.insert(keranjang).values({
+                    custId: userId,
+                    produkId: id_produk,
+                    warna: color_sylla,
+                    size: size_sylla,
+                    qtyProduk: requestedQty,
+                    hargaPoduk: Math.floor(finalPrice),
+                    gambarProduk: freshDetail.gambar || freshProduct.gambar,
+                    isFlashsale: isFlashSale ? 1 : 0,
+                    flashsaleId: isFlashSale ? String(activeFlashSale[0].flashSaleId) : null,
+                    flashsaleExpired: isFlashSale ? activeFlashSale[0].waktuSelesai : null,
+                    isPreorder: 0,
+                    preorderId: null,
+                    createdAt: now,
+                    status: 0,
+                    tipeDiskon: "allin",
+                    keterangan: ""
+                });
+            }
+
+            return { success: true };
+        });
+
+        if (result.error) {
+            logger.warn("Cart Add: Validation failed in transaction", { userId, ...result });
+            return NextResponse.json({ message: result.error, detail: result.detail });
         }
 
         // 7. Ambil total item terbaru di keranjang untuk dikirim ke frontend

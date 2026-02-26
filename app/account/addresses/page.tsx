@@ -3,30 +3,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    MapPin, Plus, Home, MoreVertical,
-    Edit2, Trash2, CheckCircle2, Star,
-    Search, Map, ChevronRight, Loader2,
+    Plus,
+    Search,
     Package, AlertCircle
 } from "lucide-react";
-import Link from "next/link";
 import Navbar from "@/components/store/Navbar";
 import UserSidebar from "@/components/store/UserSidebar";
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator
-} from "@/components/ui/breadcrumb";
+
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+
 import { useAddresses, Address } from "@/hooks/use-addresses";
 import AddressCard from "@/components/store/AddressCard";
 import AddAddressModal from "@/components/store/AddAddressModal";
@@ -54,70 +40,33 @@ export default function AddressesPage() {
     );
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen bg-neutral-base-50 flex flex-col items-center justify-center p-6 bg-[url('/bg-pattern.svg')] bg-repeat bg-size-[400px_400px]">
-                <Loader2 className="w-10 h-10 text-amber-800 animate-spin mb-4" />
-                <p className="text-[12px] font-black uppercase tracking-widest text-neutral-base-400">Memuat Daftar Alamat...</p>
-            </div>
-        );
+        return <AddressesSkeleton />;
     }
 
     return (
-        <div className="min-h-screen bg-neutral-base-50 font-sans text-neutral-base-900 selection:bg-amber-100 selection:text-amber-900">
+        <div className="min-h-screen bg-[#F9FAFB] font-sans text-neutral-base-900">
             <Navbar />
 
-            <main className="max-w-[1240px] mx-auto px-6 py-12 md:py-16">
-                <div className="flex flex-col md:flex-row gap-8 md:gap-12">
-                    <UserSidebar />
+            <main className="max-w-[1340px] mx-auto px-4 md:px-8 py-10">
+                <div className="flex flex-col lg:flex-row gap-12">
+                    <div className="hidden lg:block">
+                        <UserSidebar />
+                    </div>
 
                     <div className="flex-1 min-w-0">
-                        {/* Breadcrumbs */}
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mb-8"
-                        >
-                            <Breadcrumb>
-                                <BreadcrumbList>
-                                    <BreadcrumbItem>
-                                        <BreadcrumbLink asChild>
-                                            <Link href="/" className="flex items-center gap-1.5 transition-colors hover:text-amber-800">
-                                                <Home className="w-3.5 h-3.5" />
-                                                <span>Home</span>
-                                            </Link>
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-                                    <BreadcrumbSeparator />
-                                    <BreadcrumbItem>
-                                        <BreadcrumbPage className="text-[11px] font-bold uppercase tracking-widest text-neutral-base-900">
-                                            Daftar Alamat
-                                        </BreadcrumbPage>
-                                    </BreadcrumbItem>
-                                </BreadcrumbList>
-                            </Breadcrumb>
-                        </motion.div>
-
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                            >
-                                <h1 className="text-[32px] md:text-[42px] font-heading font-bold text-neutral-base-900 tracking-tight leading-tight mb-3">Daftar <span className="text-amber-800">Alamat</span></h1>
-                                <p className="text-[14px] md:text-[16px] text-neutral-base-400 font-bold max-w-[500px] leading-relaxed">Atur alamat pengiriman kamu untuk proses checkout yang lebih cepat.</p>
-                            </motion.div>
+                            <div>
+                                <h1 className="text-[28px] md:text-[32px] font-bold text-neutral-base-900 tracking-tight leading-tight mb-2">Daftar Alamat</h1>
+                                <p className="text-[14px] text-neutral-base-400 font-bold">Kelola alamat pengiriman kamu untuk proses checkout yang lebih cepat.</p>
+                            </div>
 
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
+                            <Button
+                                onClick={handleAdd}
+                                className="h-14 px-8 rounded-2xl bg-neutral-base-900 text-white font-bold tracking-widest uppercase hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 gap-3 group shrink-0"
                             >
-                                <Button
-                                    onClick={handleAdd}
-                                    className="h-14 px-8 rounded-2xl bg-neutral-base-900 text-white font-bold tracking-widest uppercase hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 gap-3 group"
-                                >
-                                    <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                                    Tambah Alamat
-                                </Button>
-                            </motion.div>
+                                <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                                Tambah Alamat
+                            </Button>
                         </div>
 
                         {/* Search & Stats Bar */}
@@ -210,6 +159,38 @@ export default function AddressesPage() {
                 onOpenChange={setIsAddModalOpen}
                 initialData={selectedAddress}
             />
+        </div>
+    );
+}
+function AddressesSkeleton() {
+    return (
+        <div className="min-h-screen bg-[#F9FAFB]">
+            <Navbar />
+            <main className="max-w-[1340px] mx-auto px-4 md:px-8 py-10">
+                <div className="flex flex-col lg:flex-row gap-12">
+                    <div className="hidden lg:block w-[280px] shrink-0">
+                        <UserSidebar />
+                    </div>
+                    <div className="flex-1 space-y-10">
+                        <div className="flex justify-between items-center">
+                            <div className="space-y-2">
+                                <Skeleton className="h-10 w-48" />
+                                <Skeleton className="h-4 w-96" />
+                            </div>
+                            <Skeleton className="h-14 w-44 rounded-2xl" />
+                        </div>
+                        <div className="bg-white/60 backdrop-blur-md border border-neutral-base-100/60 rounded-[24px] p-2 flex items-center gap-4">
+                            <Skeleton className="h-12 flex-1 rounded-[18px]" />
+                            <Skeleton className="h-4 w-32 mr-6" />
+                        </div>
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                            {[1, 2, 3, 4].map((i) => (
+                                <Skeleton key={i} className="h-[300px] w-full rounded-[32px]" />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 }

@@ -253,11 +253,11 @@ export default function CartPage() {
                                                         <div className="flex items-start justify-between gap-4">
                                                             <div className="flex flex-col gap-1.5 min-w-0">
                                                                 <h3 className="text-[14px] md:text-[16px] font-black text-neutral-base-900 tracking-tight leading-tight truncate">
-                                                                    {item.produkId}
+                                                                    {item.namaProduk}
                                                                 </h3>
                                                                 <div className="flex items-center gap-2">
                                                                     <span className="text-[8px] font-black uppercase tracking-widest text-neutral-base-400 px-2 py-0.5 bg-neutral-base-50 rounded-md">
-                                                                        {item.warnaName || item.warnaId}
+                                                                        {item.warnaName || item.warna}
                                                                     </span>
                                                                     <span className="text-[8px] font-black uppercase tracking-widest text-neutral-base-400 px-2 py-0.5 bg-neutral-base-50 rounded-md">
                                                                         Size: {item.size}

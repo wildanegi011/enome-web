@@ -81,7 +81,7 @@ export default function ProductsPage() {
             <main className="min-h-screen bg-white">
                 <Navbar />
 
-                <HeroSection />
+                {/* <HeroSection /> */}
 
                 <div className="sticky top-[80px] z-30 bg-white/90 backdrop-blur-md border-b border-neutral-base-50">
                     <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
