@@ -12,7 +12,7 @@ export const CONFIG = {
     DEFAULT_KATEGORI_CUSTOMER_ID: 4, // Retail / Harga Jual
     DEFAULT_ORIGIN_CITY: "115",      // Default: Kota Bekasi
     RAJAONGKIR_KEY_VAR: "RAJAONGKIR_APP_KEY",
-    DEFAULT_COMPANY_PROFILE_ID: 1,
+    DEFAULT_COMPANY_PROFILE_ID: 6,
     PACKING_FEE: 2000,
 
     // Pagination Defaults

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import FilterSidebar, { FilterState } from "@/components/store/FilterSidebar";
 import ProductListHeader, { SortOption } from "@/components/store/ProductListHeader";
 import ProductCard from "@/components/store/ProductCard";
 import Navbar from "@/components/store/Navbar";
 import Footer from "@/components/store/Footer";
-import ResultsInfo from "@/components/store/ResultsInfo"; // Added this import
+import ResultsInfo from "@/components/store/ResultsInfo";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { SlidersHorizontal, Loader2 } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
@@ -21,11 +22,14 @@ import HeroSection from "@/components/store/HeroSection";
 import CONFIG from "@/lib/config";
 
 export default function ProductsPage() {
+    const searchParams = useSearchParams();
+    const categoryFromUrl = searchParams.get("category");
+
     const [activeFilters, setActiveFilters] = useState<FilterState>({
         size: [],
         color: [],
         price: [],
-        collection: [],
+        collection: categoryFromUrl ? [categoryFromUrl] : [],
         tag: []
     });
     const [sortBy, setSortBy] = useState<SortOption>("newest");

@@ -11,6 +11,7 @@ import { useProduct } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 export default function ProductDetailPage(props: { params: Promise<{ id: string }> }) {
     const params = use(props.params);
@@ -61,24 +62,24 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
 
     return (
         <TooltipProvider>
-            <main className="min-h-screen bg-white">
+            <main className="min-h-screen bg-white overflow-x-hidden">
                 <Navbar />
 
                 {/* Breadcrumbs */}
                 <div className="border-b border-neutral-base-100 bg-neutral-base-50/50">
-                    <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-4">
+                    <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-4 overflow-x-auto scrollbar-hide">
                         <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-neutral-base-400 font-sans">
                             Home <span className="mx-2">/</span> Products <span className="mx-2">/</span> <span className="text-neutral-base-900">{product.namaProduk}</span>
                         </p>
                     </div>
                 </div>
 
-                <section className="py-12 md:py-20 lg:py-24">
-                    <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
-                        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+                <section className="py-8 md:py-20 lg:py-24">
+                    <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-12 lg:gap-16 items-start">
 
                             {/* Left Side - Image Gallery */}
-                            <div className="lg:col-span-7">
+                            <div className="lg:col-span-7 min-w-0">
                                 <ProductGallery
                                     images={galleryImages}
                                     isSoldOut={parseInt(stats.totalStock) === 0}
@@ -86,7 +87,7 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
                             </div>
 
                             {/* Right Side - Product Info */}
-                            <div className="lg:col-span-5">
+                            <div className="lg:col-span-5 min-w-0">
                                 <ProductInfo product={{ ...infoProduct, id: product.produkId } as any} />
                             </div>
 
@@ -96,13 +97,13 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
 
                 {/* Related Products Section */}
                 {relatedProducts.length > 0 && (
-                    <section className="py-20 border-t border-neutral-base-100">
-                        <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
-                            <div className="mb-12">
-                                <h2 className="font-serif text-[32px] text-neutral-base-900 italic">You Might Also Love</h2>
-                                <p className="text-neutral-base-500 mt-2">More pieces from the {product.kategori} collection.</p>
+                    <section className="py-10 md:py-20 border-t border-neutral-base-100">
+                        <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
+                            <div className="mb-6 md:mb-12">
+                                <h2 className="font-heading text-[22px] md:text-[32px] text-neutral-base-900">Rekomendasi Untuk Anda</h2>
+                                <p className="text-neutral-base-500 mt-1 md:mt-2 text-[13px] md:text-base">Koleksi lainnya dari kategori {product.kategori}.</p>
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
                                 {relatedProducts.map((p: any, idx: number) => {
                                     const relColorArray = p.colors
                                         ? p.colors.split(",").map((c: string) => {
@@ -125,6 +126,17 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
                                     };
                                     return <ProductCard key={p.produkId} product={mappedRelProduct as any} index={idx} />;
                                 })}
+                            </div>
+                            <div className="mt-8 md:mt-12 text-center">
+                                <Link
+                                    href={`/products?category=${encodeURIComponent(product.kategori)}`}
+                                    className="inline-flex items-center gap-2 text-[12px] font-bold tracking-[0.15em] uppercase text-neutral-base-900 border border-neutral-base-200 px-8 py-3 rounded-lg hover:bg-neutral-base-900 hover:text-white transition-all duration-300"
+                                >
+                                    Lihat Semua
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M5 12h14M12 5l7 7-7 7" />
+                                    </svg>
+                                </Link>
                             </div>
                         </div>
                     </section>

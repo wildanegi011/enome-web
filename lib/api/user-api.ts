@@ -9,6 +9,9 @@ export interface Address {
     city: string;
     province: string;
     district: string;
+    cityId?: string;
+    provinceId?: string;
+    districtId?: string;
     postalCode: string;
     shopName: string;
     isPrimary: number;

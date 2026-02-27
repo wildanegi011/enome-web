@@ -6,9 +6,10 @@ import {
     produk,
     rekeningPembayaran,
     statusOrder,
-    statusTagihan
+    statusTagihan,
+    payment as paymentTable
 } from "@/lib/db/schema";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, or, sql, like } from "drizzle-orm";
 import { getSession } from "@/lib/auth-utils";
 import logger from "@/lib/logger";
 import { CustomerService } from "@/lib/services/customer-service";
@@ -96,18 +97,35 @@ export async function GET(
         );
 
         if (isBcaTransfer) {
-            // Find active bank accounts for instruction (assuming user needs to know where to pay)
             const banks = await db.select().from(rekeningPembayaran).where(eq(rekeningPembayaran.isAktif, 1)).limit(1);
             if (banks.length > 0) {
                 paymentInfo = banks[0];
             }
         }
 
+        // 4. Fetch Voucher Info from payment table
+        let voucherInfo = null;
+        const [paymentRow]: any = await db.select({
+            voucherKode: paymentTable.voucherKode,
+            voucherNominal: paymentTable.voucherNominal,
+        })
+            .from(paymentTable)
+            .where(like(paymentTable.paymentTransactionId, `%${orderId}%`))
+            .limit(1);
+
+        if (paymentRow && paymentRow.voucherKode && paymentRow.voucherKode.trim() !== "") {
+            voucherInfo = {
+                kode: paymentRow.voucherKode,
+                nominal: paymentRow.voucherNominal || 0,
+            };
+        }
+
         logger.info("Order Detail: Fetch success", { userId, orderId });
         return NextResponse.json({
             order,
             items,
-            paymentInfo
+            paymentInfo,
+            voucherInfo
         });
 
     } catch (error: any) {

@@ -46,26 +46,38 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: 0, message: "Data customer tidak ditemukan" });
         }
 
-        // Cari voucher di database (case-insensitive)
+        // Cari voucher yang aktif DAN masih dalam masa berlaku (cek tanggal langsung di SQL)
         const [voucherData]: any = await db.select()
             .from(voucher)
             .where(and(
                 sql`LOWER(${voucher.kodeVoucher}) = LOWER(${kode})`,
-                eq(voucher.isAktif, 1)
+                eq(voucher.isAktif, 1),
+                sql`(${voucher.tanggalMulai} IS NULL OR NOW() >= ${voucher.tanggalMulai})`,
+                sql`(${voucher.tanggalKadaluarsa} IS NULL OR NOW() <= ${voucher.tanggalKadaluarsa})`
             ))
             .limit(1);
 
         if (!voucherData) {
-            logger.info("Voucher Check: Voucher not found or inactive", { kode });
-            return NextResponse.json({ success: 0, message: `Voucher ${kode} tidak tersedia untuk saat ini` });
-        }
+            // Cek apakah voucher ada tapi sudah kadaluarsa / belum mulai
+            const [existingVoucher]: any = await db.select({
+                kodeVoucher: voucher.kodeVoucher,
+                tanggalMulai: voucher.tanggalMulai,
+                tanggalKadaluarsa: voucher.tanggalKadaluarsa,
+                isAktif: voucher.isAktif,
+            })
+                .from(voucher)
+                .where(sql`LOWER(${voucher.kodeVoucher}) = LOWER(${kode})`)
+                .limit(1);
 
-        // Validasi Masa Berlaku
-        const startDate = voucherData.tanggalMulai ? new Date(voucherData.tanggalMulai) : null;
-        const endDate = voucherData.tanggalKadaluarsa ? new Date(voucherData.tanggalKadaluarsa) : null;
-
-        if ((startDate && now < startDate) || (endDate && now > endDate)) {
-            logger.info("Voucher Check: Expired", { kode });
+            if (!existingVoucher) {
+                logger.info("Voucher Check: Voucher not found", { kode });
+                return NextResponse.json({ success: 0, message: `Voucher ${kode} tidak ditemukan` });
+            }
+            if (existingVoucher.isAktif !== 1) {
+                logger.info("Voucher Check: Voucher inactive", { kode });
+                return NextResponse.json({ success: 0, message: `Voucher ${kode} tidak aktif` });
+            }
+            logger.info("Voucher Check: Expired or not started", { kode, start: existingVoucher.tanggalMulai, end: existingVoucher.tanggalKadaluarsa });
             return NextResponse.json({ success: 0, message: `Voucher ${kode} sudah tidak tersedia (kadaluarsa)` });
         }
 

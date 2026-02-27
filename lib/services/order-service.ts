@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
 import {
     keranjang, orders, orderdetail, produk, produkDetail,
-    preOrder, wallet, voucher
+    preOrder, wallet, voucher, voucherHistory, payment as paymentTable
 } from "@/lib/db/schema";
+
 import { eq, and, sql, desc, like } from "drizzle-orm";
 import { CONFIG } from "@/lib/config";
 import logger from "@/lib/logger";
@@ -55,7 +56,7 @@ export class OrderService {
             const lastIdSuffix = lastOrder.orderId.substring(prefix.length);
             nextIndex = parseInt(lastIdSuffix) + 1;
         }
-        return `${prefix}${nextIndex}`;
+        return `${prefix}${String(nextIndex).padStart(4, '0')}`;
     }
 
     static async verifyStock(cartItems: any[]) {
@@ -290,14 +291,76 @@ export class OrderService {
                 logger.info("OrderService: Step D Success");
             }
 
-            // E. Voucher Update
+            // E. Voucher Update + History
             if (orderData.voucherCode) {
                 logger.info("OrderService: Step E - Voucher Update", { voucherCode: orderData.voucherCode });
+
+                // E1. Ambil data voucher untuk snapshot ke history
+                const [voucherRow]: any = await tx.select()
+                    .from(voucher)
+                    .where(eq(voucher.kodeVoucher, orderData.voucherCode))
+                    .limit(1);
+
+                // E2. Kurangi kuota
                 await tx.update(voucher)
                     .set({ kuotaVoucher: sql`${voucher.kuotaVoucher} - 1` })
                     .where(eq(voucher.kodeVoucher, orderData.voucherCode));
+
+                // E3. Insert ke voucher_history
+                if (voucherRow) {
+                    await tx.insert(voucherHistory).values({
+                        kodeVoucher: voucherRow.kodeVoucher,
+                        namaVoucher: voucherRow.namaVoucher || "",
+                        tanggalMulai: voucherRow.tanggalMulai,
+                        tanggalKadaluarsa: voucherRow.tanggalKadaluarsa,
+                        nilaiVoucher: voucherRow.nilaiVoucher || 0,
+                        tipeVoucher: voucherRow.tipeVoucher || "",
+                        orderTipe: voucherRow.orderTipe || "",
+                        kategoriCustomerId: voucherRow.kategoriCustomerId || "",
+                        minimalTransaksi: voucherRow.minimalTransaksi || 0,
+                        maksimalNominalVoucherPersen: voucherRow.maksimalNominalVoucherPersen || 0,
+                        custId: customerData.custId,
+                        kuotaVoucher: (voucherRow.kuotaVoucher || 1) - 1,
+                        deskripsiVoucher: voucherRow.deskripsiVoucher || "",
+                        isAktif: voucherRow.isAktif ?? 1,
+                        createdBy: Number(userId) || 1,
+                        updatedAt: new Date(),
+                        updatedBy: Number(userId) || 1,
+                        syaratDanKetentuan: voucherRow.syaratDanKetentuan || "",
+                    });
+                }
                 logger.info("OrderService: Step E Success");
             }
+
+            // F. Payment Insertion
+            logger.info("OrderService: Step F - Payment Insertion");
+            const paymentValues: any = {
+                isPaid: finalBankAmount <= 0 ? 1 : 0,
+                paidTime: finalBankAmount <= 0 ? sql`${dhms}` : null,
+                expiredTime: finalBankAmount > 0 ? sql`DATE_ADD(${dhms}, INTERVAL 1 DAY)` : null,
+                subtotal: Math.round(totalAmount),
+                otherFee: Math.round(packingFee),
+                postFee: Math.round(shippingCost),
+                ammount: Math.round(totalAmount + shippingCost + packingFee - discountAmount),
+                voucherNominal: discountAmount || 0,
+                uniqueCode: uniqueCode > 0 ? uniqueCode.toString() : "0",
+                ammountTotal: Math.round(finalBankAmount > 0 ? finalBankAmount : totalTagihan),
+                ammountTotalWallet: Math.round(finalWalletAmount),
+                paymentTransactionTypeId: 2,
+                paymentTransactionId: `${orderId};`,
+                createdAt: sql`${dhms}`,
+                createdBy: Number(userId) || 1,
+                tujuanAtasNama: payment === "Transfer Bank BCA" ? "TRY Setyo0603" : "-",
+                tujuanNamaBank: payment === "Transfer Bank BCA" ? "BCA" : (payment || "-"),
+                tujuanLogoBank: "-",
+                tujuanNoRekening: payment === "Transfer Bank BCABCA" ? "2810377740" : "-",
+                paymentType: finalWalletAmount > 0 && finalBankAmount > 0 ? "SPLIT" : (finalWalletAmount > 0 ? "WALLET" : payment),
+                isDp: 0,
+                voucherKode: orderData.voucherCode || "",
+                isDeleted: 0,
+            };
+            await tx.insert(paymentTable).values(paymentValues);
+            logger.info("OrderService: Step F Success");
 
             logger.info("OrderService: All Steps Success - Committing Transaction", { orderId });
 

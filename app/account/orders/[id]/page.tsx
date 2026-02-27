@@ -7,7 +7,7 @@ import {
     ShoppingBag, Calendar, CreditCard, ChevronLeft,
     Loader2, Package, CheckCircle2, MapPin,
     Truck, Mail, Phone, ExternalLink,
-    AlertCircle, Copy, Check
+    AlertCircle, Copy, Check, Tag
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -141,6 +141,10 @@ interface OrderDetail {
     };
     items: any[];
     paymentInfo?: any;
+    voucherInfo?: {
+        kode: string;
+        nominal: number;
+    } | null;
 }
 
 const statusSteps = [
@@ -206,7 +210,7 @@ export default function OrderDetailPage() {
 
     if (!data) return null;
 
-    const { order, items, paymentInfo } = data;
+    const { order, items, paymentInfo, voucherInfo } = data;
     const currentStatusIndex = statusSteps.findIndex(s => s.status === order.statusOrder);
 
     // Ekstrak kode unik dari keterangan jika ada
@@ -417,10 +421,27 @@ export default function OrderDetailPage() {
                                             </div>
                                         )}
 
+                                        {voucherInfo && voucherInfo.nominal > 0 && (
+                                            <div className="flex items-center justify-between text-[14px] font-medium">
+                                                <span className="text-emerald-600 flex items-center gap-1.5">
+                                                    <Tag className="w-3.5 h-3.5" />
+                                                    Voucher ({voucherInfo.kode})
+                                                </span>
+                                                <span className="text-emerald-600 font-bold">-{formatPrice(voucherInfo.nominal)}</span>
+                                            </div>
+                                        )}
+
                                         {order.viaWallet > 0 && (
                                             <div className="flex items-center justify-between text-[14px] font-medium">
                                                 <span className="text-emerald-600">Wallet Deduction</span>
                                                 <span className="text-emerald-600 font-bold">-{formatPrice(order.viaWallet)}</span>
+                                            </div>
+                                        )}
+
+                                        {uniqueCodeValue > 0 && (
+                                            <div className="flex items-center justify-between text-[14px] font-medium">
+                                                <span className="text-amber-600">Kode Unik</span>
+                                                <span className="text-amber-600 font-bold">+{formatPrice(uniqueCodeValue)}</span>
                                             </div>
                                         )}
                                     </div>

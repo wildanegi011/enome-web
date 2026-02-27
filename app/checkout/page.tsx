@@ -45,14 +45,14 @@ function CheckoutContent() {
     }
 
     return (
-        <div className="min-h-screen bg-neutral-base-50 pb-20">
+        <div className="min-h-screen bg-neutral-base-50 pb-10 md:pb-20">
             <Navbar />
 
-            <main className="max-w-7xl mx-auto pt-8 px-4">
+            <main className="max-w-7xl mx-auto pt-4 md:pt-8 px-4">
                 <AnimatePresence mode="wait">
-                    <div className="flex flex-col lg:flex-row gap-8 items-start">
+                    <div className="flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
                         {/* Main Checkout Form */}
-                        <div className="flex-1 flex flex-col gap-8 w-full">
+                        <div className="flex-1 flex flex-col gap-4 md:gap-8 w-full min-w-0">
                             {/* 1. Cart Review */}
                             <CartReview
                                 items={cartItems}
@@ -63,7 +63,7 @@ function CheckoutContent() {
                             />
 
                             {/* 2. Shipping Section Wrapper */}
-                            <div className="flex flex-col gap-6 bg-white border border-neutral-base-100 p-6 md:p-8 rounded-[32px] shadow-sm">
+                            <div className="flex flex-col gap-4 md:gap-6 bg-white border border-neutral-base-100 p-4 md:p-8 rounded-xl md:rounded-[32px] shadow-sm">
                                 <AddressSection
                                     addresses={addresses}
                                     shippingForm={shippingForm}
@@ -75,7 +75,7 @@ function CheckoutContent() {
                                     handleSelectAddress={handleSelectAddress}
                                 />
 
-                                <div className="h-px bg-neutral-base-50 my-4" />
+                                <div className="h-px bg-neutral-base-50 my-1 md:my-2" />
 
                                 <CourierSection
                                     couriers={couriers}
@@ -90,7 +90,7 @@ function CheckoutContent() {
                                     formatPrice={formatPrice}
                                 />
 
-                                <div className="h-px bg-neutral-base-50 my-4" />
+                                <div className="h-px bg-neutral-base-50 my-1 md:my-2" />
 
                                 <DropshipperSection
                                     isDropshipper={isDropshipper}

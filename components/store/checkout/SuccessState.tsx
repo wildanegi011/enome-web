@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, ChevronRight, ShoppingBag, Copy, Info, Clock, ExternalLink, ShieldCheck } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle2, ChevronRight, ShoppingBag, Copy, ShieldCheck, Clock } from "lucide-react";
+import { motion } from "framer-motion";
 import { ASSET_URL } from "@/config/config";
 import { toast } from "sonner";
 
@@ -15,7 +15,6 @@ interface SuccessStateProps {
         bankAccount?: string,
         bankOwner?: string,
         bankName?: string,
-        // Added breakdown fields
         subtotal?: number,
         shippingPrice?: number,
         packingFee?: number,
@@ -53,138 +52,158 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
     };
 
     return (
-        <div className="max-w-4xl mx-auto py-12 md:py-20 px-4">
+        <div className="max-w-5xl mx-auto py-6 md:py-16 px-4 md:px-8">
             <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="flex flex-col"
             >
-                {/* Status Indicator */}
-                <div className="mb-10 text-center">
-                    <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-100/50">
-                        <CheckCircle2 className="w-8 h-8" />
-                    </div>
-                    <h1 className="text-[32px] md:text-[40px] font-bold text-neutral-base-900 tracking-tight leading-loose">
-                        {isTransfer ? "Instruksi Pembayaran" : "Pesanan Selesai!"}
+                {/* ===== HEADER ===== */}
+                <div className="text-center mb-6 md:mb-12">
+                    <motion.div
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                        className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 md:mb-5 border-2 border-emerald-100"
+                    >
+                        <CheckCircle2 className="w-7 h-7 md:w-10 md:h-10" />
+                    </motion.div>
+                    <h1 className="text-[24px] md:text-[36px] font-bold text-neutral-base-900 tracking-tight leading-snug">
+                        {isTransfer ? "Instruksi Pembayaran" : "Pesanan Berhasil!"}
                     </h1>
-                    <p className="text-neutral-base-400 font-medium">
-                        Order <span className="text-neutral-base-900 font-bold">#{orderResult.orderId}</span> • {lastOrderedItems.length} Produk
+                    <p className="text-[13px] md:text-[15px] text-neutral-base-400 font-medium mt-1.5 md:mt-2">
+                        Order <span className="text-neutral-base-900 font-bold">#{orderResult.orderId}</span> — {lastOrderedItems.length} Produk
                     </p>
                 </div>
 
-                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                {/* ===== MAIN CONTENT ===== */}
+                <div className="flex flex-col lg:flex-row gap-5 md:gap-8 items-start">
 
-                    {/* Main Instructions */}
-                    <div className="lg:col-span-7 space-y-6">
+                    {/* LEFT COLUMN — Payment Instructions */}
+                    <div className="flex-1 w-full flex flex-col gap-5 md:gap-6 min-w-0">
 
                         {isTransfer && (
-                            <div className="bg-white border border-neutral-base-100 rounded-[40px] p-8 md:p-10 shadow-xl shadow-neutral-base-900/5 transition-all hover:shadow-2xl hover:shadow-neutral-base-900/10">
-
-                                <div className="flex items-center justify-between mb-10">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-                                            <CreditCard className="w-4 h-4 text-amber-600" />
-                                        </div>
-                                        <span className="text-[12px] font-black uppercase tracking-widest text-neutral-base-900">Transfer Bank</span>
+                            <div className="bg-white border border-neutral-base-100 rounded-2xl md:rounded-[32px] overflow-hidden shadow-lg shadow-neutral-base-900/5">
+                                {/* Transfer header bar */}
+                                <div className="bg-neutral-base-900 px-5 md:px-8 py-3.5 md:py-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-2.5">
+                                        <CreditCard className="w-4 h-4 text-white/60" />
+                                        <span className="text-[11px] md:text-[12px] font-black uppercase tracking-widest text-white">Transfer Bank</span>
                                     </div>
                                 </div>
 
-                                <div className="space-y-8">
-                                    {/* Amount Highlight */}
-                                    <div className="text-center md:text-left">
-                                        <p className="text-[11px] font-black text-neutral-base-300 uppercase tracking-[0.2em] mb-3">Jumlah yang harus dibayar</p>
-                                        <div className="flex flex-col md:flex-row items-baseline md:items-center justify-between gap-4">
-                                            <div className="flex items-baseline font-black tracking-tighter cursor-default group" onClick={() => copyToClipboard(orderResult.total.toString(), "amt")}>
-                                                <span className="text-[24px] md:text-[42px] text-neutral-base-900/40 mr-1">Rp</span>
-                                                <span className="text-[38px] md:text-[56px] text-neutral-base-900">
+                                <div className="p-5 md:p-8 flex flex-col gap-5 md:gap-7">
+                                    {/* Amount to pay */}
+                                    <div>
+                                        <p className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-widest mb-2 md:mb-3">Jumlah Transfer</p>
+                                        <div className="flex items-end md:items-center justify-between gap-3 flex-wrap">
+                                            <div
+                                                className="flex items-baseline font-black tracking-tighter cursor-pointer select-none"
+                                                onClick={() => copyToClipboard(orderResult.total.toString(), "amt")}
+                                            >
+                                                <span className="text-[16px] md:text-[32px] text-neutral-base-400 mr-0.5 md:mr-1">Rp</span>
+                                                <span className="text-[28px] md:text-[48px] text-neutral-base-900 leading-none">
                                                     {orderResult.total.toLocaleString('id-ID').slice(0, -3)}
                                                 </span>
-                                                <span className="text-[38px] md:text-[56px] text-amber-600 relative">
+                                                <span className="text-[28px] md:text-[48px] text-amber-600 leading-none relative">
                                                     {orderResult.total.toLocaleString('id-ID').slice(-3)}
-                                                    <span className="absolute -bottom-1 left-0 w-full h-1 bg-amber-200 rounded-full opacity-50"></span>
+                                                    <span className="absolute -bottom-0.5 left-0 w-full h-[3px] bg-amber-300 rounded-full opacity-60" />
                                                 </span>
                                             </div>
                                             <button
                                                 onClick={() => copyToClipboard(orderResult.total.toString(), "amt")}
-                                                className={`flex items-center gap-2 px-6 h-12 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${isCopied["amt"] ? "bg-emerald-500 text-white" : "bg-neutral-base-900 text-white hover:bg-neutral-base-800 shadow-lg shadow-neutral-base-900/10"}`}
+                                                className={`flex items-center gap-2 px-4 md:px-5 h-10 md:h-11 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 shrink-0 ${isCopied["amt"] ? "bg-emerald-500 text-white" : "bg-neutral-base-900 text-white hover:bg-neutral-base-800"}`}
                                             >
-                                                {isCopied["amt"] ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                                                Salin Nominal
+                                                {isCopied["amt"] ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                                                Salin
                                             </button>
                                         </div>
-                                        <p className="mt-4 text-[13px] font-bold text-neutral-base-400 italic">
-                                            ⚠️ <span className="text-neutral-base-900">Mohon transfer nominal tepat</span> agar sistem otomatis mendeteksi pesanan Anda.
+                                        <p className="mt-2.5 md:mt-3 text-[11px] md:text-[12px] font-medium text-neutral-base-400 leading-relaxed">
+                                            ⚠️ Transfer <span className="text-neutral-base-900 font-bold">nominal tepat hingga 3 digit terakhir</span> agar terdeteksi otomatis.
                                         </p>
-                                        <div className="mt-4 p-4 bg-emerald-50/50 border border-emerald-100/50 rounded-2xl flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                                                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                                    </div>
+
+                                    <div className="h-px bg-neutral-base-100" />
+
+                                    {/* Bank Account */}
+                                    <div>
+                                        <p className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-widest mb-3">Rekening Tujuan</p>
+                                        <div className="bg-neutral-base-50 rounded-xl md:rounded-2xl p-4 md:p-5 flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                                                <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-white flex items-center justify-center p-2 md:p-2.5 shrink-0 border border-neutral-base-100 shadow-sm">
+                                                    <Image src="https://syllahijab.com/frontend/web/img/rekening_pembayaran/bca.png" alt="BCA" width={48} height={16} className="object-contain" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-[16px] md:text-[20px] font-black text-neutral-base-900 tracking-tight leading-none mb-1 md:mb-1.5">{orderResult.bankAccount}</p>
+                                                    <p className="text-[10px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest leading-none truncate">a/n {orderResult.bankOwner}</p>
+                                                </div>
                                             </div>
-                                            <p className="text-[12px] font-medium text-emerald-800">
-                                                Pembayaran akan <span className="font-bold">diverifikasi secara otomatis</span> dalam <span className="font-bold">{formatTime(timeLeft)}</span> menit setelah transfer diterima.
-                                            </p>
+                                            <button
+                                                onClick={() => copyToClipboard(orderResult.bankAccount || "", "acc")}
+                                                className={`shrink-0 flex items-center gap-1.5 px-3.5 md:px-4 h-10 md:h-11 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 border ${isCopied["acc"] ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "bg-white border-neutral-base-200 text-neutral-base-600 hover:bg-neutral-base-50 hover:border-neutral-base-300"}`}
+                                            >
+                                                {isCopied["acc"] ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                                                Salin
+                                            </button>
                                         </div>
                                     </div>
 
-                                    <div className="h-px bg-neutral-base-50" />
-
-                                    {/* Bank Account */}
-                                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-16 h-16 rounded-2xl bg-neutral-base-50 flex items-center justify-center p-3">
-                                                <Image src="https://syllahijab.com/frontend/web/img/rekening_pembayaran/bca.png" alt="BCA" width={48} height={16} className="object-contain" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[18px] font-black text-neutral-base-900 tracking-tight leading-none mb-2">{orderResult.bankAccount}</p>
-                                                <p className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest leading-none">a/n {orderResult.bankOwner}</p>
-                                            </div>
+                                    {/* Auto verification notice */}
+                                    <div className="p-3.5 md:p-4 bg-emerald-50/60 border border-emerald-100 rounded-xl md:rounded-2xl flex items-start gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 mt-0.5">
+                                            <ShieldCheck className="w-4 h-4 text-emerald-600" />
                                         </div>
-                                        <button
-                                            onClick={() => copyToClipboard(orderResult.bankAccount || "", "acc")}
-                                            className={`p-4 rounded-2xl transition-all border ${isCopied["acc"] ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-white border-neutral-base-100 text-neutral-base-400 hover:bg-neutral-base-50"}`}
-                                        >
-                                            {isCopied["acc"] ? <CheckCircle2 className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-                                        </button>
+                                        <p className="text-[11px] md:text-[12px] font-medium text-emerald-800 leading-relaxed">
+                                            Pembayaran akan <span className="font-bold">diverifikasi otomatis</span> setelah transfer diterima. Proses membutuhkan waktu {formatTime(timeLeft)} menit.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {!isTransfer && (
-                            <div className="bg-white border border-neutral-base-100 rounded-[40px] p-10 shadow-xl shadow-neutral-base-900/5 text-center">
-                                <div className="w-20 h-20 rounded-[32px] bg-emerald-50 flex items-center justify-center mx-auto mb-6">
-                                    <ShieldCheck className="w-10 h-10 text-emerald-600" />
+                            <div className="bg-white border border-neutral-base-100 rounded-2xl md:rounded-[32px] p-8 md:p-12 shadow-lg shadow-neutral-base-900/5 text-center">
+                                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-emerald-50 flex items-center justify-center mx-auto mb-5 md:mb-6">
+                                    <ShieldCheck className="w-8 h-8 md:w-10 md:h-10 text-emerald-600" />
                                 </div>
-                                <h3 className="text-[20px] font-bold text-neutral-base-900 mb-2">Terima kasih atas pesanan Anda!</h3>
-                                <p className="text-neutral-base-400 font-medium">Pesanan Anda sedang kami siapkan untuk dikirim segera.</p>
+                                <h3 className="text-[18px] md:text-[22px] font-bold text-neutral-base-900 mb-2">Terima kasih atas pesanan Anda!</h3>
+                                <p className="text-[13px] md:text-[15px] text-neutral-base-400 font-medium leading-relaxed">Pesanan sedang kami siapkan untuk dikirim.</p>
                             </div>
                         )}
 
-                        {/* Secondary Actions */}
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <Link href="/products" className="flex-1 h-16 rounded-[24px] border border-neutral-base-100 flex items-center justify-center gap-2 text-[12px] font-black uppercase tracking-widest text-neutral-base-900 bg-white hover:bg-neutral-base-50 transition-all">
-                                <ShoppingBag className="w-4 h-4" />
-                                Kembali Belanja
-                            </Link>
-                            <Link href={`/account/orders/${orderResult.orderId}`} className="flex-[1.5] h-16 rounded-[24px] bg-neutral-base-900 flex items-center justify-center gap-2 text-[12px] font-black uppercase tracking-widest text-white hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10">
+                        {/* Action Buttons */}
+                        <div className="flex flex-col md:flex-row gap-4">
+                            <Link
+                                href={`/account/orders/${orderResult.orderId}`}
+                                className="flex-1 md:flex-[1.5] py-5 md:py-6 rounded-2xl bg-neutral-base-900 flex items-center justify-center gap-2.5 text-[13px] md:text-[14px] font-black uppercase tracking-[0.12em] text-white hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-[0.98]"
+                            >
                                 Detail Order
                                 <ChevronRight className="w-4 h-4" />
+                            </Link>
+                            <Link
+                                href="/products"
+                                className="flex-1 py-5 md:py-6 rounded-2xl border-2 border-neutral-base-200 flex items-center justify-center gap-2.5 text-[13px] md:text-[14px] font-black uppercase tracking-[0.12em] text-neutral-base-900 bg-white hover:bg-neutral-base-50 transition-all active:scale-[0.98]"
+                            >
+                                <ShoppingBag className="w-4 h-4" />
+                                Lanjut Belanja
                             </Link>
                         </div>
                     </div>
 
-                    {/* Order Sidebar */}
-                    <div className="lg:col-span-5 w-full flex flex-col gap-6">
-
-                        {/* Summary List */}
-                        <div className="bg-white border border-neutral-base-100 rounded-[40px] p-8 shadow-lg shadow-neutral-base-900/5">
-                            <h4 className="text-[12px] font-black uppercase tracking-[0.2em] text-neutral-base-900 mb-6 flex items-center gap-2">
-                                <div className="w-1 h-3 bg-amber-500 rounded-full" />
+                    {/* RIGHT COLUMN — Order Summary */}
+                    <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0">
+                        <div className="bg-white border border-neutral-base-100 rounded-2xl md:rounded-[32px] p-5 md:p-7 shadow-lg shadow-neutral-base-900/5">
+                            <h4 className="text-[11px] md:text-[12px] font-black uppercase tracking-widest text-neutral-base-900 mb-4 md:mb-5 flex items-center gap-2.5">
+                                <div className="w-1 h-3.5 bg-amber-500 rounded-full" />
                                 Pesanan Anda
                             </h4>
-                            <div className="space-y-4 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
+
+                            {/* Product Items */}
+                            <div className="space-y-3.5 md:space-y-4 max-h-[300px] md:max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
                                 {lastOrderedItems.map((item, idx) => (
-                                    <div key={idx} className="flex gap-4">
-                                        <div className="w-14 h-16 bg-neutral-base-50 rounded-xl overflow-hidden shrink-0 relative border border-neutral-base-100">
+                                    <div key={idx} className="flex gap-3 md:gap-4">
+                                        <div className="w-12 h-[58px] md:w-14 md:h-[66px] bg-neutral-base-50 rounded-xl overflow-hidden shrink-0 relative border border-neutral-base-100">
                                             <Image
                                                 src={item.gambar ? `${ASSET_URL}/img/produk/${item.gambar}` : "/placeholder-product.jpg"}
                                                 alt={item.namaProduk}
@@ -193,66 +212,61 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                                 sizes="56px"
                                             />
                                         </div>
-                                        <div className="flex-1 py-1 flex flex-col justify-between">
-                                            <p className="text-[12px] font-bold text-neutral-base-900 line-clamp-1">{item.namaProduk}</p>
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[10px] font-black text-neutral-base-300 uppercase">Qty {item.qty} • {item.size}</span>
-                                                <span className="text-[12px] font-bold text-neutral-base-900">{formatPrice(Number(item.harga) * Number(item.qty))}</span>
+                                        <div className="flex-1 py-0.5 flex flex-col justify-between min-w-0">
+                                            <p className="text-[12px] md:text-[13px] font-semibold text-neutral-base-900 line-clamp-2 leading-snug">{item.namaProduk}</p>
+                                            <div className="flex items-center justify-between gap-2 mt-1">
+                                                <span className="text-[10px] md:text-[11px] font-bold text-neutral-base-400">Qty {item.qty} · {item.size}</span>
+                                                <span className="text-[12px] md:text-[13px] font-bold text-neutral-base-900 tabular-nums shrink-0">{formatPrice(Number(item.harga) * Number(item.qty))}</span>
                                             </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            {/* Detailed Order Breakdown */}
-                            <div className="mt-6 pt-6 border-t border-neutral-base-100 flex flex-col gap-3">
-                                <div className="flex justify-between items-center text-[12px] font-medium text-neutral-base-500">
-                                    <span>Subtotal Produk</span>
-                                    <span className="text-neutral-base-900">{formatPrice(orderResult.subtotal || 0)}</span>
+                            {/* Order Breakdown */}
+                            <div className="mt-4 md:mt-5 pt-4 md:pt-5 border-t border-neutral-base-100 flex flex-col gap-2.5">
+                                <div className="flex justify-between text-[11px] md:text-[12px] text-neutral-base-500">
+                                    <span>Subtotal</span>
+                                    <span className="text-neutral-base-900 font-medium tabular-nums">{formatPrice(orderResult.subtotal || 0)}</span>
                                 </div>
-                                <div className="flex justify-between items-center text-[12px] font-medium text-neutral-base-500">
-                                    <span>Biaya Pengiriman</span>
-                                    <span className="text-neutral-base-900">{formatPrice(orderResult.shippingPrice || 0)}</span>
+                                <div className="flex justify-between text-[11px] md:text-[12px] text-neutral-base-500">
+                                    <span>Pengiriman</span>
+                                    <span className="text-neutral-base-900 font-medium tabular-nums">{formatPrice(orderResult.shippingPrice || 0)}</span>
                                 </div>
                                 {(orderResult.packingFee || 0) > 0 && (
-                                    <div className="flex justify-between items-center text-[12px] font-medium text-neutral-base-500">
-                                        <span>Biaya Packing</span>
-                                        <span className="text-neutral-base-900">{formatPrice(orderResult.packingFee || 0)}</span>
+                                    <div className="flex justify-between text-[11px] md:text-[12px] text-neutral-base-500">
+                                        <span>Packing</span>
+                                        <span className="text-neutral-base-900 font-medium tabular-nums">{formatPrice(orderResult.packingFee || 0)}</span>
                                     </div>
                                 )}
                                 {(orderResult.voucherDiscount || 0) > 0 && (
-                                    <div className="flex justify-between items-center text-[12px] font-medium text-emerald-600">
+                                    <div className="flex justify-between text-[11px] md:text-[12px] text-emerald-600">
                                         <span>Diskon Voucher</span>
-                                        <span>-{formatPrice(orderResult.voucherDiscount || 0)}</span>
+                                        <span className="font-medium tabular-nums">-{formatPrice(orderResult.voucherDiscount || 0)}</span>
                                     </div>
                                 )}
                                 {(orderResult.walletDeduction || 0) > 0 && (
-                                    <div className="flex justify-between items-center text-[12px] font-medium text-amber-600">
-                                        <span>Saldo Wallet Dipakai</span>
-                                        <span>-{formatPrice(orderResult.walletDeduction || 0)}</span>
+                                    <div className="flex justify-between text-[11px] md:text-[12px] text-amber-600">
+                                        <span>Saldo Wallet</span>
+                                        <span className="font-medium tabular-nums">-{formatPrice(orderResult.walletDeduction || 0)}</span>
                                     </div>
                                 )}
                                 {orderResult.uniqueCode && orderResult.uniqueCode > 0 && (
-                                    <div className="flex justify-between items-center text-[12px] font-medium text-amber-600">
-                                        <span>Kode Unik Transfer</span>
-                                        <span>+Rp {orderResult.uniqueCode}</span>
+                                    <div className="flex justify-between text-[11px] md:text-[12px] text-amber-600">
+                                        <span>Kode Unik</span>
+                                        <span className="font-medium tabular-nums">+Rp {orderResult.uniqueCode}</span>
                                     </div>
                                 )}
-                                <div className="mt-2 pt-4 border-t border-dashed border-neutral-base-200 flex justify-between items-center">
-                                    <span className="text-[14px] font-bold text-neutral-base-900">Total Pembayaran</span>
-                                    <span className="text-[18px] font-black text-amber-600">
+
+                                {/* Total */}
+                                <div className="mt-2 pt-3.5 md:pt-4 border-t border-dashed border-neutral-base-200 flex justify-between items-center">
+                                    <span className="text-[13px] md:text-[14px] font-bold text-neutral-base-900">Total</span>
+                                    <span className="text-[17px] md:text-[20px] font-black text-amber-600 tabular-nums">
                                         {formatPrice(orderResult.total)}
                                     </span>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Customer Info */}
-                        {/* <div className="bg-neutral-base-50/50 rounded-[40px] p-8 border border-neutral-base-100">
-                            <p className="text-[11px] font-black text-neutral-base-900/40 uppercase tracking-widest mb-1 text-center italic">
-                                Konfirmasi pesanan telah dikirim ke Email Anda.
-                            </p>
-                        </div> */}
                     </div>
 
                 </div>
@@ -261,7 +275,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
     );
 }
 
-// Custom Icons for better look
+// Custom CreditCard icon
 const CreditCard = ({ className }: { className?: string }) => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
         <rect width="20" height="14" x="2" y="5" rx="2" />

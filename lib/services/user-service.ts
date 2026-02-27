@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { customerAlamat, wallet } from "@/lib/db/schema";
+import { customerAlamat, wallet, provinsi, kota, kecamatan } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 
 export class UserService {
@@ -15,14 +15,20 @@ export class UserService {
             phone: customerAlamat.noHandphone,
             label: customerAlamat.labelAlamat,
             kelurahan: customerAlamat.kelurahan,
-            kecamatan: customerAlamat.kecamatan,
-            kota: customerAlamat.kota,
-            provinsi: customerAlamat.provinsi,
+            kec: customerAlamat.kecamatan,
+            kot: customerAlamat.kota,
+            prov: customerAlamat.provinsi,
             kodePos: customerAlamat.kodePos,
             namaToko: customerAlamat.namaToko,
             isPrimary: customerAlamat.isPrimary,
+            provName: provinsi.province,
+            cityName: kota.cityName,
+            districtName: kecamatan.subdistrictName
         })
             .from(customerAlamat)
+            .leftJoin(provinsi, eq(customerAlamat.provinsi, provinsi.provinceId))
+            .leftJoin(kota, eq(customerAlamat.kota, kota.cityId))
+            .leftJoin(kecamatan, eq(customerAlamat.kecamatan, kecamatan.subdistrictId))
             .where(eq(customerAlamat.custId, custId))
             .orderBy(desc(customerAlamat.id));
 
@@ -32,9 +38,12 @@ export class UserService {
             receiverName: addr.name || "",
             phoneNumber: addr.phone || "",
             fullAddress: addr.address || "",
-            city: addr.kota || "",
-            province: addr.provinsi || "",
-            district: addr.kecamatan || "",
+            city: addr.cityName || addr.kot || "",
+            province: addr.provName || addr.prov || "",
+            district: addr.districtName || addr.kec || "",
+            cityId: addr.kot || "",
+            provinceId: addr.prov || "",
+            districtId: addr.kec || "",
             postalCode: addr.kodePos || "",
             shopName: addr.namaToko || "",
             isPrimary: addr.isPrimary,

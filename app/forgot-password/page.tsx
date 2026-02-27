@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
             {/* Left Side - Hero Content (Consistent with Login) */}
             <div className="hidden lg:flex lg:flex-1 relative overflow-hidden bg-neutral-base-950">
                 <Image
-                    src="/bg-login.png"
+                    src="/bg-login2.png"
                     alt="Luxury Interior"
                     fill
                     className="object-cover transition-transform duration-[10s] ease-out"

@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, ChevronDown, Check, Ruler, Truck, ShieldCheck, ShoppingBag, Plus, Minus, Loader2 } from "lucide-react";
+import { ChevronDown, Check, Ruler, Truck, ShieldCheck, ShoppingBag, Plus, Minus, Loader2, Heart, Package } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { useWishlist, useToggleWishlist } from "@/hooks/use-wishlist";
 
 interface ProductInfoProps {
     product: {
@@ -32,7 +33,18 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     const [openAccordion, setOpenAccordion] = useState<string | null>("details");
     const { isAuthenticated } = useAuth();
 
-    // Memoize matrix for quick lookup
+    // Wishlist
+    const { data: wishlistData } = useWishlist();
+    const toggleWishlist = useToggleWishlist();
+    const isWishlisted = wishlistData?.items?.includes(product.id) ?? false;
+
+    const handleWishlist = () => {
+        if (product.id) {
+            toggleWishlist.mutate(product.id);
+        }
+    };
+
+    // Matrix lookup
     const currentCombination = product.matrix.find(
         m => m.color === selectedColor && m.size === selectedSize
     );
@@ -40,22 +52,16 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     const isSoldOut = parseInt(product.totalStock || "0") === 0;
     const currentStock = currentCombination?.stock ?? 0;
 
-    // Derived stock status message
-    let stockStatus = "";
-    let stockColorClass = "text-neutral-base-500";
+    // Get stock for a specific size (given current color)
+    const getStockForSize = (size: string) => {
+        const variant = product.matrix.find(m => m.color === selectedColor && m.size === size);
+        return variant?.stock ?? 0;
+    };
 
-    if (selectedColor && selectedSize) {
-        if (currentStock >= 10) {
-            stockStatus = "Tersedia";
-            stockColorClass = "text-emerald-600";
-        } else if (currentStock > 0) {
-            stockStatus = `Sisa stok ${currentStock}`;
-            stockColorClass = "text-amber-600";
-        } else {
-            stockStatus = "Stok habis";
-            stockColorClass = "text-rose-600";
-        }
-    }
+    // Dynamic price based on selection
+    const selectedPrice = currentCombination
+        ? `Rp ${parseInt(currentCombination.price).toLocaleString('id-ID')}`
+        : product.price;
 
     const handleQuantityChange = (type: "increase" | "decrease") => {
         if (type === "decrease" && quantity > 1) {
@@ -92,13 +98,11 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
             if (data.message === "login") {
                 toast.error("Silakan login terlebih dahulu untuk menambah ke keranjang");
-                // Optional: trigger login modal via window event
                 window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { tab: "login" } }));
             } else if (data.message === "success") {
                 toast.success("Barang berhasil ditambahkan ke keranjang", {
                     icon: <Check className="w-4 h-4 text-emerald-500" />
                 });
-                // Invalidate cart queries
                 window.dispatchEvent(new CustomEvent("cart-updated", { detail: { count: data.totalinlove } }));
             } else {
                 toast.error(data.detail || data.pesan || "Terjadi kesalahan saat menambah ke keranjang");
@@ -118,7 +122,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             >
                 <div className="flex items-center gap-3">
                     {Icon && <Icon className="w-4 h-4 text-neutral-base-400 group-hover:text-neutral-base-900 transition-colors" />}
-                    <span className="text-[14px] font-bold uppercase tracking-widest text-neutral-base-900 group-hover:text-amber-800 transition-colors">
+                    <span className="text-[12px] md:text-[14px] font-bold uppercase tracking-widest text-neutral-base-900 group-hover:text-amber-800 transition-colors">
                         {title}
                     </span>
                 </div>
@@ -148,62 +152,54 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     );
 
     return (
-        <div className="flex flex-col lg:pl-8 xl:pl-12 font-sans">
+        <div className="flex flex-col lg:pl-8 xl:pl-12 font-sans min-w-0">
             {/* Header / Badges */}
-            <div className="mb-6">
-                <span className="inline-block px-3 py-1 bg-neutral-base-100 text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-base-500 mb-4 font-sans">
+            <div className="mb-4 md:mb-6">
+                <span className="inline-block px-3 py-1 bg-neutral-base-100 text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-base-500 mb-3 md:mb-4 font-sans">
                     {product.collection}
                 </span>
-                <h1 className="font-serif text-[36px] md:text-[48px] text-neutral-base-900 leading-[1.1] mb-6">
+                <h1 className="font-serif text-[24px] md:text-[36px] lg:text-[48px] text-neutral-base-900 leading-[1.2] mb-3 md:mb-6">
                     {product.name}
                 </h1>
 
-                <div className="flex flex-col gap-3">
-                    <div className="flex flex-col">
-                        {product.originalPrice && (
-                            <p className="text-[16px] text-neutral-base-300 line-through font-medium mb-1">
-                                {product.originalPrice}
-                            </p>
-                        )}
-                        <div className="flex items-center gap-4">
-                            <p className="text-[28px] md:text-[36px] font-black tracking-tighter text-neutral-base-900 leading-tight">
-                                {product.price}
-                            </p>
-                        </div>
-                    </div>
-                    {/* TODO: uncomment if need Potensi Komisi */}
-                    {/* {product.hasCommission && product.commission && (
-                        <div className="bg-red-50/50 border-l-2 border-red-500 px-4 py-2 w-fit">
-                            <p className="text-[13px] text-red-600 font-bold italic tracking-wide">
-                                Potensi Komisi Anda: {product.commission}
-                            </p>
-                        </div>
-                    )} */}
+                <div className="flex flex-col gap-2">
+                    {product.originalPrice && (
+                        <p className="text-[14px] md:text-[16px] text-neutral-base-300 line-through font-medium">
+                            {product.originalPrice}
+                        </p>
+                    )}
+                    <p className="text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-neutral-base-900 leading-tight">
+                        {selectedPrice}
+                    </p>
                 </div>
             </div>
 
             {/* Description */}
-            <div className="mb-10">
+            <div className="mb-8 md:mb-10 min-w-0">
                 <div
                     dangerouslySetInnerHTML={{ __html: product.description }}
-                    className="text-[15px] leading-[1.8] text-neutral-base-500 italic prose prose-sm max-w-none line-clamp-3"
+                    className="text-[14px] md:text-[15px] leading-[1.8] text-neutral-base-500 italic prose prose-sm max-w-none line-clamp-3 overflow-hidden wrap-break-word"
                 />
             </div>
 
             {/* Color Selection */}
-            <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
+            <div className="mb-6 md:mb-8">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
                     <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-base-900">
-                        Color: <span className="font-medium text-neutral-base-500 ml-1">{selectedColor}</span>
+                        Warna: <span className="font-medium text-neutral-base-500 ml-1 normal-case">{selectedColor}</span>
                     </span>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-3 md:gap-4">
                     {product.colors.map(color => {
                         const isColorAvailable = color.totalStock > 0;
                         return (
                             <button
                                 key={color.name}
-                                onClick={() => setSelectedColor(color.name)}
+                                onClick={() => {
+                                    setSelectedColor(color.name);
+                                    setSelectedSize(""); // reset size when color changes
+                                    setQuantity(1);
+                                }}
                                 className={`relative flex flex-col items-center gap-2 group transition-opacity ${!isColorAvailable ? "opacity-30" : "opacity-100"}`}
                                 aria-label={`Select ${color.name} ${!isColorAvailable ? "(Sold Out)" : ""}`}
                             >
@@ -225,65 +221,85 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 </div>
             </div>
 
-            {/* Size Selection */}
-            <div className="mb-12">
-                <div className="flex items-center justify-between mb-4">
+            {/* Size Selection with Inline Stock */}
+            <div className="mb-6 md:mb-8">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
                     <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-base-900">
-                        Size: <span className="font-medium text-neutral-base-500 ml-1">{selectedSize}</span>
+                        Ukuran: <span className="font-medium text-neutral-base-500 ml-1 normal-case">{selectedSize || "Pilih ukuran"}</span>
                     </span>
                     <button className="text-[11px] font-bold text-neutral-base-400 hover:text-neutral-base-900 underline flex items-center gap-1 transition-colors">
                         <Ruler className="w-3 h-3" />
                         Size Guide
                     </button>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 md:gap-3">
                     {product.sizes.map(size => {
                         const isSelected = selectedSize === size;
-                        // Check availability for this specific color-size combo
-                        const variant = product.matrix.find(m => m.color === selectedColor && m.size === size);
-                        const isAvailable = (variant?.stock ?? 0) > 0;
+                        const stock = getStockForSize(size);
+                        const isAvailable = stock > 0;
+                        const isLowStock = stock > 0 && stock <= 5;
 
                         return (
                             <button
                                 key={size}
-                                onClick={() => setSelectedSize(size)}
-                                className={`group relative w-14 h-14 flex items-center justify-center text-[13px] font-bold rounded-full transition-all ${isSelected
-                                    ? "bg-neutral-base-900 text-white shadow-lg ring-2 ring-offset-2 ring-neutral-base-900"
-                                    : "border border-neutral-base-200 text-neutral-base-500 hover:border-neutral-base-900 hover:text-neutral-base-900 bg-white"
-                                    } ${!isAvailable ? "opacity-40" : "opacity-100"}`}
+                                onClick={() => {
+                                    setSelectedSize(size);
+                                    setQuantity(1);
+                                }}
+                                className={`group relative px-4 py-2.5 md:px-5 md:py-3 flex items-center justify-center text-[11px] md:text-[13px] font-bold rounded-lg transition-all ${isSelected
+                                    ? "bg-neutral-base-900 text-white shadow-lg ring-1 ring-neutral-base-900"
+                                    : "border border-neutral-base-200 text-neutral-base-600 hover:border-neutral-base-900 hover:text-neutral-base-900 bg-white"
+                                    } ${!isAvailable ? "opacity-30 line-through cursor-not-allowed" : "opacity-100"}`}
+                                disabled={!isAvailable}
                             >
                                 {size}
-                                {!isAvailable && (
-                                    <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full pointer-events-none">
-                                        <div className="w-[120%] h-px bg-neutral-base-300 rotate-45" />
-                                    </div>
+                                {/* Low stock dot indicator */}
+                                {isLowStock && !isSelected && (
+                                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full" />
                                 )}
                             </button>
                         );
                     })}
                 </div>
-                {stockStatus && (
-                    <motion.p
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className={`mt-4 text-[12px] font-bold uppercase tracking-widest ${stockColorClass}`}
-                    >
-                        {stockStatus}
-                    </motion.p>
-                )}
+
+                {/* Elegant Stock Status Bar */}
+                <AnimatePresence mode="wait">
+                    {selectedSize && (
+                        <motion.div
+                            key={`${selectedColor}-${selectedSize}`}
+                            initial={{ opacity: 0, y: -8, height: 0 }}
+                            animate={{ opacity: 1, y: 0, height: "auto" }}
+                            exit={{ opacity: 0, y: -8, height: 0 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="overflow-hidden"
+                        >
+                            <div className={`mt-3 flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-semibold ${currentStock >= 10
+                                ? "bg-emerald-50 text-emerald-700"
+                                : currentStock > 0
+                                    ? "bg-amber-50 text-amber-700"
+                                    : "bg-rose-50 text-rose-600"
+                                }`}>
+                                <Package className="w-3.5 h-3.5" />
+                                {currentStock >= 10 && "Stok tersedia"}
+                                {currentStock > 0 && currentStock < 10 && `Sisa ${currentStock} — segera dapatkan!`}
+                                {currentStock === 0 && "Stok habis untuk kombinasi ini"}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Quantity and Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <div className="flex flex-row gap-2 md:gap-3 mb-8 md:mb-12">
                 {/* Quantity Selector */}
-                <div className="flex items-center border border-neutral-base-200 h-14 sm:w-[140px] shrink-0">
+                <div className="flex items-center border border-neutral-base-200 h-11 md:h-14 w-[100px] md:w-[130px] shrink-0 justify-between rounded-lg">
                     <button
                         onClick={() => handleQuantityChange("decrease")}
-                        className="w-12 h-full flex items-center justify-center text-neutral-base-400 hover:text-neutral-base-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-9 md:w-11 h-full flex items-center justify-center text-neutral-base-400 hover:text-neutral-base-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={quantity <= 1}
                         aria-label="Decrease quantity"
                     >
-                        <Minus className="w-4 h-4" />
+                        <Minus className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>
                     <input
                         type="number"
@@ -297,15 +313,15 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                                 setQuantity(Math.max(1, val));
                             }
                         }}
-                        className="flex-1 bg-transparent text-center text-[14px] font-bold text-neutral-base-900 outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="flex-1 bg-transparent text-center text-[13px] md:text-[14px] font-bold text-neutral-base-900 outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <button
                         onClick={() => handleQuantityChange("increase")}
-                        className="w-12 h-full flex items-center justify-center text-neutral-base-400 hover:text-neutral-base-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={quantity >= 10}
+                        className="w-9 md:w-11 h-full flex items-center justify-center text-neutral-base-400 hover:text-neutral-base-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={quantity >= currentStock}
                         aria-label="Increase quantity"
                     >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>
                 </div>
 
@@ -313,36 +329,53 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 <motion.button
                     whileHover={!isSoldOut && currentStock > 0 && !isAdding ? { scale: 1.02 } : {}}
                     whileTap={!isSoldOut && currentStock > 0 && !isAdding ? { scale: 0.98 } : {}}
-                    disabled={isSoldOut || currentStock === 0 || isAdding}
+                    disabled={isSoldOut || currentStock === 0 || isAdding || !selectedSize}
                     onClick={handleAddToCart}
-                    className={`flex-1 h-14 text-[13px] font-bold uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-3 transition-colors ${(isSoldOut || currentStock === 0 || isAdding)
+                    className={`flex-1 h-11 md:h-14 text-[11px] md:text-[13px] font-bold uppercase tracking-widest md:tracking-[0.2em] shadow-xl flex items-center justify-center gap-2 transition-colors rounded-lg ${(isSoldOut || currentStock === 0 || isAdding || !selectedSize)
                         ? "bg-neutral-base-200 text-neutral-base-400 cursor-not-allowed shadow-none"
                         : "bg-neutral-base-900 text-white hover:bg-neutral-base-800"
                         }`}
                 >
                     {isAdding ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-3.5 h-3.5 md:w-4 md:h-4 animate-spin" />
                     ) : (
-                        <ShoppingBag className="w-4 h-4" />
+                        <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     )}
-                    {isSoldOut || currentStock === 0 ? "Stok Habis" : isAdding ? "Adding..." : "Add to Cart"}
+                    {!selectedSize ? "Pilih Ukuran" : isSoldOut || currentStock === 0 ? "Stok Habis" : isAdding ? "Adding..." : "Keranjang"}
+                </motion.button>
+
+                {/* Wishlist Button */}
+                <motion.button
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={handleWishlist}
+                    className={`w-11 h-11 md:w-14 md:h-14 shrink-0 flex items-center justify-center rounded-lg border transition-all duration-200 ${isWishlisted
+                        ? "bg-rose-50 border-rose-200 text-rose-500"
+                        : "border-neutral-base-200 text-neutral-base-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50"
+                        }`}
+                    aria-label={isWishlisted ? "Hapus dari Wishlist" : "Tambah ke Wishlist"}
+                >
+                    <Heart
+                        className={`w-4 h-4 md:w-5 md:h-5 transition-all duration-200 ${isWishlisted ? "fill-rose-500" : ""}`}
+                        strokeWidth={2}
+                    />
                 </motion.button>
             </div>
 
             {/* Accordions */}
             <div className="border-t border-neutral-base-100">
-                <AccordionItem id="details" title="Product Details">
+                <AccordionItem id="details" title="Detail Produk">
                     <div
                         dangerouslySetInnerHTML={{ __html: product.detail || product.description }}
-                        className="prose prose-sm font-sans text-neutral-base-500 max-w-none"
+                        className="prose prose-sm font-sans text-neutral-base-500 max-w-none overflow-hidden wrap-break-word"
                     />
                 </AccordionItem>
-                <AccordionItem id="shipping" title="Shipping & Returns" icon={Truck}>
-                    <p className="mb-2">Free standard shipping on orders over Rp 2.000.000.</p>
-                    <p>Returns accepted within 14 days of delivery. Items must be in original condition with tags attached.</p>
+                <AccordionItem id="shipping" title="Pengiriman" icon={Truck}>
+                    <p className="mb-2">Gratis ongkir untuk pembelian di atas Rp 2.000.000.</p>
+                    <p>Pengembalian diterima dalam 14 hari setelah pengiriman. Barang harus dalam kondisi asli dengan label masih terpasang.</p>
                 </AccordionItem>
-                <AccordionItem id="care" title="Care Instructions" icon={ShieldCheck}>
-                    <p>Dry clean only. Do not bleach. Iron on low heat on the reverse side to preserve the natural dyes.</p>
+                <AccordionItem id="care" title="Perawatan" icon={ShieldCheck}>
+                    <p>Hanya dry clean. Jangan gunakan pemutih. Setrika dengan suhu rendah pada sisi belakang untuk menjaga warna alami.</p>
                 </AccordionItem>
             </div>
         </div>

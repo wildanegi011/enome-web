@@ -24,7 +24,6 @@ export function useCheckout() {
     const [totalAmount, setTotalAmount] = useState(0);
     const { refreshCart } = useCart();
 
-    // Shipping Form State
     const [shippingForm, setShippingForm] = useState({
         customerId: 0,
         name: "",
@@ -36,6 +35,7 @@ export function useCheckout() {
         kecamatan: "",
         kota: "",
         provinsi: "",
+        districtId: "",
         kodePos: "",
         resi: "",
         catatan: "",
@@ -178,7 +178,10 @@ export function useCheckout() {
     const fetchShippingCost = useCallback(async () => {
         if (!shippingForm.kecamatan || totalWeight === 0) return;
 
-        const cacheKey = `shippingCost_${shippingForm.kecamatan}_${totalWeight}`;
+        // Use districtId for shipping API if available, fallback to kecamatan string
+        const destination = (shippingForm as any).districtId || shippingForm.kecamatan;
+
+        const cacheKey = `shippingCost_${destination}_${totalWeight}`;
         const cachedStr = sessionStorage.getItem(cacheKey);
 
         const handleCosts = (costs: any[]) => {
@@ -215,7 +218,7 @@ export function useCheckout() {
         setIsLoadingShipping(true);
         try {
             const data = await checkoutApi.getShippingCost({
-                destination: shippingForm.kecamatan,
+                destination: destination,
                 weight: totalWeight,
                 courier: "ALL"
             });
@@ -230,7 +233,7 @@ export function useCheckout() {
         } finally {
             setIsLoadingShipping(false);
         }
-    }, [shippingForm.kecamatan, totalWeight]);
+    }, [shippingForm.kecamatan, (shippingForm as any).districtId, totalWeight]);
 
     useEffect(() => {
         fetchShippingCost();
@@ -266,6 +269,7 @@ export function useCheckout() {
                     provinsi: defaultAddr.province,
                     kota: defaultAddr.city,
                     kecamatan: defaultAddr.district,
+                    districtId: defaultAddr.districtId || defaultAddr.district,
                     kodePos: defaultAddr.postalCode,
                 }));
             }
@@ -290,6 +294,7 @@ export function useCheckout() {
             address: addr.fullAddress || "",
             addressId: addr.id || 0,
             kecamatan: addr.district || "",
+            districtId: addr.districtId || addr.district,
             kota: addr.city || "",
             provinsi: addr.province || "",
             kodePos: addr.postalCode || "",
