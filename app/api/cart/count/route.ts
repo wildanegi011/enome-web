@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-utils";
+import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CartService } from "@/lib/services/cart-service";
 
@@ -11,10 +11,9 @@ import { CartService } from "@/lib/services/cart-service";
  * @method GET
  * @response 200 — { total: number }
  */
-export async function GET(request: NextRequest) {
+export const GET = withOptionalAuth(async (request: NextRequest, context: any, session: any) => {
     logger.debug("API Request: GET /api/cart/count");
     try {
-        const session = await getSession();
         if (!session) {
             return NextResponse.json({ total: 0 });
         }
@@ -30,5 +29,4 @@ export async function GET(request: NextRequest) {
         apiLogger.error(request, error);
         return NextResponse.json({ total: 0 }, { status: 500 });
     }
-}
-
+});

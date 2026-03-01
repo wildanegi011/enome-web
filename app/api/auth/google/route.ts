@@ -1,11 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { db } from "@/lib/db";
-import { user, activityLogin } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { user, activityLogin, customer, customerAlamat } from "@/lib/db/schema";
+import { eq, like, and, notLike, desc, sql } from "drizzle-orm";
 import { login } from "@/lib/auth-utils";
 import { randomBytes } from "crypto";
 import { execSync } from "child_process";
+import { sendActivationEmail } from "@/lib/mail";
 import logger, { apiLogger } from "@/lib/logger";
+
+function buatkode(lastId: string, key: string, padding: number) {
+    const lastNum = parseInt(lastId.substring(key.length)) || 0;
+    const nextNum = lastNum + 1;
+    const nextId = key + nextNum.toString().padStart(padding, "0");
+    return nextId;
+}
+
+async function getNextCustId() {
+    const lastCustomer = await db.select({ custId: customer.custId })
+        .from(customer)
+        .where(
+            and(
+                like(customer.custId, 'C%'),
+                notLike(customer.custId, 'CUST-%')
+            )
+        )
+        .orderBy(desc(customer.custId))
+        .limit(1);
+
+    const key = "C";
+    const padding = 10;
+    const lastId = lastCustomer.length > 0 ? lastCustomer[0].custId : `${key}${"0".repeat(padding)}`;
+
+    return buatkode(lastId, key, padding);
+}
 
 /**
  * Login/Register via Google OAuth.
@@ -68,6 +95,8 @@ export async function POST(request: NextRequest) {
             const authKey = randomBytes(16).toString("hex");
             const tempPassword = randomBytes(16).toString("hex");
 
+            const verificationToken = randomBytes(32).toString("hex");
+
             // Hash temp password via PHP for parity
             const b64Password = Buffer.from(tempPassword).toString('base64');
             const phpCmd = `php -r 'echo password_hash(base64_decode("${b64Password}"), PASSWORD_BCRYPT, ["cost" => 13]);'`;
@@ -79,27 +108,78 @@ export async function POST(request: NextRequest) {
                 passwordHash = "GOOGLE_OAUTH_USER"; // Fallback if PHP fails (though unlikely)
             }
 
-            const insertResult = await db.insert(user).values({
-                username: trimmedEmail,
-                email: trimmedEmail,
-                passwordHash: passwordHash,
-                authKey: authKey,
-                nama: name || "Google User",
-                role: 2, // Customer
-                status: 10, // Active
-                // TODO : sementara langsung aktif nanti kedepanya set jadi 2 untuk lakukan aktifasi
-                isDeleted: 0,
-                createdAt: now,
-                updatedAt: now,
-                alamat: "",
-                photo: picture || "",
-                urlphoto: picture || "",
-                updatephoto: "",
+            await db.transaction(async (tx) => {
+                const [userResult]: any = await tx.insert(user).values({
+                    username: trimmedEmail,
+                    email: trimmedEmail,
+                    passwordHash: passwordHash,
+                    authKey: authKey,
+                    nama: name || "Google User",
+                    role: 2, // Customer
+                    status: 10, // Active
+                    isDeleted: 2, // Pending verification
+                    verificationToken: verificationToken,
+                    createdAt: now,
+                    updatedAt: now,
+                    alamat: "",
+                    photo: picture || "",
+                    urlphoto: picture || "",
+                    updatephoto: "",
+                });
+
+                const insertedUserId = userResult.insertId;
+                const custId = await getNextCustId();
+
+                await tx.insert(customer).values({
+                    custId: custId,
+                    namaCustomer: name || "Google User",
+                    userId: insertedUserId,
+                    email: trimmedEmail,
+                    telp: "",
+                    alamat: "",
+                    alamatLengkap: "",
+                    namaToko: "",
+                    kecamatan: "",
+                    kota: "",
+                    provinsi: "",
+                    kodepos: "",
+                    kategoriCustomerId: 4, // Default to Pelanggan
+                    completedDepositTime: sql`CURRENT_TIMESTAMP`,
+                    isDeleted: 0,
+                });
+
+                await tx.insert(customerAlamat).values({
+                    custId: custId,
+                    labelAlamat: "Utama",
+                    namaPenerima: name || "Google User",
+                    alamatLengkap: "",
+                    noHandphone: "",
+                    kecamatan: "",
+                    kota: "",
+                    provinsi: "",
+                    kodePos: "",
+                    isPrimary: 1,
+                    createdAt: sql`CURRENT_TIMESTAMP`,
+                    createdBy: insertedUserId,
+                });
             });
 
             // Re-fetch the newly created user to get the full record (especially the ID)
             const newUserRes = await db.select().from(user).where(eq(user.email, trimmedEmail)).limit(1);
             currentUser = newUserRes[0];
+
+            const activationLink = `${process.env.NEXT_PUBLIC_URL}/verify-email?token=${verificationToken}`;
+            after(async () => {
+                logger.info("Background job: Sending activation email for Google Registration", { email: trimmedEmail });
+                await sendActivationEmail(trimmedEmail, activationLink);
+            });
+
+            return NextResponse.json({
+                success: true,
+                requiresVerification: true,
+                message: "Registrasi berhasil. Silakan cek email Anda untuk aktivasi akun."
+            });
+
         } else {
             currentUser = userData[0];
 

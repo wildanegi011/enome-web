@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { user, customer, customerKategori, customerAlamat } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { getSession } from "@/lib/auth-utils";
+import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { promises as fs } from "fs";
 import { join } from "path";
@@ -18,15 +18,9 @@ import { join } from "path";
  * @response 404 — { error: "User not found" }
  * @response 500 — { error: "Terjadi kesalahan sistem" }
  */
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: GET /api/user/profile");
     try {
-        const session = await getSession();
-        if (!session || !session.user) {
-            logger.warn("Profile Check: Unauthorized access attempt");
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
         const userId = session.user.id;
 
         const profileData = await db.select({
@@ -67,7 +61,7 @@ export async function GET(request: NextRequest) {
         apiLogger.error(request, error);
         return NextResponse.json({ error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
-}
+});
 
 /**
  * Memperbarui data profil user (nama, gender, tanggal lahir, no HP, foto).
@@ -80,14 +74,9 @@ export async function GET(request: NextRequest) {
  * @response 401 — { error: "Unauthorized" }
  * @response 500 — { error: "Terjadi kesalahan sistem" }
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: POST /api/user/profile");
     try {
-        const session = await getSession();
-        if (!session || !session.user) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
         const userId = session.user.id;
         const formData = await request.formData();
 
@@ -158,4 +147,4 @@ export async function POST(request: NextRequest) {
         apiLogger.error(request, error);
         return NextResponse.json({ error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
-}
+});

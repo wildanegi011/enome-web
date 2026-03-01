@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { keranjangLove, produk } from "@/lib/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-utils";
+import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 
 /**
@@ -15,10 +15,9 @@ import logger, { apiLogger } from "@/lib/logger";
  *   WishlistItem: { wishlist_id, produk_id, nama_produk, kategori, gambar, min_price, max_price, total_stock, colors }
  * @response 500 — { error: "Gagal mengambil wishlist" }
  */
-export async function GET(request: NextRequest) {
+export const GET = withOptionalAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: GET /api/wishlist/details");
     try {
-        const session = await getSession();
         if (!session) {
             return NextResponse.json({ items: [] });
         }
@@ -56,4 +55,4 @@ export async function GET(request: NextRequest) {
         apiLogger.error(request, error);
         return NextResponse.json({ error: "Gagal mengambil wishlist" }, { status: 500 });
     }
-}
+});

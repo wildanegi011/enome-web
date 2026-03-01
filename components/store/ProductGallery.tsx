@@ -1,15 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ProductGalleryProps {
     images: string[];
     isSoldOut?: boolean;
+    isOnFlashSale?: boolean;
+    flashSaleEndTime?: string;
 }
 
-export default function ProductGallery({ images, isSoldOut }: ProductGalleryProps) {
+import { Zap } from "lucide-react";
+
+export default function ProductGallery({ images, isSoldOut, isOnFlashSale, flashSaleEndTime }: ProductGalleryProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     return (
@@ -68,6 +72,17 @@ export default function ProductGallery({ images, isSoldOut }: ProductGalleryProp
                         )}
                     </motion.div>
                 </AnimatePresence>
+
+                {/* Flash Sale Top-Left Badge OVERLAY */}
+                {isOnFlashSale && (
+                    <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+                        <div className="bg-red-600 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg border border-red-500/50">
+                            <Zap className="w-3.5 h-3.5 text-white fill-white animate-pulse" />
+                            <span className="text-[11px] font-bold uppercase tracking-widest text-white drop-shadow-sm">Flash Sale</span>
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
     );

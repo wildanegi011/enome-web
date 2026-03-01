@@ -57,6 +57,21 @@ export default function LoginPage() {
 
             if (!res.ok) throw new Error("Gagal login dengan Google");
 
+            const data = await res.json();
+
+            if (data.requiresVerification) {
+                setIsSuccess(true);
+                toast.success(data.message || "Akun berhasil dibuat! Silakan cek email Anda untuk aktivasi.", {
+                    duration: 6000,
+                });
+                // Let the success state show for a bit, no redirect needed since they are on login 
+                // but we could just stay here or reload
+                setTimeout(() => {
+                    window.location.reload();
+                }, 10000);
+                return;
+            }
+
             setIsSuccess(true);
             toast.success("Berhasil masuk dengan Google!");
 

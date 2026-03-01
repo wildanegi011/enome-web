@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Loader2, Minus, Plus, Trash2 } from "lucide-react";
+import { Loader2, Minus, Plus, Trash2, Zap } from "lucide-react";
 import { ASSET_URL } from "@/config/config";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +17,7 @@ interface CartItem {
     qty: number;
     stock: number;
     isOnline?: number;
+    isFlashsale?: number;
 }
 
 interface CartReviewProps {
@@ -91,6 +92,12 @@ export default function CartReview({ items, isLoading, updateQuantity, removeIte
                                         <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-neutral-base-400 px-1.5 md:px-2 py-0.5 bg-neutral-base-50 rounded border border-neutral-base-100">
                                             Size {item.size}
                                         </span>
+                                        {item.isFlashsale === 1 && (
+                                            <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-red-600 px-1.5 md:px-2 py-0.5 bg-red-50 rounded border border-red-100 flex items-center gap-1">
+                                                <Zap className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                                                Flash Sale
+                                            </span>
+                                        )}
                                         {isOffline && (
                                             <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white px-1.5 md:px-2 py-0.5 bg-red-500 rounded border border-red-600 animate-pulse">
                                                 Offline

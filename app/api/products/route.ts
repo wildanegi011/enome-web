@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-utils";
+import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CustomerService } from "@/lib/services/customer-service";
 import { ProductService } from "@/lib/services/product-service";
@@ -18,7 +18,7 @@ import { eq, sql } from "drizzle-orm";
  *   { produkId, namaProduk, gambar, kategori, finalMinPrice, finalMaxPrice, totalStock, colors, ... }[]
  * @response 500 — { error: "Internal Server Error" }
  */
-export async function GET(request: NextRequest) {
+export const GET = withOptionalAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: GET /api/products");
     try {
         const { searchParams } = new URL(request.url);
@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
         const colors = searchParams.get("colors")?.split(",").filter(Boolean);
         const sizes = searchParams.get("sizes")?.split(",").filter(Boolean);
 
-        const session = await getSession();
         const kategoriId = await CustomerService.getKategoriId(session?.user?.id);
 
         logger.debug("Products Fetch: Using kategoriId", { kategoriId, categories, priceRanges, colors, sizes });
@@ -53,6 +52,5 @@ export async function GET(request: NextRequest) {
             { status: 500 }
         );
     }
-}
-
+});
 

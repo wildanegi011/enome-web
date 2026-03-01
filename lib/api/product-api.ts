@@ -51,6 +51,7 @@ export interface Product {
     hasCommission?: boolean;
     commissionMin?: string | number | null;
     commissionMax?: string | number | null;
+    discountPercentage?: number;
 }
 
 export interface ProductDetailResponse {

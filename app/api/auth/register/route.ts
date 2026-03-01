@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
                 kota: kota || "",
                 provinsi: provinsi || "",
                 kodepos: kode_pos || "",
-                kategoriCustomerId: 1, // Default to Retail/Regular
+                kategoriCustomerId: 4, // Default to Pelanggan
                 completedDepositTime: sql`CURRENT_TIMESTAMP`,
                 isDeleted: 0,
             });

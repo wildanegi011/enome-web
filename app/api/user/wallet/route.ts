@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-utils";
+import { NextRequest, NextResponse } from "next/server";
+import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CustomerService } from "@/lib/services/customer-service";
 import { UserService } from "@/lib/services/user-service";
@@ -14,15 +14,9 @@ import { UserService } from "@/lib/services/user-service";
  * @response 401 — { message: "login" }
  * @response 500 — { message: "error", error: "Terjadi kesalahan sistem" }
  */
-export async function GET() {
+export const GET = withAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: GET /api/user/wallet");
     try {
-        const session = await getSession();
-        if (!session) {
-            logger.warn("Wallet Check: Unauthorized access attempt");
-            return NextResponse.json({ message: "login" }, { status: 401 });
-        }
-
         const userId = session.user.id;
 
         // Mencari custId yang berelasi dengan userId ini
@@ -38,8 +32,8 @@ export async function GET() {
         logger.info("Wallet Check: Balance fetched successfully", { userId, balance });
         return NextResponse.json({ balance });
     } catch (error: any) {
-        apiLogger.error(null, error, { route: "/api/user/wallet" });
+        apiLogger.error(request, error, { route: "/api/user/wallet" });
         return NextResponse.json({ message: "error", error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
-}
+});
 

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     ChevronRight, ShoppingBag, ArrowLeft, Trash2, Plus, Minus,
     Loader2, ShoppingCart, ShieldCheck, Truck, MessageSquare,
-    CheckSquare, Square
+    CheckSquare, Square, Zap
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -258,6 +258,12 @@ export default function CartPage() {
                                                                     <span className="text-[8px] font-black uppercase tracking-widest text-neutral-base-400 px-1.5 py-0.5 bg-neutral-base-50 rounded">
                                                                         {item.size}
                                                                     </span>
+                                                                    {item.isFlashsale === 1 && (
+                                                                        <span className="text-[8px] font-black uppercase tracking-widest text-red-600 px-1.5 py-0.5 bg-red-50 rounded border border-red-100 flex items-center gap-1">
+                                                                            <Zap className="w-2.5 h-2.5" />
+                                                                            Flash Sale
+                                                                        </span>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                             <button

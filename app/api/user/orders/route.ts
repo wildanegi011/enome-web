@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders, statusOrder as statusOrderSchema } from "@/lib/db/schema";
 import { eq, desc, sql, and, gte, lte, or, ne, notInArray, inArray } from "drizzle-orm";
-import { getSession } from "@/lib/auth-utils";
+import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
 import { CustomerService } from "@/lib/services/customer-service";
@@ -18,15 +18,9 @@ import { CustomerService } from "@/lib/services/customer-service";
  * @response 401 — { message: "login" }
  * @response 500 — { message: "error", error: "Terjadi kesalahan sistem" }
  */
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: GET /api/user/orders");
     try {
-        const session = await getSession();
-        if (!session) {
-            logger.warn("Order History: Unauthorized access attempt");
-            return NextResponse.json({ message: "login" }, { status: 401 });
-        }
-
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get("page") || String(CONFIG.PAGINATION.DEFAULT_PAGE));
         const limit = parseInt(searchParams.get("limit") || String(CONFIG.PAGINATION.DEFAULT_LIMIT));
@@ -133,6 +127,6 @@ export async function GET(request: NextRequest) {
         apiLogger.error(request, error);
         return NextResponse.json({ message: "error", error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
-}
+});
 
 

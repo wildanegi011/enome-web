@@ -7,6 +7,7 @@ import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
+    TooltipProvider,
 } from "@/components/ui/tooltip";
 import { Heart } from "lucide-react";
 import Link from 'next/link';
@@ -31,6 +32,7 @@ interface Product {
     isOnPreOrder?: boolean;
     commission?: string;
     hasCommission?: boolean;
+    discountPercentage?: number;
 }
 
 interface ProductCardProps {
@@ -80,7 +82,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     {/* Status Badges */}
                     {product.isOnFlashSale && (
                         <div className="absolute top-3 left-3 z-1">
-                            <span className="bg-amber-500/90 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-sm">
+                            <span className="bg-red-600/90 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-sm">
                                 Flash Sale
                             </span>
                         </div>
@@ -128,10 +130,17 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                             {product.name}
                         </h3>
                         <div className="pt-0.5">
-                            {product.originalPrice && (
-                                <span className="text-[12px] text-neutral-base-300 line-through mr-2">
-                                    {product.originalPrice}
-                                </span>
+                            {product.originalPrice && product.isOnFlashSale && (
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-[12px] text-neutral-base-400 line-through">
+                                        {product.originalPrice}
+                                    </span>
+                                    {!!product.discountPercentage && product.discountPercentage > 0 && (
+                                        <span className="text-[9px] font-bold text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded">
+                                            -{product.discountPercentage}%
+                                        </span>
+                                    )}
+                                </div>
                             )}
                             <p className="text-[17px] font-bold text-neutral-base-900 tracking-tight">
                                 {product.price}
@@ -150,28 +159,30 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                                 >
                                     <AnimatePresence mode="popLayout">
                                         {(isHovered ? colors : colors.slice(0, 2)).map((color, cIdx) => (
-                                            <Tooltip key={`${color.name}-${cIdx}`}>
-                                                <TooltipTrigger asChild>
-                                                    <motion.div
-                                                        layout
-                                                        initial={{ opacity: 0, scale: 0, x: -8 }}
-                                                        animate={{ opacity: 1, scale: 1, x: 0 }}
-                                                        exit={{ opacity: 0, scale: 0, x: -8 }}
-                                                        transition={{
-                                                            type: "spring",
-                                                            stiffness: 500,
-                                                            damping: 30,
-                                                            delay: isHovered ? cIdx * 0.03 : 0,
-                                                        }}
-                                                        whileHover={{ scale: 1.3, zIndex: 10 }}
-                                                        className="w-3.5 h-3.5 rounded-full ring-2 ring-white shadow-sm cursor-pointer"
-                                                        style={{ backgroundColor: color.value }}
-                                                    />
-                                                </TooltipTrigger>
-                                                <TooltipContent className="bg-neutral-base-900 text-white border-none text-[10px] font-bold py-1 px-2 mb-1">
-                                                    {color.name}
-                                                </TooltipContent>
-                                            </Tooltip>
+                                            <TooltipProvider key={`${color.name}-${cIdx}`}>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <motion.div
+                                                            layout
+                                                            initial={{ opacity: 0, scale: 0, x: -8 }}
+                                                            animate={{ opacity: 1, scale: 1, x: 0 }}
+                                                            exit={{ opacity: 0, scale: 0, x: -8 }}
+                                                            transition={{
+                                                                type: "spring",
+                                                                stiffness: 500,
+                                                                damping: 30,
+                                                                delay: isHovered ? cIdx * 0.03 : 0,
+                                                            }}
+                                                            whileHover={{ scale: 1.3, zIndex: 10 }}
+                                                            className="w-3.5 h-3.5 rounded-full ring-2 ring-white shadow-sm cursor-pointer"
+                                                            style={{ backgroundColor: color.value }}
+                                                        />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className="bg-neutral-base-900 text-white border-none text-[10px] font-bold py-1 px-2 mb-1">
+                                                        {color.name}
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
                                         ))}
                                     </AnimatePresence>
                                     {!isHovered && colors.length > 2 && (

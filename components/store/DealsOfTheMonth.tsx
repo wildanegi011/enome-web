@@ -68,9 +68,16 @@ export default function DealsOfTheMonth() {
                             <h3 className="text-[20px] md:text-[24px] font-bold text-neutral-base-900">
                                 {currentProduct.namaProduk}
                             </h3>
-                            <p className="text-rose-500 font-bold text-lg">
-                                Rp {Number(currentProduct.finalMinPrice).toLocaleString()}
-                            </p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-red-600 font-bold text-lg">
+                                    Rp {Number(currentProduct.finalMinPrice).toLocaleString('id-ID')}
+                                </p>
+                                {!!currentProduct.discountPercentage && currentProduct.discountPercentage > 0 && (
+                                    <span className="text-[11px] font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-sm">
+                                        -{currentProduct.discountPercentage}%
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         {/* TODO: uncomment when we have product description */}
                         {/* {currentProduct.deskripsi ? (

@@ -19,6 +19,8 @@ export class CartService {
             gambar: sql<string>`COALESCE(${keranjang.gambarProduk}, ${produk.gambar})`.as('gambar'),
             keterangan: keranjang.keterangan,
             isFlashsale: keranjang.isFlashsale,
+            flashsaleId: keranjang.flashsaleId,
+            flashsaleExpired: keranjang.flashsaleExpired,
             isPreorder: keranjang.isPreorder,
             isOnline: produk.isOnline,
             stock: produkDetail.stokNormal,

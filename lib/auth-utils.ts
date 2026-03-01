@@ -60,3 +60,26 @@ export async function updateSession(request: NextRequest) {
     });
     return res;
 }
+
+type AuthenticatedHandler = (
+    request: NextRequest,
+    context: any,
+    session: any
+) => Promise<NextResponse> | NextResponse;
+
+export function withAuth(handler: AuthenticatedHandler) {
+    return async (request: NextRequest, context: any) => {
+        const session = await getSession();
+        if (!session) {
+            return NextResponse.json({ message: "Silakan login terlebih dahulu", authenticated: false }, { status: 401 });
+        }
+        return handler(request, context, session);
+    };
+}
+
+export function withOptionalAuth(handler: AuthenticatedHandler) {
+    return async (request: NextRequest, context: any) => {
+        const session = await getSession();
+        return handler(request, context, session);
+    };
+}

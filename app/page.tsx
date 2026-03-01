@@ -1,5 +1,6 @@
 import Navbar from "@/components/store/Navbar";
 import HeroSection from "@/components/store/HeroSection";
+import FlashSaleSection from "@/components/store/FlashSaleSection";
 import DealsOfTheMonth from "@/components/store/DealsOfTheMonth";
 import NewArrivals from "@/components/store/NewArrivals";
 import FeaturedBanner from "@/components/store/FeaturedBanner";
@@ -12,6 +13,7 @@ export default function Home() {
     <div className="min-h-screen bg-white font-sans">
       <Navbar />
       <HeroSection />
+      <FlashSaleSection />
       <DealsOfTheMonth />
       <NewArrivals />
       <FeaturedBanner />

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-utils";
+import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { getJakartaDate } from "@/lib/date-utils";
 import { CartService } from "@/lib/services/cart-service";
@@ -21,20 +21,17 @@ import { eq, and, sql } from "drizzle-orm";
  * @response 404 — { message: "not_found" }
  * @response 500 — { message: "error", error: "Terjadi kesalahan sistem" }
  */
-export async function PATCH(
+export const PATCH = withAuth(async (
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-) {
+    context: { params: Promise<{ id: string }> },
+    session: any
+) => {
+    const { params } = context;
     const { id: idStr } = await params;
     const id = parseInt(idStr);
     logger.info("API Request: PATCH /api/cart/[id]", { id });
 
     try {
-        const session = await getSession();
-        if (!session) {
-            logger.warn("Cart Update: Unauthorized");
-            return NextResponse.json({ message: "login" }, { status: 401 });
-        }
 
         const { qty, notes } = await request.json();
 
@@ -114,7 +111,7 @@ export async function PATCH(
         apiLogger.error(request, error, { cartItemId: id });
         return NextResponse.json({ message: "error", error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
-}
+});
 
 /**
  * Hapus item dari keranjang (soft delete).
@@ -127,20 +124,17 @@ export async function PATCH(
  * @response 400 — { message: "bad_request" }
  * @response 500 — { message: "error", error: "Terjadi kesalahan sistem" }
  */
-export async function DELETE(
+export const DELETE = withAuth(async (
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-) {
+    context: { params: Promise<{ id: string }> },
+    session: any
+) => {
+    const { params } = context;
     const { id: idStr } = await params;
     const id = parseInt(idStr);
     logger.info("API Request: DELETE /api/cart/[id]", { id });
 
     try {
-        const session = await getSession();
-        if (!session) {
-            logger.warn("Cart Delete: Unauthorized");
-            return NextResponse.json({ message: "login" }, { status: 401 });
-        }
 
         if (isNaN(id)) {
             logger.warn("Cart Delete: Invalid ID", { idStr });
@@ -157,5 +151,5 @@ export async function DELETE(
         apiLogger.error(request, error, { cartItemId: id });
         return NextResponse.json({ message: "error", error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
-}
+});
 

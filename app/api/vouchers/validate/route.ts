@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { voucher, customer } from "@/lib/db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import { getSession } from "@/lib/auth-utils";
+import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { getJakartaDate } from "@/lib/date-utils";
 
@@ -18,9 +18,8 @@ import { getJakartaDate } from "@/lib/date-utils";
  * @response 200 (invalid) — { success: 0, message: string }
  * @response 500 — { success: 0, message: "Terjadi kesalahan sistem saat validasi voucher" }
  */
-export async function POST(req: Request) {
+export const POST = withAuth(async (req: Request, context: any, session: any) => {
     try {
-        const session = await getSession();
         const body = await req.json();
         const { kode, subtotal, order_tipe } = body;
 
@@ -29,11 +28,6 @@ export async function POST(req: Request) {
         if (!kode) {
             logger.warn("Voucher Warning: Missing code");
             return NextResponse.json({ success: 0, message: "Kode voucher harus diisi" });
-        }
-
-        if (!session) {
-            logger.warn("Voucher Warning: Unauthorized validation attempt");
-            return NextResponse.json({ success: 0, message: "Silakan login terlebih dahulu" });
         }
 
         const userId = session.user.id;
@@ -146,5 +140,4 @@ export async function POST(req: Request) {
         apiLogger.error(null, error, { route: "/api/vouchers/validate" });
         return NextResponse.json({ success: 0, message: "Terjadi kesalahan sistem saat validasi voucher" }, { status: 500 });
     }
-}
-
+});

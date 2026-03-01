@@ -5,6 +5,8 @@ import { produk } from "@/lib/db/schema";
 import { eq, asc, and } from "drizzle-orm";
 import { CONFIG } from "@/lib/config";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Mengambil produk highlight (Deal of the Month).
  * Diurutkan berdasarkan highlightOrder. Harga menggunakan kategori retail default.

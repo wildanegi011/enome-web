@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { customer, customerAlamat } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { getSession } from "@/lib/auth-utils";
+import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { getJakartaDate } from "@/lib/date-utils";
 import { CustomerService } from "@/lib/services/customer-service";
@@ -17,16 +17,9 @@ import { UserService } from "@/lib/services/user-service";
  * @response 401 — { message: "Unauthorized" }
  * @response 500 — { message: "Terjadi kesalahan sistem" }
  */
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: GET /api/user/addresses");
     try {
-        // Mendapatkan sesi user yang sedang login
-        const session = await getSession();
-        if (!session) {
-            logger.warn("API Unauthorized: GET /api/user/addresses");
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-        }
-
         const userId = session.user.id;
         const custId = await CustomerService.getCustId(userId);
 
@@ -47,7 +40,7 @@ export async function GET(request: NextRequest) {
             { status: 500 }
         );
     }
-}
+});
 
 /**
  * Menambahkan alamat pengiriman baru.
@@ -61,14 +54,8 @@ export async function GET(request: NextRequest) {
  * @response 404 — { error: "Profil customer tidak ditemukan" }
  * @response 500 — { error: "Gagal menyimpan alamat" }
  */
-export async function POST(req: NextRequest) {
+export const POST = withAuth(async (req: NextRequest, context: any, session: any) => {
     try {
-        const session = await getSession();
-        if (!session || !session.user?.id) {
-            logger.warn("API Unauthorized: POST /api/user/addresses");
-            return NextResponse.json({ error: "Sesi tidak valid" }, { status: 401 });
-        }
-
         const body = await req.json();
         logger.info("API Request: POST /api/user/addresses", { body });
 
@@ -133,7 +120,7 @@ export async function POST(req: NextRequest) {
         apiLogger.error(req, error);
         return NextResponse.json({ error: "Gagal menyimpan alamat" }, { status: 500 });
     }
-}
+});
 
 /**
  * Menghapus alamat pengiriman berdasarkan ID.
@@ -145,14 +132,8 @@ export async function POST(req: NextRequest) {
  * @response 401 — { error: "Sesi tidak valid" }
  * @response 500 — { error: "Gagal menghapus alamat" }
  */
-export async function DELETE(req: NextRequest) {
+export const DELETE = withAuth(async (req: NextRequest, context: any, session: any) => {
     try {
-        const session = await getSession();
-        if (!session) {
-            logger.warn("API Unauthorized: DELETE /api/user/addresses");
-            return NextResponse.json({ error: "Sesi tidak valid" }, { status: 401 });
-        }
-
         const { id } = await req.json();
         logger.info("API Request: DELETE /api/user/addresses", { addressId: id });
 
@@ -167,7 +148,7 @@ export async function DELETE(req: NextRequest) {
         apiLogger.error(req, error);
         return NextResponse.json({ error: "Gagal menghapus alamat" }, { status: 500 });
     }
-}
+});
 
 /**
  * Memperbarui data alamat atau mengubah status Alamat Utama.
@@ -180,14 +161,8 @@ export async function DELETE(req: NextRequest) {
  * @response 404 — { error: "Alamat tidak ditemukan" }
  * @response 500 — { error: "Gagal memperbarui alamat" }
  */
-export async function PATCH(req: NextRequest) {
+export const PATCH = withAuth(async (req: NextRequest, context: any, session: any) => {
     try {
-        const session = await getSession();
-        if (!session) {
-            logger.warn("API Unauthorized: PATCH /api/user/addresses");
-            return NextResponse.json({ error: "Sesi tidak valid" }, { status: 401 });
-        }
-
         const body = await req.json();
         const { id, isPrimary, ...updates } = body;
         logger.info("API Request: PATCH /api/user/addresses", { addressId: id, isPrimary, updates });
@@ -245,6 +220,6 @@ export async function PATCH(req: NextRequest) {
         apiLogger.error(req, error);
         return NextResponse.json({ error: "Gagal memperbarui alamat" }, { status: 500 });
     }
-}
+});
 
 

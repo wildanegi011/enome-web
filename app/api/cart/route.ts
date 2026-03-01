@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-utils";
+import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CartService } from "@/lib/services/cart-service";
 
@@ -12,10 +12,9 @@ import { CartService } from "@/lib/services/cart-service";
  * @response 200 — { items: CartItem[], totalAmount: number, totalQty: number }
  * @response 500 — { items: [], totalAmount: 0, totalQty: 0, error: "Terjadi kesalahan sistem" }
  */
-export async function GET(request: NextRequest) {
+export const GET = withOptionalAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: GET /api/cart");
     try {
-        const session = await getSession();
         if (!session) {
             logger.info("Cart Check: Anonymous cart requested (empty)");
             return NextResponse.json({ items: [], totalAmount: 0, totalQty: 0 });
@@ -31,5 +30,4 @@ export async function GET(request: NextRequest) {
         apiLogger.error(request, error);
         return NextResponse.json({ items: [], totalAmount: 0, totalQty: 0, error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
-}
-
+});

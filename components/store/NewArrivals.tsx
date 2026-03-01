@@ -117,6 +117,7 @@ export default function NewArrivals() {
                                     designer: "Handmade Batik by Énome",
                                     totalStock: product.totalStock ? parseInt(product.totalStock.toString()) : 0,
                                     isOnFlashSale: product.isOnFlashSale,
+                                    discountPercentage: product.discountPercentage,
                                     isOnPreOrder: product.isOnPreOrder,
                                     commission: product.hasCommission
                                         ? formatPriceRange(product.commissionMin, product.commissionMax)

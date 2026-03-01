@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Check, Ruler, Truck, ShieldCheck, ShoppingBag, Plus, Minus, Loader2, Heart, Package } from "lucide-react";
+import { ChevronDown, Check, Ruler, Truck, ShieldCheck, ShoppingBag, Plus, Minus, Loader2, Heart, Package, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useWishlist, useToggleWishlist } from "@/hooks/use-wishlist";
@@ -23,6 +23,9 @@ interface ProductInfoProps {
         matrix: { color: string; size: string; stock: number; price: string; image: string | null }[];
         commission?: string;
         hasCommission?: boolean;
+        isOnFlashSale?: boolean;
+        flashSaleEndTime?: string;
+        discountPercentage?: number;
     };
 }
 
@@ -32,6 +35,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     const [quantity, setQuantity] = useState(1);
     const [isAdding, setIsAdding] = useState(false);
     const [openAccordion, setOpenAccordion] = useState<string | null>("details");
+    const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
     const { isAuthenticated } = useAuth();
     const router = useRouter();
 
@@ -49,6 +53,38 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             toggleWishlist.mutate(product.id);
         }
     };
+
+    // Flash sale countdown timer
+    useEffect(() => {
+        if (!product.isOnFlashSale || !product.flashSaleEndTime) return;
+
+        // Date is usually returned as an ISO string from Next.js API
+        const endTimeStr = product.flashSaleEndTime.endsWith('Z')
+            ? product.flashSaleEndTime
+            : product.flashSaleEndTime.replace(' ', 'T') + (product.flashSaleEndTime.includes('T') ? '' : '+07:00');
+
+        const endTime = new Date(endTimeStr).getTime();
+
+        const calculateTimeLeft = () => {
+            const now = new Date().getTime();
+            const difference = endTime - now;
+
+            if (difference <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+
+            return {
+                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+                seconds: Math.floor((difference % (1000 * 60)) / 1000),
+            };
+        };
+
+        setTimeLeft(calculateTimeLeft());
+        const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
+        return () => clearInterval(timer);
+    }, [product.isOnFlashSale, product.flashSaleEndTime]); // primitive dependencies are fine, shouldn't loop here unless parent provides new obj
+
+    const formatTime = (time: number) => time.toString().padStart(2, '0');
 
     // Matrix lookup
     const currentCombination = product.matrix.find(
@@ -82,6 +118,10 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     };
 
     const handleAddToCart = async () => {
+        if (!isAuthenticated) {
+            router.push('/login');
+            return;
+        }
         if (!selectedSize || !selectedColor) {
             toast.error("Silakan pilih ukuran dan warna terlebih dahulu");
             return;
@@ -97,15 +137,16 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     color_sylla: selectedColor,
                     size_sylla: selectedSize,
                     qty_produk: quantity,
+                    is_flash_sale: product.isOnFlashSale,
                 }),
             });
 
             const data = await response.json();
 
-            if (data.message === "login") {
-                toast.error("Silakan login terlebih dahulu untuk menambah ke keranjang");
-                router.push('/login');
-            } else if (data.message === "success") {
+            // if (data.message === "login") {
+            //     toast.error("Silakan login terlebih dahulu untuk menambah ke keranjang");
+            //     router.push('/login');
+            if (data.message === "success") {
                 toast.success("Barang berhasil ditambahkan ke keranjang", {
                     icon: <Check className="w-4 h-4 text-emerald-500" />
                 });
@@ -120,43 +161,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         }
     };
 
-    const AccordionItem = ({ id, title, icon: Icon, children }: { id: string, title: string, icon?: any, children: React.ReactNode }) => (
-        <div className="border-b border-neutral-base-100 py-4">
-            <button
-                onClick={() => toggleAccordion(id)}
-                className="w-full flex items-center justify-between text-left group"
-            >
-                <div className="flex items-center gap-3">
-                    {Icon && <Icon className="w-4 h-4 text-neutral-base-400 group-hover:text-neutral-base-900 transition-colors" />}
-                    <span className="text-[12px] md:text-[14px] font-bold uppercase tracking-widest text-neutral-base-900 group-hover:text-amber-800 transition-colors">
-                        {title}
-                    </span>
-                </div>
-                <motion.div
-                    animate={{ rotate: openAccordion === id ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                >
-                    <ChevronDown className="w-4 h-4 text-neutral-base-400" />
-                </motion.div>
-            </button>
-            <AnimatePresence>
-                {openAccordion === id && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
-                    >
-                        <div className="pt-4 pb-2 text-[14px] text-neutral-base-500 leading-relaxed font-sans">
-                            {children}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
-
     return (
         <div className="flex flex-col lg:pl-8 xl:pl-12 font-sans min-w-0">
             {/* Header / Badges */}
@@ -170,14 +174,72 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
                 <div className="flex flex-col gap-2">
                     {product.originalPrice && (
-                        <p className="text-[14px] md:text-[16px] text-neutral-base-300 line-through font-medium">
-                            {product.originalPrice}
-                        </p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-[14px] md:text-[16px] text-neutral-base-400 line-through font-medium">
+                                {product.originalPrice}
+                            </p>
+                            {!!product.discountPercentage && product.discountPercentage > 0 && (
+                                <span className="text-[12px] font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-sm">
+                                    Hemat {product.discountPercentage}%
+                                </span>
+                            )}
+                        </div>
                     )}
-                    <p className="text-[20px] md:text-[28px] lg:text-[36px] font-black tracking-tighter text-neutral-base-900 leading-tight">
-                        {selectedPrice}
-                    </p>
+                    <div className="flex flex-col md:flex-row md:items-end gap-3 md:gap-5">
+                        <p className={`text-[20px] md:text-[28px] lg:text-[36px] font-semibold tracking-tighter leading-none shadow-sm pb-1 ${product.originalPrice ? 'text-red-600' : 'text-neutral-base-900'}`}>
+                            {selectedPrice}
+                        </p>
+                    </div>
                 </div>
+
+                {/* Flash Sale Banner */}
+                {product.isOnFlashSale && timeLeft && (
+                    <div className="mt-4 md:mt-6 bg-neutral-base-900 rounded-xl overflow-hidden relative shadow-lg">
+                        <div className="absolute inset-0 bg-red-900/20"></div>
+                        <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-linear-to-l from-red-600/10 to-transparent"></div>
+                        <div className="relative px-4 py-3 md:px-5 md:py-4 flex items-center justify-between">
+                            <div className="flex flex-col">
+                                <span className="text-white/90 text-[10px] md:text-[11px] uppercase tracking-widest font-bold mb-0.5 flex items-center gap-1.5">
+                                    Penawaran Terbatas
+                                </span>
+                                <span className="text-white text-[12px] md:text-[14px] font-medium leading-tight">Flash Sale Sedang Berlangsung</span>
+                            </div>
+
+                            <div className="flex flex-col items-end">
+                                <span className="text-amber-300 text-[9px] md:text-[10px] uppercase tracking-widest font-bold mb-1.5">Berakhir Dalam</span>
+                                <div className="flex items-center gap-1 font-mono font-bold text-white text-[12px] md:text-[14px]">
+                                    {timeLeft.days > 0 && (
+                                        <>
+                                            <div className="bg-white/10 backdrop-blur-md border border-white/20 px-1.5 py-0.5 md:py-1 rounded text-center min-w-[28px] shadow-inner">
+                                                {timeLeft.days}
+                                                <span className="text-[9px] ml-0.5 font-sans uppercase">Hr</span>
+                                            </div>
+                                            <span className="text-white/60">:</span>
+                                        </>
+                                    )}
+                                    <div className="bg-white/10 backdrop-blur-md border border-white/20 w-8 md:w-9 py-0.5 md:py-1 rounded text-center shadow-inner">{formatTime(timeLeft.hours)}</div>
+                                    <span className="text-white/60">:</span>
+                                    <div className="bg-white/10 backdrop-blur-md border border-white/20 w-8 md:w-9 py-0.5 md:py-1 rounded text-center shadow-inner">{formatTime(timeLeft.minutes)}</div>
+                                    <span className="text-white/60">:</span>
+                                    <div className="bg-red-600 backdrop-blur-md border border-red-500 w-8 md:w-9 py-0.5 md:py-1 rounded relative overflow-hidden h-[24px] md:h-[28px] flex items-center justify-center shadow-md">
+                                        <AnimatePresence mode="popLayout">
+                                            <motion.span
+                                                key={timeLeft.seconds}
+                                                initial={{ y: 15, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                exit={{ y: -15, opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="absolute"
+                                            >
+                                                {formatTime(timeLeft.seconds)}
+                                            </motion.span>
+                                        </AnimatePresence>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Description */}
@@ -370,20 +432,57 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
             {/* Accordions */}
             <div className="border-t border-neutral-base-100">
-                <AccordionItem id="details" title="Detail Produk">
+                <AccordionItem id="details" title="Detail Produk" openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
                     <div
                         dangerouslySetInnerHTML={{ __html: product.detail || product.description }}
                         className="prose prose-sm font-sans text-neutral-base-500 max-w-none overflow-hidden wrap-break-word"
                     />
                 </AccordionItem>
-                <AccordionItem id="shipping" title="Pengiriman" icon={Truck}>
+                <AccordionItem id="shipping" title="Pengiriman" icon={Truck} openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
                     <p className="mb-2">Gratis ongkir untuk pembelian di atas Rp 2.000.000.</p>
                     <p>Pengembalian diterima dalam 14 hari setelah pengiriman. Barang harus dalam kondisi asli dengan label masih terpasang.</p>
                 </AccordionItem>
-                <AccordionItem id="care" title="Perawatan" icon={ShieldCheck}>
+                <AccordionItem id="care" title="Perawatan" icon={ShieldCheck} openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
                     <p>Hanya dry clean. Jangan gunakan pemutih. Setrika dengan suhu rendah pada sisi belakang untuk menjaga warna alami.</p>
                 </AccordionItem>
             </div>
         </div>
     );
 }
+
+const AccordionItem = ({ id, title, icon: Icon, children, openAccordion, toggleAccordion }: { id: string, title: string, icon?: any, children: React.ReactNode, openAccordion: string | null, toggleAccordion: (id: string) => void }) => (
+    <div className="border-b border-neutral-base-100 py-4">
+        <button
+            onClick={() => toggleAccordion(id)}
+            className="w-full flex items-center justify-between text-left group"
+        >
+            <div className="flex items-center gap-3">
+                {Icon && <Icon className="w-4 h-4 text-neutral-base-400 group-hover:text-neutral-base-900 transition-colors" />}
+                <span className="text-[12px] md:text-[14px] font-bold uppercase tracking-widest text-neutral-base-900 group-hover:text-amber-800 transition-colors">
+                    {title}
+                </span>
+            </div>
+            <motion.div
+                animate={{ rotate: openAccordion === id ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+            >
+                <ChevronDown className="w-4 h-4 text-neutral-base-400" />
+            </motion.div>
+        </button>
+        <AnimatePresence>
+            {openAccordion === id && (
+                <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                >
+                    <div className="pt-4 pb-2 text-[14px] text-neutral-base-500 leading-relaxed font-sans">
+                        {children}
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    </div>
+);

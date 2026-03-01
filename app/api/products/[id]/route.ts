@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { produk, produkDetail, warna, size, customer, flashSale, flashSaleDetail, customerKategori } from "@/lib/db/schema";
 import { eq, and, sql, not, min, max } from "drizzle-orm";
-import { getSession } from "@/lib/auth-utils";
+import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
 import { getJakartaDate } from "@/lib/date-utils";
@@ -25,17 +25,17 @@ import { getJakartaDate } from "@/lib/date-utils";
  * @response 404 — { error: "Product not found" }
  * @response 500 — { error: "Internal Server Error" }
  */
-export async function GET(
+export const GET = withOptionalAuth(async (
     request: NextRequest,
-    props: { params: Promise<{ id: string }> }
-) {
-    const params = await props.params;
+    context: { params: Promise<{ id: string }> },
+    session: any
+) => {
+    const params = await context.params;
     const { id } = params;
 
     logger.info("API Request: GET /api/products/[id]", { productId: id });
 
     try {
-        const session = await getSession();
         let kategoriId = CONFIG.DEFAULT_KATEGORI_CUSTOMER_ID;
 
         if (session?.user?.id) {
@@ -57,8 +57,9 @@ export async function GET(
         const productData = await db
             .select({
                 product: produk,
-                flashSaleId: sql<number>`(SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = ${produk.produkId} AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
-                preOrderId: sql<number>`(SELECT po.pre_order_id FROM pre_order po INNER JOIN pre_order_detail pod ON po.pre_order_id = pod.pre_order_id WHERE po.is_aktif = 1 AND pod.produk_id = ${produk.produkId} AND po.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
+                flashSaleId: sql<number>`(SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = produk.produk_id AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
+                flashSaleEndTime: sql<string>`(SELECT DATE_FORMAT(fs.waktu_selesai, '%Y-%m-%d %H:%i:%s') FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = produk.produk_id AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
+                preOrderId: sql<number>`(SELECT po.pre_order_id FROM pre_order po INNER JOIN pre_order_detail pod ON po.pre_order_id = pod.pre_order_id WHERE po.is_aktif = 1 AND pod.produk_id = produk.produk_id AND po.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
                 flashSaleDiscount: sql<number>`(SELECT ck.diskon_flash_sale FROM customer_kategori ck WHERE ck.id = ${kategoriId} LIMIT 1)`,
             })
             .from(produk)
@@ -72,6 +73,7 @@ export async function GET(
 
         const mainProduct = productData[0].product;
         const isOnFlashSale = !!productData[0].flashSaleId;
+        const flashSaleEndTime = productData[0].flashSaleEndTime || null;
         const isOnPreOrder = !!productData[0].preOrderId;
         const flashSaleDiscount = productData[0].flashSaleDiscount || 0;
 
@@ -108,6 +110,7 @@ export async function GET(
                 size: produkDetail.size,
                 stock: produkDetail.stokNormal,
                 price: priceColumn,
+                basePrice: produkDetail.hargaJual,
                 image: produkDetail.gambar,
             })
             .from(produkDetail)
@@ -169,9 +172,9 @@ export async function GET(
                 maxPrice: max(priceColumn),
                 baseMinPrice: min(produkDetail.hargaJual),
                 baseMaxPrice: max(produkDetail.hargaJual),
-                totalStock: sql<string>`(SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail WHERE produk_id = ${produk.produkId})`,
+                totalStock: sql<string>`(SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail WHERE produk_id = produk.produk_id)`,
                 colors: sql<string>`GROUP_CONCAT(DISTINCT CONCAT(COALESCE(${warna.warna}, ${produkDetail.warnaId}), '|', COALESCE(${warna.kodeWarna}, '#cccccc')) SEPARATOR ',')`,
-                flashSaleId: sql<number>`(SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = ${produk.produkId} AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
+                flashSaleId: sql<number>`(SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = produk.produk_id AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
                 flashSaleDiscount: sql<number>`(SELECT ck.diskon_flash_sale FROM customer_kategori ck WHERE ck.id = ${kategoriId} LIMIT 1)`,
             })
             .from(produk)
@@ -189,8 +192,9 @@ export async function GET(
 
         const processRelated = related.map((p: any) => {
             const hasFS = !!p.flashSaleId;
-            const fMin = hasFS ? Number(p.baseMinPrice) - (Number(p.baseMinPrice) * (Number(p.flashSaleDiscount || 0) / 100)) : Number(p.minPrice);
-            const fMax = hasFS ? Number(p.baseMaxPrice) - (Number(p.baseMaxPrice) * (Number(p.flashSaleDiscount || 0) / 100)) : Number(p.maxPrice);
+            const flashDiscountValue = hasFS ? Number(p.flashSaleDiscount || 0) : 0;
+            const fMin = hasFS ? Number(p.baseMinPrice) - (Number(p.baseMinPrice) * (flashDiscountValue / 100)) : Number(p.minPrice);
+            const fMax = hasFS ? Number(p.baseMaxPrice) - (Number(p.baseMaxPrice) * (flashDiscountValue / 100)) : Number(p.maxPrice);
             return {
                 ...p,
                 isOnFlashSale: hasFS,
@@ -198,6 +202,7 @@ export async function GET(
                 finalMaxPrice: fMax,
                 baseMinPrice: Number(p.baseMinPrice),
                 baseMaxPrice: Number(p.baseMaxPrice),
+                discountPercentage: flashDiscountValue,
                 totalStock: Number(p.totalStock || 0),
             };
         });
@@ -213,6 +218,8 @@ export async function GET(
                 commissionMax,
                 hasCommission: commissionMin > 0 || commissionMax > 0,
                 isOnFlashSale,
+                flashSaleEndTime,
+                discountPercentage: isOnFlashSale ? Number(flashSaleDiscount || 0) : 0,
                 isOnPreOrder,
                 totalStock: Number(stats.totalStock || 0)
             },
@@ -221,9 +228,9 @@ export async function GET(
                 sizes: sizes.map(s => s.name),
                 matrix: details.map(d => {
                     const dPrice = isOnFlashSale
-                        ? Number(d.price) - (Number(d.price) * (Number(flashSaleDiscount) / 100))
+                        ? Number(d.basePrice) - (Number(d.basePrice) * (Number(flashSaleDiscount) / 100))
                         : d.price;
-                    return { ...d, finalPrice: dPrice };
+                    return { ...d, price: dPrice, originalCategoryPrice: d.price };
                 }),
             },
             images: allImages,
@@ -234,6 +241,5 @@ export async function GET(
         apiLogger.error(request, error, { productId: id });
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
-}
-
+});
 

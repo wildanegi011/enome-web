@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-utils";
+import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
 import { OrderService } from "@/lib/services/order-service";
@@ -19,14 +19,8 @@ import { CartService } from "@/lib/services/cart-service";
  * @response 404 — { error: "Profil customer tidak ditemukan" }
  * @response 500 — { message: "error", desc: "Terjadi kesalahan sistem" }
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, context: any, session: any) => {
     try {
-        const session = await getSession();
-        if (!session) {
-            logger.warn("API Unauthorized: POST /api/orders");
-            return NextResponse.json({ message: "Silakan login terlebih dahulu" }, { status: 401 });
-        }
-
         const body = await request.json();
         logger.info("API Request: POST /api/orders", { body });
 
@@ -134,4 +128,4 @@ export async function POST(request: NextRequest) {
         apiLogger.error(request, error);
         return NextResponse.json({ message: "error", desc: "Terjadi kesalahan sistem" }, { status: 500 });
     }
-}
+});

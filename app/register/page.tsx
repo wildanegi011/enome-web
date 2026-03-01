@@ -118,6 +118,19 @@ export default function RegisterPage() {
 
             if (!res.ok) throw new Error("Gagal login dengan Google");
 
+            const data = await res.json();
+
+            if (data.requiresVerification) {
+                setIsSuccess(true);
+                toast.success(data.message || "Akun berhasil dibuat! Silakan cek email Anda untuk aktivasi.", {
+                    duration: 6000,
+                });
+                setTimeout(() => {
+                    router.push("/login"); // or keep them there, but login is safer
+                }, 10000);
+                return;
+            }
+
             setIsSuccess(true);
             toast.success("Berhasil masuk dengan Google!");
 
