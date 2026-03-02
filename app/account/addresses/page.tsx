@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/store/Navbar";
 import UserSidebar from "@/components/store/UserSidebar";
+import AccountSidebarMobile from "@/components/store/AccountSidebarMobile";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ export default function AddressesPage() {
         <div className="min-h-screen bg-[#F9FAFB] font-sans text-neutral-base-900">
             <Navbar />
 
-            <main className="max-w-[1340px] mx-auto px-4 md:px-8 py-10">
+            <main className="max-w-[1340px] mx-auto px-3 sm:px-4 md:px-8 py-6 md:py-10">
                 <div className="flex flex-col lg:flex-row gap-12">
                     <div className="hidden lg:block">
                         <UserSidebar />
@@ -55,16 +56,21 @@ export default function AddressesPage() {
 
                     <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
-                            <div>
-                                <h1 className="text-[28px] md:text-[32px] font-bold text-neutral-base-900 tracking-tight leading-tight mb-2">Daftar Alamat</h1>
-                                <p className="text-[14px] text-neutral-base-400 font-bold">Kelola alamat pengiriman kamu untuk proses checkout yang lebih cepat.</p>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-4">
+                                <div className="flex flex-col gap-1">
+                                    <h1 className="text-[26px] md:text-[32px] font-black text-neutral-base-900 tracking-tight leading-tight">Daftar Alamat</h1>
+                                    <p className="text-[12px] md:text-[14px] text-neutral-base-400 font-medium">Kelola alamat pengiriman kamu untuk proses checkout yang lebih cepat.</p>
+                                </div>
+                                <div className="flex items-center gap-3 self-end sm:self-auto">
+                                    <AccountSidebarMobile />
+                                </div>
                             </div>
 
                             <Button
                                 onClick={handleAdd}
-                                className="h-14 px-8 rounded-2xl bg-neutral-base-900 text-white font-bold tracking-widest uppercase hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 gap-3 group shrink-0"
+                                className="h-12 md:h-14 px-6 md:px-8 rounded-xl md:rounded-2xl bg-neutral-base-900 text-white font-bold tracking-widest uppercase hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 gap-3 group shrink-0 w-full sm:w-auto text-[11px] md:text-[13px]"
                             >
-                                <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                                <Plus className="w-4 h-4 md:w-5 md:h-5 group-hover:rotate-90 transition-transform duration-300" />
                                 Tambah Alamat
                             </Button>
                         </div>

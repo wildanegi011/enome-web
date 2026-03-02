@@ -6,12 +6,16 @@ import {
     User, Mail, Phone, Lock, Save,
     Home, Camera, Shield, ChevronRight,
     Loader2, CheckCircle2, Hash, Store,
-    Award, Ticket, Info, AlertCircle
+    Award, Ticket, Info, AlertCircle,
+    Calendar as CalendarIcon
 } from "lucide-react";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/store/Navbar";
 import UserSidebar from "@/components/store/UserSidebar";
+import AccountSidebarMobile from "@/components/store/AccountSidebarMobile";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ASSET_URL } from "@/config/config";
@@ -29,6 +33,10 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
 
 interface ProfileData {
     id: number;
@@ -146,17 +154,21 @@ export default function ProfilePage() {
                     <div className="hidden lg:block">
                         <UserSidebar />
                     </div>
-
                     <div className="flex-1 min-w-0">
                         {/* Mockup Header */}
-                        <div className="mb-10">
-                            <h1 className="text-[32px] font-black text-[#111827] tracking-tight mb-2">Profile Saya</h1>
-                            <p className="text-[14px] text-neutral-base-400 font-medium">Kelola informasi profil Anda untuk keamanan akun ÉNOMÉ Anda.</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                            <div className="flex flex-col gap-1">
+                                <h1 className="text-[26px] md:text-[32px] font-black text-neutral-base-900 tracking-tight">Profil Saya</h1>
+                                <p className="text-[12px] md:text-[14px] text-neutral-base-400 font-medium">Kelola informasi profil Anda untuk keamanan akun ÉNOMÉ Anda.</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <AccountSidebarMobile />
+                            </div>
                         </div>
 
-                        <div className="bg-white rounded-[32px] p-8 md:p-12 border border-neutral-base-100 shadow-sm space-y-12">
+                        <div className="bg-white rounded-[24px] md:rounded-[32px] p-5 sm:p-8 md:p-12 border border-neutral-base-100 shadow-sm space-y-10 md:space-y-12">
                             {/* Profile Photo Section */}
-                            <div className="flex items-center gap-8">
+                            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 md:gap-8">
                                 <div className="relative group">
                                     <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg relative bg-neutral-base-50 flex items-center justify-center">
                                         {photoPreview ? (
@@ -174,14 +186,14 @@ export default function ProfilePage() {
                                                 className="object-cover"
                                             />
                                         ) : (
-                                            <User className="w-12 h-12 text-neutral-base-200" />
+                                            <User className="w-10 h-10 md:w-12 md:h-12 text-neutral-base-200" />
                                         )}
                                     </div>
                                 </div>
-                                <div className="space-y-4">
-                                    <div>
+                                <div className="flex flex-col items-center sm:items-start text-center sm:text-left space-y-4">
+                                    <div className="space-y-1">
                                         <h3 className="text-[16px] font-bold text-[#111827]">Foto Profil</h3>
-                                        <p className="text-[13px] text-neutral-base-400 font-medium mt-1">Maksimal 2MB. Format JPG, PNG, atau GIF.</p>
+                                        <p className="text-[12px] md:text-[13px] text-neutral-base-400 font-medium">Maksimal 2MB. Format JPG, PNG, atau GIF.</p>
                                     </div>
                                     <input
                                         type="file"
@@ -193,7 +205,7 @@ export default function ProfilePage() {
                                     <Button
                                         type="button"
                                         onClick={handlePhotoClick}
-                                        className="h-10 px-6 bg-[#111827] text-white rounded-xl text-[12px] font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-900/10"
+                                        className="h-9 md:h-10 px-6 bg-[#111827] text-white rounded-xl text-[11px] md:text-[12px] font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-900/10"
                                     >
                                         Ubah Foto
                                     </Button>
@@ -216,43 +228,63 @@ export default function ProfilePage() {
                                     </div>
                                     <div className="space-y-3">
                                         <label className="text-[13px] font-bold text-[#111827]">Tanggal Lahir</label>
-                                        <Input
-                                            type="date"
-                                            value={formData.brithdate}
-                                            onChange={(e) => setFormData({ ...formData, brithdate: e.target.value })}
-                                            className="h-12 bg-white border-neutral-base-100/60 rounded-xl px-4 text-[14px] font-medium focus:ring-4 focus:ring-gray-900/5 transition-all"
-                                        />
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-full h-12 justify-start text-left font-medium text-[14px] bg-white border-neutral-base-100/60 rounded-xl px-4 focus:ring-4 focus:ring-gray-900/5 transition-all",
+                                                        !formData.brithdate && "text-neutral-base-400"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4 text-neutral-base-400" />
+                                                    {formData.brithdate ? format(new Date(formData.brithdate), "dd MMMM yyyy", { locale: id }) : <span>Pilih Tanggal</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0 rounded-3xl overflow-hidden border-neutral-base-100 shadow-2xl" align="start">
+                                                <CalendarComponent
+                                                    mode="single"
+                                                    selected={formData.brithdate ? new Date(formData.brithdate) : undefined}
+                                                    onSelect={(date) => setFormData({ ...formData, brithdate: date ? date.toISOString().split('T')[0] : "" })}
+                                                    initialFocus
+                                                    captionLayout="dropdown"
+                                                    startMonth={new Date(1900, 0)}
+                                                    endMonth={new Date()}
+                                                    className="p-3"
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
 
                                     {/* Row 2 */}
                                     <div className="space-y-3">
                                         <label className="text-[13px] font-bold text-[#111827]">Jenis Kelamin</label>
-                                        <div className="flex gap-4">
-                                            <button
-                                                type="button"
+                                        <RadioGroup
+                                            value={formData.gender.toString()}
+                                            onValueChange={(val) => setFormData({ ...formData, gender: parseInt(val) })}
+                                            className="flex flex-col sm:flex-row gap-3 sm:gap-4"
+                                        >
+                                            <div
                                                 onClick={() => setFormData({ ...formData, gender: 1 })}
                                                 className={cn(
-                                                    "flex-1 h-12 rounded-xl text-[13px] font-bold transition-all",
-                                                    formData.gender === 1
-                                                        ? "bg-[#111827] text-white shadow-lg shadow-gray-900/10"
-                                                        : "bg-white text-neutral-base-500 border border-neutral-base-100 hover:bg-neutral-base-50"
+                                                    "flex items-center space-x-3 bg-white border rounded-xl px-4 py-3 cursor-pointer transition-all flex-1",
+                                                    formData.gender === 1 ? "border-amber-800 bg-amber-50/10 shadow-sm" : "border-neutral-base-100 hover:bg-neutral-base-50"
                                                 )}
                                             >
-                                                Laki-laki
-                                            </button>
-                                            <button
-                                                type="button"
+                                                <RadioGroupItem value="1" id="gender-male" className="border-neutral-base-300 text-amber-800" />
+                                                <Label htmlFor="gender-male" className="font-bold text-[13px] cursor-pointer w-full text-neutral-base-900">Laki-laki</Label>
+                                            </div>
+                                            <div
                                                 onClick={() => setFormData({ ...formData, gender: 2 })}
                                                 className={cn(
-                                                    "flex-1 h-12 rounded-xl text-[13px] font-bold transition-all",
-                                                    formData.gender === 2
-                                                        ? "bg-[#111827] text-white shadow-lg shadow-gray-900/10"
-                                                        : "bg-white text-neutral-base-500 border border-neutral-base-100 hover:bg-neutral-base-50"
+                                                    "flex items-center space-x-3 bg-white border rounded-xl px-4 py-3 cursor-pointer transition-all flex-1",
+                                                    formData.gender === 2 ? "border-amber-800 bg-amber-50/10 shadow-sm" : "border-neutral-base-100 hover:bg-neutral-base-50"
                                                 )}
                                             >
-                                                Perempuan
-                                            </button>
-                                        </div>
+                                                <RadioGroupItem value="2" id="gender-female" className="border-neutral-base-300 text-amber-800" />
+                                                <Label htmlFor="gender-female" className="font-bold text-[13px] cursor-pointer w-full text-neutral-base-900">Perempuan</Label>
+                                            </div>
+                                        </RadioGroup>
                                     </div>
                                     <div className="space-y-3">
                                         <label className="text-[13px] font-bold text-[#111827]">Email</label>
@@ -282,28 +314,29 @@ export default function ProfilePage() {
                                 </div>
 
                                 {/* Footer Action Buttons */}
-                                <div className="flex items-center justify-end gap-4 pt-10">
+                                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-10">
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        className="h-12 px-10 border-neutral-base-100 rounded-xl text-[14px] font-bold hover:bg-neutral-base-50 transition-all min-w-[140px]"
+                                        className="h-11 md:h-12 px-10 border-neutral-base-100 rounded-xl text-[13px] md:text-[14px] font-bold hover:bg-neutral-base-50 transition-all w-full sm:min-w-[140px] sm:w-auto"
                                     >
                                         Batalkan
                                     </Button>
                                     <Button
                                         type="submit"
-                                        className="h-12 px-10 bg-[#111827] text-white rounded-xl text-[14px] font-bold shadow-xl shadow-gray-900/10 hover:bg-gray-800 transition-all min-w-[140px]"
                                         disabled={isSaving}
+                                        className="h-11 md:h-12 px-10 bg-[#111827] text-white rounded-xl text-[13px] md:text-[14px] font-bold shadow-xl shadow-gray-900/10 hover:bg-gray-800 transition-all w-full sm:min-w-[140px] sm:w-auto flex items-center justify-center gap-2"
                                     >
-                                        {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+                                        {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                                        Simpan Perubahan
                                     </Button>
                                 </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
+                            </form >
+                        </div >
+                    </div >
+                </div >
+            </main >
+        </div >
     );
 }
 
@@ -333,7 +366,7 @@ function ProfileSkeleton() {
                             <Skeleton className="h-10 w-48" />
                             <Skeleton className="h-4 w-96" />
                         </div>
-                        <div className="bg-white rounded-[32px] p-8 md:p-12 border border-neutral-base-100 shadow-sm space-y-12">
+                        <div className="bg-white rounded-[32px] p-5 sm:p-8 md:p-12 border border-neutral-base-100 shadow-sm space-y-12">
                             <div className="flex items-center gap-8">
                                 <Skeleton className="w-24 h-24 md:w-32 md:h-32 rounded-full" />
                                 <div className="space-y-3">

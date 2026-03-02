@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 const resetPasswordSchema = z.object({
     password: z.string().min(8, "Password minimal 8 karakter"),
@@ -36,6 +37,7 @@ function ResetPasswordForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
+    const { resetPassword } = useAuth();
     const [isSuccess, setIsSuccess] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -56,30 +58,20 @@ function ResetPasswordForm() {
     }, [token, router]);
 
     const onSubmit = async (values: ResetPasswordValues) => {
+        if (!token) return;
         try {
-            const res = await fetch("/api/auth/reset-password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    token,
-                    password: values.password,
-                }),
+            await resetPassword({
+                token,
+                password: values.password,
             });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                toast.error(data.error || "Gagal mengatur ulang kata sandi");
-                return;
-            }
 
             setIsSuccess(true);
             toast.success("Kata sandi berhasil diperbarui!");
             setTimeout(() => {
                 router.push("/login");
             }, 3000);
-        } catch (error) {
-            toast.error("Terjadi kesalahan sistem");
+        } catch (error: any) {
+            toast.error(error.message || "Gagal mengatur ulang kata sandi");
         }
     };
 
@@ -103,9 +95,9 @@ function ResetPasswordForm() {
                     <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center">
                         <CheckCircle2 className="w-8 h-8 text-emerald-600" />
                     </div>
-                    <div className="space-y-2">
-                        <h4 className="text-xl font-bold text-neutral-base-900">Kata Sandi Diperbarui</h4>
-                        <p className="text-neutral-base-500 text-sm leading-relaxed">
+                    <div className="space-y-3">
+                        <h4 className="text-lg sm:text-xl font-bold text-neutral-base-900">Kata Sandi Diperbarui</h4>
+                        <p className="text-neutral-base-500 text-xs sm:text-sm leading-relaxed">
                             Kata sandi baru Anda telah berhasil ditetapkan. Anda kini dapat kembali masuk ke akun Anda.
                         </p>
                     </div>
@@ -125,9 +117,9 @@ function ResetPasswordForm() {
                         control={form.control}
                         name="password"
                         render={({ field }) => (
-                            <FormItem className="space-y-1.5">
+                            <FormItem className="space-y-1">
                                 <FormLabel className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-base-400 ml-1">
-                                    Kata Sandi Baru
+                                    Password Baru
                                 </FormLabel>
                                 <FormControl>
                                     <div className="relative group">
@@ -139,7 +131,7 @@ function ResetPasswordForm() {
                                             type={showPassword ? "text" : "password"}
                                             placeholder="••••••••"
                                             className={cn(
-                                                "h-12 bg-neutral-base-50/50 border-neutral-base-200 focus:bg-white focus:border-neutral-base-900 focus:ring-4 focus:ring-neutral-base-900/5 rounded-xl transition-all pl-12 pr-12 text-base placeholder:text-neutral-base-300 shadow-sm",
+                                                "h-14 bg-neutral-base-50/50 border-neutral-base-200 focus:bg-white focus:border-neutral-base-900 focus:ring-4 focus:ring-neutral-base-900/5 rounded-2xl transition-all pl-12 pr-12 text-base placeholder:text-neutral-base-300 shadow-sm",
                                                 form.formState.errors.password && "border-red-500 ring-red-500/5 focus:border-red-500 focus:ring-red-500/10"
                                             )}
                                             {...field}
@@ -153,7 +145,7 @@ function ResetPasswordForm() {
                                         </button>
                                     </div>
                                 </FormControl>
-                                <FormMessage className="text-[11px] font-medium text-red-500 mt-1 ml-1" />
+                                <FormMessage className="text-[11px] font-medium text-red-500 mt-0.5 ml-1" />
                             </FormItem>
                         )}
                     />
@@ -162,9 +154,9 @@ function ResetPasswordForm() {
                         control={form.control}
                         name="confirmPassword"
                         render={({ field }) => (
-                            <FormItem className="space-y-1.5">
+                            <FormItem className="space-y-1">
                                 <FormLabel className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-base-400 ml-1">
-                                    Konfirmasi Kata Sandi Baru
+                                    Konfirmasi Password Baru
                                 </FormLabel>
                                 <FormControl>
                                     <div className="relative group">
@@ -176,7 +168,7 @@ function ResetPasswordForm() {
                                             type={showConfirmPassword ? "text" : "password"}
                                             placeholder="••••••••"
                                             className={cn(
-                                                "h-12 bg-neutral-base-50/50 border-neutral-base-200 focus:bg-white focus:border-neutral-base-900 focus:ring-4 focus:ring-neutral-base-900/5 rounded-xl transition-all pl-12 pr-12 text-base placeholder:text-neutral-base-300 shadow-sm",
+                                                "h-14 bg-neutral-base-50/50 border-neutral-base-200 focus:bg-white focus:border-neutral-base-900 focus:ring-4 focus:ring-neutral-base-900/5 rounded-2xl transition-all pl-12 pr-12 text-base placeholder:text-neutral-base-300 shadow-sm",
                                                 form.formState.errors.confirmPassword && "border-red-500 ring-red-500/5 focus:border-red-500 focus:ring-red-500/10"
                                             )}
                                             {...field}
@@ -190,7 +182,7 @@ function ResetPasswordForm() {
                                         </button>
                                     </div>
                                 </FormControl>
-                                <FormMessage className="text-[11px] font-medium text-red-500 mt-1 ml-1" />
+                                <FormMessage className="text-[11px] font-medium text-red-500 mt-0.5 ml-1" />
                             </FormItem>
                         )}
                     />
@@ -244,70 +236,67 @@ export default function ResetPasswordPage() {
     };
 
     return (
-        <div className="min-h-screen flex bg-[#FAF9F6] font-sans overflow-hidden relative selection:bg-neutral-base-900/10">
-            {/* Left Side - Hero Content (Consistent with Login) */}
-            <div className="hidden lg:flex lg:flex-1 relative overflow-hidden bg-neutral-base-950">
-                <Image
-                    src="/bg-login2.png"
-                    alt="Luxury Interior"
-                    fill
-                    className="object-cover transition-transform duration-[10s] ease-out"
-                    priority
-                />
-                <div className="absolute inset-0 bg-linear-to-tr from-neutral-base-950/80 via-neutral-base-950/40 to-transparent" />
-                <div className="relative z-10 w-full h-full flex flex-col justify-end p-20">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                        className="max-w-xl space-y-6"
-                    >
-                        <div className="w-12 h-1 bg-white" />
-                        <h1 className="text-5xl xl:text-7xl font-bold text-white leading-[1.1] tracking-tight">
-                            Tentukan <span className="text-neutral-base-400">Standar Baru.</span>
-                        </h1>
-                        <p className="text-xl text-neutral-base-200/90 leading-relaxed font-light">
-                            Mengamankan perjalanan Anda dengan protokol yang ditingkatkan dan estetika yang halus.
+        <div className="min-h-screen flex flex-col items-center justify-start lg:justify-center p-0 sm:p-8 md:p-12 bg-[#FAF9F6] font-sans overflow-x-hidden relative selection:bg-neutral-base-900/10">
+            {/* Main Content Card */}
+            <div className="w-full max-w-[1100px] bg-white rounded-none sm:rounded-[2.5rem] shadow-none sm:shadow-[0_20px_80px_-15px_rgba(0,0,0,0.08)] overflow-hidden flex h-auto lg:h-[720px] lg:max-h-[95vh] relative z-10 border-none sm:border border-neutral-base-100/80">
+
+                {/* Left Side - Hero Content */}
+                <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden bg-neutral-base-950 items-end p-12">
+                    <Image
+                        src="/bg-login2.png"
+                        alt="Luxury Interior"
+                        fill
+                        className="object-cover transition-transform duration-[20s] ease-out hover:scale-105"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-neutral-base-950/90 via-neutral-base-950/20 to-transparent" />
+                    <div className="relative z-10 w-full text-white">
+                        <Link href="/" className="inline-block mb-6 group">
+                            <span className="text-3xl font-bold tracking-tighter text-white uppercase group-hover:text-neutral-base-100 transition-colors">Énome</span>
+                        </Link>
+                        <p className="text-white/80 text-base max-w-[90%] leading-relaxed">
+                            Koleksi interior mewah untuk mendefinisikan kembali ruang hidup Anda.
                         </p>
+                    </div>
+                </div>
+
+                {/* Right Side - Form Section */}
+                <div className="w-full lg:w-[55%] flex items-center justify-center p-6 sm:p-8 md:p-10 bg-white relative overflow-visible">
+                    {/* Subtle Geometric Polish */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="w-full max-w-[420px] space-y-8 relative z-10"
+                    >
+                        <motion.div variants={itemVariants} className="space-y-4">
+                            <Link href="/" className="inline-block mb-4">
+                                <span className="text-2xl font-bold tracking-tighter text-neutral-base-900 uppercase">Énome</span>
+                            </Link>
+                            <h2 className="text-3xl sm:text-4xl font-bold text-neutral-base-900 tracking-tight">
+                                Atur Ulang Kata Sandi
+                            </h2>
+                            <p className="text-neutral-base-500 text-base sm:text-lg leading-relaxed">
+                                Masukkan kata sandi baru untuk mengamankan kembali akun Énome Anda.
+                            </p>
+                        </motion.div>
+
+                        <Suspense fallback={<div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-neutral-base-900 shadow-sm" /></div>}>
+                            <ResetPasswordForm />
+                        </Suspense>
+
+                        <motion.div variants={itemVariants} className="text-center pt-6">
+                            <Link href="/login" className="inline-flex items-center gap-2 font-bold text-neutral-base-900 hover:text-neutral-base-700 transition-colors group">
+                                Kembali ke Halaman Masuk
+                            </Link>
+                        </motion.div>
                     </motion.div>
                 </div>
+                {/* End Main Content Card */}
             </div>
-
-            {/* Right Side - Form Section */}
-            <div className="w-full lg:w-[580px] xl:w-[680px] flex items-center justify-center p-8 md:p-12 lg:p-20 bg-white/80 backdrop-blur-sm relative border-l border-neutral-base-100 overflow-hidden">
-                {/* Subtle Geometric Polish */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl -mr-32 -mt-32" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl -ml-32 -mb-32" />
-
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="w-full max-w-[420px] space-y-10 relative z-10"
-                >
-                    <motion.div variants={itemVariants} className="space-y-4">
-                        <Link href="/" className="inline-block mb-4">
-                            <span className="text-2xl font-bold tracking-tighter text-neutral-base-900 uppercase">Énome</span>
-                        </Link>
-                        <h2 className="text-4xl font-bold text-neutral-base-900 tracking-tight">
-                            Atur Ulang Kata Sandi
-                        </h2>
-                        <p className="text-neutral-base-500 text-lg leading-relaxed">
-                            Masukkan kata sandi baru untuk mengamankan kembali akun Énome Anda.
-                        </p>
-                    </motion.div>
-
-                    <Suspense fallback={<div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-neutral-base-900 shadow-sm" /></div>}>
-                        <ResetPasswordForm />
-                    </Suspense>
-
-                    <motion.div variants={itemVariants} className="text-center pt-6">
-                        <Link href="/login" className="inline-flex items-center gap-2 font-bold text-neutral-base-900 hover:text-neutral-base-700 transition-colors group">
-                            Kembali ke Halaman Masuk
-                        </Link>
-                    </motion.div>
-                </motion.div>
-            </div>
-        </div >
+        </div>
     );
 }

@@ -305,25 +305,25 @@ export default function Navbar() {
                                         </div>
                                     </div>
                                     <Link href="/account/orders" className="flex items-center gap-3 text-[12px] font-black uppercase tracking-widest text-neutral-base-900">
-                                        <Package className="w-4 h-4 text-amber-800" /> My Orders
+                                        <Package className="w-4 h-4 text-amber-800" /> Kelola akun
                                     </Link>
                                     <button
                                         onClick={() => logout()}
                                         className="text-[12px] font-black uppercase tracking-widest text-red-600"
                                     >
-                                        Sign Out
+                                        Keluar Akun
                                     </button>
                                 </div>
                             ) : (
                                 <div className="flex flex-col gap-3">
                                     <button
-                                        onClick={() => { setMobileOpen(false); setAuthModal({ open: true, tab: "login" }); }}
+                                        onClick={() => { setMobileOpen(false); router.push("/login"); }}
                                         className="text-[12px] font-bold uppercase tracking-widest text-neutral-base-900 py-3 border border-neutral-base-200 rounded-xl"
                                     >
                                         Sign In
                                     </button>
                                     <button
-                                        onClick={() => { setMobileOpen(false); setAuthModal({ open: true, tab: "register" }); }}
+                                        onClick={() => { setMobileOpen(false); router.push("/register"); }}
                                         className="text-[12px] font-bold uppercase tracking-widest text-white py-3 bg-neutral-base-900 rounded-xl shadow-lg shadow-neutral-base-900/10"
                                     >
                                         Sign Up

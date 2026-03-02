@@ -94,8 +94,12 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }: Aut
                 <div className="relative h-32 bg-neutral-base-900 flex items-center justify-center overflow-hidden">
                     <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&q=80')] bg-cover bg-center grayscale" />
                     <div className="relative z-10 text-center">
-                        <h2 className="font-serif text-3xl text-white italic tracking-tight">Experience Énome</h2>
-                        <p className="text-neutral-base-400 text-[10px] uppercase tracking-[0.3em] font-bold mt-2">Premium Batik Collection</p>
+                        <DialogTitle asChild>
+                            <h2 className="font-serif text-3xl text-white italic tracking-tight">Experience Énome</h2>
+                        </DialogTitle>
+                        <DialogDescription asChild>
+                            <p className="text-neutral-base-400 text-[10px] uppercase tracking-[0.3em] font-bold mt-2">Premium Batik Collection</p>
+                        </DialogDescription>
                     </div>
                 </div>
 
