@@ -36,7 +36,7 @@ export default function CartReview({ items, isLoading, updateQuantity, removeIte
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     return (
-        <section className="flex flex-col gap-4 md:gap-6 bg-white border border-neutral-base-100 p-4 md:p-8 rounded-xl md:rounded-[32px] shadow-sm">
+        <section className="flex flex-col gap-4 md:gap-6 bg-white/80 backdrop-blur-sm border border-neutral-base-100/50 p-4 md:p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <div className="flex items-center justify-between border-b border-neutral-base-50 pb-4 md:pb-6">
                 <div className="flex items-center gap-3 md:gap-4">
                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-amber-50 flex items-center justify-center font-black text-amber-800 text-[14px] md:text-[18px]">1</div>
@@ -81,9 +81,9 @@ export default function CartReview({ items, isLoading, updateQuantity, removeIte
 
                         return (
                             <div key={item.id} className={cn(
-                                "group bg-white border p-3 md:p-5 rounded-xl md:rounded-[24px] flex items-start gap-3 md:gap-5 hover:shadow-md transition-all duration-300",
+                                "group bg-white/50 backdrop-blur-xs border p-3 md:p-5 rounded-[24px] flex items-start gap-3 md:gap-5 hover:shadow-[0_8px_25px_rgb(0,0,0,0.06)] hover:border-neutral-base-200 transition-all duration-500",
                                 isOffline ? "opacity-60 grayscale-[0.5] border-neutral-base-100" :
-                                    isStockInsufficient ? "border-red-100 bg-red-50/10 shadow-sm" : "border-neutral-base-100"
+                                    isStockInsufficient ? "border-red-100 bg-red-50/20 shadow-sm" : "border-neutral-base-100"
                             )}>
                                 <div className="w-16 h-20 md:w-20 md:h-24 bg-neutral-base-50 rounded-lg md:rounded-2xl overflow-hidden relative shrink-0 border border-neutral-base-100">
                                     <Image

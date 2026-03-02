@@ -19,7 +19,7 @@ export default function DropshipperSection({
     onFieldChange
 }: DropshipperSectionProps) {
     return (
-        <div className="bg-neutral-base-50/20 rounded-xl md:rounded-[32px] border border-dashed border-neutral-base-100/80 p-4 md:p-8">
+        <div className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-dashed border-neutral-base-200/60 p-4 md:p-8">
             <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 md:gap-4 min-w-0">
                     <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all duration-500 shrink-0 ${isDropshipper ? "bg-amber-800 text-white shadow-xl shadow-amber-900/20 rotate-6" : "bg-neutral-base-50 text-neutral-base-400 shadow-sm shadow-neutral-base-900/5 hover:-rotate-3"}`}>
@@ -65,7 +65,7 @@ export default function DropshipperSection({
                                         setDropshipperForm({ ...dropshipperForm, name: e.target.value });
                                         onFieldChange?.();
                                     }}
-                                    className="h-12 md:h-14 bg-white border border-neutral-base-100 rounded-xl md:rounded-2xl px-4 md:px-6 outline-none focus:border-amber-800 focus:ring-4 focus:ring-amber-50/50 font-bold text-[13px] md:text-[14px] transition-all shadow-sm placeholder:text-neutral-base-200"
+                                    className="h-12 md:h-14 bg-white/80 border border-neutral-base-100 rounded-2xl px-4 md:px-6 outline-none focus:border-amber-800 focus:ring-4 focus:ring-amber-50/50 font-bold text-[13px] md:text-[14px] transition-all shadow-sm shadow-neutral-base-900/5 placeholder:text-neutral-base-200"
                                     placeholder="Nama Anda..."
                                 />
                             </div>
@@ -81,7 +81,7 @@ export default function DropshipperSection({
                                         setDropshipperForm({ ...dropshipperForm, phone: e.target.value });
                                         onFieldChange?.();
                                     }}
-                                    className="h-12 md:h-14 bg-white border border-neutral-base-100 rounded-xl md:rounded-2xl px-4 md:px-6 outline-none focus:border-amber-800 focus:ring-4 focus:ring-amber-50/50 font-bold text-[13px] md:text-[14px] transition-all shadow-sm placeholder:text-neutral-base-200"
+                                    className="h-12 md:h-14 bg-white/80 border border-neutral-base-100 rounded-2xl px-4 md:px-6 outline-none focus:border-amber-800 focus:ring-4 focus:ring-amber-50/50 font-bold text-[13px] md:text-[14px] transition-all shadow-sm shadow-neutral-base-900/5 placeholder:text-neutral-base-200"
                                     placeholder="08..."
                                 />
                             </div>
@@ -97,7 +97,7 @@ export default function DropshipperSection({
                                         setDropshipperForm({ ...dropshipperForm, address: e.target.value });
                                         onFieldChange?.();
                                     }}
-                                    className="h-12 md:h-14 bg-white border border-neutral-base-100 rounded-xl md:rounded-2xl px-4 md:px-6 outline-none focus:border-amber-800 focus:ring-4 focus:ring-amber-50/50 font-bold text-[13px] md:text-[14px] transition-all shadow-sm placeholder:text-neutral-base-200"
+                                    className="h-12 md:h-14 bg-white/80 border border-neutral-base-100 rounded-2xl px-4 md:px-6 outline-none focus:border-amber-800 focus:ring-4 focus:ring-amber-50/50 font-bold text-[13px] md:text-[14px] transition-all shadow-sm shadow-neutral-base-900/5 placeholder:text-neutral-base-200"
                                     placeholder="Alamat asal (Opsional)..."
                                 />
                             </div>

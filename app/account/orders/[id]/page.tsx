@@ -244,9 +244,9 @@ export default function OrderDetailPage() {
                                         Detail Pesanan
                                     </h1>
                                 </div>
-                                <div className="flex items-center gap-3 self-end sm:self-auto">
+                                {/* <div className="flex items-center gap-3 self-end sm:self-auto">
                                     <AccountSidebarMobile />
-                                </div>
+                                </div> */}
                             </div>
 
                             <div className="flex flex-wrap items-center gap-y-4 gap-x-6 ml-14 md:ml-0">

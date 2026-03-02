@@ -42,7 +42,7 @@ export default function CourierSection({
             </div>
 
             <div className={`p-1 rounded-[32px] transition-all duration-300 ${hasError ? "ring-2 ring-rose-200 shadow-[0_0_20px_rgba(244,63,94,0.1)]" : ""}`}>
-                <div className="flex flex-col gap-6 md:gap-8 bg-neutral-base-50/30 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[32px] border border-neutral-base-100/60">
+                <div className="flex flex-col gap-6 md:gap-8 bg-neutral-base-50/20 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[30px] border border-neutral-base-100/40">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1">
                         <div className="flex items-center gap-2">
                             <Zap className="w-3.5 h-3.5 text-amber-800" />
@@ -77,14 +77,14 @@ export default function CourierSection({
                                             }));
                                             onFieldChange?.();
                                         }}
-                                        className={`flex p-4 md:p-6 rounded-xl md:rounded-[28px] border transition-all items-center gap-4 ${isSelected
-                                            ? "border-neutral-base-900 border-2 bg-white ring-4 ring-neutral-base-900/5 shadow-md scale-[1.01] z-10"
-                                            : "border-white bg-white/50 hover:bg-white hover:shadow-sm"
+                                        className={`flex p-4 md:p-6 rounded-[28px] border transition-all duration-500 items-center gap-4 ${isSelected
+                                            ? "border-neutral-base-900 bg-white/50 backdrop-blur-sm ring-4 ring-neutral-base-900/5 shadow-[0_10px_30px_rgb(0,0,0,0.06)] scale-[1.01] z-10"
+                                            : "border-neutral-base-100/50 bg-white/30 hover:bg-white hover:shadow-md"
                                             }`}
                                     >
-                                        <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all shrink-0 ${isSelected
-                                            ? "bg-neutral-base-900 text-white"
-                                            : "bg-white text-neutral-base-400 group-hover:bg-neutral-base-50 shadow-sm border border-neutral-base-100/50"
+                                        <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 flex items-center justify-center rounded-2xl transition-all duration-500 shrink-0 ${isSelected
+                                            ? "bg-neutral-base-900 text-white shadow-lg shadow-neutral-base-900/20"
+                                            : "bg-white/80 backdrop-blur-sm text-neutral-base-400 group-hover:bg-white shadow-sm border border-neutral-base-100/50"
                                             }`}>
                                             <Truck className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
                                         </div>

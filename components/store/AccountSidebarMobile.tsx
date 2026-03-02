@@ -1,6 +1,6 @@
 "use client";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { User, Menu } from "lucide-react";
 import UserSidebar from "./UserSidebar";
@@ -18,6 +18,12 @@ export default function AccountSidebarMobile() {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 border-r-0 w-[300px]">
+                <div className="sr-only">
+                    <SheetHeader>
+                        <SheetTitle>Menu Akun</SheetTitle>
+                        <SheetDescription>Akses berbagai menu akun Anda</SheetDescription>
+                    </SheetHeader>
+                </div>
                 <div className="py-10 px-6 h-full overflow-y-auto">
                     <UserSidebar isSheet className="w-full" />
                 </div>

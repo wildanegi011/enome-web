@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, Suspense } from "react";
-import { AnimatePresence } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Loader2, Check, ShoppingBag, MapPin, Truck, CreditCard } from "lucide-react";
+import clsx from "clsx";
 import Navbar from "@/components/store/Navbar";
 import Breadcrumb from "@/components/store/Breadcrumb";
 import { useCheckout } from "@/hooks/use-checkout";
@@ -72,16 +73,56 @@ function CheckoutContent() {
         <div className="min-h-screen bg-neutral-base-50 pb-10 md:pb-20">
             <Navbar />
 
-            {/* Sticky Breadcrumb Section */}
-            <div className="sticky top-[70px] md:top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-neutral-base-100">
-                <div className="max-w-7xl mx-auto px-4 py-4">
-                    <Breadcrumb
-                        items={[
-                            { label: "Beranda", href: "/" },
-                            { label: "Keranjang", href: "/cart" },
-                            { label: "Checkout" }
-                        ]}
-                    />
+            {/* Premium Header & Stepper Section */}
+            <div className="bg-white border-b border-neutral-base-100/50 pt-4 md:pt-6 pb-2 sticky top-[70px] md:top-[80px] z-30 transition-all duration-300">
+                <div className="max-w-7xl mx-auto px-4">
+                    <div className="mb-4 hidden md:block">
+                        <Breadcrumb
+                            items={[
+                                { label: "Beranda", href: "/" },
+                                { label: "Keranjang", href: "/cart" },
+                                { label: "Checkout" }
+                            ]}
+                        />
+                    </div>
+
+                    {/* Modern Stepper */}
+                    <div className="flex items-center justify-between max-w-2xl mx-auto mb-4 relative">
+                        {[
+                            { id: "cart", label: "Keranjang", icon: ShoppingBag, step: 1 },
+                            { id: "address", label: "Pengiriman", icon: MapPin, step: 2 },
+                            { id: "payment", label: "Pembayaran", icon: CreditCard, step: 3 }
+                        ].map((s, idx, arr) => {
+                            const isActive = s.id === "cart" || (s.id === "address" && shippingForm.addressId) || (s.id === "payment" && paymentMethod);
+                            const isCurrent = (s.id === "cart" && !shippingForm.addressId) || (s.id === "address" && shippingForm.addressId && !paymentMethod) || (s.id === "payment" && paymentMethod);
+
+                            return (
+                                <div key={s.id} className="flex flex-col items-center relative z-10">
+                                    <div className={clsx(
+                                        "w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm border-2",
+                                        isActive ? "bg-neutral-base-900 border-neutral-base-900 text-white" : "bg-white border-neutral-base-100 text-neutral-base-300"
+                                    )}>
+                                        {isActive ? <Check className="w-5 h-5 md:w-6 md:h-6" /> : <s.icon className="w-5 h-5 md:w-6 md:h-6" />}
+                                    </div>
+                                    <span className={clsx(
+                                        "mt-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-colors duration-300",
+                                        isActive ? "text-neutral-base-900" : "text-neutral-base-300"
+                                    )}>
+                                        {s.label}
+                                    </span>
+
+                                    {idx < arr.length - 1 && (
+                                        <div className="absolute left-[calc(100%+8px)] top-5 md:top-6 w-[calc(100vw/3)] sm:w-20 md:w-32 lg:w-48 h-[2px] bg-neutral-base-100 -z-10 overflow-hidden">
+                                            <div
+                                                className="h-full bg-neutral-base-900 transition-all duration-700 ease-out"
+                                                style={{ width: isActive ? '100%' : '0%' }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
             </div>
 
@@ -91,17 +132,27 @@ function CheckoutContent() {
                         {/* Main Checkout Form */}
                         <div className="flex-1 flex flex-col gap-4 md:gap-8 w-full min-w-0">
                             {/* 1. Cart Review */}
-                            <CartReview
-                                items={cartItems}
-                                isLoading={isLoading}
-                                updateQuantity={updateQuantity}
-                                removeItem={removeItem}
-                                removeAllItems={removeAllItems}
-                                formatPrice={formatPrice}
-                            />
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                            >
+                                <CartReview
+                                    items={cartItems}
+                                    isLoading={isLoading}
+                                    updateQuantity={updateQuantity}
+                                    removeItem={removeItem}
+                                    removeAllItems={removeAllItems}
+                                    formatPrice={formatPrice}
+                                />
+                            </motion.div>
 
                             {/* 2. Shipping Section Wrapper */}
-                            <div className="flex flex-col gap-4 md:gap-6 bg-white border border-neutral-base-100 p-4 md:p-8 rounded-xl md:rounded-[32px] shadow-sm">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className="flex flex-col gap-4 md:gap-6 bg-white/80 backdrop-blur-sm border border-neutral-base-100/50 p-4 md:p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+                            >
                                 <div ref={addressRef} id="address-section">
                                     <AddressSection
                                         addresses={addresses}
@@ -117,7 +168,7 @@ function CheckoutContent() {
                                     />
                                 </div>
 
-                                <div className="h-px bg-neutral-base-50 my-1 md:my-2" />
+                                <div className="h-px bg-neutral-base-50/50 my-1 md:my-2" />
 
                                 <div ref={shippingRef} id="shipping-section">
                                     <CourierSection
@@ -136,7 +187,7 @@ function CheckoutContent() {
                                     />
                                 </div>
 
-                                <div className="h-px bg-neutral-base-50 my-1 md:my-2" />
+                                <div className="h-px bg-neutral-base-50/50 my-1 md:my-2" />
 
                                 <DropshipperSection
                                     isDropshipper={isDropshipper}
@@ -144,10 +195,16 @@ function CheckoutContent() {
                                     dropshipperForm={dropshipperForm}
                                     setDropshipperForm={setDropshipperForm}
                                 />
-                            </div>
+                            </motion.div>
 
                             {/* 4. Payment Method */}
-                            <div ref={paymentRef} id="payment-section">
+                            <motion.div
+                                ref={paymentRef}
+                                id="payment-section"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                            >
                                 <PaymentSection
                                     remainingBill={remainingBill}
                                     useWallet={useWallet}
@@ -158,7 +215,7 @@ function CheckoutContent() {
                                     hasError={errors?.payment}
                                     onFieldChange={() => setErrors(prev => ({ ...prev, payment: false }))}
                                 />
-                            </div>
+                            </motion.div>
                         </div>
 
                         {/* Order Summary Sidebar */}

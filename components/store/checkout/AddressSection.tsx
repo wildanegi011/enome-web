@@ -119,7 +119,7 @@ export default function AddressSection({
 
             <div className={`flex flex-col gap-6 md:gap-8 p-1 rounded-[32px] transition-all duration-300 ${hasError ? "bg-white ring-2 ring-rose-200 shadow-[0_0_20px_rgba(244,63,94,0.05)]" : ""}`}>
                 {shippingForm.addressId > 0 && addresses.find(a => a.id === shippingForm.addressId) ? (
-                    <div className="bg-neutral-base-50/30 p-4 md:p-8 rounded-xl md:rounded-[32px] border border-neutral-base-100/60 flex flex-col gap-6">
+                    <div className="bg-neutral-base-50/20 p-4 md:p-8 rounded-[30px] border border-neutral-base-100/40 flex flex-col gap-6">
                         <AddressCard
                             address={addresses.find(a => a.id === shippingForm.addressId)!}
                             variant="checkout"
@@ -134,14 +134,14 @@ export default function AddressSection({
                                         setIsAddAddressModalOpen(true);
                                     }
                                 }}
-                                className="h-16 md:h-14 flex-1 bg-white border border-neutral-base-100 p-2 md:p-0 px-6 rounded-xl md:rounded-2xl font-black text-[12px] md:text-[13px] uppercase tracking-widest text-neutral-base-600 hover:text-neutral-base-900 hover:bg-neutral-base-50 transition-all flex items-center justify-center gap-3 group"
+                                className="h-16 md:h-14 flex-1 bg-white/70 backdrop-blur-sm border border-neutral-base-100/60 p-2 md:p-0 px-6 rounded-2xl font-black text-[12px] md:text-[13px] uppercase tracking-widest text-neutral-base-600 hover:text-neutral-base-900 hover:bg-white hover:border-amber-800 transition-all flex items-center justify-center gap-3 group"
                             >
                                 <Search className="w-4 h-4 text-neutral-base-300 group-hover:text-amber-800 transition-colors" />
                                 Update (Ubah)
                             </button>
                             <button
                                 onClick={() => setIsSelectionModalOpen(true)}
-                                className="h-16 md:h-14 flex-1 bg-white border border-neutral-base-100 p-2 md:p-0 px-6 rounded-xl md:rounded-2xl font-black text-[12px] md:text-[13px] uppercase tracking-widest text-neutral-base-600 hover:text-amber-800 hover:border-amber-100 hover:bg-amber-50/30 transition-all flex items-center justify-center gap-3 group"
+                                className="h-16 md:h-14 flex-1 bg-white/70 backdrop-blur-sm border border-neutral-base-100/60 p-2 md:p-0 px-6 rounded-2xl font-black text-[12px] md:text-[13px] uppercase tracking-widest text-neutral-base-600 hover:text-amber-800 hover:border-amber-100 hover:bg-amber-50/50 transition-all flex items-center justify-center gap-3 group"
                             >
                                 <Truck className="w-4 h-4 text-neutral-base-300 group-hover:text-amber-800 transition-colors" />
                                 Pilih Lainnya
@@ -149,8 +149,8 @@ export default function AddressSection({
                         </div>
                     </div>
                 ) : addresses.length === 0 ? (
-                    <div className="bg-neutral-base-50/30 rounded-xl md:rounded-[32px] p-8 md:p-12 border border-dashed border-neutral-base-200 flex flex-col items-center justify-center text-center gap-4 md:gap-6 group transition-all hover:bg-neutral-base-50/50">
-                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-[32px] bg-white border border-neutral-base-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500">
+                    <div className="bg-neutral-base-50/20 rounded-[30px] p-8 md:p-12 border border-dashed border-neutral-base-200 flex flex-col items-center justify-center text-center gap-4 md:gap-6 group transition-all hover:bg-neutral-base-50/40">
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-[28px] bg-white/80 backdrop-blur-sm border border-neutral-base-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500">
                             <MapPin className="w-8 h-8 md:w-10 md:h-10 text-neutral-base-200 group-hover:text-amber-800 transition-colors" />
                         </div>
                         <div className="flex flex-col gap-1 md:gap-2">
@@ -168,8 +168,8 @@ export default function AddressSection({
                         </button>
                     </div>
                 ) : (
-                    <div className="bg-neutral-base-50/30 rounded-xl md:rounded-[32px] p-4 md:p-8 border border-neutral-base-100/60 flex flex-col items-center justify-center text-center gap-6 md:gap-8 min-h-[240px]">
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-[24px] bg-white border border-neutral-base-100 flex items-center justify-center shadow-sm">
+                    <div className="bg-neutral-base-50/20 rounded-[30px] p-4 md:p-8 border border-neutral-base-100/40 flex flex-col items-center justify-center text-center gap-6 md:gap-8 min-h-[240px]">
+                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-[24px] bg-white/80 backdrop-blur-sm border border-neutral-base-100 flex items-center justify-center shadow-sm">
                             <Truck className="w-6 h-6 md:w-8 md:h-8 text-neutral-base-200" />
                         </div>
                         <div className="flex flex-col gap-1 md:gap-2">

@@ -54,8 +54,8 @@ export default function OrderSummary({
     formatPrice
 }: OrderSummaryProps) {
     return (
-        <aside className="w-full lg:w-[400px] lg:sticky lg:top-28 shrink-0">
-            <div className="bg-white border border-neutral-base-100 rounded-xl md:rounded-[32px] p-5 md:p-8 shadow-xl shadow-neutral-base-400/5">
+        <aside className="w-full lg:w-[400px] lg:sticky lg:top-40 shrink-0">
+            <div className="bg-white/90 backdrop-blur-md border border-neutral-base-100/50 rounded-[32px] p-5 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)]">
                 <div className="flex items-center gap-3 mb-5 md:mb-8">
                     <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-amber-50 flex items-center justify-center">
                         <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-800" />
@@ -123,7 +123,7 @@ export default function OrderSummary({
                             </button>
                         </motion.div>
                     ) : (
-                        <div className={`border border-neutral-base-100 rounded-xl md:rounded-[24px] p-3 md:p-4 flex flex-col gap-2 md:gap-3 transition-all duration-300 ${remainingBill === 0 ? "bg-neutral-base-50/30 opacity-60 grayscale" : "bg-neutral-base-50/50"}`}>
+                        <div className={`border border-neutral-base-100/50 rounded-[28px] p-4 md:p-5 flex flex-col gap-3 md:gap-4 transition-all duration-500 shadow-sm ${remainingBill === 0 ? "bg-neutral-base-50/20 opacity-60 grayscale" : "bg-white/50 backdrop-blur-xs"}`}>
                             <span className="text-[10px] md:text-[11px] font-black text-neutral-base-900 uppercase tracking-widest ml-1">
                                 {remainingBill === 0 ? "Promo Code Tidak Tersedia" : "Punya Kode Promo?"}
                             </span>
@@ -133,13 +133,13 @@ export default function OrderSummary({
                                     value={voucherCode}
                                     disabled={remainingBill === 0}
                                     onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
-                                    className="flex-1 h-10 md:h-12 bg-white border border-neutral-base-100 rounded-lg md:rounded-xl px-3 md:px-4 text-[11px] md:text-[12px] font-bold outline-none focus:border-amber-800 focus:ring-2 focus:ring-amber-50 transition-all placeholder:text-neutral-base-200 uppercase disabled:bg-neutral-base-50 disabled:cursor-not-allowed min-w-0"
+                                    className="flex-1 h-11 md:h-12 bg-white/80 border border-neutral-base-100 rounded-2xl px-3 md:px-4 text-[11px] md:text-[12px] font-bold outline-none focus:border-amber-800 focus:ring-4 focus:ring-amber-50/50 transition-all placeholder:text-neutral-base-200 uppercase disabled:bg-neutral-base-50/50 disabled:cursor-not-allowed min-w-0"
                                     placeholder={remainingBill === 0 ? "---" : "ENOME10"}
                                 />
                                 <button
                                     onClick={applyVoucher}
                                     disabled={!voucherCode || isVoucherLoading || remainingBill === 0}
-                                    className="px-4 md:px-6 h-10 md:h-12 rounded-lg md:rounded-xl bg-neutral-base-900 text-white text-[12px] md:text-[13px] font-black uppercase tracking-widest hover:bg-neutral-base-800 disabled:opacity-50 transition-all active:scale-95 disabled:cursor-not-allowed shrink-0"
+                                    className="px-6 h-11 md:h-12 rounded-2xl bg-neutral-base-900 text-white text-[12px] md:text-[13px] font-black uppercase tracking-widest hover:bg-neutral-base-800 disabled:opacity-50 transition-all active:scale-95 disabled:cursor-not-allowed shrink-0 shadow-lg shadow-neutral-base-900/10"
                                 >
                                     {isVoucherLoading ? <Loader2 className="w-3.5 h-3.5 md:w-4 md:h-4 animate-spin" /> : "Pakai"}
                                 </button>
@@ -160,7 +160,7 @@ export default function OrderSummary({
                     </div>
 
                     {useWallet && appliedWalletAmount > 0 && (
-                        <div className="flex justify-between items-center py-2 md:py-3 px-3 md:px-4 bg-emerald-50 rounded-xl md:rounded-2xl border border-emerald-100">
+                        <div className="flex justify-between items-center py-3 md:py-4 px-4 md:px-6 bg-emerald-50/50 backdrop-blur-xs rounded-[24px] border border-emerald-100/50 shadow-sm">
                             <div className="flex flex-col gap-0.5">
                                 <span className="text-[10px] md:text-[11px] font-bold text-emerald-800 uppercase tracking-widest">Sisa Pembayaran</span>
                                 <div className="flex items-center gap-1.5">
@@ -170,7 +170,7 @@ export default function OrderSummary({
                                     </span>
                                 </div>
                             </div>
-                            <span className="text-[16px] md:text-[18px] font-black text-emerald-700 tracking-tight tabular-nums">
+                            <span className="text-[18px] md:text-[22px] font-black text-emerald-700 tracking-tight tabular-nums">
                                 {formatPrice(remainingBill)}
                             </span>
                         </div>
@@ -180,8 +180,13 @@ export default function OrderSummary({
                 <button
                     disabled={isSubmitting || cartItemsCount === 0}
                     onClick={submitOrder}
-                    className="w-full bg-neutral-base-900 text-white h-14 md:h-18 rounded-xl md:rounded-[24px] text-[14px] md:text-[15px] font-black uppercase tracking-[0.15em] md:tracking-[0.25em] flex items-center justify-center gap-3 md:gap-4 hover:bg-neutral-base-800 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-neutral-base-900/15 disabled:opacity-50 disabled:cursor-not-allowed group mb-5 md:mb-8"
+                    className="w-full bg-neutral-base-900 text-white h-16 md:h-18 rounded-3xl text-[14px] md:text-[15px] font-black uppercase tracking-[0.25em] flex items-center justify-center gap-3 md:gap-4 hover:bg-neutral-base-800 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-neutral-base-900/20 disabled:opacity-50 disabled:cursor-not-allowed group mb-5 md:mb-8 overflow-hidden relative"
                 >
+                    <motion.div
+                        className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        animate={{ x: ["-100%", "100%"] }}
+                        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                    />
                     {isSubmitting ? (
                         <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
                     ) : (
