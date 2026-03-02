@@ -57,26 +57,19 @@ export async function POST(request: NextRequest) {
         const {
             username,
             email,
-            password,
-            nama_lengkap,
-            no_hp,
-            provinsi,
-            kota,
-            kecamatan,
-            kode_pos,
-            alamat_lengkap
+            password
         } = body;
 
         const trimmedEmail = email?.trim().toLowerCase();
         const trimmedUsername = username?.trim().toLowerCase();
-        const trimmedNama = nama_lengkap?.trim();
+        // const trimmedNama = trimmedUsername; // Default nama to username
 
-        logger.info("Auth Request: Extended registration attempt", { email: trimmedEmail, username: trimmedUsername });
+        logger.info("Auth Request: Simple registration attempt", { email: trimmedEmail, username: trimmedUsername });
 
         // Validasi input
-        if (!trimmedEmail || !password || !trimmedNama || !trimmedUsername || !no_hp || !alamat_lengkap) {
+        if (!trimmedEmail || !password || !trimmedUsername) {
             logger.warn("Auth Warning: Missing registration fields", { email: trimmedEmail });
-            return NextResponse.json({ error: "Semua data wajib harus diisi" }, { status: 400 });
+            return NextResponse.json({ error: "Username, email, dan password wajib diisi" }, { status: 400 });
         }
 
         // Cek apakah email atau username sudah terdaftar di tabel user
@@ -124,14 +117,14 @@ export async function POST(request: NextRequest) {
                 email: trimmedEmail,
                 passwordHash: passwordHash,
                 authKey: authKey,
-                nama: trimmedNama,
+                nama: "",
                 role: 2, // Customer
                 status: 10, // Active
                 isDeleted: 2, // Pending Verification
                 verificationToken: verificationToken,
                 createdAt: now,
                 updatedAt: now,
-                alamat: alamat_lengkap,
+                alamat: "",
                 photo: "",
                 urlphoto: "",
                 updatephoto: "",
@@ -143,37 +136,37 @@ export async function POST(request: NextRequest) {
             // 2. Simpan ke tabel customer
             await tx.insert(customer).values({
                 custId: custId,
-                namaCustomer: trimmedNama,
+                namaCustomer: "",
                 userId: insertedUserId,
                 email: trimmedEmail,
-                telp: no_hp,
-                alamat: alamat_lengkap.substring(0, 50),
-                alamatLengkap: alamat_lengkap.substring(0, 50),
+                telp: "",
+                alamat: "",
+                alamatLengkap: "",
                 namaToko: "",
-                kecamatan: kecamatan || "",
-                kota: kota || "",
-                provinsi: provinsi || "",
-                kodepos: kode_pos || "",
+                kecamatan: "",
+                kota: "",
+                provinsi: "",
+                kodepos: "",
                 kategoriCustomerId: 4, // Default to Pelanggan
                 completedDepositTime: sql`CURRENT_TIMESTAMP`,
                 isDeleted: 0,
             });
 
-            // 3. Simpan ke tabel customer_alamat (Alamat Utama)
-            await tx.insert(customerAlamat).values({
-                custId: custId,
-                labelAlamat: "Utama",
-                namaPenerima: trimmedNama,
-                alamatLengkap: alamat_lengkap,
-                noHandphone: no_hp,
-                kecamatan: kecamatan || "",
-                kota: kota || "",
-                provinsi: provinsi || "",
-                kodePos: kode_pos || "",
-                isPrimary: 1,
-                createdAt: sql`CURRENT_TIMESTAMP`,
-                createdBy: insertedUserId,
-            });
+            // // 3. Simpan ke tabel customer_alamat (Alamat Utama)
+            // await tx.insert(customerAlamat).values({
+            //     custId: custId,
+            //     labelAlamat: "Utama",
+            //     namaPenerima: trimmedNama,
+            //     alamatLengkap: alamat_lengkap,
+            //     noHandphone: no_hp,
+            //     kecamatan: kecamatan || "",
+            //     kota: kota || "",
+            //     provinsi: provinsi || "",
+            //     kodePos: kode_pos || "",
+            //     isPrimary: 1,
+            //     createdAt: sql`CURRENT_TIMESTAMP`,
+            //     createdBy: insertedUserId,
+            // });
         });
 
         // Kirim email aktivasi dalam background menggunakan after()
@@ -184,7 +177,7 @@ export async function POST(request: NextRequest) {
             await sendActivationEmail(trimmedEmail, activationLink);
         });
 
-        logger.info("Auth Success: Extended registration completed, activation email queued in background", { email: trimmedEmail });
+        logger.info("Auth Success: Simple registration completed, activation email queued in background", { email: trimmedEmail });
         return NextResponse.json({
             message: "Registrasi berhasil. Silakan cek email Anda untuk aktivasi akun."
         }, { status: 201 });

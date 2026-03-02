@@ -43,8 +43,8 @@ export default function AddressCard({
     return (
         <div
             className={cn(
-                "bg-white rounded-[32px] transition-all duration-300 relative group flex flex-col",
-                isAccount || isSelection ? "p-6 md:p-8 border" : "p-0",
+                "bg-white rounded-[24px] md:rounded-[32px] transition-all duration-300 relative group flex flex-col",
+                isAccount || isSelection ? "p-5 sm:p-6 md:p-8 border" : "p-0",
                 address.isPrimary === 1 && (isAccount || isSelection)
                     ? "border-amber-800/20 shadow-xl shadow-amber-900/5 ring-4 ring-amber-50/10"
                     : isAccount || isSelection ? "border-neutral-base-100/60 hover:border-amber-800/10 hover:shadow-lg hover:shadow-neutral-base-900/5" : "",
@@ -144,11 +144,11 @@ export default function AddressCard({
                 </div>
             </div>
 
-            {isAccount && (onEdit || onDelete || onSetPrimary) && (
-                <div className="flex items-center justify-between pt-6 border-t border-neutral-base-50 mt-auto">
+            {(isAccount || isSelection) && (onEdit || onDelete || onSetPrimary) && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-neutral-base-50 mt-auto">
                     <div className="flex items-center gap-2">
                         {address.isPrimary === 1 ? (
-                            <div className="flex items-center gap-2 text-amber-800 font-black text-[11px] uppercase tracking-widest">
+                            <div className="flex items-center gap-2 text-amber-800 font-black text-[10px] md:text-[11px] uppercase tracking-widest">
                                 <CheckCircle2 className="w-4 h-4" /> Alamat Pengiriman Utama
                             </div>
                         ) : onSetPrimary && (
@@ -157,15 +157,15 @@ export default function AddressCard({
                                     e.stopPropagation();
                                     onSetPrimary(address.id);
                                 }}
-                                className="text-[11px] font-black uppercase tracking-widest text-neutral-base-400 hover:text-amber-800 transition-colors"
+                                className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-neutral-base-400 hover:text-amber-800 transition-colors"
                             >
                                 Atur Sebagai Utama
                             </button>
                         )}
                     </div>
-                    <button className="text-[11px] font-black uppercase tracking-widest text-amber-800 flex items-center gap-1 group/btn">
+                    {/* <button className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-amber-800 flex items-center gap-1 group/btn self-end sm:self-auto">
                         Lihat di Map <ChevronRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform" />
-                    </button>
+                    </button> */}
                 </div>
             )}
         </div>

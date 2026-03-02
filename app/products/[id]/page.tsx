@@ -11,6 +11,7 @@ import { useProduct } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import Breadcrumb from "@/components/store/Breadcrumb";
 import Link from "next/link";
 
 export default function ProductDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -68,12 +69,16 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
             <main className="min-h-screen bg-white overflow-x-hidden">
                 <Navbar />
 
-                {/* Breadcrumbs */}
-                <div className="border-b border-neutral-base-100 bg-neutral-base-50/50">
+                {/* Sticky Breadcrumbs Section */}
+                <div className="sticky top-[70px] md:top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-neutral-base-100">
                     <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-4 overflow-x-auto scrollbar-hide">
-                        <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-neutral-base-400 font-sans">
-                            Home <span className="mx-2">/</span> Products <span className="mx-2">/</span> <span className="text-neutral-base-900">{product.namaProduk}</span>
-                        </p>
+                        <Breadcrumb
+                            items={[
+                                { label: "Beranda", href: "/" },
+                                { label: "Katalog", href: "/products" },
+                                { label: product.namaProduk }
+                            ]}
+                        />
                     </div>
                 </div>
 
@@ -158,7 +163,7 @@ function ProductDetailSkeleton() {
     return (
         <main className="min-h-screen bg-white">
             <Navbar />
-            <div className="border-b border-neutral-base-100 bg-neutral-base-50/50 py-4">
+            <div className="sticky top-[70px] md:top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-neutral-base-100 py-4">
                 <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                     <Skeleton className="h-4 w-64" />
                 </div>

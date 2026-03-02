@@ -5,11 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import {
-    ShoppingBag, Search, Package, MapPin, Loader2, Calendar as CalendarIcon
+    ShoppingBag, Search, Package, MapPin, Loader2, Calendar as CalendarIcon, ChevronRight, User as UserIcon, Heart
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Navbar from "@/components/store/Navbar";
 import UserSidebar from "@/components/store/UserSidebar";
+import AccountSidebarMobile from "@/components/store/AccountSidebarMobile";
 import Image from "next/image";
 import { format, subMonths, subDays, startOfDay, endOfDay } from "date-fns";
 import { id } from "date-fns/locale";
@@ -84,7 +86,15 @@ const OrderCardSkeleton = () => (
     </div>
 );
 
+const menuItems = [
+    { title: "Profil Saya", icon: UserIcon, href: "/account/profile" },
+    { title: "Daftar Alamat", icon: MapPin, href: "/account/addresses" },
+    { title: "Riwayat Transaksi", icon: ShoppingBag, href: "/account/orders" },
+    { title: "Wishlist", icon: Heart, href: "/account/wishlist" },
+];
+
 export default function OrderHistoryPage() {
+    const pathname = usePathname();
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -156,7 +166,7 @@ export default function OrderHistoryPage() {
         <div className="min-h-screen bg-neutral-base-50/30 font-sans text-neutral-base-900">
             <Navbar />
 
-            <main className="max-w-[1340px] mx-auto px-4 md:px-8 py-10">
+            <main className="max-w-[1340px] mx-auto px-3 sm:px-4 md:px-8 py-6 md:py-10">
                 <div className="flex flex-col lg:flex-row gap-12">
                     <div className="hidden lg:block">
                         <UserSidebar />
@@ -164,9 +174,14 @@ export default function OrderHistoryPage() {
 
                     <div className="flex-1 min-w-0">
                         {/* Header Section */}
-                        <div className="flex flex-col gap-2 mb-8 md:mb-10">
-                            <h1 className="text-[28px] md:text-[32px] font-black text-neutral-base-900 tracking-tight">Riwayat Pesanan</h1>
-                            <p className="text-[13px] md:text-[14px] text-neutral-base-400 font-medium">Lacak dan kelola semua pesanan Anda di sini.</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                            <div className="flex flex-col gap-1">
+                                <h1 className="text-[26px] md:text-[32px] font-black text-neutral-base-900 tracking-tight">Riwayat Pesanan</h1>
+                                <p className="text-[12px] md:text-[14px] text-neutral-base-400 font-medium">Lacak dan kelola semua pesanan Anda di sini.</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <AccountSidebarMobile />
+                            </div>
                         </div>
 
                         {/* Status Tabs */}
@@ -307,7 +322,7 @@ export default function OrderHistoryPage() {
                                                 key={order.orderId}
                                                 initial={{ opacity: 0, y: 10 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                className="bg-white border border-neutral-base-100 rounded-[28px] md:rounded-3xl p-5 md:p-8 hover:shadow-xl hover:shadow-neutral-base-900/5 transition-all group"
+                                                className="bg-white border border-neutral-base-100 rounded-[24px] md:rounded-3xl p-4 sm:p-5 md:p-8 hover:shadow-xl hover:shadow-neutral-base-900/5 transition-all group"
                                             >
                                                 {/* Card Header */}
                                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-neutral-base-50">
@@ -356,8 +371,12 @@ export default function OrderHistoryPage() {
                                                     </div>
 
                                                     <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto mt-2 md:mt-0">
-                                                        <Link href={`/account/orders/${encodeURIComponent(order.orderId)}`} className="flex-1 md:flex-none h-11 md:h-12 inline-flex items-center justify-center px-6 md:px-8 bg-white border border-neutral-base-100 text-neutral-base-900 rounded-[14px] md:rounded-xl text-[12px] font-bold hover:bg-neutral-base-50 transition-all">
+                                                        <Link
+                                                            href={`/account/orders/${encodeURIComponent(order.orderId)}`}
+                                                            className="flex-1 md:flex-none h-11 md:h-12 inline-flex items-center justify-center px-6 md:px-8 bg-white border border-neutral-base-100 text-neutral-base-900 rounded-[14px] md:rounded-xl text-[12px] font-bold hover:bg-neutral-base-50 transition-all gap-2 group/btn"
+                                                        >
                                                             Detail
+                                                            <ChevronRight className="w-4 h-4 text-neutral-base-300 group-hover/btn:translate-x-0.5 group-hover/btn:text-neutral-base-900 transition-all" />
                                                         </Link>
                                                         {order.statusOrder === "PESANAN DIKIRIM" && (
                                                             <Button className="flex-1 md:flex-none h-11 md:h-12 px-6 md:px-8 bg-neutral-base-900 text-white rounded-[14px] md:rounded-xl text-[12px] font-black uppercase tracking-widest gap-2 shadow-lg shadow-neutral-base-900/10">
@@ -373,66 +392,68 @@ export default function OrderHistoryPage() {
                                     })}
 
                                     {/* Pagination */}
-                                    <div className="pt-10 flex justify-center">
-                                        <Pagination>
-                                            <PaginationContent className="gap-2">
-                                                <PaginationItem>
-                                                    <PaginationPrevious
-                                                        onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                                                        className={cn("h-11 px-4 rounded-xl border-neutral-base-100", currentPage === 1 && "opacity-30 pointer-events-none")}
-                                                    />
-                                                </PaginationItem>
-                                                {(() => {
-                                                    const pages = [];
-                                                    const maxVisiblePages = 5;
+                                    {totalOrders > limit && (
+                                        <div className="pt-10 flex justify-center">
+                                            <Pagination>
+                                                <PaginationContent className="gap-2">
+                                                    <PaginationItem>
+                                                        <PaginationPrevious
+                                                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                                                            className={cn("h-11 px-4 rounded-xl border-neutral-base-100", currentPage === 1 && "opacity-30 pointer-events-none")}
+                                                        />
+                                                    </PaginationItem>
+                                                    {(() => {
+                                                        const pages = [];
+                                                        const maxVisiblePages = 5;
 
-                                                    if (totalPages <= maxVisiblePages) {
-                                                        for (let i = 1; i <= totalPages; i++) pages.push(i);
-                                                    } else {
-                                                        pages.push(1);
-                                                        if (currentPage > 3) pages.push('ellipsis-start');
+                                                        if (totalPages <= maxVisiblePages) {
+                                                            for (let i = 1; i <= totalPages; i++) pages.push(i);
+                                                        } else {
+                                                            pages.push(1);
+                                                            if (currentPage > 3) pages.push('ellipsis-start');
 
-                                                        const startPage = Math.max(2, currentPage - 1);
-                                                        const endPage = Math.min(totalPages - 1, currentPage + 1);
+                                                            const startPage = Math.max(2, currentPage - 1);
+                                                            const endPage = Math.min(totalPages - 1, currentPage + 1);
 
-                                                        for (let i = startPage; i <= endPage; i++) {
-                                                            if (i !== 1 && i !== totalPages) pages.push(i);
+                                                            for (let i = startPage; i <= endPage; i++) {
+                                                                if (i !== 1 && i !== totalPages) pages.push(i);
+                                                            }
+
+                                                            if (currentPage < totalPages - 2) pages.push('ellipsis-end');
+                                                            if (totalPages > 1) pages.push(totalPages);
                                                         }
 
-                                                        if (currentPage < totalPages - 2) pages.push('ellipsis-end');
-                                                        if (totalPages > 1) pages.push(totalPages);
-                                                    }
-
-                                                    return pages.map((page, i) => (
-                                                        <PaginationItem key={i}>
-                                                            {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
-                                                                <span className="flex w-11 h-11 items-center justify-center text-neutral-base-400">
-                                                                    <PaginationEllipsis />
-                                                                </span>
-                                                            ) : (
-                                                                <PaginationLink
-                                                                    isActive={currentPage === page}
-                                                                    onClick={() => handlePageChange(page as number)}
-                                                                    className={cn(
-                                                                        "w-11 h-11 rounded-xl transition-all",
-                                                                        currentPage === page ? "bg-neutral-base-900 text-white" : "hover:bg-neutral-base-50"
-                                                                    )}
-                                                                >
-                                                                    {page}
-                                                                </PaginationLink>
-                                                            )}
-                                                        </PaginationItem>
-                                                    ));
-                                                })()}
-                                                <PaginationItem>
-                                                    <PaginationNext
-                                                        onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                                                        className={cn("h-11 px-4 rounded-xl border-neutral-base-100", currentPage === totalPages && "opacity-30 pointer-events-none")}
-                                                    />
-                                                </PaginationItem>
-                                            </PaginationContent>
-                                        </Pagination>
-                                    </div>
+                                                        return pages.map((page, i) => (
+                                                            <PaginationItem key={i}>
+                                                                {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
+                                                                    <span className="flex w-11 h-11 items-center justify-center text-neutral-base-400">
+                                                                        <PaginationEllipsis />
+                                                                    </span>
+                                                                ) : (
+                                                                    <PaginationLink
+                                                                        isActive={currentPage === page}
+                                                                        onClick={() => handlePageChange(page as number)}
+                                                                        className={cn(
+                                                                            "w-11 h-11 rounded-xl transition-all",
+                                                                            currentPage === page ? "bg-neutral-base-900 text-white" : "hover:bg-neutral-base-50"
+                                                                        )}
+                                                                    >
+                                                                        {page}
+                                                                    </PaginationLink>
+                                                                )}
+                                                            </PaginationItem>
+                                                        ));
+                                                    })()}
+                                                    <PaginationItem>
+                                                        <PaginationNext
+                                                            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                                                            className={cn("h-11 px-4 rounded-xl border-neutral-base-100", currentPage === totalPages && "opacity-30 pointer-events-none")}
+                                                        />
+                                                    </PaginationItem>
+                                                </PaginationContent>
+                                            </Pagination>
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>

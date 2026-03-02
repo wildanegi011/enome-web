@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/store/Navbar";
 import UserSidebar from "@/components/store/UserSidebar";
+import AccountSidebarMobile from "@/components/store/AccountSidebarMobile";
 import { ASSET_URL } from "@/config/config";
 import { useToggleWishlist } from "@/hooks/use-wishlist";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -201,7 +202,7 @@ export default function WishlistPage() {
             <div className="min-h-screen bg-neutral-base-50/30 font-sans text-neutral-base-900">
                 <Navbar />
 
-                <main className="max-w-[1340px] mx-auto px-4 md:px-8 py-10">
+                <main className="max-w-[1340px] mx-auto px-3 sm:px-4 md:px-8 py-6 md:py-10">
                     <div className="flex flex-col lg:flex-row gap-12">
                         <div className="hidden lg:block">
                             <UserSidebar />
@@ -209,15 +210,18 @@ export default function WishlistPage() {
 
                         <div className="flex-1 min-w-0">
                             {/* Header */}
-                            <div className="flex flex-col gap-2 mb-6">
-                                <div className="flex items-center justify-between">
-                                    <h1 className="text-[28px] md:text-[32px] font-black text-neutral-base-900 tracking-tight">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                <div className="flex flex-col gap-1">
+                                    <h1 className="text-[26px] md:text-[32px] font-black text-neutral-base-900 tracking-tight">
                                         Wishlist
                                     </h1>
+                                    <p className="text-[12px] md:text-[14px] text-neutral-base-400 font-medium">
+                                        Produk favorit yang ingin Anda beli nanti.
+                                    </p>
                                 </div>
-                                <p className="text-[13px] md:text-[14px] text-neutral-base-400 font-medium">
-                                    Produk favorit yang ingin Anda beli nanti.
-                                </p>
+                                <div className="flex items-center gap-3">
+                                    <AccountSidebarMobile />
+                                </div>
                             </div>
 
                             {/* Filters & Controls */}
@@ -344,7 +348,7 @@ export default function WishlistPage() {
                                             </div>
                                         </div>
                                         {/* Fade Mask */}
-                                        <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-neutral-base-50/30 to-transparent pointer-events-none hidden md:block" />
+                                        <div className="absolute right-0 top-0 bottom-2 w-12 bg-linear-to-l from-neutral-base-50/30 to-transparent pointer-events-none hidden md:block" />
                                     </div>
 
                                     {/* Results count */}

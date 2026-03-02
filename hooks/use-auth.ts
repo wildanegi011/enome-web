@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { authApi } from "@/lib/api/auth-api";
 
 interface User {
     id: number;
@@ -38,11 +39,38 @@ export function useAuth() {
         },
     });
 
+    const loginMutation = useMutation({
+        mutationFn: authApi.login,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["auth-me"] });
+        },
+    });
+
+    const registerMutation = useMutation({
+        mutationFn: authApi.register,
+    });
+
+    const forgotPasswordMutation = useMutation({
+        mutationFn: authApi.forgotPassword,
+    });
+
+    const resetPasswordMutation = useMutation({
+        mutationFn: authApi.resetPassword,
+    });
+
     return {
         user: data?.user,
         isAuthenticated: !!data?.authenticated,
         isLoading,
         logout: logoutMutation.mutate,
         isLoggingOut: logoutMutation.isPending,
+        login: loginMutation.mutateAsync,
+        isLoggingIn: loginMutation.isPending,
+        register: registerMutation.mutateAsync,
+        isRegistering: registerMutation.isPending,
+        forgotPassword: forgotPasswordMutation.mutateAsync,
+        isForgottingPassword: forgotPasswordMutation.isPending,
+        resetPassword: resetPasswordMutation.mutateAsync,
+        isResettingPassword: resetPasswordMutation.isPending,
     };
 }

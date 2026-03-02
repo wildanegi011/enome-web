@@ -56,10 +56,10 @@ export async function POST(request: NextRequest) {
 
         if (contentType.includes("application/json")) {
             const body = await request.json();
-            credential = body.credential;
+            credential = body.credential || body.id_token;
         } else if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
             const formData = await request.formData();
-            credential = formData.get("credential") as string;
+            credential = (formData.get("credential") as string) || (formData.get("id_token") as string);
             isRedirect = true;
         }
 
@@ -173,6 +173,10 @@ export async function POST(request: NextRequest) {
                 logger.info("Background job: Sending activation email for Google Registration", { email: trimmedEmail });
                 await sendActivationEmail(trimmedEmail, activationLink);
             });
+
+            if (isRedirect) {
+                return NextResponse.redirect(new URL("/login?registered=true", request.url));
+            }
 
             return NextResponse.json({
                 success: true,
