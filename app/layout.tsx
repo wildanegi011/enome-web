@@ -22,8 +22,8 @@ export const metadata: Metadata = {
 };
 
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
-
 import { Toaster } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function RootLayout({
   children,
@@ -34,9 +34,11 @@ export default function RootLayout({
     <html lang="id">
       <body className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}>
         <ReactQueryProvider>
-          {children}
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
         </ReactQueryProvider>
-        <Toaster position="top-center" richColors />
+        <Toaster position="bottom-center" richColors />
       </body>
     </html>
   );

@@ -71,13 +71,4 @@ export class CartService {
             .set({ isDeleted: 1, updatedAt })
             .where(and(eq(keranjang.id, id), eq(keranjang.custId, Number(userId))));
     }
-
-    /**
-     * Delete (soft delete) all cart items for a user.
-     */
-    static async deleteAllCartItems(userId: number | string, updatedAt: any) {
-        return await db.update(keranjang)
-            .set({ isDeleted: 1, updatedAt })
-            .where(and(eq(keranjang.custId, Number(userId)), eq(keranjang.isDeleted, 0)));
-    }
 }

@@ -40,7 +40,15 @@ export function useCheckout() {
         resi: "",
         catatan: "",
         service: "",
+        courierName: "",
+        shippingPrice: 0,
     });
+
+    const [errors, setErrors] = useState<{
+        address?: boolean;
+        shipping?: boolean;
+        payment?: boolean;
+    }>({});
 
     const [walletBalance, setWalletBalance] = useState(0);
     const [useWallet, setUseWallet] = useState(false);
@@ -92,14 +100,19 @@ export function useCheckout() {
     const [lastOrderedItems, setLastOrderedItems] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVoucherLoading, setIsVoucherLoading] = useState(false);
+    const [totalWeight, setTotalWeight] = useState(0);
+    const [shippingOptions, setShippingOptions] = useState<any[]>([]);
+    const [isLoadingShipping, setIsLoadingShipping] = useState(false);
 
     // Dynamic Options State
     const [couriers, setCouriers] = useState<any[]>([]);
     const [isLoadingCouriers, setIsLoadingCouriers] = useState(false);
-    const [totalWeight, setTotalWeight] = useState(0);
-    const [shippingOptions, setShippingOptions] = useState<any[]>([]);
-    const [isLoadingShipping, setIsLoadingShipping] = useState(false);
-    const [shippingPrice, setShippingPrice] = useState(0);
+    const shippingPrice = shippingForm.shippingPrice;
+    const setShippingPrice = useCallback((price: number) => {
+        setShippingForm(prev => ({ ...prev, shippingPrice: price }));
+    }, []);
+
+    // Subtotal and weight calculation is handled in the effect below fetchCartQuery definition
 
     const packingFee = CONFIG.PACKING_FEE;
 
@@ -126,6 +139,21 @@ export function useCheckout() {
         queryFn: cartApi.getCart,
     });
 
+    // Total Weight calculation from items
+    useEffect(() => {
+        if (fetchCartQuery.data) {
+            let items = fetchCartQuery.data.items || [];
+            if (selectedIds.length > 0) {
+                items = items.filter((item: any) => selectedIds.includes(item.id));
+            }
+            setCartItems(items);
+            const total = items.reduce((acc: number, item: any) => acc + (Number(item.harga || 0) * Number(item.qty || 0)), 0);
+            const weight = items.reduce((acc: number, item: any) => acc + (Number(item.berat || 0) * Number(item.qty || 0)), 0);
+            setTotalAmount(total);
+            setTotalWeight(weight);
+        }
+    }, [fetchCartQuery.data, selectedIds]);
+
     const isLoading = fetchCartQuery.isLoading;
 
     const fetchWalletQuery = useQuery({
@@ -142,20 +170,6 @@ export function useCheckout() {
         queryKey: queryKeys.shipping.couriers,
         queryFn: checkoutApi.getCouriers,
     });
-
-    useEffect(() => {
-        if (fetchCartQuery.data) {
-            let items = fetchCartQuery.data.items || [];
-            if (selectedIds.length > 0) {
-                items = items.filter((item: any) => selectedIds.includes(item.id));
-            }
-            setCartItems(items);
-            const total = items.reduce((acc: number, item: any) => acc + (Number(item.harga || 0) * Number(item.qty || 0)), 0);
-            const weight = items.reduce((acc: number, item: any) => acc + (Number(item.berat || 0) * Number(item.qty || 0)), 0);
-            setTotalAmount(total);
-            setTotalWeight(weight);
-        }
-    }, [fetchCartQuery.data, selectedIds]);
 
     useEffect(() => {
         if (fetchWalletQuery.data !== undefined) {
@@ -180,25 +194,33 @@ export function useCheckout() {
 
         // Use districtId for shipping API if available, fallback to kecamatan string
         const destination = (shippingForm as any).districtId || shippingForm.kecamatan;
-
-        const cacheKey = `shippingCost_${destination}_${totalWeight}`;
+        const cacheKey = `shippingCost_v3_${destination}_${totalWeight}`;
         const cachedStr = sessionStorage.getItem(cacheKey);
 
         const handleCosts = (costs: any[]) => {
             setShippingOptions(costs);
             if (costs.length > 0) {
                 setShippingForm(prev => {
-                    const exists = prev.service ? costs.find((c: any) => c.service === prev.service) : null;
+                    const exists = prev.service && prev.courier
+                        ? costs.find((c: any) =>
+                            c.service?.toLowerCase() === prev.service?.toLowerCase() &&
+                            (c.courierCode?.toLowerCase() === prev.courier?.toLowerCase())
+                        )
+                        : null;
+
                     if (exists) {
-                        setShippingPrice(exists.cost[0].value);
-                        return prev;
+                        return {
+                            ...prev,
+                            shippingPrice: exists.cost[0].value
+                        };
                     } else {
                         const firstService = costs[0];
-                        setShippingPrice(firstService.cost[0].value);
                         return {
                             ...prev,
                             service: firstService.service,
-                            courier: firstService.courierCode || prev.courier
+                            courier: firstService.courierCode || firstService.courierName || "Kurir",
+                            courierName: firstService.courierName || firstService.courierCode || "Kurir",
+                            shippingPrice: firstService.cost[0].value
                         };
                     }
                 });
@@ -222,10 +244,17 @@ export function useCheckout() {
                 weight: totalWeight,
                 courier: "ALL"
             });
-            if (data.rajaongkir?.results?.[0]?.costs) {
-                const costs = data.rajaongkir.results[0].costs;
-                sessionStorage.setItem(cacheKey, JSON.stringify(costs));
-                handleCosts(costs);
+            if (data.rajaongkir?.results) {
+                const results = data.rajaongkir.results;
+                const allCosts = results.flatMap((r: any) =>
+                    (r.costs || []).map((c: any) => ({
+                        ...c,
+                        courierCode: (r.code || r.name || "Kurir").toUpperCase(),
+                        courierName: r.name || r.code || "Kurir"
+                    }))
+                );
+                sessionStorage.setItem(cacheKey, JSON.stringify(allCosts));
+                handleCosts(allCosts);
             }
         } catch (error) {
             console.error("Fetch Shipping Error:", error);
@@ -251,12 +280,42 @@ export function useCheckout() {
         fetchCartQuery.refetch();
     }, []);
 
-    // Auto-fill form when addresses are loaded
+    // Sync form when selected address is updated in the addresses list (e.g., after editing in modal)
+    useEffect(() => {
+        if (shippingForm.addressId > 0 && addresses.length > 0) {
+            const currentAddr = addresses.find((a: Address) => a.id === shippingForm.addressId);
+            if (currentAddr) {
+                // Check if any field has changed before updating to avoid loops
+                const hasChanged =
+                    shippingForm.name !== currentAddr.receiverName ||
+                    shippingForm.phone !== currentAddr.phoneNumber ||
+                    shippingForm.address !== currentAddr.fullAddress ||
+                    shippingForm.provinsi !== currentAddr.province ||
+                    shippingForm.kota !== currentAddr.city ||
+                    shippingForm.kecamatan !== currentAddr.district ||
+                    shippingForm.kodePos !== currentAddr.postalCode;
+
+                if (hasChanged) {
+                    setShippingForm(prev => ({
+                        ...prev,
+                        name: currentAddr.receiverName,
+                        phone: currentAddr.phoneNumber,
+                        address: currentAddr.fullAddress,
+                        provinsi: currentAddr.province,
+                        kota: currentAddr.city,
+                        kecamatan: currentAddr.district,
+                        districtId: currentAddr.districtId || currentAddr.district,
+                        kodePos: currentAddr.postalCode,
+                    }));
+                }
+            }
+        }
+    }, [addresses, shippingForm.addressId, shippingForm.name, shippingForm.phone, shippingForm.address, shippingForm.provinsi, shippingForm.kota, shippingForm.kecamatan, shippingForm.kodePos]);
+
+    // Auto-fill form when addresses are loaded (initial load) - Strictly only for Primary addresses
     useEffect(() => {
         if (addresses.length > 0 && shippingForm.addressId === 0) {
-            const defaultAddr = addresses.find((a: Address) => a.isPrimary === 1) ||
-                addresses.find((a: Address) => a.type === "Profile") ||
-                addresses[0];
+            const defaultAddr = addresses.find((a: Address) => a.isPrimary === 1);
 
             if (defaultAddr) {
                 setShippingForm(prev => ({
@@ -344,6 +403,23 @@ export function useCheckout() {
         }
     };
 
+    const removeAllItems = async () => {
+        if (!confirm("Apakah Anda yakin ingin menghapus semua produk di keranjang?")) return;
+
+        try {
+            const response = await fetch("/api/cart", { method: "DELETE" });
+            if (response.ok) {
+                toast.success("Semua barang dihapus dari keranjang");
+                await fetchCartQuery.refetch();
+                refreshCart();
+                // Redirect back to cart page after clearing
+                window.location.href = "/cart";
+            }
+        } catch (error) {
+            toast.error("Gagal mengosongkan keranjang");
+        }
+    };
+
     const applyVoucher = async () => {
         if (!voucherCode) return;
         setIsVoucherLoading(true);
@@ -377,13 +453,39 @@ export function useCheckout() {
         }
     };
 
-    const submitOrder = async () => {
-        if (!shippingForm.name || !shippingForm.phone || !shippingForm.address || !shippingForm.courier) {
-            toast.error("Lengkapi data pengiriman");
-            return;
+    const validateCheckout = useCallback(() => {
+        const newErrors: typeof errors = {};
+
+        // 1. Address Validation
+        const isAddressComplete = !!(
+            shippingForm.name &&
+            shippingForm.phone &&
+            shippingForm.address &&
+            shippingForm.kecamatan &&
+            shippingForm.kota &&
+            shippingForm.provinsi
+        );
+        if (!isAddressComplete) newErrors.address = true;
+
+        // 2. Shipping Validation
+        if (!shippingForm.courier || !shippingForm.service || shippingForm.shippingPrice === 0) {
+            newErrors.shipping = true;
         }
+
+        // 3. Payment Validation
         if (!paymentMethod) {
-            toast.error("Pilih metode pembayaran");
+            newErrors.payment = true;
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    }, [shippingForm, shippingPrice, paymentMethod]);
+
+    const submitOrder = async () => {
+        const isValid = validateCheckout();
+
+        if (!isValid) {
+            toast.error("Lengkapi data yang masih kosong (ditandai merah)");
             return;
         }
 
@@ -465,7 +567,8 @@ export function useCheckout() {
         paymentMethod, setPaymentMethod, paymentMethods, isLoadingPayments,
         orderResult, lastOrderedItems, isSubmitting,
         couriers, isLoadingCouriers, shippingOptions, setShippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
+        errors, validateCheckout, setErrors,
         packingFee, grandTotal, remainingBill,
-        handleSelectAddress, updateQuantity, removeItem, applyVoucher, submitOrder, formatPrice, setVoucherData
+        handleSelectAddress, updateQuantity, removeItem, removeAllItems, applyVoucher, submitOrder, formatPrice, setVoucherData
     };
 }
