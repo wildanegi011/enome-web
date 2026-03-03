@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-utils";
+import { NextRequest, NextResponse } from "next/server";
+import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CustomerService } from "@/lib/services/customer-service";
 import { ProductService } from "@/lib/services/product-service";
@@ -15,10 +15,9 @@ import { desc } from "drizzle-orm";
  * @response 200 — Product[] (max 20 newest products)
  * @response 500 — { error: "Internal Server Error" }
  */
-export async function GET() {
+export const GET = withOptionalAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: GET /api/products/new-arrivals");
     try {
-        const session = await getSession();
         const kategoriId = await CustomerService.getKategoriId(session?.user?.id);
 
         logger.debug("New Arrivals Fetch: Using kategoriId", { kategoriId });
@@ -33,12 +32,11 @@ export async function GET() {
         logger.info("New Arrivals Fetch: Success", { count: processData.length });
         return NextResponse.json(processData);
     } catch (error: any) {
-        apiLogger.error(null, error, { route: "/api/products/new-arrivals" });
+        apiLogger.error(request, error, { route: "/api/products/new-arrivals" });
         return NextResponse.json(
             { error: "Internal Server Error" },
             { status: 500 }
         );
     }
-}
-
+});
 

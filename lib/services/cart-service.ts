@@ -19,6 +19,8 @@ export class CartService {
             gambar: sql<string>`COALESCE(${keranjang.gambarProduk}, ${produk.gambar})`.as('gambar'),
             keterangan: keranjang.keterangan,
             isFlashsale: keranjang.isFlashsale,
+            flashsaleId: keranjang.flashsaleId,
+            flashsaleExpired: keranjang.flashsaleExpired,
             isPreorder: keranjang.isPreorder,
             isOnline: produk.isOnline,
             stock: produkDetail.stokNormal,
@@ -68,5 +70,14 @@ export class CartService {
         return await db.update(keranjang)
             .set({ isDeleted: 1, updatedAt })
             .where(and(eq(keranjang.id, id), eq(keranjang.custId, Number(userId))));
+    }
+
+    /**
+     * Delete (soft delete) all cart items for a user.
+     */
+    static async deleteAllCartItems(userId: number | string, updatedAt: any) {
+        return await db.update(keranjang)
+            .set({ isDeleted: 1, updatedAt })
+            .where(and(eq(keranjang.custId, Number(userId)), eq(keranjang.isDeleted, 0)));
     }
 }

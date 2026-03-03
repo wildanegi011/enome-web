@@ -5,21 +5,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     ChevronRight, ShoppingBag, ArrowLeft, Trash2, Plus, Minus,
     Loader2, ShoppingCart, ShieldCheck, Truck, MessageSquare,
-    CheckSquare, Square
+    CheckSquare, Square, Zap
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/store/Navbar";
+import Navbar from "@/components/store/layout/Navbar";
 import { toast } from "sonner";
 import { useCart } from "@/hooks/use-cart";
+import Breadcrumb from "@/components/store/shared/Breadcrumb";
+import ConfirmDialog from "@/components/store/shared/ConfirmDialog";
 import { ASSET_URL } from "@/config/config";
 import { debounce } from "lodash";
 import { useRouter } from "next/navigation";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function CartPage() {
     const [cartItems, setCartItems] = useState<any[]>([]);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isConfirmDeleteAllOpen, setIsConfirmDeleteAllOpen] = useState(false);
     const { refreshCart } = useCart();
     const router = useRouter();
 
@@ -129,6 +133,24 @@ export default function CartPage() {
         }
     };
 
+    const removeAllItems = async () => {
+        if (cartItems.length === 0) return;
+
+        try {
+            const response = await fetch("/api/cart", {
+                method: "DELETE"
+            });
+            if (response.ok) {
+                setCartItems([]);
+                setSelectedIds([]);
+                refreshCart();
+                toast.success("Semua produk dihapus dari keranjang");
+            }
+        } catch (error) {
+            toast.error("Gagal mengosongkan keranjang");
+        }
+    };
+
     const handleCheckout = () => {
         if (selectedIds.length === 0) {
             toast.error("Pilih minimal satu produk untuk checkout");
@@ -146,10 +168,76 @@ export default function CartPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFDFD] text-neutral-base-900 font-sans selection:bg-amber-100 selection:text-amber-900">
+        <div className="min-h-screen bg-white text-neutral-base-900 font-sans selection:bg-amber-100 selection:text-amber-900">
             <Navbar />
 
-            <main className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-16">
+            {/* Sticky Header with Breadcrumb and Actions */}
+            <div className="sticky top-[70px] md:top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-neutral-base-50">
+                <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-4 md:py-6 flex items-center justify-between gap-4">
+                    <Breadcrumb
+                        className="truncate min-w-0"
+                        items={[
+                            { label: "Beranda", href: "/" },
+                            { label: "Keranjang" }
+                        ]}
+                    />
+
+                    {!isLoading && cartItems.length > 0 && (
+                        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={toggleSelectAll}
+                                        className="flex items-center gap-2 bg-white px-3 md:px-4 py-2 rounded-lg border border-neutral-base-100 shadow-sm hover:border-neutral-base-300 transition-all group"
+                                    >
+                                        {selectedIds.length === cartItems.length ? (
+                                            <CheckSquare className="w-4 h-4 text-neutral-base-900" />
+                                        ) : (
+                                            <Square className="w-4 h-4 text-neutral-base-300 group-hover:text-neutral-base-900" />
+                                        )}
+                                        <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest text-neutral-base-900">
+                                            {selectedIds.length === cartItems.length ? "Batalkan Pilihan" : "Pilih Semua"}
+                                        </span>
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">
+                                    <p>{selectedIds.length === cartItems.length ? "Batalkan Pilihan" : "Pilih Semua"}</p>
+                                </TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => setIsConfirmDeleteAllOpen(true)}
+                                        className="flex items-center gap-2 bg-white px-3 md:px-4 py-2 rounded-lg border border-red-100 shadow-sm hover:bg-red-50 hover:border-red-200 transition-all group"
+                                    >
+                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                        <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest text-red-600">
+                                            Hapus Semua
+                                        </span>
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">
+                                    <p>Hapus Semua</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <ConfirmDialog
+                open={isConfirmDeleteAllOpen}
+                onOpenChange={setIsConfirmDeleteAllOpen}
+                title="Hapus Semua Pesanan?"
+                description="Tindakan ini akan mengosongkan seluruh isi keranjang Anda. Apakah Anda yakin?"
+                confirmText="Ya, Hapus Semua"
+                cancelText="Batal"
+                variant="destructive"
+                onConfirm={removeAllItems}
+            />
+
+            <main className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-20">
                 <AnimatePresence mode="wait">
                     {isLoading ? (
                         <motion.div
@@ -185,28 +273,6 @@ export default function CartPage() {
                         </motion.div>
                     ) : (
                         <div className="flex flex-col gap-6 md:gap-10">
-                            {/* Header Section */}
-                            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6 pb-4 md:pb-6 border-b border-neutral-base-100">
-                                <nav className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-neutral-base-400">
-                                    <Link href="/" className="hover:text-amber-800 transition-colors">Home</Link>
-                                    <ChevronRight className="w-2 h-2" />
-                                    <span className="text-neutral-base-900">Keranjang Belanja</span>
-                                </nav>
-                                <button
-                                    onClick={toggleSelectAll}
-                                    className="flex items-center gap-2.5 bg-white px-4 py-2 rounded-lg border border-neutral-base-100 shadow-sm hover:border-amber-800/20 transition-all group self-start"
-                                >
-                                    {selectedIds.length === cartItems.length ? (
-                                        <CheckSquare className="w-4 h-4 text-amber-800" />
-                                    ) : (
-                                        <Square className="w-4 h-4 text-neutral-base-300 group-hover:text-neutral-base-900" />
-                                    )}
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-base-900">
-                                        {selectedIds.length === cartItems.length ? "Batalkan Pilihan" : "Pilih Semua"}
-                                    </span>
-                                </button>
-                            </div>
-
                             <div className="flex flex-col lg:flex-row gap-6 md:gap-10 items-start">
                                 {/* Product List */}
                                 <div className="flex-1 w-full flex flex-col gap-3 md:gap-4 min-w-0">
@@ -234,50 +300,73 @@ export default function CartPage() {
                                                     </button>
 
                                                     {/* Image */}
-                                                    <div className="relative w-20 h-20 md:w-28 md:h-28 overflow-hidden rounded-lg md:rounded-xl bg-neutral-base-50 border border-neutral-base-100 shrink-0">
+                                                    <div className="w-24 h-32 md:w-32 md:h-40 bg-neutral-base-50 rounded-xl md:rounded-3xl overflow-hidden relative shrink-0 border border-neutral-base-100 shadow-sm group-hover:shadow-md transition-all">
                                                         <Image
-                                                            src={`${ASSET_URL}/img/produk/${item.gambar}`}
-                                                            alt={item.produkId}
+                                                            src={item.gambar ? `${ASSET_URL}/img/produk/${item.gambar}` : "/placeholder-product.jpg"}
+                                                            alt={item.namaProduk}
                                                             fill
-                                                            className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                                            sizes="(max-width: 768px) 100px, 150px"
                                                         />
                                                     </div>
 
                                                     {/* Info */}
                                                     <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                                                         {/* Top row: name + delete */}
-                                                        <div className="flex items-start justify-between gap-2">
+                                                        <div className="flex items-start justify-between gap-2 mb-2">
                                                             <div className="flex flex-col gap-1 min-w-0">
-                                                                <h3 className="text-[13px] md:text-[16px] font-black text-neutral-base-900 tracking-tight leading-tight truncate">
+                                                                <h3 className="text-[14px] md:text-[17px] font-bold text-neutral-base-900 tracking-tight leading-snug wrap-break-word line-clamp-2">
                                                                     {item.namaProduk}
                                                                 </h3>
+                                                                {item.isFlashsale === 1 && (
+                                                                    <div className="flex items-center gap-1.5 text-red-600 my-1">
+                                                                        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-red-50 border border-red-100 rounded-md">
+                                                                            <Zap className="w-2.5 h-2.5 fill-red-600" />
+                                                                            <span className="text-[8px] font-black uppercase tracking-widest leading-none">Flash Sale</span>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
                                                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                                                    <span className="text-[8px] font-black uppercase tracking-widest text-neutral-base-400 px-1.5 py-0.5 bg-neutral-base-50 rounded">
+                                                                    <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-base-400 px-1.5 py-0.5 bg-neutral-base-50 rounded">
                                                                         {item.warnaName || item.warna}
                                                                     </span>
-                                                                    <span className="text-[8px] font-black uppercase tracking-widest text-neutral-base-400 px-1.5 py-0.5 bg-neutral-base-50 rounded">
+                                                                    <span className="text-[9px] font-bold uppercase tracking-wider text-neutral-base-400 px-1.5 py-0.5 bg-neutral-base-50 rounded">
                                                                         {item.size}
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            <button
-                                                                onClick={() => removeItem(item.id)}
-                                                                className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-neutral-base-200 hover:bg-red-50 hover:text-red-500 transition-all shrink-0"
-                                                            >
-                                                                <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                                                            </button>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <button
+                                                                        onClick={() => removeItem(item.id)}
+                                                                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full text-red-500 hover:text-red-800 hover:bg-red-50 transition-all shrink-0"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent side="top">
+                                                                    <p className="text-[10px] font-bold">Hapus</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
                                                         </div>
 
                                                         {/* Bottom row: qty + price */}
                                                         <div className="flex items-center justify-between gap-2 mt-2 md:mt-3">
                                                             <div className="flex items-center bg-neutral-base-50/50 border border-neutral-base-100 rounded-lg p-0.5 md:p-1 gap-0.5 md:gap-1">
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, item.qty - 1, item.stock); }}
-                                                                    disabled={item.qty <= 1}
-                                                                    className="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center hover:bg-white rounded-md transition-all disabled:opacity-30 active:scale-95"
-                                                                >
-                                                                    <Minus className="w-2.5 h-2.5 md:w-3 md:h-3 text-neutral-base-600" />
-                                                                </button>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, item.qty - 1, item.stock); }}
+                                                                            disabled={item.qty <= 1}
+                                                                            className="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center hover:bg-white rounded-md transition-all disabled:opacity-30 active:scale-95"
+                                                                        >
+                                                                            <Minus className="w-2.5 h-2.5 md:w-3 md:h-3 text-neutral-base-600" />
+                                                                        </button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent side="top">
+                                                                        <p className="text-[10px] font-bold">Kurangi</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
                                                                 <input
                                                                     type="number"
                                                                     value={item.qty}
@@ -292,13 +381,20 @@ export default function CartPage() {
                                                                     }}
                                                                     className="w-7 md:w-8 bg-transparent text-center text-[11px] md:text-[12px] font-black text-neutral-base-900 tabular-nums outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                                 />
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, item.qty + 1, item.stock); }}
-                                                                    disabled={item.qty >= item.stock}
-                                                                    className="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center hover:bg-white rounded-md transition-all disabled:opacity-30 active:scale-95"
-                                                                >
-                                                                    <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-neutral-base-600" />
-                                                                </button>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, item.qty + 1, item.stock); }}
+                                                                            disabled={item.qty >= item.stock}
+                                                                            className="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center hover:bg-white rounded-md transition-all disabled:opacity-30 active:scale-95"
+                                                                        >
+                                                                            <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 text-neutral-base-600" />
+                                                                        </button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent side="top">
+                                                                        <p className="text-[10px] font-bold">Tambah</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
                                                             </div>
                                                             <span className="text-[13px] md:text-[16px] font-black text-neutral-base-900 tracking-tighter tabular-nums">
                                                                 {formatPrice(Number(item.harga || 0) * Number(item.qty || 0))}
@@ -332,7 +428,7 @@ export default function CartPage() {
                                             <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-amber-50 flex items-center justify-center">
                                                 <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-800" />
                                             </div>
-                                            <h3 className="font-serif text-[20px] md:text-[24px] text-neutral-base-900 tracking-tight">Ringkasan</h3>
+                                            <h3 className="font-heading text-[20px] md:text-[24px] font-bold text-neutral-base-900 tracking-tight">Ringkasan</h3>
                                         </div>
 
                                         <div className="flex flex-col gap-4 md:gap-5 mb-5 md:mb-8">
@@ -352,22 +448,34 @@ export default function CartPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-col gap-2 md:gap-3">
-                                            <button
-                                                onClick={handleCheckout}
-                                                disabled={selectedIds.length === 0}
-                                                className="w-full bg-neutral-base-900 text-white h-12 md:h-16 rounded-xl md:rounded-[20px] text-[11px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-[0.98] group disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
-                                            >
-                                                Checkout Sekarang
-                                                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                            </button>
+                                        <button
+                                            onClick={handleCheckout}
+                                            disabled={selectedIds.length === 0}
+                                            className="w-full bg-neutral-base-900 text-white h-14 md:h-16 rounded-xl md:rounded-[20px] text-[11px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
+                                        >
+                                            Checkout Sekarang
+                                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                        </button>
 
-                                            <Link href="/products" className="flex items-center justify-center gap-2 h-10 md:h-12 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-neutral-base-300 hover:text-neutral-base-900 transition-all">
-                                                <ArrowLeft className="w-3.5 h-3.5" />
-                                                Lanjut Belanja
-                                            </Link>
+                                        <div className="mt-6 pt-6 border-t border-neutral-base-50 flex items-center justify-center gap-6">
+                                            <div className="flex items-center gap-2">
+                                                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-neutral-base-400">Secure Payment</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Truck className="w-4 h-4 text-amber-600" />
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-neutral-base-400">Fast Delivery</span>
+                                            </div>
                                         </div>
                                     </div>
+
+                                    <Link
+                                        href="/products"
+                                        className="mt-6 flex items-center justify-center gap-2 text-neutral-base-400 hover:text-neutral-base-900 transition-all"
+                                    >
+                                        <ArrowLeft className="w-3 h-3" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Lanjut Belanja</span>
+                                    </Link>
                                 </aside>
                             </div>
                         </div>

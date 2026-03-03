@@ -1,64 +1,71 @@
+"use client";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api/api-client";
-
-interface WishlistResponse {
-    items: string[];
-}
-
-interface WishlistToggleResponse {
-    action: "added" | "removed";
-    produkId: string;
-}
-
-const wishlistKeys = {
-    all: ["wishlist"] as const,
-};
+import { userApi, WishlistItem } from "@/lib/api/user-api";
+import { queryKeys } from "@/lib/query-keys";
+import { toast } from "sonner";
 
 export function useWishlist() {
-    return useQuery<WishlistResponse>({
-        queryKey: wishlistKeys.all,
-        queryFn: () => apiClient<WishlistResponse>("/api/wishlist"),
+    return useQuery({
+        queryKey: queryKeys.user.wishlist.all,
+        queryFn: async () => {
+            const res = await fetch("/api/wishlist");
+            if (!res.ok) throw new Error("Failed to fetch wishlist");
+            return res.json() as Promise<{ items: string[] }>;
+        },
+    });
+}
+
+export function useWishlistDetails() {
+    return useQuery<WishlistItem[]>({
+        queryKey: queryKeys.user.wishlist.details,
+        queryFn: () => userApi.getWishlistDetails(),
     });
 }
 
 export function useToggleWishlist() {
     const queryClient = useQueryClient();
 
-    return useMutation<WishlistToggleResponse, Error, string>({
-        mutationFn: async (produkId: string) => {
-            const res = await fetch("/api/wishlist", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ produkId }),
-            });
-            if (!res.ok) throw new Error("Failed to toggle wishlist");
-            return res.json();
-        },
+    return useMutation({
+        mutationFn: (produkId: string) => userApi.toggleWishlist(produkId),
         onMutate: async (produkId) => {
-            // Optimistic update
-            await queryClient.cancelQueries({ queryKey: wishlistKeys.all });
-            const previous = queryClient.getQueryData<WishlistResponse>(wishlistKeys.all);
+            await queryClient.cancelQueries({ queryKey: queryKeys.user.wishlist.all });
+            await queryClient.cancelQueries({ queryKey: queryKeys.user.wishlist.details });
 
-            queryClient.setQueryData<WishlistResponse>(wishlistKeys.all, (old) => {
+            const previousWishlist = queryClient.getQueryData<{ items: string[] }>(queryKeys.user.wishlist.all);
+            const previousDetails = queryClient.getQueryData<WishlistItem[]>(queryKeys.user.wishlist.details);
+
+            // Optimistically update the ID list
+            queryClient.setQueryData<{ items: string[] }>(queryKeys.user.wishlist.all, (old) => {
                 if (!old) return { items: [produkId] };
-                const isWishlisted = old.items.includes(produkId);
+                const exists = old.items.includes(produkId);
                 return {
-                    items: isWishlisted
+                    items: exists
                         ? old.items.filter(id => id !== produkId)
                         : [...old.items, produkId],
                 };
             });
 
-            return { previous };
+            return { previousWishlist, previousDetails };
         },
-        onError: (_err, _produkId, context: any) => {
-            // Rollback on error
-            if (context?.previous) {
-                queryClient.setQueryData(wishlistKeys.all, context.previous);
+        onError: (err, produkId, context: any) => {
+            if (context?.previousWishlist) {
+                queryClient.setQueryData(queryKeys.user.wishlist.all, context.previousWishlist);
             }
+            if (context?.previousDetails) {
+                queryClient.setQueryData(queryKeys.user.wishlist.details, context.previousDetails);
+            }
+            toast.error("Gagal memperbarui wishlist");
         },
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: wishlistKeys.all });
+        onSettled: (data) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.user.wishlist.all });
+            queryClient.invalidateQueries({ queryKey: queryKeys.user.wishlist.details });
+
+            if (data?.action === "added") {
+                toast.success("Berhasil ditambahkan ke wishlist");
+            } else if (data?.action === "removed") {
+                toast.success("Berhasil dihapus dari wishlist");
+            }
         },
     });
 }

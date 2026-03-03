@@ -1,0 +1,61 @@
+"use client";
+
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { DateRange } from "react-day-picker";
+import { userApi } from "@/lib/api/user-api";
+import { queryKeys } from "@/lib/query-keys";
+import { startOfDay, endOfDay, subDays, subMonths } from "date-fns";
+import { CONFIG } from "@/lib/config";
+
+export interface OrderFilters {
+    search: string;
+    dateRange: DateRange | undefined;
+    statusOrder: string;
+}
+
+export function useOrders(initialLimit: number = 10) {
+    const datePresets = [
+        { id: "today", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[0].label, getRange: () => ({ from: startOfDay(new Date()), to: endOfDay(new Date()) }) },
+        { id: "yesterday", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[1].label, getRange: () => ({ from: startOfDay(subDays(new Date(), 1)), to: endOfDay(subDays(new Date(), 1)) }) },
+        { id: "7days", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[2].label, getRange: () => ({ from: subDays(new Date(), 7), to: new Date() }) },
+        { id: "3months", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[3].label, getRange: () => ({ from: subMonths(new Date(), 3), to: new Date() }) },
+    ];
+
+    const [page, setPage] = useState(1);
+    const [filters, setFilters] = useState<OrderFilters>({
+        search: "",
+        dateRange: datePresets[3].getRange(),
+        statusOrder: "ALL",
+    });
+
+    const ordersQuery = useQuery({
+        queryKey: [...queryKeys.user.orders, page, initialLimit, filters],
+        queryFn: () => userApi.getOrders({
+            page,
+            limit: initialLimit,
+            search: filters.search,
+            dateRange: filters.dateRange,
+            statusOrder: filters.statusOrder,
+        }),
+    });
+
+    const handleFilterChange = (newFilters: Partial<OrderFilters>) => {
+        setFilters(prev => ({ ...prev, ...newFilters }));
+        setPage(1);
+    };
+
+    return {
+        orders: ordersQuery.data?.orders || [],
+        total: ordersQuery.data?.total || 0,
+        tabs: ordersQuery.data?.tabs || [{ label: "Semua", value: "ALL" }],
+        isLoading: ordersQuery.isLoading,
+        isError: ordersQuery.isError,
+        page,
+        setPage,
+        filters,
+        setFilters: handleFilterChange,
+        datePresets,
+        refetch: ordersQuery.refetch,
+    };
+}

@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { keranjangLove } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-utils";
+import { withAuth, withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 
 /**
@@ -13,10 +13,9 @@ import logger, { apiLogger } from "@/lib/logger";
  * @response 200 — { items: string[] } (array of produkId)
  * @response 500 — { error: "Gagal mengambil wishlist" }
  */
-export async function GET(request: NextRequest) {
+export const GET = withOptionalAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: GET /api/wishlist");
     try {
-        const session = await getSession();
         if (!session) {
             return NextResponse.json({ items: [] });
         }
@@ -41,8 +40,7 @@ export async function GET(request: NextRequest) {
         apiLogger.error(request, error);
         return NextResponse.json({ error: "Gagal mengambil wishlist" }, { status: 500 });
     }
-}
-
+});
 /**
  * Toggle wishlist item (add/remove) berdasarkan produk_id.
  *
@@ -55,14 +53,9 @@ export async function GET(request: NextRequest) {
  * @response 400 — { error: "produkId is required" }
  * @response 500 — { error: "Gagal update wishlist" }
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: POST /api/wishlist");
     try {
-        const session = await getSession();
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
         const custId = Number(session.user.id);
         const body = await request.json();
         const { produkId } = body;
@@ -120,4 +113,4 @@ export async function POST(request: NextRequest) {
         apiLogger.error(request, error);
         return NextResponse.json({ error: "Gagal update wishlist" }, { status: 500 });
     }
-}
+});

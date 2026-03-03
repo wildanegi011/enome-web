@@ -68,9 +68,16 @@ export default function DealsOfTheMonth() {
                             <h3 className="text-[20px] md:text-[24px] font-bold text-neutral-base-900">
                                 {currentProduct.namaProduk}
                             </h3>
-                            <p className="text-rose-500 font-bold text-lg">
-                                Rp {Number(currentProduct.finalMinPrice).toLocaleString()}
-                            </p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-red-600 font-bold text-lg">
+                                    Rp {Number(currentProduct.finalMinPrice).toLocaleString('id-ID')}
+                                </p>
+                                {!!currentProduct.discountPercentage && currentProduct.discountPercentage > 0 && (
+                                    <span className="text-[11px] font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-sm">
+                                        -{currentProduct.discountPercentage}%
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         {/* TODO: uncomment when we have product description */}
                         {/* {currentProduct.deskripsi ? (
@@ -127,7 +134,7 @@ export default function DealsOfTheMonth() {
                                     className="absolute inset-0"
                                 >
                                     <NextImage
-                                        src={highlights[current].gambar ? `${ASSET_URL}/img/produk/${highlights[current].gambar}` : "/placeholder.jpg"}
+                                        src={highlights[current].gambar ? `${ASSET_URL}/img/produk_utama/${highlights[current].gambar}` : "/placeholder.jpg"}
                                         alt={highlights[current].namaProduk}
                                         fill
                                         className="object-cover"
@@ -143,7 +150,7 @@ export default function DealsOfTheMonth() {
                             {highlights.length >= 2 && (
                                 <div className="relative w-[340px] h-[480px] shrink-0 opacity-40 rounded-sm overflow-hidden pointer-events-none bg-neutral-50">
                                     <NextImage
-                                        src={highlights[(current + 1) % highlights.length].gambar ? `${ASSET_URL}/img/produk/${highlights[(current + 1) % highlights.length].gambar}` : "/placeholder.jpg"}
+                                        src={highlights[(current + 1) % highlights.length].gambar ? `${ASSET_URL}/img/produk_utama/${highlights[(current + 1) % highlights.length].gambar}` : "/placeholder.jpg"}
                                         alt="Next item"
                                         fill
                                         className="object-cover"
@@ -155,7 +162,7 @@ export default function DealsOfTheMonth() {
                             {highlights.length >= 3 && (
                                 <div className="relative w-[280px] h-[440px] shrink-0 opacity-20 rounded-sm overflow-hidden pointer-events-none bg-neutral-50">
                                     <NextImage
-                                        src={highlights[(current + 2) % highlights.length].gambar ? `${ASSET_URL}/img/produk/${highlights[(current + 2) % highlights.length].gambar}` : "/placeholder.jpg"}
+                                        src={highlights[(current + 2) % highlights.length].gambar ? `${ASSET_URL}/img/produk_utama/${highlights[(current + 2) % highlights.length].gambar}` : "/placeholder.jpg"}
                                         alt="Next item"
                                         fill
                                         className="object-cover"

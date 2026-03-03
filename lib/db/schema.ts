@@ -341,8 +341,8 @@ export const wallet = mysqlTable("wallet", {
     kredit: int("kredit").default(0),
     saldo: int("saldo").default(0),
     keterangan: text("keterangan"),
-    createdAt: timestamp("created_at"),
-    updatedAt: timestamp("updated_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
 export const companyProfile = mysqlTable("companyprofile", {

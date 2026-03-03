@@ -2,7 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import Link from "next/link";
+import Breadcrumb from "@/components/store/shared/Breadcrumb";
 import { cn } from "@/lib/utils";
 
 export type SortOption = "newest" | "price_asc" | "price_desc" | "name_asc";
@@ -25,11 +25,12 @@ export default function ProductListHeader({ sortBy, onSortChange }: ProductListH
     return (
         <div className="flex items-center justify-between py-6 font-sans">
             {/* Breadcrumbs */}
-            <nav className="flex items-center gap-2 text-[14px] text-neutral-base-400">
-                <Link href="/" className="hover:text-neutral-base-900 transition-colors">Beranda</Link>
-                <span>›</span>
-                <span className="text-neutral-base-900 font-bold">Katalog</span>
-            </nav>
+            <Breadcrumb
+                items={[
+                    { label: "Beranda", href: "/" },
+                    { label: "Katalog" }
+                ]}
+            />
 
             {/* Sorting */}
             <div className="flex items-center gap-2">

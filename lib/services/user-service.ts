@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { customerAlamat, wallet, provinsi, kota, kecamatan } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export class UserService {
     /**
@@ -62,5 +62,64 @@ export class UserService {
             .limit(1);
 
         return lastWallet?.saldo || 0;
+    }
+    /**
+     * Get wallet history with pagination.
+     */
+    static async getWalletHistory(custId: string, limit: number = 10, offset: number = 0) {
+        const history = await db.select()
+            .from(wallet)
+            .where(eq(wallet.custId, custId))
+            .orderBy(desc(wallet.id))
+            .limit(limit)
+            .offset(offset);
+
+        const [totalCount]: any = await db.select({
+            count: sql`count(*)`
+        })
+            .from(wallet)
+            .where(eq(wallet.custId, custId));
+
+        return {
+            history,
+            total: Number(totalCount?.count || 0)
+        };
+    }
+
+    /**
+     * Internal helper to process wallet transactions (Debit/Kredit).
+     */
+    private static async processTransaction(
+        custId: string,
+        amount: number,
+        type: "debit" | "kredit",
+        description: string
+    ) {
+        const currentBalance = await this.getWalletBalance(custId);
+        const newBalance = type === "debit" ? currentBalance + amount : currentBalance - amount;
+
+        return await db.insert(wallet).values({
+            custId,
+            debit: type === "debit" ? amount : 0,
+            kredit: type === "kredit" ? amount : 0,
+            saldo: newBalance,
+            keterangan: description,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+    }
+
+    /**
+     * Add wallet balance (Top-up).
+     */
+    static async addWalletBalance(custId: string, amount: number, description: string) {
+        return await this.processTransaction(custId, amount, "debit", description);
+    }
+
+    /**
+     * Deduct wallet balance (Payment).
+     */
+    static async deductWalletBalance(custId: string, amount: number, description: string) {
+        return await this.processTransaction(custId, amount, "kredit", description);
     }
 }

@@ -37,15 +37,20 @@ const menuItems = [
         icon: Heart,
         href: "/account/wishlist",
     },
+    {
+        title: "Wallet",
+        icon: Wallet,
+        href: "/account/wallet",
+    },
 ];
 
-export default function UserSidebar() {
+export default function UserSidebar({ className, isSheet }: { className?: string, isSheet?: boolean }) {
     const pathname = usePathname();
     const { user, isLoading, logout, isLoggingOut } = useAuth();
 
     return (
-        <aside className="w-full md:w-[280px] shrink-0">
-            <div className="sticky top-24 space-y-8">
+        <aside className={cn("w-full md:w-[280px] shrink-0", className)}>
+            <div className={cn(isSheet ? "space-y-6" : "sticky top-24 space-y-8")}>
 
                 {/* Brand Logo or App Icon Placeholder (Matches circle in mockup) */}
                 <div className="hidden md:flex justify-start mb-10 pl-4">

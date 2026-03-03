@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import {
     keranjang, orders, orderdetail, produk, produkDetail,
-    preOrder, wallet, voucher, voucherHistory, payment as paymentTable
+    preOrder, wallet, voucher, voucherHistory, payment as paymentTable, flashSale
 } from "@/lib/db/schema";
 
 import { eq, and, sql, desc, like } from "drizzle-orm";
@@ -119,6 +119,42 @@ export class OrderService {
                     success: false,
                     error: "Mohon maaf, stok produk di keranjang Anda sudah tidak tersedia atau jumlahnya berubah."
                 };
+            }
+
+            // Flash Sale validation
+            if (item.isFlashsale === 1) {
+                if (item.flashsaleId) {
+                    const [fsData]: any = await db.select({
+                        isAktif: flashSale.isAktif,
+                        waktuSelesai: flashSale.waktuSelesai
+                    }).from(flashSale).where(eq(flashSale.id, Number(item.flashsaleId))).limit(1);
+
+                    if (!fsData || fsData.isAktif !== 1) {
+                        return {
+                            success: false,
+                            error: `Mohon maaf, Flash Sale untuk produk ${item.namaProduk || item.produkId} sudah dihentikan. Silakan hapus dari keranjang.`
+                        };
+                    }
+
+                    const expiredDate = new Date(fsData.waktuSelesai || item.flashsaleExpired).getTime();
+                    const now = new Date().getTime();
+                    if (now > expiredDate) {
+                        return {
+                            success: false,
+                            error: `Waktu Flash Sale untuk produk ${item.namaProduk || item.produkId} telah berakhir. Silakan hapus dari keranjang atau ulangi proses tambah.`
+                        };
+                    }
+                } else if (item.flashsaleExpired) {
+                    // Fallback for older cart items without flashsaleId
+                    const expiredDate = new Date(item.flashsaleExpired).getTime();
+                    const now = new Date().getTime();
+                    if (now > expiredDate) {
+                        return {
+                            success: false,
+                            error: `Waktu Flash Sale untuk produk ${item.namaProduk || item.produkId} telah berakhir. Silakan hapus dari keranjang atau ulangi proses tambah.`
+                        };
+                    }
+                }
             }
 
             totalWeight += (detail.berat || 0) * qty;

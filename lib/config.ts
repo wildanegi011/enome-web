@@ -73,6 +73,8 @@ export const CONFIG = {
             { id: "3months", label: "3 Bulan Terakhir" },
         ],
     },
+
+    PREDEFINED_AMOUNTS: [50000, 100000, 200000, 500000],
 };
 
 export default CONFIG;

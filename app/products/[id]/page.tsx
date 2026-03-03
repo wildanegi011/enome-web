@@ -2,15 +2,16 @@
 
 import { use } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Navbar from "@/components/store/Navbar";
-import Footer from "@/components/store/Footer";
-import ProductGallery from "@/components/store/ProductGallery";
-import ProductInfo from "@/components/store/ProductInfo";
-import ProductCard from "@/components/store/ProductCard";
+import Navbar from "@/components/store/layout/Navbar";
+import Footer from "@/components/store/layout/Footer";
+import ProductGallery from "@/components/store/product/ProductGallery";
+import ProductInfo from "@/components/store/product/ProductInfo";
+import ProductCard from "@/components/store/product/ProductCard";
 import { useProduct } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import Breadcrumb from "@/components/store/shared/Breadcrumb";
 import Link from "next/link";
 
 export default function ProductDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -49,6 +50,7 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
         originalPrice: (stats.finalMinPrice !== stats.baseMinPrice || stats.finalMaxPrice !== stats.baseMaxPrice)
             ? formatPriceRange(stats.baseMinPrice, stats.baseMaxPrice)
             : undefined,
+        discountPercentage: stats.discountPercentage,
         description: product.deskripsi || "No description available.",
         colors: variants.colors,
         sizes: variants.sizes,
@@ -57,7 +59,9 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
         totalStock: stats.totalStock,
         matrix: variants.matrix,
         commission: stats.hasCommission ? formatPriceRange(stats.commissionMin, stats.commissionMax) : undefined,
-        hasCommission: stats.hasCommission
+        hasCommission: stats.hasCommission,
+        isOnFlashSale: stats.isOnFlashSale,
+        flashSaleEndTime: stats.flashSaleEndTime
     };
 
     return (
@@ -65,16 +69,20 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
             <main className="min-h-screen bg-white overflow-x-hidden">
                 <Navbar />
 
-                {/* Breadcrumbs */}
-                <div className="border-b border-neutral-base-100 bg-neutral-base-50/50">
+                {/* Sticky Breadcrumbs Section */}
+                <div className="sticky top-[70px] md:top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-neutral-base-100">
                     <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-4 overflow-x-auto scrollbar-hide">
-                        <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-neutral-base-400 font-sans">
-                            Home <span className="mx-2">/</span> Products <span className="mx-2">/</span> <span className="text-neutral-base-900">{product.namaProduk}</span>
-                        </p>
+                        <Breadcrumb
+                            items={[
+                                { label: "Beranda", href: "/" },
+                                { label: "Katalog", href: "/products" },
+                                { label: product.namaProduk }
+                            ]}
+                        />
                     </div>
                 </div>
 
-                <section className="py-8 md:py-20 lg:py-24">
+                <section className="py-8 md:py-16 lg:py-20">
                     <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-12 lg:gap-16 items-start">
 
@@ -83,6 +91,8 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
                                 <ProductGallery
                                     images={galleryImages}
                                     isSoldOut={parseInt(stats.totalStock) === 0}
+                                    isOnFlashSale={stats.isOnFlashSale}
+                                    flashSaleEndTime={stats.flashSaleEndTime}
                                 />
                             </div>
 
@@ -121,6 +131,8 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
                                         originalPrice: (p.finalMinPrice !== p.baseMinPrice || p.finalMaxPrice !== p.baseMaxPrice)
                                             ? formatPriceRange(p.baseMinPrice, p.baseMaxPrice)
                                             : undefined,
+                                        isOnFlashSale: p.isOnFlashSale,
+                                        discountPercentage: p.discountPercentage,
                                         designer: "Handmade Batik by Énome",
                                         totalStock: p.totalStock
                                     };
@@ -151,7 +163,7 @@ function ProductDetailSkeleton() {
     return (
         <main className="min-h-screen bg-white">
             <Navbar />
-            <div className="border-b border-neutral-base-100 bg-neutral-base-50/50 py-4">
+            <div className="sticky top-[70px] md:top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-neutral-base-100 py-4">
                 <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                     <Skeleton className="h-4 w-64" />
                 </div>

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { keranjang, customer, customerKategori, produk, produkDetail, flashSale, flashSaleDetail, user } from "@/lib/db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import { getSession } from "@/lib/auth-utils";
+import { withAuth } from "@/lib/auth-utils";
 import fs from "fs";
 import path from "path";
 import logger, { apiLogger } from "@/lib/logger";
@@ -21,14 +21,8 @@ import { getJakartaDate, nowJakartaYYMMDD, nowJakartaDate, nowJakartaFull } from
  * @response 200 (error)   — { message: "not_available"|"stok_empty", detail: string }
  * @response 500 — { message: "error", error: "Terjadi kesalahan sistem" }
  */
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, context: any, session: any) => {
     try {
-        const session = await getSession();
-        if (!session) {
-            logger.warn("Cart Add: Unauthorized attempt");
-            return NextResponse.json({ message: "login" });
-        }
-
         const body = await request.json();
         const { id_produk, color_sylla, size_sylla, qty_produk, data_pre_order_id } = body;
 
@@ -115,13 +109,19 @@ export async function POST(request: NextRequest) {
             const isFlashSale = activeFlashSale.length > 0;
             const isPreOrder = false;
 
+            // Jika frontend mengharapkan harga flash sale tapi ternyata sudah habis di backend
+            if (body.is_flash_sale && !isFlashSale) {
+                return { error: "flash_sale_ended", detail: "Mohon maaf, periode flash sale untuk produk ini baru saja berakhir." };
+            }
+
             // 5. Kalkulasi harga akhir (freshDetail.stok_normal uses snake_case in raw execute)
-            let basePrice = Number(freshDetail[priceColumnName as keyof typeof freshDetail] || freshDetail.harga_jual);
+            let basePrice = Number(freshDetail[priceColumnName as keyof typeof freshDetail] || freshDetail.hargaJual);
             let finalPrice = basePrice;
 
             if (isFlashSale) {
                 const discount = parseInt(activeFlashSale[0].diskonFlashSale || "0");
-                finalPrice = basePrice - (basePrice * (discount / 100));
+                const retailPrice = Number(freshDetail.hargaJual || freshDetail.harga_jual || 0);
+                finalPrice = retailPrice - (retailPrice * (discount / 100));
             }
 
             // 6. Cek apakah item yang persis sama sudah ada di keranjang (LOCK)
@@ -218,6 +218,4 @@ export async function POST(request: NextRequest) {
         apiLogger.error(request, error, { route: "/api/cart/add" });
         return NextResponse.json({ message: "error", error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
-}
-
-
+});

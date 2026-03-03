@@ -10,7 +10,7 @@ import {
     payment as paymentTable
 } from "@/lib/db/schema";
 import { eq, and, or, sql, like } from "drizzle-orm";
-import { getSession } from "@/lib/auth-utils";
+import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CustomerService } from "@/lib/services/customer-service";
 
@@ -27,16 +27,12 @@ import { CustomerService } from "@/lib/services/customer-service";
  * @response 500 — { message: "error", error: "Terjadi kesalahan sistem" }
  */
 
-export async function GET(
+export const GET = withAuth(async (
     req: NextRequest,
-    context: any
-) {
+    context: any,
+    session: any
+) => {
     try {
-        const session = await getSession();
-        if (!session || !session.user) {
-            return NextResponse.json({ message: "unauthorized" }, { status: 401 });
-        }
-
         const userId = session.user.id;
         const params = await context.params;
         const orderId = decodeURIComponent(params.id);
@@ -152,4 +148,4 @@ export async function GET(
         apiLogger.error(req, error);
         return NextResponse.json({ message: "error", error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
-}
+});
