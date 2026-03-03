@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useNewArrivals } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
-import ProductCard from "./ProductCard";
+import ProductCard from "@/components/store/product/ProductCard";
 
 export default function NewArrivals() {
     const { data: rawProducts = [], isLoading: productsLoading } = useNewArrivals();
     const [activeCategory, setActiveCategory] = useState("");
     const headerRef = useRef(null);
-    const headerInView = useInView(headerRef, { once: true });
 
     const isLoading = productsLoading;
 
@@ -108,7 +107,7 @@ export default function NewArrivals() {
                                 const mappedProduct = {
                                     id: product.produkId,
                                     name: product.namaProduk,
-                                    image: product.gambar ? `${ASSET_URL}/img/produk/${product.gambar}` : "/placeholder.jpg",
+                                    image: product.gambar ? `${ASSET_URL}/img/produk_utama/${product.gambar}` : "/placeholder.jpg",
                                     colors: colorArray,
                                     price: formatPriceRange(product.finalMinPrice, product.finalMaxPrice),
                                     originalPrice: (product.finalMinPrice !== product.baseMinPrice || product.finalMaxPrice !== product.baseMaxPrice)

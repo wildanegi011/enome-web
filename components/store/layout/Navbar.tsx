@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Search, ShoppingBag, User, Settings, LogOut, Package, Wallet, ChevronDown, Menu, X, MapPin, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import AuthModal from "./AuthModal";
+import AuthModal from "@/components/store/auth/AuthModal";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";

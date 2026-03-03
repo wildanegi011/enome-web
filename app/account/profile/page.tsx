@@ -1,62 +1,27 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-    User, Mail, Phone, Lock, Save,
-    Home, Camera, Shield, ChevronRight,
-    Loader2, CheckCircle2, Hash, Store,
-    Award, Ticket, Info, AlertCircle,
-    Calendar as CalendarIcon
-} from "lucide-react";
+import { User, Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/store/Navbar";
-import UserSidebar from "@/components/store/UserSidebar";
-import AccountSidebarMobile from "@/components/store/AccountSidebarMobile";
+import Navbar from "@/components/store/layout/Navbar";
+import UserSidebar from "@/components/store/layout/UserSidebar";
+import AccountHeader from "@/components/store/layout/AccountHeader";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { ASSET_URL } from "@/config/config";
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator
-} from "@/components/ui/breadcrumb";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 
-interface ProfileData {
-    id: number;
-    username: string;
-    email: string;
-    nama: string;
-    kodeCustomer: string;
-    namaTipeCustomer: string;
-    namaToko: string;
-    noHandphone: string;
-    gender: number;
-    brithdate: string | null;
-    photo: string | null;
-    urlphoto: string | null;
-    vouchers: any[];
-}
-
 export default function ProfilePage() {
-    const { user } = useAuth();
-    const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState({
         nama: "",
         brithdate: "",
@@ -66,17 +31,9 @@ export default function ProfilePage() {
     const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const router = useRouter();
-    const queryClient = useQueryClient();
 
-    const { data: profile, isLoading } = useQuery<ProfileData>({
-        queryKey: ["user-profile"],
-        queryFn: async () => {
-            const res = await fetch("/api/user/profile");
-            if (!res.ok) throw new Error("Failed to fetch profile");
-            return res.json();
-        }
-    });
+    const { data: profile, isLoading } = useProfile();
+    const updateProfileMutation = useUpdateProfile();
 
     useEffect(() => {
         if (profile) {
@@ -111,34 +68,22 @@ export default function ProfilePage() {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSaving(true);
 
-        try {
-            const data = new FormData();
-            data.append("nama", formData.nama);
-            data.append("gender", formData.gender.toString());
-            data.append("brithdate", formData.brithdate);
-            data.append("noHandphone", "+62" + formData.noHandphone);
-            if (selectedPhoto) {
-                data.append("photo", selectedPhoto);
-            }
-
-            const response = await fetch("/api/user/profile", {
-                method: "POST",
-                body: data,
-            });
-
-            if (!response.ok) throw new Error("Gagal memperbarui profil");
-
-            toast.success("Profil berhasil diperbarui");
-            queryClient.invalidateQueries({ queryKey: ["user-profile"] });
-            setSelectedPhoto(null);
-            setPhotoPreview(null);
-        } catch (error: any) {
-            toast.error(error.message || "Terjadi kesalahan");
-        } finally {
-            setIsSaving(false);
+        const data = new FormData();
+        data.append("nama", formData.nama);
+        data.append("gender", formData.gender.toString());
+        data.append("brithdate", formData.brithdate);
+        data.append("noHandphone", "+62" + formData.noHandphone);
+        if (selectedPhoto) {
+            data.append("photo", selectedPhoto);
         }
+
+        updateProfileMutation.mutate(data, {
+            onSuccess: () => {
+                setSelectedPhoto(null);
+                setPhotoPreview(null);
+            }
+        });
     };
 
     if (isLoading) {
@@ -155,16 +100,10 @@ export default function ProfilePage() {
                         <UserSidebar />
                     </div>
                     <div className="flex-1 min-w-0">
-                        {/* Mockup Header */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                            <div className="flex flex-col gap-1">
-                                <h1 className="text-[26px] md:text-[32px] font-black text-neutral-base-900 tracking-tight">Profil Saya</h1>
-                                <p className="text-[12px] md:text-[14px] text-neutral-base-400 font-medium">Kelola informasi profil Anda untuk keamanan akun ÉNOMÉ Anda.</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <AccountSidebarMobile />
-                            </div>
-                        </div>
+                        <AccountHeader
+                            title="Profil Saya"
+                            description="Kelola informasi profil Anda untuk keamanan akun ÉNOMÉ Anda."
+                        />
 
                         <div className="bg-white rounded-[24px] md:rounded-[32px] p-5 sm:p-8 md:p-12 border border-neutral-base-100 shadow-sm space-y-10 md:space-y-12">
                             {/* Profile Photo Section */}
@@ -265,24 +204,22 @@ export default function ProfilePage() {
                                             className="flex flex-col sm:flex-row gap-3 sm:gap-4"
                                         >
                                             <div
-                                                onClick={() => setFormData({ ...formData, gender: 1 })}
                                                 className={cn(
                                                     "flex items-center space-x-3 bg-white border rounded-xl px-4 py-3 cursor-pointer transition-all flex-1",
                                                     formData.gender === 1 ? "border-amber-800 bg-amber-50/10 shadow-sm" : "border-neutral-base-100 hover:bg-neutral-base-50"
                                                 )}
                                             >
                                                 <RadioGroupItem value="1" id="gender-male" className="border-neutral-base-300 text-amber-800" />
-                                                <Label htmlFor="gender-male" className="font-bold text-[13px] cursor-pointer w-full text-neutral-base-900">Laki-laki</Label>
+                                                <Label htmlFor="gender-male" className="font-bold text-[13px] cursor-pointer w-full py-1 text-neutral-base-900">Laki-laki</Label>
                                             </div>
                                             <div
-                                                onClick={() => setFormData({ ...formData, gender: 2 })}
                                                 className={cn(
                                                     "flex items-center space-x-3 bg-white border rounded-xl px-4 py-3 cursor-pointer transition-all flex-1",
                                                     formData.gender === 2 ? "border-amber-800 bg-amber-50/10 shadow-sm" : "border-neutral-base-100 hover:bg-neutral-base-50"
                                                 )}
                                             >
                                                 <RadioGroupItem value="2" id="gender-female" className="border-neutral-base-300 text-amber-800" />
-                                                <Label htmlFor="gender-female" className="font-bold text-[13px] cursor-pointer w-full text-neutral-base-900">Perempuan</Label>
+                                                <Label htmlFor="gender-female" className="font-bold text-[13px] cursor-pointer w-full py-1 text-neutral-base-900">Perempuan</Label>
                                             </div>
                                         </RadioGroup>
                                     </div>
@@ -324,10 +261,10 @@ export default function ProfilePage() {
                                     </Button>
                                     <Button
                                         type="submit"
-                                        disabled={isSaving}
+                                        disabled={updateProfileMutation.isPending}
                                         className="h-11 md:h-12 px-10 bg-[#111827] text-white rounded-xl text-[13px] md:text-[14px] font-bold shadow-xl shadow-gray-900/10 hover:bg-gray-800 transition-all w-full sm:min-w-[140px] sm:w-auto flex items-center justify-center gap-2"
                                     >
-                                        {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                                        {updateProfileMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                                         Simpan Perubahan
                                     </Button>
                                 </div>
@@ -340,13 +277,6 @@ export default function ProfilePage() {
     );
 }
 
-function Badge({ children, className }: { children: React.ReactNode, className?: string }) {
-    return (
-        <span className={cn("text-[10px] font-black uppercase tracking-widest border rounded-full px-2 py-0.5", className)}>
-            {children}
-        </span>
-    );
-}
 
 function ProfileSkeleton() {
     return (

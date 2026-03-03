@@ -4,8 +4,8 @@ import { useEffect, useRef, Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, Check, ShoppingBag, MapPin, Truck, CreditCard } from "lucide-react";
 import clsx from "clsx";
-import Navbar from "@/components/store/Navbar";
-import Breadcrumb from "@/components/store/Breadcrumb";
+import Navbar from "@/components/store/layout/Navbar";
+import Breadcrumb from "@/components/store/shared/Breadcrumb";
 import { useCheckout } from "@/hooks/use-checkout";
 
 // Modular Components

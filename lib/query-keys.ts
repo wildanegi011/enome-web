@@ -20,8 +20,18 @@ export const queryKeys = {
         item: (id: number) => ["cart", id] as const,
     },
     user: {
-        wallet: ["user", "wallet"] as const,
+        wallet: {
+            balance: ["user", "wallet", "balance"] as const,
+            history: ["user", "wallet", "history"] as const,
+        },
         addresses: ["user", "addresses"] as const,
+        orders: ["user", "orders"] as const,
+        orderDetail: (id: string) => ["user", "order-detail", id] as const,
+        profile: ["user", "profile"] as const,
+        wishlist: {
+            all: ["user", "wishlist"] as const,
+            details: ["user", "wishlist", "details"] as const,
+        },
     },
     payments: {
         methods: ["payment-methods"] as const,

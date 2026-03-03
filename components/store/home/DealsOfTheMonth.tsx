@@ -134,7 +134,7 @@ export default function DealsOfTheMonth() {
                                     className="absolute inset-0"
                                 >
                                     <NextImage
-                                        src={highlights[current].gambar ? `${ASSET_URL}/img/produk/${highlights[current].gambar}` : "/placeholder.jpg"}
+                                        src={highlights[current].gambar ? `${ASSET_URL}/img/produk_utama/${highlights[current].gambar}` : "/placeholder.jpg"}
                                         alt={highlights[current].namaProduk}
                                         fill
                                         className="object-cover"
@@ -150,7 +150,7 @@ export default function DealsOfTheMonth() {
                             {highlights.length >= 2 && (
                                 <div className="relative w-[340px] h-[480px] shrink-0 opacity-40 rounded-sm overflow-hidden pointer-events-none bg-neutral-50">
                                     <NextImage
-                                        src={highlights[(current + 1) % highlights.length].gambar ? `${ASSET_URL}/img/produk/${highlights[(current + 1) % highlights.length].gambar}` : "/placeholder.jpg"}
+                                        src={highlights[(current + 1) % highlights.length].gambar ? `${ASSET_URL}/img/produk_utama/${highlights[(current + 1) % highlights.length].gambar}` : "/placeholder.jpg"}
                                         alt="Next item"
                                         fill
                                         className="object-cover"
@@ -162,7 +162,7 @@ export default function DealsOfTheMonth() {
                             {highlights.length >= 3 && (
                                 <div className="relative w-[280px] h-[440px] shrink-0 opacity-20 rounded-sm overflow-hidden pointer-events-none bg-neutral-50">
                                     <NextImage
-                                        src={highlights[(current + 2) % highlights.length].gambar ? `${ASSET_URL}/img/produk/${highlights[(current + 2) % highlights.length].gambar}` : "/placeholder.jpg"}
+                                        src={highlights[(current + 2) % highlights.length].gambar ? `${ASSET_URL}/img/produk_utama/${highlights[(current + 2) % highlights.length].gambar}` : "/placeholder.jpg"}
                                         alt="Next item"
                                         fill
                                         className="object-cover"

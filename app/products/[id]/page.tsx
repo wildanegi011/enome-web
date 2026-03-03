@@ -2,16 +2,16 @@
 
 import { use } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Navbar from "@/components/store/Navbar";
-import Footer from "@/components/store/Footer";
-import ProductGallery from "@/components/store/ProductGallery";
-import ProductInfo from "@/components/store/ProductInfo";
-import ProductCard from "@/components/store/ProductCard";
+import Navbar from "@/components/store/layout/Navbar";
+import Footer from "@/components/store/layout/Footer";
+import ProductGallery from "@/components/store/product/ProductGallery";
+import ProductInfo from "@/components/store/product/ProductInfo";
+import ProductCard from "@/components/store/product/ProductCard";
 import { useProduct } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import Breadcrumb from "@/components/store/Breadcrumb";
+import Breadcrumb from "@/components/store/shared/Breadcrumb";
 import Link from "next/link";
 
 export default function ProductDetailPage(props: { params: Promise<{ id: string }> }) {

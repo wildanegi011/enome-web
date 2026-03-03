@@ -157,7 +157,7 @@ export function useCheckout() {
     const isLoading = fetchCartQuery.isLoading;
 
     const fetchWalletQuery = useQuery({
-        queryKey: queryKeys.user.wallet,
+        queryKey: queryKeys.user.wallet.balance,
         queryFn: userApi.getWalletBalance,
     });
 

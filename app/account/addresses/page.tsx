@@ -2,21 +2,20 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-    Plus,
-    Search,
-    Package, AlertCircle
-} from "lucide-react";
-import Navbar from "@/components/store/Navbar";
-import UserSidebar from "@/components/store/UserSidebar";
-import AccountSidebarMobile from "@/components/store/AccountSidebarMobile";
+import { Plus } from "lucide-react";
+import Navbar from "@/components/store/layout/Navbar";
+import UserSidebar from "@/components/store/layout/UserSidebar";
+import AccountHeader from "@/components/store/layout/AccountHeader";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
 import { useAddresses, Address } from "@/hooks/use-addresses";
-import AddressCard from "@/components/store/AddressCard";
-import AddAddressModal from "@/components/store/AddAddressModal";
+import AddressCard from "@/components/store/address/AddressCard";
+import AddAddressModal from "@/components/store/address/AddAddressModal";
+import SearchInput from "@/components/store/shared/SearchInput";
+import EmptyState from "@/components/store/shared/EmptyState";
+import { MapPin } from "lucide-react";
 
 export default function AddressesPage() {
     const { addresses, isLoading, deleteAddress, setPrimary } = useAddresses();
@@ -55,17 +54,11 @@ export default function AddressesPage() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-4">
-                                <div className="flex flex-col gap-1">
-                                    <h1 className="text-[26px] md:text-[32px] font-black text-neutral-base-900 tracking-tight leading-tight">Daftar Alamat</h1>
-                                    <p className="text-[12px] md:text-[14px] text-neutral-base-400 font-medium">Kelola alamat pengiriman kamu untuk proses checkout yang lebih cepat.</p>
-                                </div>
-                                <div className="flex items-center gap-3 self-end sm:self-auto">
-                                    <AccountSidebarMobile />
-                                </div>
-                            </div>
-
+                        <AccountHeader
+                            title="Daftar Alamat"
+                            description="Kelola alamat pengiriman kamu untuk proses checkout yang lebih cepat."
+                            className="mb-10"
+                        >
                             <Button
                                 onClick={handleAdd}
                                 className="h-12 md:h-14 px-6 md:px-8 rounded-xl md:rounded-2xl bg-neutral-base-900 text-white font-bold tracking-widest uppercase hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 gap-3 group shrink-0 w-full sm:w-auto text-[11px] md:text-[13px]"
@@ -73,21 +66,17 @@ export default function AddressesPage() {
                                 <Plus className="w-4 h-4 md:w-5 md:h-5 group-hover:rotate-90 transition-transform duration-300" />
                                 Tambah Alamat
                             </Button>
-                        </div>
+                        </AccountHeader>
 
                         {/* Search & Stats Bar */}
-                        <div className="bg-white/60 backdrop-blur-md border border-neutral-base-100/60 rounded-[24px] p-2 mb-8 flex flex-col md:flex-row items-center gap-4 shadow-sm">
-                            <div className="relative flex-1 group w-full">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-base-300 group-focus-within:text-amber-800 transition-colors" />
-                                <input
-                                    type="text"
-                                    placeholder="Cari alamat atau nama penerima..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full h-12 bg-white/80 border-transparent rounded-[18px] pl-12 pr-6 text-[13px] font-bold outline-none focus:bg-white focus:ring-4 focus:ring-amber-50/20 transition-all placeholder:text-neutral-base-300"
-                                />
-                            </div>
-                            <div className="px-6 py-2 border-l border-neutral-base-100 hidden md:block">
+                        <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
+                            <SearchInput
+                                placeholder="Cari alamat atau nama penerima..."
+                                value={searchQuery}
+                                onChange={setSearchQuery}
+                                className="bg-white/60 backdrop-blur-md"
+                            />
+                            <div className="px-6 py-3 bg-white/60 backdrop-blur-md border border-neutral-base-100/60 rounded-[20px] shadow-sm hidden md:block shrink-0">
                                 <span className="text-[11px] font-black uppercase tracking-widest text-neutral-base-400">Total: {addresses.length} Alamat</span>
                             </div>
                         </div>
@@ -132,29 +121,13 @@ export default function AddressesPage() {
                                 </motion.button>
                             </div>
                         ) : (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-white rounded-[40px] p-20 border border-neutral-base-100/60 shadow-sm flex flex-col items-center text-center"
-                            >
-                                <div className="w-24 h-24 rounded-full bg-neutral-base-50 flex items-center justify-center mb-8 relative">
-                                    <Package className="w-10 h-10 text-neutral-base-200" />
-                                    <div className="absolute -right-2 -bottom-2 w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg border border-neutral-base-50">
-                                        <AlertCircle className="w-5 h-5 text-amber-800" />
-                                    </div>
-                                </div>
-                                <h3 className="text-[20px] font-bold text-neutral-base-900 mb-3 tracking-tight">Belum Ada Alamat Tersimpan</h3>
-                                <p className="text-neutral-base-400 font-bold text-[14px] max-w-[320px] mb-10 leading-relaxed">
-                                    Kamu belum menambahkan alamat pengiriman. Tambahkan satu untuk mempermudah saat checkout.
-                                </p>
-                                <Button
-                                    onClick={handleAdd}
-                                    className="h-14 px-10 rounded-full bg-neutral-base-900 text-white font-bold tracking-widest uppercase hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 gap-3 group"
-                                >
-                                    <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                                    Tambah Alamat Sekarang
-                                </Button>
-                            </motion.div>
+                            <EmptyState
+                                icon={MapPin}
+                                title="Belum Ada Alamat Tersimpan"
+                                description="Kamu belum menambahkan alamat pengiriman. Tambahkan satu untuk mempermudah saat checkout."
+                                actionLabel="Tambah Alamat Sekarang"
+                                onActionClick={handleAdd}
+                            />
                         )}
                     </div>
                 </div>

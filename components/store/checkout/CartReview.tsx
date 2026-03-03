@@ -5,7 +5,7 @@ import { Loader2, Minus, Plus, Trash2, Zap } from "lucide-react";
 import { ASSET_URL } from "@/config/config";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import ConfirmDialog from "@/components/store/ConfirmDialog";
+import ConfirmDialog from "@/components/store/shared/ConfirmDialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CartItem {

@@ -3,12 +3,12 @@
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import FilterSidebar, { FilterState } from "@/components/store/FilterSidebar";
-import ProductListHeader, { SortOption } from "@/components/store/ProductListHeader";
-import ProductCard from "@/components/store/ProductCard";
-import Navbar from "@/components/store/Navbar";
-import Footer from "@/components/store/Footer";
-import ResultsInfo from "@/components/store/ResultsInfo";
+import FilterSidebar, { FilterState } from "@/components/store/product/FilterSidebar";
+import ProductListHeader, { SortOption } from "@/components/store/product/ProductListHeader";
+import ProductCard from "@/components/store/product/ProductCard";
+import Navbar from "@/components/store/layout/Navbar";
+import Footer from "@/components/store/layout/Footer";
+import ResultsInfo from "@/components/store/shared/ResultsInfo";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { SlidersHorizontal, Loader2 } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
@@ -18,7 +18,7 @@ import type { Category, Color, Size } from "@/hooks/use-products";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-import HeroSection from "@/components/store/HeroSection";
+import HeroSection from "@/components/store/home/HeroSection";
 import CONFIG from "@/lib/config";
 
 function ProductsContent() {
@@ -118,8 +118,6 @@ function ProductsContent() {
             <main className="min-h-screen bg-white">
                 <Navbar />
 
-                {/* <HeroSection /> */}
-
                 <div className="sticky top-[80px] z-30 bg-white/90 backdrop-blur-md border-b border-neutral-base-50">
                     <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                         <ProductListHeader sortBy={sortBy} onSortChange={setSortBy} />
@@ -210,7 +208,7 @@ function ProductsContent() {
                                                     const mappedProduct = {
                                                         id: p.produkId,
                                                         name: p.namaProduk,
-                                                        image: p.gambar ? `${ASSET_URL}/img/produk/${p.gambar}` : "/placeholder.jpg",
+                                                        image: p.gambar ? `${ASSET_URL}/img/produk_utama/${p.gambar}` : "/placeholder.jpg",
                                                         category: p.kategori,
                                                         colors: colorArray,
                                                         price: formatPriceRange(p.finalMinPrice, p.finalMaxPrice),

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Timer, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
-import ProductCard from "@/components/store/ProductCard";
+import ProductCard from "@/components/store/product/ProductCard";
 import { ASSET_URL } from "@/config/config";
 
 interface FlashSaleEvent {

@@ -9,11 +9,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/store/Navbar";
+import Navbar from "@/components/store/layout/Navbar";
 import { toast } from "sonner";
 import { useCart } from "@/hooks/use-cart";
-import Breadcrumb from "@/components/store/Breadcrumb";
-import ConfirmDialog from "@/components/store/ConfirmDialog";
+import Breadcrumb from "@/components/store/shared/Breadcrumb";
+import ConfirmDialog from "@/components/store/shared/ConfirmDialog";
 import { ASSET_URL } from "@/config/config";
 import { debounce } from "lodash";
 import { useRouter } from "next/navigation";

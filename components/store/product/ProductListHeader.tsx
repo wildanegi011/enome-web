@@ -2,7 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import Breadcrumb from "@/components/store/Breadcrumb";
+import Breadcrumb from "@/components/store/shared/Breadcrumb";
 import { cn } from "@/lib/utils";
 
 export type SortOption = "newest" | "price_asc" | "price_desc" | "name_asc";
