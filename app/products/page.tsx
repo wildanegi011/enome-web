@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import FilterSidebar, { FilterState } from "@/components/store/FilterSidebar";
@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import HeroSection from "@/components/store/HeroSection";
 import CONFIG from "@/lib/config";
 
-export default function ProductsPage() {
+function ProductsContent() {
     const searchParams = useSearchParams();
     const categoryFromUrl = searchParams.get("category");
 
@@ -260,6 +260,14 @@ export default function ProductsPage() {
                 <Footer />
             </main>
         </TooltipProvider>
+    );
+}
+
+export default function ProductsPage() {
+    return (
+        <Suspense fallback={<ProductListSkeleton />}>
+            <ProductsContent />
+        </Suspense>
     );
 }
 
