@@ -401,7 +401,8 @@ export class OrderService {
                 .where(eq(centralConfig.variable, "batas_pembayaran"))
                 .limit(1);
 
-            const paymentInterval = payConfig?.value || "1 DAY";
+            const rawInterval = payConfig?.value || "1";
+            const paymentInterval = /^\d+$/.test(rawInterval) ? `${rawInterval} DAY` : rawInterval;
 
             const paymentValues: any = {
                 isPaid: finalBankAmount <= 0 ? 1 : 0,
