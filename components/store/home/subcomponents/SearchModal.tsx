@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import { ChevronRight, Search, ShoppingBag, Heart, Settings, X, Sparkles } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ChevronRight, Clock, Search, ShoppingBag, Sparkles, TrendingUp, X, Compass, Heart } from "lucide-react";
 import {
     CommandDialog,
     CommandInput,
@@ -20,8 +19,9 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from "@/components/ui/drawer";
-import { useHighlights, useProducts } from "@/hooks/use-products";
+import { useHighlights, useProducts, useCategories } from "@/hooks/use-products";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useRecentSearches } from "@/hooks/use-recent-searches";
 import { ASSET_URL } from "@/config/config";
 
 interface Collection {
@@ -33,6 +33,7 @@ interface Collection {
     }[];
 }
 
+/* ─── Shared Search Results Content ─── */
 const SearchMenuContent = ({
     setDirection,
     setCurrentIndex,
@@ -41,7 +42,12 @@ const SearchMenuContent = ({
     router,
     collections,
     products,
-    searchQuery
+    searchQuery,
+    categories,
+    recentSearches,
+    onRemoveRecent,
+    onClearRecent,
+    onSelectRecent,
 }: {
     setDirection: (dir: number) => void;
     setCurrentIndex: (idx: number) => void;
@@ -51,76 +57,153 @@ const SearchMenuContent = ({
     collections: Collection[];
     products: any[];
     searchQuery: string;
+    categories: { kategoriId: number; kategori: string }[];
+    recentSearches: string[];
+    onRemoveRecent: (q: string) => void;
+    onClearRecent: () => void;
+    onSelectRecent: (q: string) => void;
 }) => (
-    <CommandList className="scrollbar-hide max-h-none pb-12">
-        <CommandEmpty className="py-24 flex flex-col items-center justify-center gap-6">
-            <div className="size-20 rounded-3xl bg-zinc-50 border border-zinc-100 flex items-center justify-center animate-pulse">
-                <Search className="size-8 text-zinc-200" />
+    <CommandList className="max-h-none pb-6">
+        {/* Empty State */}
+        <CommandEmpty className="py-16 flex flex-col items-center justify-center gap-4">
+            <div className="size-14 rounded-2xl bg-stone-100 flex items-center justify-center">
+                <Search className="size-6 text-stone-300" />
             </div>
-            <div className="text-center space-y-2">
-                <p className="text-zinc-900 text-lg font-semibold tracking-wide">No results found</p>
-                <p className="text-zinc-400 text-sm">Try searching for "Batik", "Silk", or "Collection"</p>
+            <div className="text-center space-y-1">
+                <p className="text-stone-700 text-sm font-semibold">No results found</p>
+                <p className="text-stone-400 text-xs">Try a different keyword</p>
             </div>
         </CommandEmpty>
 
-        {collections.length > 0 && (
-            <CommandGroup
-                heading={
-                    <div className="flex items-center gap-3 px-6 md:px-10 pt-8 pb-4">
-                        <Sparkles className="size-3 text-zinc-400" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">Featured Collections</span>
-                    </div>
-                }
-            >
-                <div className="px-5 md:px-8 space-y-2">
-                    {collections.map((collection) => (
-                        <CommandItem
-                            key={collection.id}
-                            onSelect={() => {
-                                const index = collections.findIndex(c => c.id === collection.id);
-                                if (index !== -1) {
-                                    setDirection(index > currentIndex ? 1 : -1);
-                                    setCurrentIndex(index);
-                                    setIsSearchOpen(false);
-                                }
-                            }}
-                            className="group/item flex items-center gap-5 px-4 py-4 rounded-2xl bg-zinc-50/0 hover:bg-zinc-50 data-[selected=true]:bg-zinc-100/60 cursor-pointer transition-all duration-300 border border-transparent hover:border-zinc-200/50"
-                        >
-                            <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-zinc-50 shrink-0 shadow-lg">
-                                <Image
-                                    src={collection.images[0].url}
-                                    alt={collection.title}
-                                    fill
-                                    className="object-cover group-hover/item:scale-110 transition-transform duration-700"
-                                />
+        {/* ── Idle State: No search query ── */}
+        {!searchQuery && (
+            <>
+                {/* Recent Searches */}
+                {recentSearches.length > 0 && (
+                    <CommandGroup
+                        heading={
+                            <div className="flex items-center justify-between px-4 pt-2 pb-2">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="size-3 text-stone-300" />
+                                    <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Recent</span>
+                                </div>
+                                <button
+                                    onClick={onClearRecent}
+                                    className="text-[10px] font-medium text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
+                                >
+                                    Clear all
+                                </button>
                             </div>
-                            <div className="flex flex-col gap-1 overflow-hidden min-w-0">
-                                <span className="font-bold text-[15px] md:text-[16px] text-zinc-900 tracking-wide truncate">{collection.title}</span>
-                                <span className="text-[12px] text-zinc-400 uppercase tracking-widest font-medium">{collection.images.length} masterworks</span>
+                        }
+                    >
+                        <div className="px-2 flex flex-wrap gap-1.5">
+                            {recentSearches.map((term) => (
+                                <CommandItem
+                                    key={term}
+                                    onSelect={() => onSelectRecent(term)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 data-[selected=true]:bg-stone-200 text-xs font-medium text-stone-600 cursor-pointer transition-colors"
+                                >
+                                    {term}
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); onRemoveRecent(term); }}
+                                        className="size-3.5 rounded-full hover:bg-stone-300 flex items-center justify-center transition-colors cursor-pointer"
+                                    >
+                                        <X className="size-2.5" />
+                                    </button>
+                                </CommandItem>
+                            ))}
+                        </div>
+                    </CommandGroup>
+                )}
+
+                {/* Trending Categories */}
+                {categories.length > 0 && (
+                    <CommandGroup
+                        heading={
+                            <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+                                <TrendingUp className="size-3 text-stone-300" />
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Trending</span>
                             </div>
-                            <div className="ml-auto flex items-center gap-2 opacity-0 group-hover/item:opacity-100 transition-all transform translate-x-4 group-hover/item:translate-x-0">
-                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">View Gallery</span>
-                                <ChevronRight className="size-4 text-zinc-300" />
+                        }
+                    >
+                        <div className="px-2 flex flex-wrap gap-1.5">
+                            {categories.slice(0, 8).map((cat) => (
+                                <CommandItem
+                                    key={cat.kategoriId}
+                                    onSelect={() => {
+                                        router.push(`/products?category=${cat.kategori}`);
+                                        setIsSearchOpen(false);
+                                    }}
+                                    className="inline-flex items-center px-3 py-1.5 rounded-lg border border-stone-200 hover:border-stone-300 hover:bg-stone-50 data-[selected=true]:bg-stone-50 text-xs font-medium text-stone-600 cursor-pointer transition-colors"
+                                >
+                                    {cat.kategori}
+                                </CommandItem>
+                            ))}
+                        </div>
+                    </CommandGroup>
+                )}
+
+                <div className="my-3 h-px bg-stone-100 mx-4" />
+
+                {/* Collections */}
+                {collections.length > 0 && (
+                    <CommandGroup
+                        heading={
+                            <div className="flex items-center gap-2 px-4 pt-1 pb-2">
+                                <Sparkles className="size-3 text-stone-300" />
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Collections</span>
                             </div>
-                        </CommandItem>
-                    ))}
-                </div>
-            </CommandGroup>
+                        }
+                    >
+                        <div className="px-2 space-y-0.5">
+                            {collections.map((collection) => (
+                                <CommandItem
+                                    key={collection.id}
+                                    onSelect={() => {
+                                        const index = collections.findIndex(c => c.id === collection.id);
+                                        if (index !== -1) {
+                                            setDirection(index > currentIndex ? 1 : -1);
+                                            setCurrentIndex(index);
+                                            setIsSearchOpen(false);
+                                        }
+                                    }}
+                                    className="group/item flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-50 data-[selected=true]:bg-stone-50 cursor-pointer transition-colors"
+                                >
+                                    <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-stone-100 shrink-0">
+                                        <Image
+                                            src={collection.images[0].url}
+                                            alt={collection.title}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="font-medium text-sm text-stone-800 truncate">{collection.title}</span>
+                                        <span className="text-[11px] text-stone-400">{collection.images.length} images</span>
+                                    </div>
+                                    <ChevronRight className="ml-auto size-4 text-stone-300 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                                </CommandItem>
+                            ))}
+                        </div>
+                    </CommandGroup>
+                )}
+
+                <div className="my-3 h-px bg-stone-100 mx-4" />
+            </>
         )}
 
-        <div className="mt-8 mb-4 h-px bg-zinc-100 mx-8 md:mx-12" />
-
+        {/* Products (always shown — recommended or search results) */}
         <CommandGroup
             heading={
-                <div className="flex items-center gap-3 px-6 md:px-10 pt-4 pb-4">
-                    <ShoppingBag className="size-3 text-zinc-400" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">
-                        {searchQuery ? "Search Results" : "Rekomendasi Produk"}
+                <div className="flex items-center gap-2 px-4 pt-1 pb-2">
+                    <ShoppingBag className="size-3 text-stone-300" />
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">
+                        {searchQuery ? "Results" : "Recommended"}
                     </span>
                 </div>
             }
         >
-            <div className="px-5 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="px-2 space-y-0.5">
                 {products.map((product) => (
                     <CommandItem
                         key={product.produkId}
@@ -128,60 +211,68 @@ const SearchMenuContent = ({
                             router.push(`/products/${product.produkId}`);
                             setIsSearchOpen(false);
                         }}
-                        className="group/prod flex items-center gap-4 px-4 py-4 rounded-2xl bg-zinc-50/0 hover:bg-zinc-50 data-[selected=true]:bg-zinc-100/60 cursor-pointer transition-all duration-300 border border-transparent hover:border-zinc-200/50"
+                        className="group/prod flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-50 data-[selected=true]:bg-stone-50 cursor-pointer transition-colors"
                     >
-                        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-zinc-50 shrink-0 shadow-sm border border-zinc-100">
+                        <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-stone-100 shrink-0">
                             <Image
                                 src={`${ASSET_URL}/img/produk_utama/${product.gambar}` || "/placeholder.png"}
                                 alt={product.namaProduk}
                                 fill
-                                className="object-cover group-hover/prod:scale-110 transition-transform duration-700"
+                                className="object-cover"
                             />
                         </div>
-                        <div className="flex flex-col gap-0.5 overflow-hidden min-w-0">
-                            <span className="font-semibold text-[14px] text-zinc-900 truncate">{product.namaProduk}</span>
-                            <span className="text-[11px] text-zinc-400 uppercase tracking-widest font-medium mb-1">{product.kategori}</span>
-                            <span className="text-[14px] text-zinc-900 font-bold tracking-tight">
-                                {product.finalMinPrice ? `Rp ${Number(product.finalMinPrice).toLocaleString('id-ID')}` : "Contact for Price"}
-                            </span>
+                        <div className="flex flex-col min-w-0 gap-0.5">
+                            <span className="font-medium text-sm text-stone-800 truncate">{product.namaProduk}</span>
+                            <span className="text-[11px] text-stone-400">{product.kategori}</span>
                         </div>
+                        <span className="ml-auto text-sm font-semibold text-stone-700 shrink-0">
+                            {product.finalMinPrice ? `Rp ${Number(product.finalMinPrice).toLocaleString('id-ID')}` : "—"}
+                        </span>
                     </CommandItem>
                 ))}
             </div>
         </CommandGroup>
 
-        <div className="mt-8 mb-4 h-px bg-zinc-100 mx-8 md:mx-12" />
-
-        {/* <CommandGroup
-            heading={
-                <div className="px-6 md:px-10 pt-4 pb-4">
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">Quick Navigation</span>
-                </div>
-            }
-        >
-            <div className="flex flex-wrap gap-3 px-6 md:px-10">
-                {[
-                    { name: "Archive", path: "/products", icon: ShoppingBag },
-                    { name: "Favorites", path: "/account/wishlist", icon: Heart },
-                    { name: "Concierge", path: "/faq", icon: Settings },
-                ].map((action) => (
-                    <button
-                        key={action.name}
-                        onClick={() => {
-                            router.push(action.path);
-                            setIsSearchOpen(false);
-                        }}
-                        className="flex items-center gap-3 px-6 py-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-100 hover:border-zinc-200 text-[12px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-all active:scale-95 group"
-                    >
-                        <action.icon className="size-4 group-hover:scale-110 transition-transform" />
-                        {action.name}
-                    </button>
-                ))}
-            </div>
-        </CommandGroup> */}
+        {/* Quick Links (idle only) */}
+        {!searchQuery && (
+            <>
+                <div className="my-3 h-px bg-stone-100 mx-4" />
+                <CommandGroup
+                    heading={
+                        <div className="flex items-center gap-2 px-4 pt-1 pb-2">
+                            <Compass className="size-3 text-stone-300" />
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Quick Links</span>
+                        </div>
+                    }
+                >
+                    <div className="px-2 space-y-0.5">
+                        {[
+                            { label: "All Products", path: "/products", icon: ShoppingBag },
+                            { label: "Wishlist", path: "/account/wishlist", icon: Heart },
+                        ].map((link) => (
+                            <CommandItem
+                                key={link.path}
+                                onSelect={() => {
+                                    router.push(link.path);
+                                    setIsSearchOpen(false);
+                                }}
+                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-50 data-[selected=true]:bg-stone-50 cursor-pointer transition-colors"
+                            >
+                                <div className="size-8 rounded-lg bg-stone-100 flex items-center justify-center shrink-0">
+                                    <link.icon className="size-4 text-stone-400" />
+                                </div>
+                                <span className="text-sm font-medium text-stone-700">{link.label}</span>
+                                <ChevronRight className="ml-auto size-4 text-stone-300" />
+                            </CommandItem>
+                        ))}
+                    </div>
+                </CommandGroup>
+            </>
+        )}
     </CommandList>
 );
 
+/* ─── Props ─── */
 interface SearchModalProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
@@ -193,6 +284,7 @@ interface SearchModalProps {
     collections: Collection[];
 }
 
+/* ─── Main Component ─── */
 export default function SearchModal({
     isOpen,
     onOpenChange,
@@ -208,41 +300,63 @@ export default function SearchModal({
 
     const { data: highlights = [] } = useHighlights();
     const { data: searchResults = [] } = useProducts({ search: debouncedSearch });
+    const { data: categories = [] } = useCategories(8);
+    const { searches: recentSearches, addSearch, removeSearch, clearAll } = useRecentSearches();
 
     const displayedProducts = debouncedSearch ? searchResults : highlights;
+
+    const handleSelectRecent = (term: string) => {
+        setSearchValue(term);
+    };
+
+    const handleSearchSubmit = () => {
+        if (searchValue.trim()) {
+            addSearch(searchValue.trim());
+        }
+    };
+
+    const sharedProps = {
+        setDirection,
+        setCurrentIndex,
+        currentIndex,
+        setIsSearchOpen: onOpenChange,
+        router,
+        collections,
+        products: displayedProducts,
+        searchQuery: debouncedSearch,
+        categories,
+        recentSearches,
+        onRemoveRecent: removeSearch,
+        onClearRecent: clearAll,
+        onSelectRecent: handleSelectRecent,
+    };
+
+    /* ── Mobile: Drawer ── */
     if (isMobile) {
         return (
             <Drawer open={isOpen} onOpenChange={onOpenChange}>
-                <DrawerContent className="bg-white border-zinc-100 text-zinc-900 rounded-t-[40px] h-[92vh] border-t p-0 overflow-hidden shadow-2xl">
+                <DrawerContent className="bg-linear-to-b from-amber-50/40 via-stone-50 to-rose-50/30 text-stone-900 rounded-t-3xl h-[90vh] border-t border-stone-200/60 p-0 overflow-hidden">
                     <DrawerHeader className="sr-only">
-                        <DrawerTitle>Explore Enome</DrawerTitle>
+                        <DrawerTitle>Search</DrawerTitle>
                     </DrawerHeader>
 
-                    <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-zinc-100" />
+                    <div className="mx-auto mt-3 h-1 w-10 rounded-full bg-stone-200" />
 
-                    <Command className="bg-transparent flex flex-col h-full overflow-hidden">
-                        <div className="relative px-6 py-6 shrink-0">
-                            <div className="absolute left-10 top-1/2 -translate-y-1/2">
-                                <Search className="size-5 text-zinc-300" />
-                            </div>
+                    <Command shouldFilter={false} className="bg-transparent flex flex-col h-full overflow-hidden">
+                        <div className="px-4 pt-4 pb-2 shrink-0">
                             <CommandInput
-                                placeholder="Search collection, product..."
+                                placeholder="Search products..."
                                 value={searchValue}
-                                onValueChange={setSearchValue}
-                                className="h-16 text-lg bg-zinc-50 rounded-3xl border-none focus:ring-0 placeholder:text-zinc-300 text-zinc-900 font-medium pl-14 pr-6 w-full"
+                                onValueChange={(val) => {
+                                    setSearchValue(val);
+                                    if (!val.trim()) return;
+                                    // Save on clear (user navigated away)
+                                }}
+                                className="h-12 text-base bg-white rounded-xl border border-stone-200 focus:ring-0 focus:border-stone-300 placeholder:text-stone-300 text-stone-900 font-medium w-full"
                             />
                         </div>
-                        <ScrollArea className="flex-1 px-2">
-                            <SearchMenuContent
-                                setDirection={setDirection}
-                                setCurrentIndex={setCurrentIndex}
-                                currentIndex={currentIndex}
-                                setIsSearchOpen={onOpenChange}
-                                router={router}
-                                collections={collections}
-                                products={displayedProducts}
-                                searchQuery={searchValue}
-                            />
+                        <ScrollArea className="flex-1">
+                            <SearchMenuContent {...sharedProps} />
                         </ScrollArea>
                     </Command>
                 </DrawerContent>
@@ -250,54 +364,52 @@ export default function SearchModal({
         );
     }
 
+    /* ── Desktop: CommandDialog ── */
     return (
         <CommandDialog
             open={isOpen}
-            onOpenChange={onOpenChange}
-            className="bg-white/95 backdrop-blur-3xl border border-white text-zinc-900 rounded-[40px] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] max-w-3xl"
+            onOpenChange={(open) => {
+                if (!open && searchValue.trim()) {
+                    addSearch(searchValue.trim());
+                }
+                onOpenChange(open);
+            }}
+            className="bg-linear-to-b from-amber-50/40 via-stone-50 to-rose-50/30 border border-stone-200/60 text-stone-900 rounded-2xl overflow-hidden shadow-[0_25px_60px_-12px_rgba(0,0,0,0.1)] max-w-lg"
             commandClassName="bg-transparent"
+            showCloseButton={false}
+            shouldFilter={false}
         >
-            <div className="relative px-10 py-10 flex items-center gap-6">
-                <div className="flex-1 relative">
-                    {/* <div className="absolute left-0 top-1/2 -translate-y-1/2">
-                        <Search className="size-6 text-zinc-300" />
-                    </div> */}
-                    <CommandInput
-                        placeholder="SEARCH THE COLLECTION..."
-                        value={searchValue}
-                        onValueChange={setSearchValue}
-                        className="h-16 text-md border-none focus:ring-0 placeholder:text-zinc-200 text-zinc-900 font-black pl-10 pr-0 tracking-widest uppercase bg-transparent w-full"
-                    />
-                </div>
-                {/* <button
-                    onClick={() => onOpenChange(false)}
-                    className="size-12 rounded-full bg-zinc-50 flex items-center justify-center hover:bg-zinc-100 transition-colors shrink-0 group"
-                >
-                    <X className="size-5 text-zinc-400 group-hover:text-zinc-900 group-hover:rotate-90 transition-all duration-500" />
-                </button> */}
+            {/* Search Input */}
+            <div className="px-4 pt-4 pb-3 bg-white">
+                <CommandInput
+                    placeholder="Search products"
+                    value={searchValue}
+                    onValueChange={setSearchValue}
+                    className="h-11 text-sm border-none focus:ring-0 placeholder:text-stone-300 text-stone-900 font-medium bg-stone-50 rounded-xl px-4 w-full"
+                />
             </div>
 
-            <ScrollArea className="h-[600px] scrollbar-hide">
-                <SearchMenuContent
-                    setDirection={setDirection}
-                    setCurrentIndex={setCurrentIndex}
-                    currentIndex={currentIndex}
-                    setIsSearchOpen={onOpenChange}
-                    router={router}
-                    collections={collections}
-                    products={displayedProducts}
-                    searchQuery={searchValue}
-                />
+            {/* Divider */}
+            <div className="h-px bg-stone-200" />
+
+            {/* Results */}
+            <ScrollArea className="h-[440px]">
+                <SearchMenuContent {...sharedProps} />
             </ScrollArea>
 
-            <div className="px-10 py-6 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between">
-                {/* <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                        <kbd className="px-2 py-1 rounded bg-zinc-200/50 text-[10px] font-bold text-zinc-500">ESC</kbd>
-                        <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">to close</span>
+            {/* Footer */}
+            <div className="px-4 py-2.5 border-t border-stone-200 bg-white flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                        <kbd className="px-1.5 py-0.5 rounded bg-stone-100 text-[10px] font-medium text-stone-400">ESC</kbd>
+                        <span className="text-[10px] text-stone-300">close</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <kbd className="px-1.5 py-0.5 rounded bg-stone-100 text-[10px] font-medium text-stone-400">↵</kbd>
+                        <span className="text-[10px] text-stone-300">select</span>
                     </div>
                 </div>
-                <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-300 font-black">Enome Luxury Experience</div> */}
+                <span className="text-[10px] text-stone-300 font-medium tracking-widest uppercase">ÉNOMÉ</span>
             </div>
         </CommandDialog>
     );

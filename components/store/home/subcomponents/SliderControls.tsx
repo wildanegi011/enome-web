@@ -10,30 +10,30 @@ interface SliderControlsProps {
 
 export default function SliderControls({ currentIndex, totalCollections, paginate }: SliderControlsProps) {
     return (
-        <div className="absolute inset-y-0 left-0 right-0 z-40 flex items-center justify-between px-8 md:px-16 pointer-events-none">
+        <div className="absolute inset-y-0 left-0 right-0 z-40 flex items-center justify-between px-4 md:px-10 pointer-events-none">
             <motion.button
-                whileHover={{ scale: 1.1, x: -5 }}
+                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => paginate(-1)}
                 disabled={currentIndex === 0}
                 className={cn(
-                    "w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-white/[0.03] backdrop-blur-3xl text-white border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all pointer-events-auto shadow-[0_8px_32px_rgba(0,0,0,0.4)] group",
+                    "size-10 md:size-12 flex items-center justify-center rounded-full bg-white/25 backdrop-blur-md text-white border border-white/30 hover:bg-white/40 transition-all pointer-events-auto cursor-pointer shadow-[0_2px_10px_rgba(0,0,0,0.3)]",
                     currentIndex === 0 && "opacity-0 pointer-events-none"
                 )}
             >
-                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5px] group-hover:-translate-x-1 transition-transform" />
+                <ChevronLeft className="size-5 stroke-[1px]" />
             </motion.button>
             <motion.button
-                whileHover={{ scale: 1.1, x: 5 }}
+                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => paginate(1)}
                 disabled={currentIndex === totalCollections - 1}
                 className={cn(
-                    "w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-white/[0.03] backdrop-blur-3xl text-white border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all pointer-events-auto shadow-[0_8px_32px_rgba(0,0,0,0.4)] group",
+                    "size-10 md:size-12 flex items-center justify-center rounded-full bg-white/25 backdrop-blur-md text-white border border-white/30 hover:bg-white/40 transition-all pointer-events-auto cursor-pointer shadow-[0_2px_10px_rgba(0,0,0,0.3)]",
                     currentIndex === totalCollections - 1 && "opacity-0 pointer-events-none"
                 )}
             >
-                <ChevronRight className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5px] group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="size-5 stroke-[1px]" />
             </motion.button>
         </div>
     );

@@ -9,26 +9,29 @@ import Navbar from "@/components/store/layout/Navbar";
 import Newsletter from "@/components/store/layout/Newsletter";
 import Footer from "@/components/store/layout/Footer";
 import IntegratedCollectionSlider from "@/components/store/home/IntegratedCollectionSlider";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white font-sans overflow-x-hidden">
-      {/* <Navbar /> */}
-      <IntegratedCollectionSlider />
+    <ScrollArea className="h-screen w-full" scrollBarClassName="hidden">
+      <div className="min-h-screen bg-white font-sans overflow-x-hidden no-scrollbar">
+        {/* <Navbar /> */}
+        <IntegratedCollectionSlider />
 
 
-      {/* Old Home Sections - Preservation as requested */}
-      {/* 
-      <HeroSection />
-      <FlashSaleSection />
-      <DealsOfTheMonth />
-      <NewArrivals />
-      <FeaturedBanner />
-      <InstagramSection /> 
-      */}
+        {/* Old Home Sections - Preservation as requested */}
+        {/* 
+        <HeroSection />
+        <FlashSaleSection />
+        <DealsOfTheMonth />
+        <NewArrivals />
+        <FeaturedBanner />
+        <InstagramSection /> 
+        */}
 
-      {/* <Newsletter /> */}
-      <Footer />
-    </div>
+        {/* <Newsletter /> */}
+        <Footer />
+      </div>
+    </ScrollArea>
   );
 }
