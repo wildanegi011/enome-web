@@ -13,6 +13,7 @@ import SliderControls from "./subcomponents/SliderControls";
 import ScrollIndicators from "./subcomponents/ScrollIndicators";
 import CollectionDots from "./subcomponents/CollectionDots";
 import SearchModal from "./subcomponents/SearchModal";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Collection {
     id: string;
@@ -116,7 +117,7 @@ export default function IntegratedCollectionSlider() {
                     <Image src="/logo-enome.png" alt="Loading" fill className="object-contain brightness-0 invert opacity-20" />
                 </motion.div>
                 <div className="flex flex-col items-center gap-2">
-                    <div className="h-[1px] w-24 bg-linear-to-r from-transparent via-white/20 to-transparent relative overflow-hidden">
+                    <div className="h-px w-24 bg-linear-to-r from-transparent via-white/20 to-transparent relative overflow-hidden">
                         <motion.div
                             animate={{ x: ["-100%", "200%"] }}
                             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -155,15 +156,7 @@ export default function IntegratedCollectionSlider() {
 
     return (
         <section className="relative w-full h-screen bg-black overflow-hidden select-none text-white font-sans">
-            <style jsx global>{`
-                .scrollbar-hide::-webkit-scrollbar {
-                    display: none;
-                }
-                .scrollbar-hide {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
-            `}</style>
+
 
             {/* Top Navigation Overlay */}
             <NavOverlay setIsSearchOpen={setIsSearchOpen} setAuthModal={setAuthModal} />
@@ -208,9 +201,11 @@ export default function IntegratedCollectionSlider() {
                     }}
                     className="absolute inset-0 w-full h-full"
                 >
-                    <div
-                        ref={scrollContainerRef}
-                        className="w-full h-full overflow-y-auto snap-y snap-mandatory scrollbar-hide scroll-smooth"
+                    <ScrollArea
+                        viewportRef={scrollContainerRef}
+                        className="w-full h-full"
+                        viewportClassName="snap-y snap-mandatory no-scrollbar scroll-smooth"
+                        scrollBarClassName="hidden"
                     >
                         {collections[currentIndex].images.map((img, i) => (
                             <div key={i} className="relative w-full h-screen snap-start shrink-0 overflow-hidden bg-zinc-950">
@@ -225,18 +220,25 @@ export default function IntegratedCollectionSlider() {
                                 />
 
                                 {/* Subtle Overlay for Brand Consistency */}
-                                <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+                                <div className="absolute inset-0 bg-black/5 pointer-events-none" />
 
-                                {/* Refined Logo Overlay - Repositioned to Left for Better Visibility */}
-                                <div className="absolute inset-0 flex items-center justify-start px-8 md:px-24 pointer-events-none">
-                                    <div
-                                        className="relative w-48 h-48 md:w-80 md:h-80 opacity-40 drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] bg-contain bg-center bg-no-repeat"
-                                        style={{ backgroundImage: 'url(/logo-enome.png)', filter: 'brightness(5)' }}
-                                    />
+                                {/* Collection Title - Bottom Left */}
+                                <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
+                                    <div className="px-6 md:px-12 pb-20 md:pb-16">
+                                        <motion.p
+                                            initial={{ opacity: 0, y: 10 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.8, delay: 0.3 }}
+                                            viewport={{ once: false }}
+                                            className="font-serif text-[13px] md:text-[15px] text-white/70 tracking-[0.25em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+                                        >
+                                            {collections[currentIndex].title}
+                                        </motion.p>
+                                    </div>
                                 </div>
 
                                 {/* Ambient Shadow Gradient */}
-                                <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-black/60 to-transparent pointer-events-none" />
+                                <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-black/40 to-transparent pointer-events-none" />
 
                                 {/* Interactive Click Overlay - FINAL STABLE POSITION */}
                                 {img.link && img.link.trim() !== "" && (
@@ -271,7 +273,7 @@ export default function IntegratedCollectionSlider() {
                                 )}
                             </div>
                         ))}
-                    </div>
+                    </ScrollArea>
                 </motion.div>
             </AnimatePresence>
 

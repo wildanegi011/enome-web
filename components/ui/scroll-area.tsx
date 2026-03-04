@@ -9,8 +9,14 @@ function ScrollArea({
   className,
   children,
   scrollBarClassName,
+  viewportClassName,
+  viewportRef,
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.Root> & { scrollBarClassName?: string }) {
+}: React.ComponentProps<typeof ScrollAreaPrimitive.Root> & {
+  scrollBarClassName?: string,
+  viewportClassName?: string,
+  viewportRef?: React.Ref<HTMLDivElement>
+}) {
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
@@ -20,7 +26,8 @@ function ScrollArea({
     >
       <ScrollAreaPrimitive.Viewport
         data-slot="scroll-area-viewport"
-        className="size-full rounded-[inherit] [&>div]:block!"
+        ref={viewportRef}
+        className={cn("size-full rounded-[inherit] [&>div]:block!", viewportClassName)}
         style={{ overflowX: 'hidden' }}
       >
         {children}

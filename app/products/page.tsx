@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useMemo, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import FilterSidebar, { FilterState } from "@/components/store/product/FilterSidebar";
 export interface FilterStateWithSearch extends FilterState {
@@ -13,7 +13,7 @@ import Navbar from "@/components/store/layout/Navbar";
 import Footer from "@/components/store/layout/Footer";
 import ResultsInfo from "@/components/store/shared/ResultsInfo";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { SlidersHorizontal, Loader2 } from "lucide-react";
+import { SlidersHorizontal, Loader2, Search } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { useProducts, useCategories, useColors, useSizes } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
@@ -23,9 +23,12 @@ import { cn } from "@/lib/utils";
 
 import HeroSection from "@/components/store/home/HeroSection";
 import CONFIG from "@/lib/config";
+import EmptyState from "@/components/store/shared/EmptyState";
 
 function ProductsContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
     const categoryFromUrl = searchParams.get("category");
     const searchFromUrl = searchParams.get("search");
 
@@ -38,12 +41,37 @@ function ProductsContent() {
         search: searchFromUrl || undefined
     });
     const [sortBy, setSortBy] = useState<SortOption>("newest");
-    const { data: rawProducts = [], isLoading: productsLoading } = useProducts(activeFilters);
+    const { data: rawProducts = [], isLoading: productsLoading, isFetching: productsFetching } = useProducts(activeFilters);
     const { data: categoriesData = [], isLoading: categoriesLoading } = useCategories();
     const { data: colorsData = [], isLoading: colorsLoading } = useColors();
     const { data: sizesData = [], isLoading: sizesLoading } = useSizes();
 
-    const isLoading = productsLoading || categoriesLoading || colorsLoading || sizesLoading;
+    // Only show skeleton on initial load when there's no data at all
+    const isInitialLoading = (productsLoading && rawProducts.length === 0) || categoriesLoading || colorsLoading || sizesLoading;
+    const isRefreshing = productsFetching && !productsLoading;
+
+    // Sync filters → URL (silently, no navigation/re-render)
+    useEffect(() => {
+        const params = new URLSearchParams();
+        if (activeFilters.collection.length > 0) {
+            params.set("category", activeFilters.collection.join(","));
+        }
+        if (activeFilters.search) {
+            params.set("search", activeFilters.search);
+        }
+        if (activeFilters.color.length > 0) {
+            params.set("color", activeFilters.color.join(","));
+        }
+        if (activeFilters.size.length > 0) {
+            params.set("size", activeFilters.size.join(","));
+        }
+        if (activeFilters.price.length > 0) {
+            params.set("price", activeFilters.price.join(","));
+        }
+        const qs = params.toString();
+        const newUrl = qs ? `${pathname}?${qs}` : pathname;
+        window.history.replaceState(null, "", newUrl);
+    }, [activeFilters, pathname]);
 
     const dynamicCollections = useMemo(() => {
         return categoriesData.map((c: Category) => c.kategori);
@@ -57,7 +85,7 @@ function ProductsContent() {
         return sizesData.map((s: Size) => s.size).filter(Boolean) as string[];
     }, [sizesData]);
 
-    const handleFilterChange = (category: keyof FilterStateWithSearch, value: string) => {
+    const handleFilterChange = useCallback((category: keyof FilterStateWithSearch, value: string) => {
         setActiveFilters(prev => {
             const current = prev[category];
 
@@ -67,13 +95,11 @@ function ProductsContent() {
                     : [...current, value];
                 return { ...prev, [category]: updated };
             } else {
-                // Handle string values (like 'search')
-                // If the same value is passed, clear it; otherwise set it
                 const updated = current === value ? undefined : value;
                 return { ...prev, [category]: updated };
             }
         });
-    };
+    }, []);
 
     // Use database-filtered products directly and apply client-side sorting
     const filteredProducts = useMemo(() => {
@@ -121,7 +147,7 @@ function ProductsContent() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    if (isLoading) {
+    if (isInitialLoading) {
         return <ProductListSkeleton />;
     }
 
@@ -177,7 +203,24 @@ function ProductsContent() {
                             </div>
 
                             {/* Main Content */}
-                            <div className="flex-1">
+                            <div className="flex-1 relative">
+                                {/* Subtle Loading Overlay */}
+                                <AnimatePresence>
+                                    {isRefreshing && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            className="absolute inset-0 z-10 bg-white/20 backdrop-blur-[1px] flex justify-center pt-20"
+                                        >
+                                            <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-neutral-base-100 h-fit">
+                                                <Loader2 className="w-4 h-4 animate-spin text-neutral-base-900" />
+                                                <span className="text-[10px] font-bold tracking-widest uppercase">Updating...</span>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
                                 {/* Total Products Count */}
                                 <div className="flex items-center justify-between mb-6">
                                     <ResultsInfo
@@ -188,19 +231,23 @@ function ProductsContent() {
                                 </div>
 
                                 {filteredProducts.length === 0 ? (
-                                    <div className="w-full py-20 text-center flex flex-col items-center justify-center border border-dashed border-neutral-base-200 rounded-3xl">
-                                        <p className="font-serif text-[24px] text-neutral-base-400 mb-2">No products found</p>
-                                        <p className="text-neutral-base-300 text-sm">Try adjusting your filters to see more results.</p>
-                                        <button
-                                            onClick={() => setActiveFilters({ size: [], color: [], price: [], collection: [], tag: [], search: undefined })}
-                                            className="mt-6 text-[12px] font-bold tracking-widest uppercase border-b border-neutral-base-900 pb-1"
-                                        >
-                                            Clear Filters
-                                        </button>
-                                    </div>
+                                    <EmptyState
+                                        icon={Search}
+                                        title="No products found"
+                                        description="Try adjusting your filters to see more results."
+                                        actionLabel="Clear Filters"
+                                        onActionClick={() => setActiveFilters({ size: [], color: [], price: [], collection: [], tag: [], search: undefined })}
+                                        className="py-20 border-dashed"
+                                    />
                                 ) : (
                                     <LayoutGroup>
-                                        <motion.div layout className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-x-6 gap-y-12">
+                                        <motion.div
+                                            layout
+                                            className={cn(
+                                                "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-x-6 gap-y-12 transition-opacity duration-500",
+                                                isRefreshing ? "opacity-40" : "opacity-100"
+                                            )}
+                                        >
                                             <AnimatePresence mode="popLayout">
                                                 {paginatedProducts.map((p: any, idx) => {
                                                     const colorArray = p.colors
