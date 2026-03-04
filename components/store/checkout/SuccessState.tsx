@@ -69,11 +69,11 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                     >
                         <CheckCircle2 className="w-7 h-7 md:w-10 md:h-10" />
                     </motion.div>
-                    <h1 className="text-[24px] md:text-[36px] font-bold text-neutral-base-900 tracking-tight leading-snug">
+                    <h1 className="text-[22px] md:text-[36px] font-bold text-neutral-base-900 tracking-tight leading-snug">
                         {isTransfer ? "Instruksi Pembayaran" : "Pesanan Berhasil!"}
                     </h1>
-                    <p className="text-[13px] md:text-[15px] text-neutral-base-400 font-medium mt-1.5 md:mt-2">
-                        Order <span className="text-neutral-base-900 font-bold">#{orderResult.orderId}</span> — {lastOrderedItems.length} Produk
+                    <p className="text-[12px] md:text-[15px] text-neutral-base-400 font-medium mt-1.5 md:mt-2">
+                        Order <span className="text-neutral-base-900 font-bold">{orderResult.orderId}</span> — {lastOrderedItems.length} Produk
                     </p>
                 </div>
 
@@ -102,13 +102,13 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                                 className="flex items-baseline font-black tracking-tighter cursor-pointer select-none"
                                                 onClick={() => copyToClipboard(orderResult.total.toString(), "amt")}
                                             >
-                                                <span className="text-[16px] md:text-[32px] text-neutral-base-400 mr-0.5 md:mr-1">Rp</span>
-                                                <span className="text-[28px] md:text-[48px] text-neutral-base-900 leading-none">
+                                                <span className="text-[14px] md:text-[32px] text-neutral-base-400 mr-0.5 md:mr-1">Rp</span>
+                                                <span className="text-[24px] md:text-[48px] text-neutral-base-900 leading-none">
                                                     {orderResult.total.toLocaleString('id-ID').slice(0, -3)}
                                                 </span>
-                                                <span className="text-[28px] md:text-[48px] text-amber-600 leading-none relative">
+                                                <span className="text-[24px] md:text-[48px] text-amber-600 leading-none relative">
                                                     {orderResult.total.toLocaleString('id-ID').slice(-3)}
-                                                    <span className="absolute -bottom-0.5 left-0 w-full h-[3px] bg-amber-300 rounded-full opacity-60" />
+                                                    <span className="absolute -bottom-0.5 left-0 w-full h-[2px] md:h-[3px] bg-amber-300 rounded-full opacity-60" />
                                                 </span>
                                             </div>
                                             <button
@@ -135,8 +135,8 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                                     <Image src="https://syllahijab.com/frontend/web/img/rekening_pembayaran/bca.png" alt="BCA" width={48} height={16} className="object-contain" />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-[16px] md:text-[20px] font-black text-neutral-base-900 tracking-tight leading-none mb-1 md:mb-1.5">{orderResult.bankAccount}</p>
-                                                    <p className="text-[10px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest leading-none truncate">a/n {orderResult.bankOwner}</p>
+                                                    <p className="text-[15px] md:text-[20px] font-black text-neutral-base-900 tracking-tight leading-none mb-1 md:mb-1.5">{orderResult.bankAccount}</p>
+                                                    <p className="text-[9px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest leading-none truncate">a/n {orderResult.bankOwner}</p>
                                                 </div>
                                             </div>
                                             <button
@@ -175,7 +175,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                         {/* Action Buttons */}
                         <div className="flex flex-col md:flex-row gap-4">
                             <Link
-                                href={`/account/orders/${orderResult.orderId}`}
+                                href={`/account/orders/${encodeURIComponent(orderResult.orderId)}`}
                                 className="flex-1 md:flex-[1.5] py-5 md:py-6 rounded-2xl bg-neutral-base-900 flex items-center justify-center gap-2.5 text-[13px] md:text-[14px] font-black uppercase tracking-[0.12em] text-white hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-[0.98]"
                             >
                                 Detail Order
@@ -231,7 +231,9 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                 </div>
                                 <div className="flex justify-between text-[11px] md:text-[12px] text-neutral-base-500">
                                     <span>Pengiriman</span>
-                                    <span className="text-neutral-base-900 font-medium tabular-nums">{formatPrice(orderResult.shippingPrice || 0)}</span>
+                                    <span className="text-neutral-base-900 font-medium tabular-nums">
+                                        {(orderResult.shippingPrice || 0) > 0 ? formatPrice(orderResult.shippingPrice || 0) : "Rp. 0"}
+                                    </span>
                                 </div>
                                 {(orderResult.packingFee || 0) > 0 && (
                                     <div className="flex justify-between text-[11px] md:text-[12px] text-neutral-base-500">

@@ -91,34 +91,87 @@ export async function POST(request: NextRequest) {
             })
         });
 
-        // C4N2U3s71af1878ea724a8d6X5PpcQpb
-
-        const data = await response.json();
+        const automatedCodes = ['jne', 'pos', 'wahana', 'tiki', 'jnt', 'sicepat', 'ninja', 'lion', 'anteraja', 'idexpress'];
 
         if (response.ok) {
+            const data = await response.json();
             logger.info("Shipping Calc: Success", { data });
 
-            // Transform Komerce to RajaOngkir structure for frontend compatibility
-            const transformedData = {
-                rajaongkir: {
-                    results: [{
-                        costs: data?.data?.map((item: any) => ({
-                            service: `${item.name} - ${item.service}`,
-                            courierCode: item.code,
-                            courierName: item.name,
-                            cost: [{
-                                value: item.cost,
-                                etd: item.etd,
-                                note: item.description || ""
-                            }]
-                        })) || []
-                    }]
+            // Standard RajaOngkir results
+            const rajaOngkirResults = data?.data?.reduce((acc: any[], item: any) => {
+                const code = item.code.toUpperCase();
+                let existing = acc.find(r => r.code === code);
+                if (!existing) {
+                    existing = { code, name: item.name, costs: [] };
+                    acc.push(existing);
                 }
-            };
-            return NextResponse.json(transformedData);
+                existing.costs.push({
+                    service: item.service,
+                    description: item.description || item.service,
+                    type: 'automated',
+                    cost: [{
+                        value: item.cost,
+                        etd: item.etd,
+                        note: item.description || ""
+                    }]
+                });
+                return acc;
+            }, []) || [];
+
+            // Add manual cargo - Only those NOT in RajaOngkir results AND not in the automatedCodes list
+            const returnedCodes = new Set(rajaOngkirResults.map((r: any) => r.code.toLowerCase()));
+
+            const manualResults = activeCouriers
+                .filter(c => {
+                    const code = c.code?.toLowerCase();
+                    return code && !returnedCodes.has(code) && !automatedCodes.includes(code);
+                })
+                .map(c => ({
+                    code: (c.code || "CARGO").toUpperCase(),
+                    name: c.name || c.code || "Cargo",
+                    costs: [{
+                        service: (c.name || c.code || "Cargo").toUpperCase(),
+                        description: `Pengiriman via ${c.name || c.code}`,
+                        type: 'manual',
+                        cost: [{
+                            value: 0,
+                            etd: "",
+                            note: "Biaya akan dihitung manual atau gratis"
+                        }]
+                    }]
+                }));
+
+            return NextResponse.json({
+                rajaongkir: {
+                    results: [...rajaOngkirResults, ...manualResults]
+                }
+            });
         } else {
-            logger.error("Shipping Calc: Komerce API Failure", { status: response.status, data });
-            return NextResponse.json(data, { status: response.status });
+            logger.error("Shipping Calc: Komerce API Failure", { status: response.status });
+
+            // Even if API fails, return only non-automated manual cargo options
+            const manualResults = activeCouriers
+                .filter(c => c.code && !automatedCodes.includes(c.code.toLowerCase()))
+                .map(c => ({
+                    code: (c.code || "CARGO").toUpperCase(),
+                    name: c.name || c.code || "Cargo",
+                    costs: [{
+                        service: (c.name || c.code || "Cargo").toUpperCase(),
+                        description: `Pengiriman via ${c.name || c.code}`,
+                        type: 'manual',
+                        cost: [{
+                            value: 0,
+                            etd: "",
+                            note: "Biaya akan dihitung manual"
+                        }]
+                    }]
+                }));
+
+            return NextResponse.json({
+                rajaongkir: {
+                    results: manualResults
+                }
+            });
         }
 
     } catch (error: any) {
@@ -126,4 +179,3 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: "error", error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
 }
-

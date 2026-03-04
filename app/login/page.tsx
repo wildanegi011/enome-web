@@ -35,6 +35,7 @@ export default function LoginPage() {
     const router = useRouter();
     const { login } = useAuth();
     const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
@@ -56,6 +57,7 @@ export default function LoginPage() {
     };
 
     const onLogin = async (data: LoginFormValues) => {
+        setError(null);
         try {
             await login(data);
 
@@ -66,7 +68,7 @@ export default function LoginPage() {
                 router.push("/");
             }, 1200);
         } catch (error: any) {
-            toast.error(error.message || "Login failed");
+            setError("Email atau password yang Anda masukkan salah. Silakan coba lagi.");
         }
     };
 
@@ -212,6 +214,24 @@ export default function LoginPage() {
                                     </span>
                                 </div>
                             </div>
+                            <AnimatePresence>
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-start gap-3"
+                                    >
+                                        <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shrink-0 mt-0.5">
+                                            <span className="text-white text-[10px] font-bold">!</span>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-bold text-red-600 leading-tight">Gagal Masuk</p>
+                                            <p className="text-[12px] text-red-500 font-medium leading-relaxed">{error}</p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
 
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onLogin)} className="space-y-6">

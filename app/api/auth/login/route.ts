@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
         if (!username || !password) {
             logger.warn("Auth Warning: Missing credentials", { username });
-            return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" });
+            return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" }, { status: 401 });
         }
 
         // actionLoginapp logic at line 853: $post_email = str_replace(" ", "", $_REQUEST['username']);
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
         if (userData.length === 0) {
             logger.warn("Auth Warning: User not found", { username });
-            return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" });
+            return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" }, { status: 401 });
         }
 
         const currentUser = userData[0];
@@ -52,12 +52,12 @@ export async function POST(request: NextRequest) {
         // actionLoginapp logic at line 866: if ($Users['role'] == 3)
         if (currentUser.role === 3) {
             logger.warn("Auth Warning: Access denied (Role 3)", { username, userId: currentUser.id });
-            return NextResponse.json({ msg: "error", pesan: "Anda tidak memiliki akses", url: "Back" });
+            return NextResponse.json({ msg: "error", pesan: "Anda tidak memiliki akses", url: "Back" }, { status: 401 });
         }
         // actionLoginapp logic at line 870: else if ($Users['is_deleted'] == 2)
         else if (currentUser.isDeleted === 2) {
             logger.warn("Auth Warning: User not verified", { username, userId: currentUser.id });
-            return NextResponse.json({ msg: "error", pesan: "Anda belum verifikasi email", url: "Back" });
+            return NextResponse.json({ msg: "error", pesan: "Anda belum verifikasi email", url: "Back" }, { status: 401 });
         }
         let passwordMatch = false;
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
         if (!passwordMatch) {
             logger.warn("Auth Warning: Invalid password", { username, userId: currentUser.id });
-            return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" });
+            return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" }, { status: 401 });
         }
 
         // actionLoginapp post-login check at line 881: if ($Users['role'] != 2 || $Users['is_deleted'] == 2)
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         // NOTE: Only role 2 (CS/App) is allowed to finish login in actionLoginapp.
         if (currentUser.role !== 2 || currentUser.isDeleted === 2) {
             logger.warn("Auth Warning: Unauthorized role", { username, role: currentUser.role });
-            return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" });
+            return NextResponse.json({ msg: "error", pesan: "Email atau password salah", url: "Back" }, { status: 401 });
         } else {
             // Success branch logic at line 887
             await db.insert(activityLogin).values({

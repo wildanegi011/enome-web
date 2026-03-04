@@ -7,6 +7,7 @@ import { ChevronDown, Check, Ruler, Truck, ShieldCheck, ShoppingBag, Plus, Minus
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useWishlist, useToggleWishlist } from "@/hooks/use-wishlist";
+import { useCartItems } from "@/hooks/use-cart-items";
 
 interface ProductInfoProps {
     product: {
@@ -43,6 +44,12 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     const { data: wishlistData } = useWishlist();
     const toggleWishlist = useToggleWishlist();
     const isWishlisted = wishlistData?.items?.includes(product.id) ?? false;
+
+    // Cart-Aware Logic
+    const { cartItems } = useCartItems();
+    const qtyInCartForVariant = cartItems
+        .filter(item => item.produkId === product.id && item.warna === selectedColor && item.size === selectedSize)
+        .reduce((sum, item) => sum + Number(item.qty || 0), 0);
 
     const handleWishlist = () => {
         if (!isAuthenticated) {
@@ -92,12 +99,17 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     );
 
     const isSoldOut = parseInt(product.totalStock || "0") === 0;
-    const currentStock = currentCombination?.stock ?? 0;
+    const rawStock = currentCombination?.stock ?? 0;
+    const currentStock = Math.max(0, rawStock - qtyInCartForVariant);
 
     // Get stock for a specific size (given current color)
     const getStockForSize = (size: string) => {
         const variant = product.matrix.find(m => m.color === selectedColor && m.size === size);
-        return variant?.stock ?? 0;
+        const rawStockForSize = variant?.stock ?? 0;
+        const qtyInCartForSize = cartItems
+            .filter(item => item.produkId === product.id && item.warna === selectedColor && item.size === size)
+            .reduce((sum, item) => sum + Number(item.qty || 0), 0);
+        return Math.max(0, rawStockForSize - qtyInCartForSize);
     };
 
     // Dynamic price based on selection
@@ -350,7 +362,8 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                                 <Package className="w-3.5 h-3.5" />
                                 {currentStock >= 10 && "Stok tersedia"}
                                 {currentStock > 0 && currentStock < 10 && `Sisa ${currentStock} — segera dapatkan!`}
-                                {currentStock === 0 && "Stok habis untuk kombinasi ini"}
+                                {currentStock === 0 && rawStock > 0 && `Sudah ada ${qtyInCartForVariant} di keranjang (Maksimal)`}
+                                {currentStock === 0 && rawStock === 0 && "Stok habis untuk kombinasi ini"}
                             </div>
                         </motion.div>
                     )}
@@ -409,7 +422,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     ) : (
                         <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     )}
-                    {!selectedSize ? "Pilih Ukuran" : isSoldOut || currentStock === 0 ? "Stok Habis" : isAdding ? "Adding..." : "Keranjang"}
+                    {!selectedSize ? "Pilih Ukuran" : (isSoldOut || rawStock === 0) ? "Stok Habis" : currentStock === 0 ? "Stok Maksimal" : isAdding ? "Adding..." : "Keranjang"}
                 </motion.button>
 
                 {/* Wishlist Button */}

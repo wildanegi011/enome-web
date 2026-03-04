@@ -6,7 +6,17 @@ export class CartService {
     /**
      * Get cart items for a specific user.
      */
-    static async getCartItems(userId: number | string) {
+    static async getCartItems(userId: number | string, itemIds?: number[]) {
+        const conditions = [
+            eq(keranjang.custId, Number(userId)),
+            eq(keranjang.isDeleted, 0)
+        ];
+
+        if (itemIds && itemIds.length > 0) {
+            const inArray = (await import("drizzle-orm")).inArray;
+            conditions.push(inArray(keranjang.id, itemIds));
+        }
+
         const items = await db.select({
             id: keranjang.id,
             produkId: keranjang.produkId,
@@ -34,7 +44,7 @@ export class CartService {
                 eq(keranjang.warna, produkDetail.warnaId),
                 eq(keranjang.size, produkDetail.size)
             ))
-            .where(and(eq(keranjang.custId, Number(userId)), eq(keranjang.isDeleted, 0)))
+            .where(and(...conditions))
             .orderBy(sql`${keranjang.createdAt} DESC`);
 
         const totalAmount = items.reduce((acc, item) => acc + (Number(item.harga || 0) * Number(item.qty || 0)), 0);

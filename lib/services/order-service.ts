@@ -319,10 +319,18 @@ export class OrderService {
             logger.info("OrderService: Step B Success");
 
             // C. Clear Cart
-            logger.info("OrderService: Step C - Clearing Cart");
-            await tx.update(keranjang)
-                .set({ isDeleted: 1, updatedAt: sql`${dhms}` } as any)
-                .where(and(eq(keranjang.custId, Number(userId)), eq(keranjang.isDeleted, 0)));
+            logger.info("OrderService: Step C - Clearing Selected Cart Items", { count: verifiedItems.length });
+            const orderedItemIds = verifiedItems.map(item => item.id).filter(id => id !== undefined);
+
+            if (orderedItemIds.length > 0) {
+                const { inArray } = await import("drizzle-orm");
+                await tx.update(keranjang)
+                    .set({ isDeleted: 1, updatedAt: sql`${dhms}` } as any)
+                    .where(and(
+                        eq(keranjang.custId, Number(userId)),
+                        inArray(keranjang.id, orderedItemIds)
+                    ));
+            }
             logger.info("OrderService: Step C Success");
 
             // D. Wallet Deduction

@@ -101,7 +101,8 @@ export const PATCH = withAuth(async (
 
         if (result.error) {
             if (result.status === 404) return NextResponse.json({ message: "not_found" }, { status: 404 });
-            return NextResponse.json({ message: result.error, desc: result.detail });
+            // Return 422 Unprocessable Entity for validation errors so frontend knows it failed
+            return NextResponse.json({ message: result.error, desc: result.detail }, { status: 422 });
         }
 
         logger.info("Cart Update: Success", { id, qty, notes });

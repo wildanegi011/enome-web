@@ -37,11 +37,10 @@ export function useCheckout() {
         provinsi: "",
         districtId: "",
         kodePos: "",
-        resi: "",
-        catatan: "",
         service: "",
         courierName: "",
         shippingPrice: 0,
+        shippingType: "automated",
     });
 
     const [errors, setErrors] = useState<{
@@ -194,7 +193,7 @@ export function useCheckout() {
 
         // Use districtId for shipping API if available, fallback to kecamatan string
         const destination = (shippingForm as any).districtId || shippingForm.kecamatan;
-        const cacheKey = `shippingCost_v3_${destination}_${totalWeight}`;
+        const cacheKey = `shippingCost_v4_${destination}_${totalWeight}`;
         const cachedStr = sessionStorage.getItem(cacheKey);
 
         const handleCosts = (costs: any[]) => {
@@ -211,7 +210,8 @@ export function useCheckout() {
                     if (exists) {
                         return {
                             ...prev,
-                            shippingPrice: exists.cost[0].value
+                            shippingPrice: exists.cost[0].value,
+                            shippingType: exists.type || "automated"
                         };
                     } else {
                         const firstService = costs[0];
@@ -220,7 +220,8 @@ export function useCheckout() {
                             service: firstService.service,
                             courier: firstService.courierCode || firstService.courierName || "Kurir",
                             courierName: firstService.courierName || firstService.courierCode || "Kurir",
-                            shippingPrice: firstService.cost[0].value
+                            shippingPrice: firstService.cost[0].value,
+                            shippingType: firstService.type || "automated"
                         };
                     }
                 });
@@ -468,7 +469,8 @@ export function useCheckout() {
         if (!isAddressComplete) newErrors.address = true;
 
         // 2. Shipping Validation
-        if (!shippingForm.courier || !shippingForm.service || shippingForm.shippingPrice === 0) {
+        const isManual = shippingForm.shippingType === 'manual';
+        if (!shippingForm.courier || !shippingForm.service || (!isManual && shippingForm.shippingPrice === 0)) {
             newErrors.shipping = true;
         }
 
@@ -499,15 +501,14 @@ export function useCheckout() {
                     payment: paymentMethod,
                     totalAmount: totalAmount,
                     specialNotes,
-                    resi: shippingForm.resi,
-                    catatan: shippingForm.catatan,
                     isDropshipper,
                     dropshipper: isDropshipper ? dropshipperForm : null,
                     voucherCode: isVoucherApplied ? voucherCode : null,
                     voucherDiscount: voucherDiscount,
                     walletAmount: appliedWalletAmount,
                     addressId: shippingForm.addressId,
-                    shippingPrice: shippingPrice
+                    shippingPrice: shippingPrice,
+                    itemIds: selectedIds
                 })
             });
 
@@ -528,6 +529,12 @@ export function useCheckout() {
                     walletDeduction: data.meta?.finalWalletAmount || appliedWalletAmount
                 });
                 setLastOrderedItems([...cartItems]);
+
+                // Invalidate cart queries to ensure UI is updated
+                queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+                queryClient.invalidateQueries({ queryKey: queryKeys.cart.count });
+                window.dispatchEvent(new CustomEvent("cart-updated", { detail: { count: 0 } }));
+
                 refreshCart();
                 toast.success("Pesanan berhasil dibuat!");
                 window.scrollTo({ top: 0, behavior: "smooth" });

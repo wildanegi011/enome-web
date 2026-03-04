@@ -23,6 +23,7 @@ function CheckoutContent() {
         shippingForm, setShippingForm,
         walletBalance, useWallet, setUseWallet, appliedWalletAmount,
         isDropshipper, setIsDropshipper, dropshipperForm, setDropshipperForm,
+        specialNotes, setSpecialNotes,
         voucherCode, setVoucherCode, isVoucherApplied, setIsVoucherApplied, voucherDiscount, isVoucherLoading,
         addresses, isLoadingAddresses, isSelectionModalOpen, setIsSelectionModalOpen, isAddAddressModalOpen, setIsAddAddressModalOpen,
         paymentMethod, setPaymentMethod, paymentMethods, isLoadingPayments,
@@ -74,7 +75,7 @@ function CheckoutContent() {
             <Navbar />
 
             {/* Premium Header & Stepper Section */}
-            <div className="bg-white border-b border-neutral-base-100/50 pt-4 md:pt-6 pb-2 sticky top-[70px] md:top-[80px] z-30 transition-all duration-300">
+            <div className="bg-white border-b border-neutral-base-100/50 pt-3 md:pt-6 pb-2 sticky top-[70px] md:top-[80px] z-30 transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="mb-4 hidden md:block">
                         <Breadcrumb
@@ -87,32 +88,31 @@ function CheckoutContent() {
                     </div>
 
                     {/* Modern Stepper */}
-                    <div className="flex items-center justify-between max-w-2xl mx-auto mb-4 relative">
+                    <div className="flex items-center justify-between max-w-2xl mx-auto mb-2 md:mb-4 relative">
                         {[
                             { id: "cart", label: "Keranjang", icon: ShoppingBag, step: 1 },
                             { id: "address", label: "Pengiriman", icon: MapPin, step: 2 },
                             { id: "payment", label: "Pembayaran", icon: CreditCard, step: 3 }
                         ].map((s, idx, arr) => {
                             const isActive = s.id === "cart" || (s.id === "address" && shippingForm.addressId) || (s.id === "payment" && paymentMethod);
-                            const isCurrent = (s.id === "cart" && !shippingForm.addressId) || (s.id === "address" && shippingForm.addressId && !paymentMethod) || (s.id === "payment" && paymentMethod);
 
                             return (
-                                <div key={s.id} className="flex flex-col items-center relative z-10">
+                                <div key={s.id} className="flex flex-col items-center relative z-10 flex-1">
                                     <div className={clsx(
-                                        "w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm border-2",
+                                        "w-9 h-9 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm border-2",
                                         isActive ? "bg-neutral-base-900 border-neutral-base-900 text-white" : "bg-white border-neutral-base-100 text-neutral-base-300"
                                     )}>
-                                        {isActive ? <Check className="w-5 h-5 md:w-6 md:h-6" /> : <s.icon className="w-5 h-5 md:w-6 md:h-6" />}
+                                        {isActive ? <Check className="w-4 h-4 md:w-6 md:h-6" /> : <s.icon className="w-4 h-4 md:w-6 md:h-6" />}
                                     </div>
                                     <span className={clsx(
-                                        "mt-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-colors duration-300",
+                                        "mt-1.5 md:mt-2 text-[9px] md:text-[11px] font-black uppercase tracking-widest transition-colors duration-300",
                                         isActive ? "text-neutral-base-900" : "text-neutral-base-300"
                                     )}>
                                         {s.label}
                                     </span>
 
                                     {idx < arr.length - 1 && (
-                                        <div className="absolute left-[calc(100%+8px)] top-5 md:top-6 w-[calc(100vw/3)] sm:w-20 md:w-32 lg:w-48 h-[2px] bg-neutral-base-100 -z-10 overflow-hidden">
+                                        <div className="absolute left-[calc(50%+18px)] md:left-[calc(50%+24px)] right-[-50%] top-4.5 md:top-6 h-[2px] bg-neutral-base-100 -z-10 overflow-hidden">
                                             <div
                                                 className="h-full bg-neutral-base-900 transition-all duration-700 ease-out"
                                                 style={{ width: isActive ? '100%' : '0%' }}
@@ -172,14 +172,10 @@ function CheckoutContent() {
 
                                 <div ref={shippingRef} id="shipping-section">
                                     <CourierSection
-                                        couriers={couriers}
-                                        isLoadingCouriers={isLoadingCouriers}
                                         shippingForm={shippingForm}
                                         setShippingForm={setShippingForm}
                                         shippingOptions={shippingOptions}
                                         isLoadingShipping={isLoadingShipping}
-                                        setShippingPrice={setShippingPrice}
-                                        setShippingOptions={setShippingOptions}
                                         totalWeight={totalWeight}
                                         formatPrice={formatPrice}
                                         hasError={errors?.shipping}
@@ -189,12 +185,25 @@ function CheckoutContent() {
 
                                 <div className="h-px bg-neutral-base-50/50 my-1 md:my-2" />
 
-                                <DropshipperSection
+                                {/* TODO: uncomment if needed */}
+                                {/* <DropshipperSection
                                     isDropshipper={isDropshipper}
                                     setIsDropshipper={setIsDropshipper}
                                     dropshipperForm={dropshipperForm}
                                     setDropshipperForm={setDropshipperForm}
-                                />
+                                /> */}
+
+                                {/* <div className="h-px bg-neutral-base-50/50 my-1 md:my-2" />
+
+                                <div className="flex flex-col gap-4">
+                                    <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-neutral-base-400 px-1">Catatan untuk Penjual (Opsional)</label>
+                                    <textarea
+                                        value={specialNotes}
+                                        onChange={(e) => setSpecialNotes(e.target.value)}
+                                        placeholder="Pesan untuk penjual..."
+                                        className="w-full min-h-[80px] bg-white border border-neutral-base-100 rounded-2xl p-5 font-bold text-[13px] outline-none focus:border-neutral-base-900 focus:ring-4 focus:ring-neutral-base-900/5 transition-all placeholder:text-neutral-base-200 resize-none shadow-sm shadow-neutral-base-900/5"
+                                    />
+                                </div> */}
                             </motion.div>
 
                             {/* 4. Payment Method */}
@@ -240,6 +249,10 @@ function CheckoutContent() {
                             remainingBill={remainingBill}
                             isSubmitting={isSubmitting}
                             cartItemsCount={cartItems.length}
+                            hasStockProblems={cartItems.some(item =>
+                                item.isOnline === 0 ||
+                                (item.stock !== undefined && (item.stock <= 0 || Number(item.qty) > item.stock))
+                            )}
                             submitOrder={submitOrder}
                             formatPrice={formatPrice}
                         />

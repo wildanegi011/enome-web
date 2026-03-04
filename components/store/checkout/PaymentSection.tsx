@@ -26,7 +26,7 @@ export default function PaymentSection({
     return (
         <section className="flex flex-col gap-4 md:gap-6 bg-white/80 backdrop-blur-sm border border-neutral-base-100/50 p-4 md:p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <div className={`p-1 rounded-[32px] transition-all duration-300 ${hasError ? "ring-2 ring-rose-200 shadow-[0_0_20px_rgba(244,63,94,0.1)]" : ""}`}>
-                <div className="flex flex-col gap-5 md:gap-8 bg-neutral-base-50/20 p-4 md:p-8 rounded-[30px] border border-neutral-base-100/40">
+                <div className="flex flex-col gap-5 md:gap-8 bg-neutral-base-50/20 p-5 md:p-8 rounded-[30px] border border-neutral-base-100/40">
                     <div className="flex items-center justify-between border-b border-neutral-base-50 pb-4 md:pb-6">
                         <div className="flex items-center gap-3 md:gap-4">
                             <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-amber-50 flex items-center justify-center font-black text-amber-800 text-[14px] md:text-[18px]">4</div>
@@ -73,14 +73,14 @@ export default function PaymentSection({
                                                     setPaymentMethod(method.namaBank);
                                                     onFieldChange?.();
                                                 }}
-                                                className={`bg-white/70 backdrop-blur-xs border p-4 md:p-6 rounded-[28px] flex items-center justify-between hover:shadow-xl hover:shadow-neutral-base-900/5 transition-all group relative overflow-hidden ${paymentMethod === method.namaBank ? "border-amber-800 bg-amber-50/30" : "border-neutral-base-100/50"} ${isDisabled ? "opacity-50 grayscale cursor-not-allowed" : ""}`}
+                                                className={`bg-white/70 backdrop-blur-xs border p-3.5 md:p-6 rounded-[24px] md:rounded-[28px] flex items-center justify-between hover:shadow-xl hover:shadow-neutral-base-900/5 transition-all group relative overflow-hidden ${paymentMethod === method.namaBank ? "border-amber-800 bg-amber-50/30" : "border-neutral-base-100/50"} ${isDisabled ? "opacity-50 grayscale cursor-not-allowed" : ""}`}
                                             >
                                                 <div className="flex items-center gap-3 md:gap-4">
-                                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all font-black text-[10px] ${paymentMethod === method.namaBank ? "bg-amber-100 text-amber-800" : "bg-neutral-base-50 text-neutral-base-400 group-hover:bg-amber-50 group-hover:text-amber-800"}`}>
+                                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all font-black text-[10px] ${paymentMethod === method.namaBank ? "bg-white text-amber-800" : "bg-neutral-base-50 text-neutral-base-400 group-hover:bg-amber-50 group-hover:text-amber-800"}`}>
                                                         {method.logoBank ? (
                                                             <img src={`https://syllahijab.com/frontend/web/img/rekening_pembayaran/${method.logoBank}`} alt={method.namaBank} className="w-6 h-6 md:w-8 md:h-8 object-contain" />
                                                         ) : (
-                                                            <Landmark className="w-4 h-4 md:w-5 md:h-5 opacity-50" />
+                                                            <Landmark className="w-3.5 h-3.5 md:w-5 md:h-5 opacity-50" />
                                                         )}
                                                     </div>
                                                     <div className="flex flex-col items-start text-left">
@@ -88,9 +88,9 @@ export default function PaymentSection({
                                                             {method.namaBank}
                                                         </h4>
                                                         {isDisabled ? (
-                                                            <p className="text-[10px] md:text-[11px] font-black text-red-500 uppercase tracking-widest mt-0.5 md:mt-1">Min. Transfer Rp 10.000</p>
+                                                            <p className="text-[9px] md:text-[11px] font-black text-red-500 uppercase tracking-widest mt-0.5 md:mt-1">Min. Transfer Rp 10.000</p>
                                                         ) : (
-                                                            <p className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-widest mt-0.5 md:mt-1">{method.namaPemilik}</p>
+                                                            <p className="text-[9px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-widest mt-0.5 md:mt-1 truncate max-w-[120px] md:max-w-none">{method.namaPemilik}</p>
                                                         )}
                                                     </div>
                                                 </div>

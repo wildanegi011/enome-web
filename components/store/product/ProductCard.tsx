@@ -12,6 +12,8 @@ import {
 import { Heart } from "lucide-react";
 import Link from 'next/link';
 import { useWishlist, useToggleWishlist } from "@/hooks/use-wishlist";
+import { useCartItems } from "@/hooks/use-cart-items";
+import { CartItem } from "@/lib/api/cart-api";
 
 interface Color {
     name: string;
@@ -47,6 +49,14 @@ export default function ProductCard({ product, index }: ProductCardProps) {
     const { data: wishlistData } = useWishlist();
     const toggleWishlist = useToggleWishlist();
     const isWishlisted = wishlistData?.items?.includes(product.id || "") ?? false;
+
+    // Cart-Aware Stock Calculation
+    const { cartItems } = useCartItems();
+    const qtyInCart = cartItems
+        .filter((item: CartItem) => item.produkId === product.id)
+        .reduce((sum: number, item: CartItem) => sum + Number(item.qty || 0), 0);
+
+    const realStock = Math.max(0, (Number(product.totalStock) || 0) - qtyInCart);
 
     const handleWishlist = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -88,11 +98,11 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                         </div>
                     )}
 
-                    {/* Out of Stock Overlay */}
-                    {(Number(product.totalStock) || 0) === 0 && (
+                    {/* Out of Stock Overlay (Cart-Aware) */}
+                    {realStock === 0 && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-1">
                             <span className="text-white text-[9px] font-bold uppercase tracking-widest">
-                                Habis
+                                {qtyInCart > 0 && qtyInCart >= (Number(product.totalStock) || 0) ? "In Cart" : "Habis"}
                             </span>
                         </div>
                     )}

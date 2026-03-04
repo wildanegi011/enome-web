@@ -25,6 +25,7 @@ interface OrderSummaryProps {
     remainingBill: number;
     isSubmitting: boolean;
     cartItemsCount: number;
+    hasStockProblems?: boolean;
     submitOrder: () => Promise<void>;
     formatPrice: (price: number) => string;
 }
@@ -50,17 +51,18 @@ export default function OrderSummary({
     remainingBill,
     isSubmitting,
     cartItemsCount,
+    hasStockProblems,
     submitOrder,
     formatPrice
 }: OrderSummaryProps) {
     return (
         <aside className="w-full lg:w-[400px] lg:sticky lg:top-40 shrink-0">
-            <div className="bg-white/90 backdrop-blur-md border border-neutral-base-100/50 rounded-[32px] p-5 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)]">
-                <div className="flex items-center gap-3 mb-5 md:mb-8">
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-amber-50 flex items-center justify-center">
-                        <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-800" />
+            <div className="bg-white border border-neutral-base-100/50 rounded-[32px] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)]">
+                <div className="flex items-center gap-3 mb-6 md:mb-8">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                        <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-amber-800" />
                     </div>
-                    <h3 className="font-heading text-[20px] md:text-[26px] font-black text-neutral-base-900 tracking-tight">Ringkasan</h3>
+                    <h3 className="font-heading text-[22px] md:text-[26px] font-black text-neutral-base-900 tracking-tight">Ringkasan</h3>
                 </div>
 
                 <div className="flex flex-col gap-4 md:gap-5 mb-5 md:mb-8">
@@ -74,12 +76,14 @@ export default function OrderSummary({
                                 (shippingForm.courierName || shippingForm.courier).toUpperCase()
                             ) : "---"})
                         </span>
-                        <span className="text-neutral-base-900 font-black text-[14px] md:text-[15px] flex items-center gap-2 shrink-0">
+                        <span className={`text-[13px] md:text-[15px] font-black flex items-center gap-2 shrink-0 text-neutral-base-900`}>
                             {isLoadingShipping ? (
                                 <Loader2 className="w-3 h-3 animate-spin text-sky-600" />
-                            ) : shippingForm.courier ? formatPrice(shippingPrice) : (
+                            ) : !shippingForm.courier ? (
                                 <span className="text-[10px] md:text-[11px] text-amber-800 font-bold italic">Belum dipilih</span>
-                            )}
+                            ) : shippingForm.shippingType === 'manual' ? (
+                                <span className="text-[13px] md:text-[15px] text-neutral-base-900 font-black">Rp. 0</span>
+                            ) : formatPrice(shippingPrice)}
                         </span>
                     </div>
                     {isVoucherApplied && (
@@ -149,12 +153,12 @@ export default function OrderSummary({
 
                     <div className="h-px bg-neutral-base-50 my-1 md:my-2" />
 
-                    <div className="flex justify-between items-center py-1 md:py-2">
+                    <div className="flex justify-between items-center py-2 md:py-2">
                         <div className="flex flex-col gap-0.5">
-                            <span className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-neutral-base-400">Total Tagihan</span>
+                            <span className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-neutral-base-400 leading-none">Total Tagihan</span>
                             <span className="text-[10px] md:text-[11px] font-bold text-neutral-base-900 uppercase tracking-wider">Grand Total</span>
                         </div>
-                        <span className="text-[22px] md:text-[28px] font-black text-neutral-base-900 tracking-tighter tabular-nums">
+                        <span className="text-[24px] md:text-[28px] font-black text-neutral-base-900 tracking-tighter tabular-nums">
                             {formatPrice(totalAmount + shippingPrice + packingFee - voucherDiscount)}
                         </span>
                     </div>
@@ -178,21 +182,16 @@ export default function OrderSummary({
                 </div>
 
                 <button
-                    disabled={isSubmitting || cartItemsCount === 0}
+                    disabled={isSubmitting || cartItemsCount === 0 || hasStockProblems}
                     onClick={submitOrder}
-                    className="w-full bg-neutral-base-900 text-white h-16 md:h-18 rounded-3xl text-[14px] md:text-[15px] font-black uppercase tracking-[0.25em] flex items-center justify-center gap-3 md:gap-4 hover:bg-neutral-base-800 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-neutral-base-900/20 disabled:opacity-50 disabled:cursor-not-allowed group mb-5 md:mb-8 overflow-hidden relative"
+                    className={`w-full h-14 md:h-18 rounded-[24px] md:rounded-3xl text-[14px] md:text-[15px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 md:gap-4 transition-all shadow-2xl group mb-6 md:mb-8 overflow-hidden relative bg-neutral-base-900 text-white hover:bg-neutral-base-800 shadow-neutral-base-900/10 disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                    <motion.div
-                        className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"
-                        animate={{ x: ["-100%", "100%"] }}
-                        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                    />
                     {isSubmitting ? (
                         <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
                     ) : (
                         <>
                             Bayar Sekarang
-                            <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-transform bg-white/10 group-hover:translate-x-1`}>
                                 <ChevronRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             </div>
                         </>

@@ -11,6 +11,10 @@ export interface CartItem {
     namaProduk: string;
     gambar: string;
     stock?: number;
+    isOnline?: number;
+    isFlashsale?: number;
+    keterangan?: string;
+    warnaName?: string;
 }
 
 export interface CartResponse {
@@ -28,8 +32,17 @@ export const cartApi = {
             method: "PATCH",
             body: JSON.stringify({ qty }),
         }),
+    updateNotes: (id: number, notes: string) =>
+        apiClient(`/api/cart/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ notes }),
+        }),
     removeItem: (id: number) =>
         apiClient(`/api/cart/${id}`, {
+            method: "DELETE",
+        }),
+    removeAll: () =>
+        apiClient("/api/cart", {
             method: "DELETE",
         }),
 };

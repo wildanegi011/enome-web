@@ -18,9 +18,13 @@ export function useCart() {
         const handleCartUpdate = (e: any) => {
             if (e.detail && typeof e.detail.count === "number") {
                 queryClient.setQueryData(queryKeys.cart.count, e.detail.count);
-            } else {
+            }
+
+            // Always invalidate the full cart list to ensure synchronization
+            queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+
+            if (!e.detail || typeof e.detail.count !== "number") {
                 refetch();
-                queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
             }
         };
 

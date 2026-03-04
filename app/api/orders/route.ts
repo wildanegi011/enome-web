@@ -27,7 +27,8 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         const {
             shipping, payment, totalAmount, voucherCode,
             voucherDiscount, walletAmount, shippingPrice,
-            specialNotes, resi, catatan, isDropshipper, dropshipper
+            specialNotes, resi, catatan, isDropshipper, dropshipper,
+            itemIds
         } = body;
 
         if (!shipping || !payment) {
@@ -43,7 +44,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         }
 
         // 1. Fetch Cart Items using CartService
-        const { items: cartItems } = await CartService.getCartItems(userId);
+        const { items: cartItems } = await CartService.getCartItems(userId, itemIds);
 
         if (cartItems.length === 0) {
             logger.warn("Order Error: Cart is empty", { userId });

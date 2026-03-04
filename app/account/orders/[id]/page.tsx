@@ -114,11 +114,7 @@ export default function OrderDetailPage() {
     const router = useRouter();
 
     const orderIdParam = Array.isArray(params.id) ? params.id[0] : (params.id || "");
-    const fullOrderId = typeof window !== 'undefined' && window.location.hash
-        ? orderIdParam + window.location.hash
-        : orderIdParam;
-
-    const { data, isLoading, isError } = useOrderDetail(fullOrderId);
+    const { data, isLoading, isError } = useOrderDetail(orderIdParam);
 
     useEffect(() => {
         if (!isLoading && isError) {
