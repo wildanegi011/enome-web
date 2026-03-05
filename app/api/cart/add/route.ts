@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { keranjang, customer, customerKategori, produk, produkDetail, flashSale, flashSaleDetail, user } from "@/lib/db/schema";
+import { keranjang, customer, customerKategori, produk, produkDetail, flashSale, flashSaleDetail, user, variant as variantTable } from "@/lib/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { withAuth } from "@/lib/auth-utils";
 import fs from "fs";
@@ -24,7 +24,7 @@ import { getJakartaDate, nowJakartaYYMMDD, nowJakartaDate, nowJakartaFull } from
 export const POST = withAuth(async (request: NextRequest, context: any, session: any) => {
     try {
         const body = await request.json();
-        const { id_produk, color_sylla, size_sylla, qty_produk, data_pre_order_id } = body;
+        const { id_produk, color_sylla, size_sylla, variant, qty_produk, data_pre_order_id } = body;
 
         const userId = session.user.id;
         logger.info("Cart Add: Request received", { userId, id_produk, qty_produk });
@@ -59,20 +59,23 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 return { error: "not_available", detail: "Produk sudah tidak tersedia atau offline." };
             }
 
-            // RE-CHECK: Ambil detail spesifik varian (warna & size) dari transaksi (LOCK)
+            // RE-CHECK: Ambil detail spesifik varian (warna & size & variant) dari transaksi (LOCK)
             const [freshDetailRows]: any = await tx.execute(sql`
                 SELECT 
-                    stok_normal as stokNormal, 
-                    harga_distributor as hargaDistributor,
-                    harga_agen as hargaAgen,
-                    harga_reseller as hargaReseller,
-                    harga_jual as hargaJual,
-                    harga_super_gold,
-                    harga_sub_agen,
-                    harga_marketer,
-                    gambar
-                FROM produkdetail 
-                WHERE produk_id = ${id_produk} AND warna = ${color_sylla} AND size = ${size_sylla} 
+                    pd.stok_normal as stokNormal, 
+                    pd.harga_distributor as hargaDistributor,
+                    pd.harga_agen as hargaAgen,
+                    pd.harga_reseller as hargaReseller,
+                    pd.harga_jual as hargaJual,
+                    pd.harga_super_gold,
+                    pd.harga_sub_agen,
+                    pd.harga_marketer,
+                    pd.gambar
+                FROM produkdetail pd
+                WHERE pd.produk_id = ${id_produk} 
+                AND pd.warna = ${color_sylla} 
+                AND pd.size = ${size_sylla} 
+                AND (pd.variant = ${variant} OR (pd.variant IS NULL AND ${variant || ""} = ""))
                 FOR UPDATE
             `);
             const freshDetail = freshDetailRows[0];
@@ -136,6 +139,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 AND produk_id = ${id_produk} 
                 AND warna = ${color_sylla} 
                 AND size = ${size_sylla} 
+                AND (variant = ${variant} OR (variant IS NULL AND ${variant || ""} = ""))
                 AND is_deleted = 0 
                 AND is_flashsale = ${isFlashSale ? 1 : 0} 
                 AND is_preorder = ${isPreOrder ? 1 : 0} 
@@ -161,6 +165,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                     produkId: id_produk,
                     warna: color_sylla,
                     size: size_sylla,
+                    variant: variant || null,
                     qtyProduk: requestedQty,
                     hargaPoduk: Math.floor(finalPrice),
                     gambarProduk: freshDetail.gambar || freshProduct.gambar,
@@ -195,8 +200,8 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         const logDate = nowJakartaYYMMDD().slice(0, 4); // YYMM
         const nowFull = nowJakartaFull();
         const logContent = `==================================================================================================================== \n` +
-            `Scc [${nowFull}][${userId}]: activity : ${session.user.name} Menambahkan ${id_produk} - ${color_sylla} - ${size_sylla} ke dalam keranjang [nextjs] \n` +
-            `Scc [${nowFull}][${userId}]: activity_description : ${session.user.name} Menambahkan ${id_produk} - ${color_sylla} - ${size_sylla} ke dalam keranjang [nextjs] \n` +
+            `Scc [${nowFull}][${userId}]: activity : ${session.user.name} Menambahkan ${id_produk} - ${variant || "No Variant"} - ${color_sylla} - ${size_sylla} ke dalam keranjang [nextjs] \n` +
+            `Scc [${nowFull}][${userId}]: activity_description : ${session.user.name} Menambahkan ${id_produk} - ${variant || "No Variant"} - ${color_sylla} - ${size_sylla} ke dalam keranjang [nextjs] \n` +
             `Scc [${nowFull}][${userId}]: created_by : ${userId} \n`;
 
         try {

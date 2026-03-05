@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 import { Minus, Plus, Trash2, Zap, MessageSquare } from "lucide-react";
 import { ASSET_URL } from "@/config/config";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -20,6 +20,7 @@ export interface OrderItemType {
     isOnline?: number;
     isFlashsale?: number;
     keterangan?: string;
+    variant?: string;
 }
 
 interface OrderItemProps {
@@ -89,7 +90,7 @@ export default function OrderItem({
                 isCheckout ? "w-16 h-20 md:w-20 md:h-24" : "w-18 h-18 md:w-32 md:h-32",
                 isOffline && "opacity-40 grayscale-[0.5]"
             )}>
-                <Image
+                <FallbackImage
                     src={item.gambar ? `${ASSET_URL}/img/produk/${item.gambar}` : "/placeholder-product.jpg"}
                     alt={item.namaProduk}
                     fill
@@ -143,7 +144,13 @@ export default function OrderItem({
 
                 {/* MIDDLE ROW: Attributes & Status */}
                 <div className="flex flex-col gap-0.5 mt-0.5 md:mt-1">
-                    <p className="text-[10px] md:text-[13px] font-medium text-neutral-base-400 flex items-center gap-1.5">
+                    <p className="text-[10px] md:text-[13px] font-medium text-neutral-base-400 flex flex-wrap items-center gap-1.5">
+                        {item.variant && (
+                            <>
+                                <span className="truncate">Varian: <span className="text-neutral-base-900 font-bold">{item.variant}</span></span>
+                                <span className="w-px h-2.5 bg-neutral-base-100" />
+                            </>
+                        )}
                         <span className="truncate">Ukuran: <span className="text-neutral-base-900 font-bold">{item.size}</span></span>
                         <span className="w-px h-2.5 bg-neutral-base-100" />
                         <span className="truncate">Warna: <span className="text-neutral-base-900 font-bold">{item.warnaName || item.warna}</span></span>

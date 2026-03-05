@@ -26,7 +26,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 const loginSchema = z.object({
     email: z.string().email("Format email tidak valid"),
-    password: z.string().min(8, "Password minimal 8 karakter"),
+    password: z.string().min(1, "Password minimal 1 karakter"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -227,7 +227,7 @@ export default function LoginPage() {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-sm font-bold text-red-600 leading-tight">Gagal Masuk</p>
-                                            <p className="text-[12px] text-red-500 font-medium leading-relaxed">{error}</p>
+                                            <p className="text-[11px] text-red-500 font-medium leading-relaxed">{error}</p>
                                         </div>
                                     </motion.div>
                                 )}

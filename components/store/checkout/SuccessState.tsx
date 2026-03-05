@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, ChevronRight, ShoppingBag, Copy, ShieldCheck, Clock } from "lucide-react";
+import { CheckCircle2, ChevronRight, ShoppingBag, Copy, ShieldCheck, Clock, Truck } from "lucide-react";
 import { motion } from "framer-motion";
 import { ASSET_URL } from "@/config/config";
 import { toast } from "sonner";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 
 interface SuccessStateProps {
     orderResult: {
@@ -19,14 +20,20 @@ interface SuccessStateProps {
         shippingPrice?: number,
         packingFee?: number,
         voucherDiscount?: number,
-        walletDeduction?: number
+        walletDeduction?: number,
+        customerName?: string,
+        customerPhone?: string,
+        fullAddress?: string,
+        courierName?: string,
+        courierService?: string,
+        bankLogo?: string
     };
     lastOrderedItems: any[];
     formatPrice: (price: number) => string;
 }
 
 export default function SuccessState({ orderResult, lastOrderedItems, formatPrice }: SuccessStateProps) {
-    const isTransfer = orderResult.paymentMethod === "BCA";
+    const isTransfer = !!orderResult.bankAccount;
     const [timeLeft, setTimeLeft] = useState(600);
     const [isCopied, setIsCopied] = useState<{ [key: string]: boolean }>({});
 
@@ -132,7 +139,13 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                         <div className="bg-neutral-base-50 rounded-xl md:rounded-2xl p-4 md:p-5 flex items-center justify-between gap-3">
                                             <div className="flex items-center gap-3 md:gap-4 min-w-0">
                                                 <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-white flex items-center justify-center p-2 md:p-2.5 shrink-0 border border-neutral-base-100 shadow-sm">
-                                                    <Image src="https://syllahijab.com/frontend/web/img/rekening_pembayaran/bca.png" alt="BCA" width={48} height={16} className="object-contain" />
+                                                    <Image
+                                                        src={orderResult.bankLogo ? `${ASSET_URL}/img/rekening_pembayaran/${orderResult.bankLogo}` : `${ASSET_URL}/img/rekening_pembayaran/bca.png`}
+                                                        alt={orderResult.bankName || "Bank"}
+                                                        width={48}
+                                                        height={16}
+                                                        className="object-contain"
+                                                    />
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="text-[15px] md:text-[20px] font-black text-neutral-base-900 tracking-tight leading-none mb-1 md:mb-1.5">{orderResult.bankAccount}</p>
@@ -204,7 +217,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                 {lastOrderedItems.map((item, idx) => (
                                     <div key={idx} className="flex gap-3 md:gap-4">
                                         <div className="w-12 h-[58px] md:w-14 md:h-[66px] bg-neutral-base-50 rounded-xl overflow-hidden shrink-0 relative border border-neutral-base-100">
-                                            <Image
+                                            <FallbackImage
                                                 src={item.gambar ? `${ASSET_URL}/img/produk/${item.gambar}` : "/placeholder-product.jpg"}
                                                 alt={item.namaProduk}
                                                 fill
@@ -215,7 +228,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                         <div className="flex-1 py-0.5 flex flex-col justify-between min-w-0">
                                             <p className="text-[12px] md:text-[13px] font-semibold text-neutral-base-900 line-clamp-2 leading-snug">{item.namaProduk}</p>
                                             <div className="flex items-center justify-between gap-2 mt-1">
-                                                <span className="text-[10px] md:text-[11px] font-bold text-neutral-base-400">Qty {item.qty} · {item.size}</span>
+                                                <span className="text-[10px] md:text-[11px] font-bold text-neutral-base-400">Qty {item.qty} · {item.size}{item.variant ? ` · ${item.variant}` : ""}</span>
                                                 <span className="text-[12px] md:text-[13px] font-bold text-neutral-base-900 tabular-nums shrink-0">{formatPrice(Number(item.harga) * Number(item.qty))}</span>
                                             </div>
                                         </div>
@@ -224,7 +237,36 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                             </div>
 
                             {/* Order Breakdown */}
-                            <div className="mt-4 md:mt-5 pt-4 md:pt-5 border-t border-neutral-base-100 flex flex-col gap-2.5">
+                            <div className="mt-4 md:mt-5 pt-4 md:pt-5 border-t border-neutral-base-100 flex flex-col gap-4">
+                                {/* Recipient Info */}
+                                <div className="space-y-2">
+                                    <p className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-widest">Penerima</p>
+                                    <div className="text-[12px] md:text-[13px] text-neutral-base-900 font-bold leading-tight">
+                                        {orderResult.customerName}
+                                        <p className="text-[11px] md:text-[12px] text-neutral-base-500 font-medium mt-0.5">{orderResult.customerPhone}</p>
+                                    </div>
+                                </div>
+
+                                {/* Shipping Address */}
+                                <div className="space-y-2">
+                                    <p className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-widest">Alamat Pengiriman</p>
+                                    <p className="text-[11px] md:text-[12px] text-neutral-base-600 font-medium leading-relaxed italic">
+                                        {orderResult.fullAddress}
+                                    </p>
+                                </div>
+
+                                {/* Courier Info */}
+                                <div className="space-y-2">
+                                    <p className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-widest">Ekspedisi</p>
+                                    <div className="flex items-center gap-2">
+                                        <Truck className="w-3.5 h-3.5 text-neutral-base-400" />
+                                        <span className="text-[11px] md:text-[12px] text-neutral-base-900 font-bold uppercase">{orderResult.courierName}</span>
+                                        <span className="text-[10px] md:text-[11px] text-neutral-base-400 font-medium">— {orderResult.courierService}</span>
+                                    </div>
+                                </div>
+
+                                <div className="h-px bg-neutral-base-100/50" />
+
                                 <div className="flex justify-between text-[11px] md:text-[12px] text-neutral-base-500">
                                     <span>Subtotal</span>
                                     <span className="text-neutral-base-900 font-medium tabular-nums">{formatPrice(orderResult.subtotal || 0)}</span>

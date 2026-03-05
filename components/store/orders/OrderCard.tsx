@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ShoppingBag, ChevronRight, MapPin } from "lucide-react";
@@ -74,7 +74,7 @@ export default function OrderCard({ order }: OrderCardProps) {
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4 md:gap-6 w-full">
                     <div className="w-16 h-20 md:w-20 md:h-24 bg-neutral-base-50 rounded-xl md:rounded-2xl overflow-hidden relative shrink-0 border border-neutral-base-50">
-                        <Image
+                        <FallbackImage
                             src={order.firstItemImage ? `${ASSET_URL}/img/produk/${order.firstItemImage}` : "/placeholder-product.jpg"}
                             alt={order.firstItemName || "Produk"}
                             fill

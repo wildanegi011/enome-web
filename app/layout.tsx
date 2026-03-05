@@ -1,4 +1,5 @@
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import React, { Suspense } from "react";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -23,7 +24,8 @@ export const metadata: Metadata = {
 
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 import { Toaster } from "sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import ScrollToTop from "@/components/store/shared/ScrollToTop";
 
 export default function RootLayout({
   children,
@@ -35,6 +37,9 @@ export default function RootLayout({
       <body className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}>
         <ReactQueryProvider>
           <TooltipProvider>
+            <Suspense fallback={null}>
+              <ScrollToTop />
+            </Suspense>
             {children}
           </TooltipProvider>
         </ReactQueryProvider>

@@ -48,6 +48,8 @@ const SearchMenuContent = ({
     onRemoveRecent,
     onClearRecent,
     onSelectRecent,
+    searchValue,
+    addSearch,
 }: {
     setDirection: (dir: number) => void;
     setCurrentIndex: (idx: number) => void;
@@ -62,6 +64,8 @@ const SearchMenuContent = ({
     onRemoveRecent: (q: string) => void;
     onClearRecent: () => void;
     onSelectRecent: (q: string) => void;
+    searchValue: string;
+    addSearch: (q: string) => void;
 }) => (
     <CommandList className="max-h-none pb-6">
         {/* Empty State */}
@@ -122,7 +126,7 @@ const SearchMenuContent = ({
                         heading={
                             <div className="flex items-center gap-2 px-4 pt-3 pb-2">
                                 <TrendingUp className="size-3 text-stone-300" />
-                                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Trending</span>
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Category</span>
                             </div>
                         }
                     >
@@ -131,6 +135,7 @@ const SearchMenuContent = ({
                                 <CommandItem
                                     key={cat.kategoriId}
                                     onSelect={() => {
+                                        if (searchValue.trim()) addSearch(searchValue.trim());
                                         router.push(`/products?category=${cat.kategori}`);
                                         setIsSearchOpen(false);
                                     }}
@@ -145,93 +150,53 @@ const SearchMenuContent = ({
 
                 <div className="my-3 h-px bg-stone-100 mx-4" />
 
-                {/* Collections */}
-                {collections.length > 0 && (
-                    <CommandGroup
-                        heading={
-                            <div className="flex items-center gap-2 px-4 pt-1 pb-2">
-                                <Sparkles className="size-3 text-stone-300" />
-                                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Collections</span>
-                            </div>
-                        }
-                    >
-                        <div className="px-2 space-y-0.5">
-                            {collections.map((collection) => (
-                                <CommandItem
-                                    key={collection.id}
-                                    onSelect={() => {
-                                        const index = collections.findIndex(c => c.id === collection.id);
-                                        if (index !== -1) {
-                                            setDirection(index > currentIndex ? 1 : -1);
-                                            setCurrentIndex(index);
-                                            setIsSearchOpen(false);
-                                        }
-                                    }}
-                                    className="group/item flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-50 data-[selected=true]:bg-stone-50 cursor-pointer transition-colors"
-                                >
-                                    <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-stone-100 shrink-0">
-                                        <Image
-                                            src={collection.images[0].url}
-                                            alt={collection.title}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                    <div className="flex flex-col min-w-0">
-                                        <span className="font-medium text-sm text-stone-800 truncate">{collection.title}</span>
-                                        <span className="text-[11px] text-stone-400">{collection.images.length} images</span>
-                                    </div>
-                                    <ChevronRight className="ml-auto size-4 text-stone-300 opacity-0 group-hover/item:opacity-100 transition-opacity" />
-                                </CommandItem>
-                            ))}
-                        </div>
-                    </CommandGroup>
-                )}
-
                 <div className="my-3 h-px bg-stone-100 mx-4" />
             </>
         )}
 
-        {/* Products (always shown — recommended or search results) */}
-        <CommandGroup
-            heading={
-                <div className="flex items-center gap-2 px-4 pt-1 pb-2">
-                    <ShoppingBag className="size-3 text-stone-300" />
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">
-                        {searchQuery ? "Results" : "Recommended"}
-                    </span>
-                </div>
-            }
-        >
-            <div className="px-2 space-y-0.5">
-                {products.map((product) => (
-                    <CommandItem
-                        key={product.produkId}
-                        onSelect={() => {
-                            router.push(`/products/${product.produkId}`);
-                            setIsSearchOpen(false);
-                        }}
-                        className="group/prod flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-50 data-[selected=true]:bg-stone-50 cursor-pointer transition-colors"
-                    >
-                        <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-stone-100 shrink-0">
-                            <Image
-                                src={`${ASSET_URL}/img/produk_utama/${product.gambar}` || "/placeholder.png"}
-                                alt={product.namaProduk}
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
-                        <div className="flex flex-col min-w-0 gap-0.5">
-                            <span className="font-medium text-sm text-stone-800 truncate">{product.namaProduk}</span>
-                            <span className="text-[11px] text-stone-400">{product.kategori}</span>
-                        </div>
-                        <span className="ml-auto text-sm font-semibold text-stone-700 shrink-0">
-                            {product.finalMinPrice ? `Rp ${Number(product.finalMinPrice).toLocaleString('id-ID')}` : "—"}
+        {/* Products (search results only) */}
+        {searchQuery && (
+            <CommandGroup
+                heading={
+                    <div className="flex items-center gap-2 px-4 pt-1 pb-2">
+                        <ShoppingBag className="size-3 text-stone-300" />
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">
+                            Results
                         </span>
-                    </CommandItem>
-                ))}
-            </div>
-        </CommandGroup>
+                    </div>
+                }
+            >
+                <div className="px-2 space-y-0.5">
+                    {products.map((product) => (
+                        <CommandItem
+                            key={product.produkId}
+                            onSelect={() => {
+                                if (searchValue.trim()) addSearch(searchValue.trim());
+                                router.push(`/products/${product.produkId}`);
+                                setIsSearchOpen(false);
+                            }}
+                            className="group/prod flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-50 data-[selected=true]:bg-stone-50 cursor-pointer transition-colors"
+                        >
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-stone-100 shrink-0">
+                                <Image
+                                    src={`${ASSET_URL}/img/produk_utama/${product.gambar}` || "/placeholder.png"}
+                                    alt={product.namaProduk}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="flex flex-col min-w-0 gap-0.5">
+                                <span className="font-medium text-sm text-stone-800 truncate">{product.namaProduk}</span>
+                                <span className="text-[11px] text-stone-400">{product.kategori}</span>
+                            </div>
+                            <span className="ml-auto text-sm font-semibold text-stone-700 shrink-0">
+                                {product.finalMinPrice ? `Rp ${Number(product.finalMinPrice).toLocaleString('id-ID')}` : "—"}
+                            </span>
+                        </CommandItem>
+                    ))}
+                </div>
+            </CommandGroup>
+        )}
 
         {/* Quick Links (idle only) */}
         {!searchQuery && (
@@ -309,9 +274,12 @@ export default function SearchModal({
         setSearchValue(term);
     };
 
-    const handleSearchSubmit = () => {
-        if (searchValue.trim()) {
-            addSearch(searchValue.trim());
+    const handleSearchSubmit = (value?: string) => {
+        const query = value || searchValue;
+        if (query.trim()) {
+            addSearch(query.trim());
+            router.push(`/products?search=${encodeURIComponent(query.trim())}`);
+            onOpenChange(false);
         }
     };
 
@@ -328,7 +296,12 @@ export default function SearchModal({
         recentSearches,
         onRemoveRecent: removeSearch,
         onClearRecent: clearAll,
-        onSelectRecent: handleSelectRecent,
+        onSelectRecent: (term: string) => {
+            setSearchValue(term);
+            handleSearchSubmit(term);
+        },
+        searchValue,
+        addSearch,
     };
 
     /* ── Mobile: Drawer ── */
@@ -349,8 +322,11 @@ export default function SearchModal({
                                 value={searchValue}
                                 onValueChange={(val) => {
                                     setSearchValue(val);
-                                    if (!val.trim()) return;
-                                    // Save on clear (user navigated away)
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        handleSearchSubmit();
+                                    }
                                 }}
                                 className="h-12 text-base bg-white rounded-xl border border-stone-200 focus:ring-0 focus:border-stone-300 placeholder:text-stone-300 text-stone-900 font-medium w-full"
                             />
@@ -385,6 +361,11 @@ export default function SearchModal({
                     placeholder="Search products"
                     value={searchValue}
                     onValueChange={setSearchValue}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            handleSearchSubmit();
+                        }
+                    }}
                     className="h-11 text-sm border-none focus:ring-0 placeholder:text-stone-300 text-stone-900 font-medium bg-stone-50 rounded-xl px-4 w-full"
                 />
             </div>

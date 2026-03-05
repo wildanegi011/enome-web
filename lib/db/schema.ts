@@ -55,6 +55,7 @@ export const produkDetail = mysqlTable("produkdetail", {
     line: int("line"),
     diskon: int("diskon"),
     gambar: varchar("gambar", { length: 255 }),
+    variant: varchar("variant", { length: 50 }),
 });
 
 export const kategoriProduk = mysqlTable("kategoriproduk", {
@@ -73,9 +74,18 @@ export const size = mysqlTable("size", {
     size: varchar("size", { length: 20 }),
 });
 
+// variant table is no longer strictly needed if we store names directly, 
+// but we keep it if user wants to manage a list of allowed variants.
+// For now, we'll keep it as a reference table but the join will be on names.
+export const variant = mysqlTable("variant", {
+    variantId: serial("variant_id").primaryKey(),
+    variant: varchar("variant", { length: 50 }).notNull(),
+});
+
 export const keranjangLove = mysqlTable("keranjang_love", {
     id: serial("id").primaryKey(),
     produkId: varchar("produk_id", { length: 20 }),
+    variant: varchar("variant", { length: 50 }),
     warna: varchar("warna", { length: 20 }),
     size: varchar("size", { length: 20 }),
     qtyProduk: int("qty_produk"),
@@ -175,6 +185,7 @@ export const keranjang = mysqlTable("keranjang", {
     produkId: varchar("produk_id", { length: 200 }),
     warna: varchar("warna", { length: 20 }),
     size: varchar("size", { length: 50 }),
+    variant: varchar("variant", { length: 50 }),
     qtyProduk: int("qty_produk"),
     hargaPoduk: int("harga_poduk"),
     gambarProduk: text("gambar_produk"),
@@ -273,6 +284,7 @@ export const orderdetail = mysqlTable("orderdetail", {
     berat: int("berat"),
     jmlBerat: int("jml_berat"),
     kategori: varchar("kategori", { length: 100 }),
+    variant: varchar("variant", { length: 50 }),
 });
 
 export const flashSale = mysqlTable("flash_sale", {
@@ -470,4 +482,11 @@ export const payment = mysqlTable("payment", {
     vaNumber: varchar("va_number", { length: 50 }),
     midtransOrderId: varchar("midtrans_order_id", { length: 100 }),
     midtransResponse: text("midtrans_response"),
+});
+
+
+export const newsLatter = mysqlTable("newslatter", {
+    id: serial("id").primaryKey(),
+    email: varchar("email", { length: 50 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
 });

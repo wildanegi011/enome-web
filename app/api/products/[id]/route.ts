@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { produk, produkDetail, warna, size, customer, flashSale, flashSaleDetail, customerKategori } from "@/lib/db/schema";
+import { produk, produkDetail, warna, size, customer, flashSale, flashSaleDetail, customerKategori, variant } from "@/lib/db/schema";
 import { eq, and, sql, not, min, max } from "drizzle-orm";
 import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
@@ -108,6 +108,8 @@ export const GET = withOptionalAuth(async (
             .select({
                 color: sql<string>`COALESCE(${warna.warna}, ${produkDetail.warnaId})`,
                 size: produkDetail.size,
+                variant: produkDetail.variant,
+                variantId: produkDetail.variant,
                 stock: produkDetail.stokNormal,
                 price: priceColumn,
                 basePrice: produkDetail.hargaJual,
@@ -142,6 +144,21 @@ export const GET = withOptionalAuth(async (
         });
 
         const colors = Object.values(colorMap);
+
+        // 4b. Ekstrak variant unik yang tersedia (dari kolom variant langsung)
+        const uniqueVariantsRows = await db
+            .selectDistinct({
+                name: produkDetail.variant,
+            })
+            .from(produkDetail)
+            .where(and(
+                eq(produkDetail.produkId, id),
+                sql`${produkDetail.variant} IS NOT NULL`,
+                sql`${produkDetail.variant} != ''`
+            ));
+
+        const types = uniqueVariantsRows.map(v => v.name).filter(Boolean) as string[];
+        logger.info("Product Detail: Variants found", { productId: id, variantCount: types.length, types });
 
         // 5. Ambil daftar size yang tersedia
         const sizes = await db
@@ -226,6 +243,7 @@ export const GET = withOptionalAuth(async (
             variants: {
                 colors,
                 sizes: sizes.map(s => s.name),
+                types: types,
                 matrix: details.map(d => {
                     const dPrice = isOnFlashSale
                         ? Number(d.basePrice) - (Number(d.basePrice) * (Number(flashSaleDiscount) / 100))

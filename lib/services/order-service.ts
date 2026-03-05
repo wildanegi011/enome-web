@@ -307,7 +307,8 @@ export class OrderService {
                     catatan: item.keterangan || "",
                     berat: item.detail.berat || 0,
                     jmlBerat: (item.detail.berat || 0) * qty,
-                    kategori: customerData.kategoriCustomer || ""
+                    kategori: customerData.kategoriCustomer || "",
+                    variant: item.variant || ""
                 };
 
                 await tx.insert(orderdetail).values(detailValues);

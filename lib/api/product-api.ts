@@ -64,7 +64,8 @@ export interface ProductDetailResponse {
     variants: {
         colors: { name: string; value: string; image: string | null; totalStock: number }[];
         sizes: string[];
-        matrix: { color: string; size: string; stock: number; price: string; image: string | null }[];
+        types: string[];
+        matrix: { color: string; size: string; variant: string; stock: number; price: string; image: string | null }[];
     };
     images: string[];
     relatedProducts: any[];

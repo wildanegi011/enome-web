@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { useHighlights } from "@/hooks/use-products";
@@ -58,7 +58,7 @@ export default function FeaturedBanner() {
                             className="absolute inset-0 hidden lg:block"
                             style={{ clipPath: "polygon(0 0, 100% 0, 85% 100%, 0% 100%)" }}
                         >
-                            <Image
+                            <FallbackImage
                                 src={imageUrl}
                                 alt={featuredProduct.namaProduk}
                                 fill
@@ -69,7 +69,7 @@ export default function FeaturedBanner() {
 
                         {/* Mobile Image (No Clip Path) */}
                         <div className="absolute inset-0 lg:hidden">
-                            <Image
+                            <FallbackImage
                                 src={imageUrl}
                                 alt={featuredProduct.namaProduk}
                                 fill

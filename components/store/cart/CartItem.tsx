@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { CheckSquare, Square, Zap, Minus, Plus, MessageSquare, Trash2 } from "lucide-react";
-import Image from "next/image";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CartItem as CartItemType } from "@/lib/api/cart-api";
 import { ASSET_URL } from "@/config/config";
@@ -51,7 +51,7 @@ export default function CartItem({
 
                 {/* Image */}
                 <div className={`w-20 h-20 xs:w-24 xs:h-24 md:w-32 md:h-32 bg-neutral-base-50 rounded-xl md:rounded-3xl overflow-hidden relative shrink-0 border border-neutral-base-100 shadow-sm group-hover:shadow-md transition-all ${isOffline ? "opacity-40 grayscale-[0.5]" : ""}`}>
-                    <Image
+                    <FallbackImage
                         src={item.gambar ? `${ASSET_URL}/img/produk/${item.gambar}` : "/placeholder-product.jpg"}
                         alt={item.namaProduk}
                         fill

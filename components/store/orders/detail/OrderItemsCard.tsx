@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 import { ASSET_URL } from "@/config/config";
 import { formatCurrency } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ interface OrderItem {
     gambar: string | null;
     ukuran?: string;
     warna?: string;
+    variant?: string;
 }
 
 interface OrderItemsCardProps {
@@ -37,7 +38,7 @@ export default function OrderItemsCard({ items }: OrderItemsCardProps) {
                         className="p-6 md:p-8 flex items-start md:items-center gap-4 md:gap-6 group"
                     >
                         <div className="w-20 h-24 md:w-24 md:h-32 bg-neutral-base-50 rounded-xl md:rounded-2xl overflow-hidden relative border border-neutral-base-50 shrink-0">
-                            <Image
+                            <FallbackImage
                                 src={
                                     item.gambar
                                         ? `${ASSET_URL}/img/produk/${item.gambar}`
@@ -56,6 +57,11 @@ export default function OrderItemsCard({ items }: OrderItemsCardProps) {
                                 {item.ukuran && (
                                     <span>
                                         Ukuran: <b className="text-neutral-base-900">{item.ukuran}</b>
+                                    </span>
+                                )}
+                                {item.variant && (
+                                    <span>
+                                        Varian: <b className="text-neutral-base-900">{item.variant}</b>
                                     </span>
                                 )}
                                 {item.warna && (

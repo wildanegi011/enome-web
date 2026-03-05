@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { keranjang, produk, warna, produkDetail } from "@/lib/db/schema";
+import { keranjang, produk, warna, produkDetail, variant as variantTable } from "@/lib/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 
 export class CartService {
@@ -24,6 +24,7 @@ export class CartService {
             warna: keranjang.warna,
             warnaName: warna.warna,
             size: keranjang.size,
+            variant: keranjang.variant,
             qty: keranjang.qtyProduk,
             harga: keranjang.hargaPoduk,
             gambar: sql<string>`COALESCE(${keranjang.gambarProduk}, ${produk.gambar})`.as('gambar'),
@@ -42,7 +43,8 @@ export class CartService {
             .leftJoin(produkDetail, and(
                 eq(keranjang.produkId, produkDetail.produkId),
                 eq(keranjang.warna, produkDetail.warnaId),
-                eq(keranjang.size, produkDetail.size)
+                eq(keranjang.size, produkDetail.size),
+                sql`(${produkDetail.variant} = ${keranjang.variant} OR (${produkDetail.variant} IS NULL AND ${keranjang.variant} IS NULL))`
             ))
             .where(and(...conditions))
             .orderBy(sql`${keranjang.createdAt} DESC`);

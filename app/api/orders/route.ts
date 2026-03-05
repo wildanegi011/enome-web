@@ -5,6 +5,9 @@ import { CONFIG } from "@/lib/config";
 import { OrderService } from "@/lib/services/order-service";
 import { CustomerService } from "@/lib/services/customer-service";
 import { CartService } from "@/lib/services/cart-service";
+import { db } from "@/lib/db";
+import { rekeningPembayaran } from "@/lib/db/schema";
+import { eq, like, or } from "drizzle-orm";
 
 /**
  * Membuat order baru dari isi keranjang.
@@ -111,12 +114,32 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         const result: any = await OrderService.createOrder(orderData, stockResult.verifiedItems || [], finalWalletAmount, uniqueCode);
 
         // Add unique code and bank info to result for frontend
-        if (uniqueCode > 0) {
+        if (isBcaTransfer) {
             result.uniqueCode = uniqueCode;
-            result.paymentMethod = "BCA";
-            result.bankAccount = "2810377740";
-            result.bankOwner = "TRYSETYO0603";
-            result.bankName = "Bank BCA";
+
+            // Fetch Bank Details dynamically
+            const [bank]: any = await db.select()
+                .from(rekeningPembayaran)
+                .where(or(
+                    eq(rekeningPembayaran.namaBank, payment),
+                    like(rekeningPembayaran.namaBank, `%${payment}%`)
+                ))
+                .limit(1);
+
+            if (bank) {
+                result.paymentMethod = bank.namaBank;
+                result.bankAccount = bank.noRekening;
+                result.bankOwner = bank.namaPemilik;
+                result.bankName = `Bank ${bank.namaBank}`;
+                result.bankLogo = bank.logoBank;
+            } else {
+                // Fallback if not found in DB
+                result.paymentMethod = payment;
+                result.bankAccount = "2810377740";
+                result.bankOwner = "TRYSETYO0603";
+                result.bankName = "Bank BCA";
+                result.bankLogo = "bca.png";
+            }
         }
 
         // Attach breakdown details for success page

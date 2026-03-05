@@ -92,6 +92,7 @@ export const GET = withAuth(async (
             warna: sql<string>`COALESCE(${warna.warna}, ${orderdetail.warna})`.as('warna'),
             harga: orderdetail.harga,
             qty: orderdetail.qty,
+            variant: orderdetail.variant,
             jmlHarga: orderdetail.jmlHarga,
             catatan: orderdetail.catatan,
         })
@@ -117,9 +118,25 @@ export const GET = withAuth(async (
         );
 
         if (isBcaTransfer) {
-            const banks = await db.select().from(rekeningPembayaran).where(eq(rekeningPembayaran.isAktif, 1)).limit(1);
-            if (banks.length > 0) {
-                paymentInfo = banks[0];
+            const [bank]: any = await db.select()
+                .from(rekeningPembayaran)
+                .where(and(
+                    eq(rekeningPembayaran.isAktif, 1),
+                    or(
+                        eq(rekeningPembayaran.namaBank, order.metodebayar),
+                        like(rekeningPembayaran.namaBank, `%${order.metodebayar}%`)
+                    )
+                ))
+                .limit(1);
+
+            if (bank) {
+                paymentInfo = bank;
+            } else {
+                // Fallback to first active bank if specific match fails
+                const banks = await db.select().from(rekeningPembayaran).where(eq(rekeningPembayaran.isAktif, 1)).limit(1);
+                if (banks.length > 0) {
+                    paymentInfo = banks[0];
+                }
             }
         }
 

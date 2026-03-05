@@ -19,7 +19,7 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import router from "next/router";
-import Image from "next/image";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -55,7 +55,7 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-[80px]">
                     <Link href="/" className="relative flex items-center h-full">
                         <div className="relative w-14 h-14 md:w-20 md:h-20 transition-all duration-500 hover:scale-105 active:scale-95 group">
-                            <Image
+                            <FallbackImage
                                 src="/logo-enome.png"
                                 alt="Logo Enome"
                                 fill

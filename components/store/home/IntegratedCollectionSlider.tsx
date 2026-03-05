@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import AuthModal from "@/components/store/auth/AuthModal";
 
 // Sub-components
 import NavOverlay from "./subcomponents/NavOverlay";
@@ -21,6 +20,7 @@ interface Collection {
     images: {
         url: string;
         link: string | null;
+        title?: string;
         aspect: string;
     }[];
 }
@@ -33,7 +33,6 @@ export default function IntegratedCollectionSlider() {
     const [direction, setDirection] = useState(0);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
-    const [authModal, setAuthModal] = useState<{ open: boolean; tab: "login" | "register" }>({ open: false, tab: "login" });
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const isMobile = useIsMobile();
 
@@ -159,7 +158,7 @@ export default function IntegratedCollectionSlider() {
 
 
             {/* Top Navigation Overlay */}
-            <NavOverlay setIsSearchOpen={setIsSearchOpen} setAuthModal={setAuthModal} />
+            <NavOverlay setIsSearchOpen={setIsSearchOpen} />
 
             {/* Search Experience */}
             <SearchModal
@@ -222,17 +221,36 @@ export default function IntegratedCollectionSlider() {
                                 {/* Subtle Overlay for Brand Consistency */}
                                 <div className="absolute inset-0 bg-black/5 pointer-events-none" />
 
-                                {/* Collection Title - Bottom Left */}
+                                {/* Vertical Side Logo - Left Center */}
+                                <motion.div
+                                    initial={{ opacity: 0, x: -30 }}
+                                    whileInView={{ opacity: 0.35, x: 0 }}
+                                    transition={{ duration: 1, delay: 0.3 }}
+                                    viewport={{ once: false }}
+                                    className="absolute left-12 md:left-20 top-1/2 -translate-y-1/2 z-10 pointer-events-none select-none"
+                                >
+                                    <div className="relative w-16 h-64 md:w-md md:h-96">
+                                        <Image
+                                            src="/logo-enome.png"
+                                            alt="ÉNOMÉ"
+                                            fill
+                                            className="object-contain brightness-0 invert opacity-100"
+                                            style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.15))" }}
+                                        />
+                                    </div>
+                                </motion.div>
+
+                                {/* Collection Title - Centered on Mobile, Left on Desktop */}
                                 <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
-                                    <div className="px-6 md:px-12 pb-20 md:pb-16">
+                                    <div className="flex flex-col items-center md:items-start px-6 md:px-12 pb-24 md:pb-16">
                                         <motion.p
                                             initial={{ opacity: 0, y: 10 }}
                                             whileInView={{ opacity: 1, y: 0 }}
                                             transition={{ duration: 0.8, delay: 0.3 }}
                                             viewport={{ once: false }}
-                                            className="font-serif text-[13px] md:text-[15px] text-white/70 tracking-[0.25em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+                                            className="font-serif text-[15px] md:text-[18px] text-center md:text-left text-white/70 tracking-[0.25em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
                                         >
-                                            {collections[currentIndex].title}
+                                            {img.title || collections[currentIndex].title}
                                         </motion.p>
                                     </div>
                                 </div>
@@ -283,12 +301,6 @@ export default function IntegratedCollectionSlider() {
                 collections={collections}
                 setDirection={setDirection}
                 setCurrentIndex={setCurrentIndex}
-            />
-
-            <AuthModal
-                isOpen={authModal.open}
-                onClose={() => setAuthModal({ ...authModal, open: false })}
-                defaultTab={authModal.tab}
             />
         </section>
     );

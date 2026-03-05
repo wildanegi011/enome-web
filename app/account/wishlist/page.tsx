@@ -60,7 +60,7 @@ export default function WishlistPage() {
         setRemovingIds(prev => new Set(prev).add(produkId));
 
         try {
-            await toggleWishlist.mutateAsync(produkId);
+            await toggleWishlist.mutateAsync({ produkId });
             setTimeout(() => {
                 setRemovingIds(prev => { const next = new Set(prev); next.delete(produkId); return next; });
             }, 300);

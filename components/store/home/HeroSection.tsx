@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ASSET_URL } from "@/config/config";
@@ -35,7 +35,7 @@ export default function HeroSection() {
                     transition={{ duration: 0.6 }} // Reduced duration for responsiveness
                     className="absolute inset-0 flex items-center justify-center"
                 >
-                    <Image
+                    <FallbackImage
                         src={`${ASSET_URL}/img/slide/${currentSlide.image || ""}`}
                         alt={currentSlide.text || "Hero Slide"}
                         fill
@@ -80,7 +80,7 @@ export default function HeroSection() {
                         transition={{ duration: 0.8, ease: "easeOut" }}
                         className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center text-center pointer-events-none"
                     >
-                        <h1 className="font-heading text-[48px] sm:text-[64px] md:text-[80px] lg:text-[100px] font-bold text-white leading-[1] tracking-tighter drop-shadow-2xl uppercase">
+                        <h1 className="font-heading text-[48px] sm:text-[64px] md:text-[80px] lg:text-[100px] font-bold text-white leading-none tracking-tighter drop-shadow-2xl uppercase">
                             {currentSlide.text}
                         </h1>
                     </motion.div>

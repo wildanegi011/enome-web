@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,7 +27,7 @@ export default function ProductGallery({ images, isSoldOut, isOnFlashSale }: Pro
                             className={`relative bg-neutral-base-50 overflow-hidden min-w-0 ${isFeatureImage ? "md:col-span-2" : "col-span-1"
                                 }`}
                         >
-                            <Image
+                            <FallbackImage
                                 src={img}
                                 alt={`Product image ${idx + 1}`}
                                 width={2000}

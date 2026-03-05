@@ -58,7 +58,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
     try {
         const custId = Number(session.user.id);
         const body = await request.json();
-        const { produkId } = body;
+        const { produkId, variant } = body;
 
         if (!produkId) {
             return NextResponse.json({ error: "produkId is required" }, { status: 400 });
@@ -96,6 +96,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
             // Add to wishlist
             await db.insert(keranjangLove).values({
                 produkId,
+                variant: variant || null,
                 custId: custId,
                 qtyProduk: 1,
                 hargaPoduk: 0,

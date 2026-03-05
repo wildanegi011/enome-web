@@ -32,8 +32,8 @@ export function useToggleWishlist() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (produkId: string) => userApi.toggleWishlist(produkId),
-        onMutate: async (produkId) => {
+        mutationFn: ({ produkId, variant }: { produkId: string, variant?: string }) => userApi.toggleWishlist(produkId, variant),
+        onMutate: async ({ produkId }) => {
             await queryClient.cancelQueries({ queryKey: queryKeys.user.wishlist.all });
             await queryClient.cancelQueries({ queryKey: queryKeys.user.wishlist.details });
 

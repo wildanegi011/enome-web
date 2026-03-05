@@ -8,6 +8,7 @@ export interface CartItem {
     berat: number;
     warna: string;
     size: string;
+    variant?: string;
     namaProduk: string;
     gambar: string;
     stock?: number;

@@ -111,6 +111,7 @@ export interface WishlistItem {
     nama_produk: string;
     kategori: string;
     gambar: string | null;
+    variant?: string | null;
     isaktif: number;
     is_online: number;
     min_price: string | null;
@@ -201,10 +202,10 @@ export const userApi = {
         const data = await apiClient<{ items: WishlistItem[] }>("/api/wishlist/details");
         return data.items;
     },
-    toggleWishlist: async (produkId: string) => {
+    toggleWishlist: async (produkId: string, variant?: string) => {
         return await apiClient<{ action: "added" | "removed"; produkId: string }>("/api/wishlist", {
             method: "POST",
-            body: JSON.stringify({ produkId }),
+            body: JSON.stringify({ produkId, variant }),
         });
     }
 };

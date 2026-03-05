@@ -23,13 +23,14 @@ export class SlideService {
             if (!collectionsMap.has(os)) {
                 collectionsMap.set(os, {
                     id: os.toString(),
-                    title: `Batik Collection ${os}`,
+                    title: "",
                     images: []
                 });
             }
             collectionsMap.get(os).images.push({
                 url: `${ASSET_URL}/img/slide/${s.image}`,
                 link: s.link,
+                title: s.text,
                 aspect: "1/1"
             });
         });

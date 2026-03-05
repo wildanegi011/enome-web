@@ -76,103 +76,88 @@ export async function POST(request: NextRequest) {
 
         // 4. Panggil API Komerce untuk SEMUA kurir aktif
         logger.debug("Shipping Calc: Calling Komerce API", { origin, destination, weight, courierCodes });
-        const response = await fetch("https://rajaongkir.komerce.id/api/v1/calculate/district/domestic-cost", {
-            method: "POST",
-            headers: {
-                "content-type": "application/x-www-form-urlencoded",
-                "key": config.value
-            },
-            body: new URLSearchParams({
-                origin: origin,
-                destination: destination.toString(),
-                weight: weight.toString(),
-                courier: courierCodes,
-                price: "lowest"
-            })
-        });
 
         const automatedCodes = ['jne', 'pos', 'wahana', 'tiki', 'jnt', 'sicepat', 'ninja', 'lion', 'anteraja', 'idexpress'];
+        let rajaOngkirResults: any[] = [];
 
-        if (response.ok) {
-            const data = await response.json();
-            logger.info("Shipping Calc: Success", { data });
-
-            // Standard RajaOngkir results
-            const rajaOngkirResults = data?.data?.reduce((acc: any[], item: any) => {
-                const code = item.code.toUpperCase();
-                let existing = acc.find(r => r.code === code);
-                if (!existing) {
-                    existing = { code, name: item.name, costs: [] };
-                    acc.push(existing);
-                }
-                existing.costs.push({
-                    service: item.service,
-                    description: item.description || item.service,
-                    type: 'automated',
-                    cost: [{
-                        value: item.cost,
-                        etd: item.etd,
-                        note: item.description || ""
-                    }]
-                });
-                return acc;
-            }, []) || [];
-
-            // Add manual cargo - Only those NOT in RajaOngkir results AND not in the automatedCodes list
-            const returnedCodes = new Set(rajaOngkirResults.map((r: any) => r.code.toLowerCase()));
-
-            const manualResults = activeCouriers
-                .filter(c => {
-                    const code = c.code?.toLowerCase();
-                    return code && !returnedCodes.has(code) && !automatedCodes.includes(code);
-                })
-                .map(c => ({
-                    code: (c.code || "CARGO").toUpperCase(),
-                    name: c.name || c.code || "Cargo",
-                    costs: [{
-                        service: (c.name || c.code || "Cargo").toUpperCase(),
-                        description: `Pengiriman via ${c.name || c.code}`,
-                        type: 'manual',
-                        cost: [{
-                            value: 0,
-                            etd: "",
-                            note: "Biaya akan dihitung manual atau gratis"
-                        }]
-                    }]
-                }));
-
-            return NextResponse.json({
-                rajaongkir: {
-                    results: [...rajaOngkirResults, ...manualResults]
-                }
+        try {
+            const response = await fetch("https://rajaongkir.komerce.id/api/v1/calculate/district/domestic-cost", {
+                method: "POST",
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded",
+                    "key": config.value
+                },
+                body: new URLSearchParams({
+                    origin: origin,
+                    destination: destination.toString(),
+                    weight: weight.toString(),
+                    courier: courierCodes,
+                    price: "lowest"
+                }),
+                signal: AbortSignal.timeout(10000) // 10 second timeout
             });
-        } else {
-            logger.error("Shipping Calc: Komerce API Failure", { status: response.status });
 
-            // Even if API fails, return only non-automated manual cargo options
-            const manualResults = activeCouriers
-                .filter(c => c.code && !automatedCodes.includes(c.code.toLowerCase()))
-                .map(c => ({
-                    code: (c.code || "CARGO").toUpperCase(),
-                    name: c.name || c.code || "Cargo",
-                    costs: [{
-                        service: (c.name || c.code || "Cargo").toUpperCase(),
-                        description: `Pengiriman via ${c.name || c.code}`,
-                        type: 'manual',
+            if (response.ok) {
+                const data = await response.json();
+                logger.info("Shipping Calc: Success", { data });
+
+                rajaOngkirResults = data?.data?.reduce((acc: any[], item: any) => {
+                    const code = item.code.toUpperCase();
+                    let existing = acc.find(r => r.code === code);
+                    if (!existing) {
+                        existing = { code, name: item.name, costs: [] };
+                        acc.push(existing);
+                    }
+                    existing.costs.push({
+                        service: item.service,
+                        description: item.description || item.service,
+                        type: 'automated',
                         cost: [{
-                            value: 0,
-                            etd: "",
-                            note: "Biaya akan dihitung manual"
+                            value: item.cost,
+                            etd: item.etd,
+                            note: item.description || ""
                         }]
-                    }]
-                }));
-
-            return NextResponse.json({
-                rajaongkir: {
-                    results: manualResults
-                }
-            });
+                    });
+                    return acc;
+                }, []) || [];
+            } else {
+                logger.error("Shipping Calc: Komerce API returned error status", { status: response.status });
+            }
+        } catch (fetchError: any) {
+            logger.error("Shipping Calc: Komerce API fetch FAILED (Timeout or Network Error)", { message: fetchError.message });
         }
+
+        // 5. Add manual cargo - ALWAYS include these even if RajaOngkir fails
+        // Manual cargo are those in the 'cargo' table that aren't in RajaOngkir's automated list
+        const returnedCodes = new Set(rajaOngkirResults.map((r: any) => r.code.toLowerCase()));
+
+        const manualResults = activeCouriers
+            .filter(c => {
+                const code = c.code?.toLowerCase();
+                // Include if it's NOT an automated courier type (like jne/jnt) 
+                // OR if RajaOngkir didn't return it (fallback)
+                return code && (!automatedCodes.includes(code) || !returnedCodes.has(code));
+            })
+            .map(c => ({
+                code: (c.code || "CARGO").toUpperCase(),
+                name: c.name || c.code || "Cargo",
+                costs: [{
+                    service: (c.name || c.code || "Cargo").toUpperCase(),
+                    description: `Pengiriman via ${c.name || c.code}`,
+                    type: 'manual',
+                    cost: [{
+                        value: 0,
+                        etd: "",
+                        note: "Biaya akan dihitung manual atau gratis"
+                    }]
+                }]
+            }));
+
+        return NextResponse.json({
+            rajaongkir: {
+                results: [...rajaOngkirResults, ...manualResults]
+            }
+        });
 
     } catch (error: any) {
         apiLogger.error(request, error);

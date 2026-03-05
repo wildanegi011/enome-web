@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 import { useState, useRef, useCallback } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -76,7 +76,7 @@ export default function InstagramSection() {
                                     transition={{ duration: 0.8, delay: idx * 0.05 }}
                                     className={`relative h-[480px] w-[300px] shrink-0 rounded-lg overflow-hidden shadow-2xl shadow-black/5 hover:shadow-black/15 transition-all group/item`}
                                 >
-                                    <Image
+                                    <FallbackImage
                                         src={img.src}
                                         alt={`Instagram fashion ${idx + 1}`}
                                         fill

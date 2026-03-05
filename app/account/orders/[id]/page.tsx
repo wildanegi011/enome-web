@@ -155,8 +155,8 @@ export default function OrderDetailPage() {
                             uniqueCodeValue={uniqueCodeValue}
                         />
 
-                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                            <div className="xl:col-span-2 space-y-8">
+                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+                            <div className="xl:col-span-7 space-y-8">
                                 <OrderItemsCard items={items} />
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -177,7 +177,7 @@ export default function OrderDetailPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-8">
+                            <div className="xl:col-span-5 space-y-8">
                                 <OrderSummaryCard
                                     totalHarga={order.totalHarga}
                                     ongkir={order.ongkir}

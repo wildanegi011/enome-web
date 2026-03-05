@@ -13,7 +13,7 @@ import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Breadcrumb from "@/components/store/shared/Breadcrumb";
 import Link from "next/link";
-import Image from "next/image";
+import FallbackImage from "@/components/store/shared/FallbackImage";
 import { motion } from "framer-motion";
 
 export default function ProductDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -81,6 +81,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
         description: product.deskripsi || "No description available.",
         colors: variants.colors,
         sizes: variants.sizes,
+        types: variants.types, // <-- Added variant types
         collection: product.kategori,
         detail: product.detail,
         totalStock: stats.totalStock,
@@ -165,7 +166,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
                                                 }}
                                                 className={`relative bg-neutral-base-50 overflow-hidden break-inside-avoid group shadow-sm hover:shadow-2xl transition-all duration-700 rounded-lg ${ratioClass}`}
                                             >
-                                                <Image
+                                                <FallbackImage
                                                     src={img}
                                                     alt={`Product detail image ${idx + 2}`}
                                                     width={2000}

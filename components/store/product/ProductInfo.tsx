@@ -18,10 +18,11 @@ interface ProductInfoProps {
         description: string;
         colors: { name: string; value: string; image: string | null; totalStock: number }[];
         sizes: string[];
+        types: string[]; // <-- Added variant types
         collection: string;
         detail: string | null;
         totalStock: string | null;
-        matrix: { color: string; size: string; stock: number; price: string; image: string | null }[];
+        matrix: { color: string; size: string; variant: string; stock: number; price: string; image: string | null }[];
         commission?: string;
         hasCommission?: boolean;
         isOnFlashSale?: boolean;
@@ -33,6 +34,8 @@ interface ProductInfoProps {
 }
 
 export default function ProductInfo({ product, selectedColor, setSelectedColor }: ProductInfoProps) {
+    console.log("ProductInfo Debug:", { id: product.id, types: product.types, matrix: product.matrix });
+    const [selectedVariant, setSelectedVariant] = useState("");
     const [selectedSize, setSelectedSize] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [isAdding, setIsAdding] = useState(false);
@@ -40,6 +43,13 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
     const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
     const { isAuthenticated } = useAuth();
     const router = useRouter();
+
+    // Reset selections when product changes
+    useEffect(() => {
+        setSelectedVariant("");
+        setSelectedColor("");
+        setSelectedSize("");
+    }, [product.id, setSelectedColor]);
 
     // Wishlist
     const { data: wishlistData } = useWishlist();
@@ -49,7 +59,12 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
     // Cart-Aware Logic
     const { cartItems } = useCartItems();
     const qtyInCartForVariant = cartItems
-        .filter(item => item.produkId === product.id && item.warna === selectedColor && item.size === selectedSize)
+        .filter(item =>
+            item.produkId === product.id &&
+            item.warna === selectedColor &&
+            item.size === selectedSize &&
+            (!selectedVariant || item.keterangan?.includes(selectedVariant)) // Approximating variant check for cart
+        )
         .reduce((sum, item) => sum + Number(item.qty || 0), 0);
 
     const handleWishlist = () => {
@@ -58,7 +73,7 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
             return;
         }
         if (product.id) {
-            toggleWishlist.mutate(product.id);
+            toggleWishlist.mutate({ produkId: product.id, variant: selectedVariant });
         }
     };
 
@@ -96,22 +111,43 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
 
     // Matrix lookup
     const currentCombination = product.matrix.find(
-        m => m.color === selectedColor && m.size === selectedSize
+        m => m.color === selectedColor &&
+            m.size === selectedSize &&
+            (m.variant || "") === (selectedVariant || "")
     );
 
     const isSoldOut = parseInt(product.totalStock || "0") === 0;
     const rawStock = currentCombination?.stock ?? 0;
     const currentStock = Math.max(0, rawStock - qtyInCartForVariant);
 
-    // Get stock for a specific size (given current color)
+    // Get stock for a specific size (given current color and variant)
     const getStockForSize = (size: string) => {
-        const variant = product.matrix.find(m => m.color === selectedColor && m.size === size);
-        const rawStockForSize = variant?.stock ?? 0;
+        const variantEntry = product.matrix.find(m =>
+            m.color === selectedColor &&
+            m.size === size &&
+            (m.variant || "") === (selectedVariant || "")
+        );
+        const rawStockForSize = variantEntry?.stock ?? 0;
         const qtyInCartForSize = cartItems
-            .filter(item => item.produkId === product.id && item.warna === selectedColor && item.size === size)
+            .filter(item =>
+                item.produkId === product.id &&
+                item.warna === selectedColor &&
+                item.size === size &&
+                (!selectedVariant || item.keterangan?.includes(selectedVariant))
+            )
             .reduce((sum, item) => sum + Number(item.qty || 0), 0);
         return Math.max(0, rawStockForSize - qtyInCartForSize);
     };
+
+    // Get available colors for selected variant
+    const availableColors = product.colors.filter(color => {
+        if (!selectedVariant) return true;
+        return product.matrix.some(m =>
+            (m.variant || "") === (selectedVariant || "") &&
+            m.color === color.name &&
+            m.stock > 0
+        );
+    });
 
     // Dynamic price based on selection
     const selectedPrice = currentCombination
@@ -135,8 +171,8 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
             router.push('/login');
             return;
         }
-        if (!selectedSize || !selectedColor) {
-            toast.error("Silakan pilih ukuran dan warna terlebih dahulu");
+        if (!selectedSize || !selectedColor || !selectedVariant) {
+            toast.error("Silakan pilih varian, warna, dan ukuran terlebih dahulu");
             return;
         }
 
@@ -149,6 +185,7 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
                     id_produk: product.id,
                     color_sylla: selectedColor,
                     size_sylla: selectedSize,
+                    variant: selectedVariant, // Pass variant
                     qty_produk: quantity,
                     is_flash_sale: product.isOnFlashSale,
                 }),
@@ -156,9 +193,6 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
 
             const data = await response.json();
 
-            // if (data.message === "login") {
-            //     toast.error("Silakan login terlebih dahulu untuk menambah ke keranjang");
-            //     router.push('/login');
             if (data.message === "success") {
                 toast.success("Barang berhasil ditambahkan ke keranjang", {
                     icon: <Check className="w-4 h-4 text-emerald-500" />
@@ -263,16 +297,49 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
                 />
             </div>
 
+            {/* Variant Selection */}
+            {product.types && product.types.length > 0 && (
+                <div className="mb-6 md:mb-8">
+                    <div className="flex items-center justify-between mb-3 md:mb-4">
+                        <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-base-900">
+                            Varian: <span className="font-medium text-neutral-base-500 ml-1 normal-case">{selectedVariant || "Pilih varian"}</span>
+                        </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 md:gap-3">
+                        {product.types.map(type => {
+                            const isSelected = selectedVariant === type;
+                            return (
+                                <button
+                                    key={type}
+                                    onClick={() => {
+                                        setSelectedVariant(type);
+                                        setSelectedColor(""); // reset subsequent choices
+                                        setSelectedSize("");
+                                        setQuantity(1);
+                                    }}
+                                    className={`px-4 py-2 text-[11px] md:text-[13px] font-bold rounded-lg transition-all ${isSelected
+                                        ? "bg-neutral-base-900 text-white shadow-lg"
+                                        : "border border-neutral-base-200 text-neutral-base-600 hover:border-neutral-base-900 bg-white"
+                                        }`}
+                                >
+                                    {type}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
             {/* Color Selection */}
             <div className="mb-6 md:mb-8">
                 <div className="flex items-center justify-between mb-3 md:mb-4">
                     <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-base-900">
-                        Warna: <span className="font-medium text-neutral-base-500 ml-1 normal-case">{selectedColor}</span>
+                        Warna: <span className="font-medium text-neutral-base-500 ml-1 normal-case">{selectedColor || "Pilih warna"}</span>
                     </span>
                 </div>
                 <div className="flex flex-wrap gap-3 md:gap-4">
-                    {product.colors.map(color => {
-                        const isColorAvailable = color.totalStock > 0;
+                    {availableColors.map(color => {
+                        const isColorAvailable = color.totalStock > 0 && !(product.types && product.types.length > 0 && !selectedVariant);
                         return (
                             <button
                                 key={color.name}
@@ -281,8 +348,9 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
                                     setSelectedSize(""); // reset size when color changes
                                     setQuantity(1);
                                 }}
-                                className={`relative flex flex-col items-center gap-2 group transition-opacity ${!isColorAvailable ? "opacity-30" : "opacity-100"}`}
-                                aria-label={`Select ${color.name} ${!isColorAvailable ? "(Sold Out)" : ""}`}
+                                disabled={!isColorAvailable}
+                                className={`relative flex flex-col items-center gap-2 group transition-opacity ${!isColorAvailable ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
+                                aria-label={`Select ${color.name} ${!isColorAvailable ? "(Sold Out or needs Varian Selection)" : ""}`}
                             >
                                 <span
                                     className={`w-8 h-8 rounded-full border border-neutral-base-200 transition-all flex items-center justify-center ${selectedColor === color.name ? "ring-2 ring-offset-2 ring-neutral-base-900 scale-110 shadow-md" : "hover:scale-110 shadow-sm"
@@ -290,11 +358,6 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
                                     style={{ backgroundColor: color.value }}
                                 >
                                     {selectedColor === color.name && <Check className="w-4 h-4 text-white drop-shadow-md" strokeWidth={3} />}
-                                    {!isColorAvailable && (
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="w-px h-full bg-white rotate-45" />
-                                        </div>
-                                    )}
                                 </span>
                             </button>
                         );
@@ -423,7 +486,7 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
                     ) : (
                         <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     )}
-                    {!selectedColor ? "Pilih Warna" : !selectedSize ? "Pilih Ukuran" : (isSoldOut || rawStock === 0) ? "Stok Habis" : currentStock === 0 ? "Stok Maksimal" : isAdding ? "Adding..." : "Keranjang"}
+                    {!selectedVariant && product.types && product.types.length > 0 ? "Pilih Varian" : !selectedColor ? "Pilih Warna" : !selectedSize ? "Pilih Ukuran" : (isSoldOut || rawStock === 0) ? "Stok Habis" : currentStock === 0 ? "Stok Maksimal" : isAdding ? "Adding..." : "Keranjang"}
                 </motion.button>
 
                 {/* Wishlist Button */}

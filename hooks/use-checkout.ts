@@ -89,12 +89,17 @@ export function useCheckout() {
         bankAccount?: string,
         bankOwner?: string,
         bankName?: string,
-        // Added breakdown fields for SuccessState:
         subtotal?: number,
         shippingPrice?: number,
         packingFee?: number,
         voucherDiscount?: number,
-        walletDeduction?: number
+        walletDeduction?: number,
+        // Detailed shipping/customer info
+        customerName?: string,
+        customerPhone?: string,
+        fullAddress?: string,
+        courierName?: string,
+        courierService?: string,
     } | null>(null);
     const [lastOrderedItems, setLastOrderedItems] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -524,7 +529,12 @@ export function useCheckout() {
                     shippingPrice: data.meta?.shippingCost || shippingPrice,
                     packingFee: data.meta?.packingFee || packingFee,
                     voucherDiscount: data.meta?.discountAmount || voucherDiscount,
-                    walletDeduction: data.meta?.finalWalletAmount || appliedWalletAmount
+                    walletDeduction: data.meta?.finalWalletAmount || appliedWalletAmount,
+                    customerName: shippingForm.name,
+                    customerPhone: shippingForm.phone,
+                    fullAddress: `${shippingForm.address}, ${shippingForm.kecamatan}, ${shippingForm.kota}, ${shippingForm.provinsi} ${shippingForm.kodePos}`,
+                    courierName: shippingForm.courierName || shippingForm.courier,
+                    courierService: shippingForm.service
                 });
                 setLastOrderedItems([...cartItems]);
 
