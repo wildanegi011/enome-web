@@ -6,6 +6,7 @@ import { motion, useInView } from "framer-motion";
 import { useHighlights } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/utils";
 
 export default function FeaturedBanner() {
     const ref = useRef(null);
@@ -36,8 +37,8 @@ export default function FeaturedBanner() {
     const formatPriceRange = (min: any, max: any) => {
         const nMin = parseInt(min);
         const nMax = parseInt(max);
-        if (!nMax || nMin === nMax) return `Rp ${nMin.toLocaleString('id-ID')}`;
-        return `Rp ${nMin.toLocaleString('id-ID')} - Rp ${nMax.toLocaleString('id-ID')}`;
+        if (!nMax || nMin === nMax) return formatCurrency(nMin);
+        return `${formatCurrency(nMin)} - ${formatCurrency(nMax)}`;
     };
 
     const price = formatPriceRange(featuredProduct.finalMinPrice, featuredProduct.finalMaxPrice);

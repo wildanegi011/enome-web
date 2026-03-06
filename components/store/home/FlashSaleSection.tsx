@@ -6,6 +6,7 @@ import { Timer, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "@/components/store/product/ProductCard";
 import { ASSET_URL } from "@/config/config";
+import { formatCurrency } from "@/lib/utils";
 
 interface FlashSaleEvent {
     id: number;
@@ -156,8 +157,8 @@ export default function FlashSaleSection() {
                                     return { name, value };
                                 }).slice(0, 3)
                                 : [],
-                            price: `Rp ${(product.finalMinPrice || product.minPrice || 0).toLocaleString('id-ID')}`,
-                            originalPrice: `Rp ${(product.baseMinPrice || 0).toLocaleString('id-ID')}`,
+                            price: formatCurrency(product.finalMinPrice || product.minPrice || 0),
+                            originalPrice: formatCurrency(product.baseMinPrice || 0),
                             totalStock: product.totalStock,
                             isOnFlashSale: true,
                             discountPercentage: product.discountPercentage,

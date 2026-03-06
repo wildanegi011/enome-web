@@ -23,6 +23,7 @@ import { useHighlights, useProducts, useCategories } from "@/hooks/use-products"
 import { useDebounce } from "@/hooks/use-debounce";
 import { useRecentSearches } from "@/hooks/use-recent-searches";
 import { ASSET_URL } from "@/config/config";
+import { formatCurrency } from "@/lib/utils";
 
 interface Collection {
     id: string;
@@ -190,7 +191,7 @@ const SearchMenuContent = ({
                                 <span className="text-[11px] text-stone-400">{product.kategori}</span>
                             </div>
                             <span className="ml-auto text-sm font-semibold text-stone-700 shrink-0">
-                                {product.finalMinPrice ? `Rp ${Number(product.finalMinPrice).toLocaleString('id-ID')}` : "—"}
+                                {product.finalMinPrice ? formatCurrency(Number(product.finalMinPrice)) : "—"}
                             </span>
                         </CommandItem>
                     ))}

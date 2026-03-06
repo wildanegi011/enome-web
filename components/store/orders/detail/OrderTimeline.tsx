@@ -7,7 +7,7 @@ import { CheckCircle2, Package } from "lucide-react";
 export const statusSteps = [
     { label: "Belum Bayar", status: "OPEN" },
     { label: "Dikemas", status: "PROSES PACKING" },
-    { label: "Dikirim", status: "PESANAN DIKIRIM" },
+    { label: "Dikirim", status: "KIRIM" },
     { label: "Selesai", status: "CLOSE" },
 ];
 

@@ -8,6 +8,8 @@ import { eq, and, sql, desc, like } from "drizzle-orm";
 import { CONFIG } from "@/lib/config";
 import logger from "@/lib/logger";
 import { nowJakartaYYMMDD, nowJakartaDate, nowJakartaFull } from "@/lib/date-utils";
+import { ConfigService } from "./config-service";
+import { sendNewOrderAdminNotification } from "@/lib/mail";
 
 export class OrderService {
     /**
@@ -181,7 +183,7 @@ export class OrderService {
         const orderTipe = activePreOrder ? "PRE-ORDER" : "ORDER";
         const statusOrder = finalBankAmount <= 0 ? "PROSES PACKING" : "OPEN";
 
-        return await db.transaction(async (tx) => {
+        const result = await db.transaction(async (tx) => {
             // A. Insert Master Order
             logger.info("OrderService: Step A - Inserting Master Order", { orderId });
             try {
@@ -206,7 +208,7 @@ export class OrderService {
                     proses2: finalBankAmount <= 0 ? "Y" : "N",
                     proses3: "N",
                     proses4: "N",
-                    noResi: orderData.resi || "",
+                    noResi: "",
                     keterangan: uniqueCode > 0
                         ? `${orderData.catatan || ""} (Kode Unik: ${uniqueCode})`.trim()
                         : (orderData.catatan || ""),
@@ -396,14 +398,28 @@ export class OrderService {
             // F. Payment Insertion
             logger.info("OrderService: Step F - Payment Insertion");
 
-            // Ambil batas pembayaran dari central_config
-            const [payConfig]: any = await tx.select()
-                .from(centralConfig)
-                .where(eq(centralConfig.variable, "batas_pembayaran"))
-                .limit(1);
+            // Ambil batas pembayaran dari ConfigService (cached)
+            const rawInterval = await ConfigService.get("batas_pembayaran", "1");
+            const isDays = /^\d+$/.test(rawInterval);
+            const paymentInterval = isDays ? `${rawInterval} DAY` : rawInterval;
 
-            const rawInterval = payConfig?.value || "1";
-            const paymentInterval = /^\d+$/.test(rawInterval) ? `${rawInterval} DAY` : rawInterval;
+            // Calculate expiredTime value for frontend response
+            let expiredTimeValue = null;
+            if (finalBankAmount > 0) {
+                const now = new Date();
+                if (isDays) {
+                    now.setDate(now.getDate() + parseInt(rawInterval));
+                } else if (rawInterval.toUpperCase().includes("HOUR")) {
+                    const hours = parseInt(rawInterval);
+                    now.setHours(now.getHours() + hours);
+                } else if (rawInterval.toUpperCase().includes("MINUTE")) {
+                    const minutes = parseInt(rawInterval);
+                    now.setMinutes(now.getMinutes() + minutes);
+                } else {
+                    now.setDate(now.getDate() + 1); // Fallback 1 day
+                }
+                expiredTimeValue = now.toISOString();
+            }
 
             const paymentValues: any = {
                 isPaid: finalBankAmount <= 0 ? 1 : 0,
@@ -435,7 +451,33 @@ export class OrderService {
 
             logger.info("OrderService: All Steps Success - Committing Transaction", { orderId });
 
-            return { success: true, orderId, totalAmount: totalTagihan };
+            return { success: true, orderId, totalAmount: totalTagihan, expiredTime: expiredTimeValue };
         });
+
+        // Trigger Admin Notification Email (Async, don't wait to respond to user faster)
+        if (result.success) {
+            (async () => {
+                try {
+                    const adminEmail = await ConfigService.get("admin_email", process.env.SMTP_USER || "admin@enome.test");
+                    await sendNewOrderAdminNotification(adminEmail, {
+                        orderId: result.orderId,
+                        customerName: orderData.customerData?.namaCustomer || "Pelanggan",
+                        totalTagihan: result.totalAmount,
+                        items: verifiedItems.map(item => ({
+                            namaProduk: item.namaProduk,
+                            size: item.size,
+                            warna: item.warna,
+                            qty: item.qty,
+                            harga: item.harga
+                        })),
+                        shippingAddress: orderData.shipping?.address || "-"
+                    });
+                } catch (emailError) {
+                    logger.error("OrderService: Failed to send admin notification email", emailError);
+                }
+            })();
+        }
+
+        return result;
     }
 }

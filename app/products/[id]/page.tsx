@@ -15,6 +15,8 @@ import Breadcrumb from "@/components/store/shared/Breadcrumb";
 import Link from "next/link";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { motion } from "framer-motion";
+import { formatCurrency } from "@/lib/utils";
+import { notFound } from "next/navigation";
 
 export default function ProductDetailPage(props: { params: Promise<{ id: string }> }) {
     const params = use(props.params);
@@ -25,12 +27,7 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
     }
 
     if (error || !productData) {
-        return (
-            <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
-                <h2 className="text-2xl font-serif italic text-neutral-base-900">Product Not Found</h2>
-                <p className="text-neutral-base-500">The product you are looking for might have been moved or deleted.</p>
-            </div>
-        );
+        notFound();
     }
 
     return <ProductDetailContent productData={productData} />;
@@ -45,8 +42,8 @@ function ProductDetailContent({ productData }: { productData: any }) {
     const formatPriceRange = (min: any, max: any) => {
         const nMin = parseInt(min);
         const nMax = parseInt(max);
-        if (!nMax || nMin === nMax) return `Rp ${nMin.toLocaleString()}`;
-        return `Rp ${nMin.toLocaleString()} - Rp ${nMax.toLocaleString()}`;
+        if (!nMax || nMin === nMax) return formatCurrency(nMin);
+        return `${formatCurrency(nMin)} - ${formatCurrency(nMax)}`;
     };
 
     // Map images to full URLs
@@ -103,7 +100,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
                         <Breadcrumb
                             items={[
                                 { label: "Beranda", href: "/" },
-                                { label: "Katalog", href: "/products" },
+                                { label: "Product", href: "/products" },
                                 { label: product.namaProduk }
                             ]}
                         />

@@ -5,6 +5,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { getJakartaDate } from "@/lib/date-utils";
+import { formatCurrency } from "@/lib/utils";
 
 /**
  * Validasi kode voucher.
@@ -93,7 +94,7 @@ export const POST = withAuth(async (req: Request, context: any, session: any) =>
             logger.info("Voucher Check: Subtotal too low", { kode, subtotal, required: voucherData.minimalTransaksi });
             return NextResponse.json({
                 success: 0,
-                message: `Minimal Transaksi untuk Voucher ${kode} adalah Rp. ${voucherData.minimalTransaksi.toLocaleString('id-ID')}`
+                message: `Minimal Transaksi untuk Voucher ${kode} adalah ${formatCurrency(voucherData.minimalTransaksi)}`
             });
         }
 

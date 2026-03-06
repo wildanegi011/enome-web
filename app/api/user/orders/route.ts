@@ -84,6 +84,9 @@ export const GET = withAuth(async (request: NextRequest, context: any, session: 
             metodebayar: orders.metodebayar,
             totalOrder: orders.totalOrder,
             updatedAt: orders.updatedAt,
+            noResi: orders.noResi,
+            ekspedisi: orders.ekspedisi,
+            teleponPenerima: orders.teleponPenerima,
             // Additional details for card UI
             firstItemName: sql<string>`(SELECT p.nama_produk FROM orderdetail od JOIN produk p ON od.produk_id = p.produk_id WHERE od.order_id = orders.order_id LIMIT 1)`,
             firstItemImage: sql<string>`(SELECT p.gambar FROM orderdetail od JOIN produk p ON od.produk_id = p.produk_id WHERE od.order_id = orders.order_id LIMIT 1)`,

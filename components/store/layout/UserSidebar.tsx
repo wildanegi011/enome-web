@@ -46,18 +46,11 @@ const menuItems = [
 
 export default function UserSidebar({ className, isSheet }: { className?: string, isSheet?: boolean }) {
     const pathname = usePathname();
-    const { user, isLoading, logout, isLoggingOut } = useAuth();
+    const { user, isLoading, logout, isLoggingOut, isAuthenticated } = useAuth();
 
     return (
         <aside className={cn("w-full md:w-[280px] shrink-0", className)}>
             <div className={cn(isSheet ? "space-y-6" : "sticky top-24 space-y-8")}>
-
-                {/* Brand Logo or App Icon Placeholder (Matches circle in mockup) */}
-                <div className="hidden md:flex justify-start mb-10 pl-4">
-                    <div className="w-12 h-12 bg-neutral-base-900 rounded-[14px] flex items-center justify-center text-white font-black text-xl shadow-lg shadow-neutral-base-900/10">
-                        É
-                    </div>
-                </div>
 
                 {/* User Profile Summary - Mockup Style */}
                 <div className="flex items-center gap-4 px-4 py-2">
@@ -126,20 +119,22 @@ export default function UserSidebar({ className, isSheet }: { className?: string
                     })}
                 </nav>
 
-                <div className="pt-6 mt-6 border-t border-neutral-base-100/50 pl-4">
-                    <button
-                        onClick={() => logout()}
-                        disabled={isLoggingOut}
-                        className="flex items-center gap-4 p-2 text-neutral-base-400 hover:text-red-500 transition-colors group disabled:opacity-50"
-                    >
-                        {isLoggingOut ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : (
-                            <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                        )}
-                        <span className="text-[13px] font-bold">Keluar</span>
-                    </button>
-                </div>
+                {isAuthenticated && (
+                    <div className="pt-6 mt-6 border-t border-neutral-base-100/50 pl-4">
+                        <button
+                            onClick={() => logout()}
+                            disabled={isLoggingOut}
+                            className="flex items-center gap-4 p-2 text-neutral-base-400 hover:text-red-500 transition-colors group disabled:opacity-50"
+                        >
+                            {isLoggingOut ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                            )}
+                            <span className="text-[13px] font-bold">Keluar</span>
+                        </button>
+                    </div>
+                )}
             </div>
         </aside>
     );

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { centralConfig, companyProfile, cargo } from "@/lib/db/schema";
+import { companyProfile, cargo } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import logger, { apiLogger } from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
+import { ConfigService } from "@/lib/services/config-service";
 
 /**
  * Menghitung ongkos kirim menggunakan API Komerce (RajaOngkir).
@@ -30,23 +31,24 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Ambil API Key RajaOngkir
-        const [config]: any = await db.select()
-            .from(centralConfig)
-            .where(eq(centralConfig.variable, CONFIG.RAJAONGKIR_KEY_VAR))
-            .limit(1);
+        const apiKey = await ConfigService.get(CONFIG.RAJAONGKIR_KEY_VAR);
 
-        if (!config?.value) {
+        if (!apiKey) {
             logger.error(`Shipping Calc: ${CONFIG.RAJAONGKIR_KEY_VAR} not found in DB`);
             return NextResponse.json({ message: "rajaongkir_key_not_found" }, { status: 500 });
         }
 
-        // 2. Ambil Kota Asal (Origin) dari Profil Perusahaan
-        const [company]: any = await db.select()
-            .from(companyProfile)
-            .where(eq(companyProfile.isAktif, 1))
-            .limit(1);
+        // 2. Ambil Kota Asal (Origin) dari Config atau Profil Perusahaan
+        const configOrigin = await ConfigService.get("origin_city");
+        let origin = configOrigin;
 
-        const origin = company?.kota || CONFIG.DEFAULT_ORIGIN_CITY;
+        if (!origin) {
+            const [company]: any = await db.select()
+                .from(companyProfile)
+                .where(eq(companyProfile.isAktif, 1))
+                .limit(1);
+            origin = company?.kota || CONFIG.DEFAULT_ORIGIN_CITY;
+        }
 
         // 3. Ambil daftar kurir aktif dari DB
         const activeCouriers = await db.select()
@@ -85,7 +87,7 @@ export async function POST(request: NextRequest) {
                 method: "POST",
                 headers: {
                     "content-type": "application/x-www-form-urlencoded",
-                    "key": config.value
+                    "key": apiKey
                 },
                 body: new URLSearchParams({
                     origin: origin,

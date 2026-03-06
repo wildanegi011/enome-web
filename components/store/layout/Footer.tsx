@@ -26,7 +26,7 @@ export default function Footer() {
                             </div>
                         </Link>
                         <p className="text-[12px] md:text-[13px] text-slate-400 font-medium tracking-wide text-center md:text-left">
-                            Batik "ENOME: Reimagining Heritage
+                            Batik ÉNOMÉ: Reimagining Heritage
                         </p>
                     </div>
 

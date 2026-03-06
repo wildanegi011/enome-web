@@ -490,3 +490,16 @@ export const newsLatter = mysqlTable("newslatter", {
     email: varchar("email", { length: 50 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const blog = mysqlTable("blog", {
+    id: serial("id").primaryKey(),
+    background: varchar("background", { length: 100 }),
+    judul: varchar("judul", { length: 50 }),
+    konten: text("konten"),
+    isPublish: int("is_publish").default(9),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").onUpdateNow(),
+    createdBy: varchar("created_by", { length: 100 }),
+    updatedBy: varchar("updated_by", { length: 100 }),
+    isDeleted: int("is_deleted").default(0),
+});

@@ -19,7 +19,7 @@ import { useProducts, useCategories, useColors, useSizes } from "@/hooks/use-pro
 import { ASSET_URL } from "@/config/config";
 import type { Category, Color, Size } from "@/hooks/use-products";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 import HeroSection from "@/components/store/home/HeroSection";
 import CONFIG from "@/lib/config";
@@ -233,9 +233,9 @@ function ProductsContent() {
                                 {filteredProducts.length === 0 ? (
                                     <EmptyState
                                         icon={Search}
-                                        title="No products found"
-                                        description="Try adjusting your filters to see more results."
-                                        actionLabel="Clear Filters"
+                                        title="Tidak ada product"
+                                        description="Coba sesuaikan filter untuk melihat lebih banyak hasil."
+                                        actionLabel="Hapus Filter"
                                         onActionClick={() => setActiveFilters({ size: [], color: [], price: [], collection: [], tag: [], search: undefined })}
                                         className="py-20 border-dashed"
                                     />
@@ -260,8 +260,8 @@ function ProductsContent() {
                                                     const formatPriceRange = (min: any, max: any) => {
                                                         const nMin = parseInt(min);
                                                         const nMax = parseInt(max);
-                                                        if (!nMax || nMin === nMax) return `Rp ${nMin.toLocaleString()}`;
-                                                        return `Rp ${nMin.toLocaleString()} - Rp ${nMax.toLocaleString()}`;
+                                                        if (!nMax || nMin === nMax) return formatCurrency(nMin);
+                                                        return `${formatCurrency(nMin)} - ${formatCurrency(nMax)}`;
                                                     };
 
                                                     const mappedProduct = {

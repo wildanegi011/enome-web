@@ -61,7 +61,7 @@ export default function AddressesPage() {
                         >
                             <Button
                                 onClick={handleAdd}
-                                className="hidden md:flex h-12 md:h-14 px-6 md:px-8 rounded-xl md:rounded-2xl bg-neutral-base-900 text-white font-bold tracking-widest uppercase hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 gap-3 group shrink-0 w-full sm:w-auto text-[11px] md:text-[13px]"
+                                className="hidden h-12 md:h-14 px-6 md:px-8 rounded-xl md:rounded-2xl bg-neutral-base-900 text-white font-bold tracking-widest uppercase hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 gap-3 group shrink-0 w-full sm:w-auto text-[11px] md:text-[13px]"
                             >
                                 <Plus className="w-4 h-4 md:w-5 md:h-5 group-hover:rotate-90 transition-transform duration-300" />
                                 Tambah Alamat

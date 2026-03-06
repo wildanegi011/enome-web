@@ -25,6 +25,8 @@ export function useAuth() {
             if (!res.ok) throw new Error("Failed to fetch auth state");
             return res.json();
         },
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        refetchOnWindowFocus: false,
         retry: false,
     });
 

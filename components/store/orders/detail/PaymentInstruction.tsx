@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { AlertCircle, Copy, Check } from "lucide-react";
+import { AlertCircle, Copy, Check, CreditCard } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 interface PaymentInstructionProps {
@@ -13,6 +13,7 @@ interface PaymentInstructionProps {
         namaPemilik: string;
     };
     uniqueCodeValue?: number;
+    expiredTime?: string | number | null;
 }
 
 export default function PaymentInstruction({
@@ -20,6 +21,7 @@ export default function PaymentInstruction({
     totalTagihan,
     paymentInfo,
     uniqueCodeValue = 0,
+    expiredTime,
 }: PaymentInstructionProps) {
     const [copiedRekening, setCopiedRekening] = useState(false);
 
@@ -33,11 +35,27 @@ export default function PaymentInstruction({
 
     return (
         <div className="mt-8 mb-5 p-6 bg-amber-50 rounded-3xl border border-amber-200/50">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center border border-amber-100 shadow-sm">
-                    <AlertCircle className="w-4 h-4 text-amber-800" />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between mb-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center border border-amber-200 shadow-sm shrink-0">
+                        <CreditCard className="w-5 h-5 text-amber-900" />
+                    </div>
+                    <p className="text-[14px] md:text-[16px] font-bold text-amber-900 leading-tight">Instruksi Pembayaran</p>
                 </div>
-                <p className="text-[13px] font-bold text-amber-900">Instruksi Pembayaran</p>
+                {expiredTime && (
+                    <div className="flex flex-col items-start sm:items-end pl-11 sm:pl-0">
+                        <p className="text-[9px] font-black text-amber-800/60 uppercase tracking-widest leading-none mb-1.5">Batas Waktu Pembayaran</p>
+                        <p className="text-[11px] font-bold text-amber-900 leading-none">
+                            {new Date(expiredTime).toLocaleString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}
+                        </p>
+                    </div>
+                )}
             </div>
 
             <div className="space-y-5">

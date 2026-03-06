@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useWishlist, useToggleWishlist } from "@/hooks/use-wishlist";
 import { useCartItems } from "@/hooks/use-cart-items";
+import { formatCurrency } from "@/lib/utils";
 
 interface ProductInfoProps {
     product: {
@@ -151,7 +152,7 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
 
     // Dynamic price based on selection
     const selectedPrice = currentCombination
-        ? `Rp ${parseInt(currentCombination.price).toLocaleString('id-ID')}`
+        ? formatCurrency(parseInt(currentCombination.price))
         : product.price;
 
     const handleQuantityChange = (type: "increase" | "decrease") => {

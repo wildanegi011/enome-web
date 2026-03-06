@@ -7,6 +7,7 @@ import { AnimatePresence, motion, useInView } from "framer-motion";
 import { useHighlights } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/utils";
 
 export default function DealsOfTheMonth() {
     const { data: highlights = [], isLoading } = useHighlights();
@@ -70,7 +71,7 @@ export default function DealsOfTheMonth() {
                             </h3>
                             <div className="flex items-center gap-2">
                                 <p className="text-red-600 font-bold text-lg">
-                                    Rp {Number(currentProduct.finalMinPrice).toLocaleString('id-ID')}
+                                    {formatCurrency(Number(currentProduct.finalMinPrice))}
                                 </p>
                                 {!!currentProduct.discountPercentage && currentProduct.discountPercentage > 0 && (
                                     <span className="text-[11px] font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-sm">

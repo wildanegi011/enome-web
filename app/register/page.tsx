@@ -25,7 +25,7 @@ import { User as UserIcon, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react
 import { useAuth } from "@/hooks/use-auth";
 
 const registerSchema = z.object({
-    username: z.string().min(3, "Username minimal 3 karakter"),
+    name: z.string().min(3, "Nama minimal 3 karakter"),
     email: z.string().email("Format email tidak valid"),
     password: z.string().min(8, "Password minimal 8 karakter"),
     confirmPassword: z.string(),
@@ -47,7 +47,7 @@ export default function RegisterPage() {
     const form = useForm<RegisterFormValues>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
-            username: "",
+            name: "",
             email: "",
             password: "",
             confirmPassword: "",
@@ -66,7 +66,7 @@ export default function RegisterPage() {
     const onRegister = async (data: RegisterFormValues) => {
         try {
             const payload = {
-                username: data.username,
+                name: data.name,
                 email: data.email,
                 password: data.password
             };
@@ -240,23 +240,23 @@ export default function RegisterPage() {
                                     <div className="space-y-3">
                                         <FormField
                                             control={form.control}
-                                            name="username"
+                                            name="name"
                                             render={({ field }) => (
                                                 <FormItem className="space-y-1">
                                                     <FormLabel className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-base-400 ml-1">
-                                                        Username
+                                                        Nama
                                                     </FormLabel>
                                                     <FormControl>
                                                         <div className="relative group">
                                                             <UserIcon className={cn(
                                                                 "absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-all duration-300",
-                                                                form.formState.errors.username ? "text-red-500" : "text-neutral-base-300 group-focus-within:text-neutral-base-900 group-focus-within:scale-110"
+                                                                form.formState.errors.name ? "text-red-500" : "text-neutral-base-300 group-focus-within:text-neutral-base-900 group-focus-within:scale-110"
                                                             )} />
                                                             <Input
                                                                 placeholder="j.edwards"
                                                                 className={cn(
                                                                     "h-14 bg-neutral-base-50/50 border-neutral-base-200 focus:bg-white focus:border-neutral-base-900 focus:ring-4 focus:ring-neutral-base-900/5 rounded-2xl transition-all pl-12 pr-6 text-base placeholder:text-neutral-base-300 shadow-sm",
-                                                                    form.formState.errors.username && "border-red-500 ring-red-500/5 focus:border-red-500 focus:ring-red-500/10"
+                                                                    form.formState.errors.name && "border-red-500 ring-red-500/5 focus:border-red-500 focus:ring-red-500/10"
                                                                 )}
                                                                 {...field}
                                                             />

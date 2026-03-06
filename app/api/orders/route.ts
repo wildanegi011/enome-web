@@ -5,6 +5,7 @@ import { CONFIG } from "@/lib/config";
 import { OrderService } from "@/lib/services/order-service";
 import { CustomerService } from "@/lib/services/customer-service";
 import { CartService } from "@/lib/services/cart-service";
+import { ConfigService } from "@/lib/services/config-service";
 import { db } from "@/lib/db";
 import { rekeningPembayaran } from "@/lib/db/schema";
 import { eq, like, or } from "drizzle-orm";
@@ -66,18 +67,25 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
 
         // 4. Calculate Meta & Logic Restoration
         const shippingCost = shippingPrice || 0;
-        const packingFee = CONFIG.PACKING_FEE;
+        // Try biaya_packing first, then packing_fee as fallback
+        let packingFee = await ConfigService.getInt("biaya_packing", -1);
+        if (packingFee === -1) {
+            packingFee = await ConfigService.getInt("biaya_packing", CONFIG.PACKING_FEE);
+        }
         const discountAmount = voucherDiscount || 0;
         let totalTagihan = totalAmount + shippingCost + packingFee - discountAmount;
 
         // 5. Generate Unique Code for BCA Transfer
         //    targetCode = 3 digit terakhir total (displayed to user)
         //    adjustment = amount added to base to achieve those 3 digits
-        const isBcaTransfer = payment.toUpperCase().includes("BCA") && !payment.toUpperCase().includes("VIRTUAL");
+        const isTransferPayment = payment.toUpperCase().includes("BCA") ||
+            payment.toUpperCase().includes("MANUAL") ||
+            payment.toUpperCase().includes("TRANSFER") ||
+            payment === "SPLIT";
         let uniqueCode = 0;
         let uniqueAdjustment = 0;
 
-        if (isBcaTransfer) {
+        if (isTransferPayment) {
             const result = await OrderService.generateUniqueCode(totalTagihan);
             uniqueCode = result.targetCode;       // 3 digit terakhir (100-999)
             uniqueAdjustment = result.adjustment;  // actual charge (100-999)
@@ -114,7 +122,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         const result: any = await OrderService.createOrder(orderData, stockResult.verifiedItems || [], finalWalletAmount, uniqueCode);
 
         // Add unique code and bank info to result for frontend
-        if (isBcaTransfer) {
+        if (isTransferPayment) {
             result.uniqueCode = uniqueCode;
 
             // Fetch Bank Details dynamically
@@ -145,7 +153,9 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         // Attach breakdown details for success page
         result.meta = orderData.meta;
         result.subtotal = totalAmount;
+        result.whatsappAdmin = await ConfigService.get("whatsapp_nomor", "628997179308");
 
+        console.log("API POST /api/orders response:", result);
         return NextResponse.json(result);
 
     } catch (error: any) {

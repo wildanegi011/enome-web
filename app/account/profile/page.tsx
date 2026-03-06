@@ -39,7 +39,7 @@ export default function ProfilePage() {
         if (profile) {
             setFormData({
                 nama: profile.nama || "",
-                brithdate: profile.brithdate ? new Date(profile.brithdate).toISOString().split('T')[0] : "",
+                brithdate: profile.brithdate ? format(new Date(profile.brithdate), "yyyy-MM-dd") : "",
                 gender: profile.gender || 1,
                 noHandphone: profile.noHandphone?.replace(/^(\+62|62|0)/, "") || ""
             });
@@ -184,8 +184,7 @@ export default function ProfilePage() {
                                                 <CalendarComponent
                                                     mode="single"
                                                     selected={formData.brithdate ? new Date(formData.brithdate) : undefined}
-                                                    onSelect={(date) => setFormData({ ...formData, brithdate: date ? date.toISOString().split('T')[0] : "" })}
-                                                    initialFocus
+                                                    onSelect={(date) => setFormData({ ...formData, brithdate: date ? format(date, "yyyy-MM-dd") : "" })}
                                                     captionLayout="dropdown"
                                                     startMonth={new Date(1900, 0)}
                                                     endMonth={new Date()}
@@ -252,13 +251,6 @@ export default function ProfilePage() {
 
                                 {/* Footer Action Buttons */}
                                 <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-10">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="h-11 md:h-12 px-10 border-neutral-base-100 rounded-xl text-[13px] md:text-[14px] font-bold hover:bg-neutral-base-50 transition-all w-full sm:min-w-[140px] sm:w-auto"
-                                    >
-                                        Batalkan
-                                    </Button>
                                     <Button
                                         type="submit"
                                         disabled={updateProfileMutation.isPending}

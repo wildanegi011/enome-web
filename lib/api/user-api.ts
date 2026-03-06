@@ -87,6 +87,8 @@ export interface OrderDetail {
         nominal: number;
     } | null;
     uniqueCode?: number;
+    expiredTime?: string | number | null;
+    whatsappAdmin?: string;
 }
 
 export interface ProfileData {
@@ -206,6 +208,12 @@ export const userApi = {
         return await apiClient<{ action: "added" | "removed"; produkId: string }>("/api/wishlist", {
             method: "POST",
             body: JSON.stringify({ produkId, variant }),
+        });
+    },
+    trackWaybill: async (awb: string, courier: string, phone: string) => {
+        return await apiClient<any>("/api/shipping/track", {
+            method: "POST",
+            body: JSON.stringify({ awb, courier, phone }),
         });
     }
 };

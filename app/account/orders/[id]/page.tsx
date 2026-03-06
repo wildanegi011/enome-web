@@ -12,8 +12,9 @@ import OrderTimeline from "@/components/store/orders/detail/OrderTimeline";
 import PaymentInstruction from "@/components/store/orders/detail/PaymentInstruction";
 import OrderItemsCard from "@/components/store/orders/detail/OrderItemsCard";
 import ShippingInfoCard from "@/components/store/orders/detail/ShippingInfoCard";
-import ShippingAddressCard from "@/components/store/orders/detail/ShippingAddressCard";
 import OrderSummaryCard from "@/components/store/orders/detail/OrderSummaryCard";
+import TrackingManifest from "@/components/store/orders/detail/TrackingManifest";
+import { CONFIG } from "@/lib/config";
 
 const OrderDetailSkeleton = () => (
     <div className="min-h-screen bg-[#F9FAFB] font-sans text-neutral-base-900">
@@ -128,7 +129,7 @@ export default function OrderDetailPage() {
 
     if (!data) return null;
 
-    const { order, items, paymentInfo, voucherInfo, uniqueCode: uniqueCodeValue = 0 } = data;
+    const { order, items, paymentInfo, voucherInfo, uniqueCode: uniqueCodeValue = 0, expiredTime, whatsappAdmin } = data;
 
     return (
         <div className="min-h-screen bg-[#F9FAFB] font-sans text-neutral-base-900">
@@ -148,37 +149,49 @@ export default function OrderDetailPage() {
 
                         <OrderTimeline statusOrder={order.statusOrder} />
 
+                        {order.statusOrder === "CLOSE" && CONFIG.TRACKABLE_COURIERS.includes(order.ekspedisi?.toLowerCase()) && (
+                            <div className="bg-white border border-neutral-base-100 rounded-[28px] md:rounded-[32px] p-6 md:p-10 mb-8 shadow-sm overflow-hidden">
+                                <TrackingManifest
+                                    awb={order.noResi}
+                                    courier={order.ekspedisi}
+                                    phone={order.teleponPenerima}
+                                    showTitle={true}
+                                    isCollapsible={true}
+                                />
+                            </div>
+                        )}
+
                         <PaymentInstruction
                             statusTagihan={order.statusTagihan}
                             totalTagihan={order.totalTagihan}
                             paymentInfo={paymentInfo}
                             uniqueCodeValue={uniqueCodeValue}
+                            expiredTime={expiredTime}
                         />
 
-                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                            <div className="xl:col-span-7 space-y-8">
+                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                            <div className="xl:col-span-7 space-y-10">
                                 <OrderItemsCard items={items} />
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-10">
                                     <ShippingInfoCard
                                         ekspedisi={order.ekspedisi}
                                         service={order.service}
                                         noResi={order.noResi}
-                                    />
-
-                                    <ShippingAddressCard
+                                        phone={order.teleponPenerima}
+                                        statusOrder={order.statusOrder}
                                         namaPenerima={order.namaPenerima}
                                         alamatKirim={order.alamatKirim}
                                         distrikKirim={order.distrikKirim}
                                         kotaKirim={order.kotaKirim}
                                         provinsiKirim={order.provinsiKirim}
-                                        teleponPenerima={order.teleponPenerima}
                                     />
                                 </div>
                             </div>
 
-                            <div className="xl:col-span-5 space-y-8">
+                            <div className="xl:col-span-5 space-y-10">
                                 <OrderSummaryCard
+                                    orderId={order.orderId}
                                     totalHarga={order.totalHarga}
                                     ongkir={order.ongkir}
                                     biayalain={order.biayalain}
@@ -188,6 +201,7 @@ export default function OrderDetailPage() {
                                     viaWallet={order.viaWallet}
                                     uniqueCodeValue={uniqueCodeValue}
                                     voucherInfo={voucherInfo}
+                                    whatsappAdmin={whatsappAdmin}
                                 />
                             </div>
                         </div>

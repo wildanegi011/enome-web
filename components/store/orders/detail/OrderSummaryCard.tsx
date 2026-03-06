@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
-import { Tag, CreditCard } from "lucide-react";
+import { Tag, CreditCard, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 
 interface OrderSummaryCardProps {
+    orderId: string;
     totalHarga: number;
     ongkir: number;
     biayalain: number;
@@ -18,9 +19,11 @@ interface OrderSummaryCardProps {
         kode: string;
         nominal: number;
     } | null;
+    whatsappAdmin?: string;
 }
 
 export default function OrderSummaryCard({
+    orderId,
     totalHarga,
     ongkir,
     biayalain,
@@ -30,12 +33,26 @@ export default function OrderSummaryCard({
     viaWallet,
     uniqueCodeValue,
     voucherInfo,
+    whatsappAdmin = "628997179308",
 }: OrderSummaryCardProps) {
+
+    const handleWhatsAppConfirm = () => {
+        const message = `Halo Admin Enome,\n\nSaya ingin konfirmasi pembayaran untuk pesanan:\n\nOrder ID: ${orderId}\nTotal Tagihan: ${formatCurrency(totalTagihan)}\nMetode Pembayaran: ${metodebayar}\n\nBerikut bukti pembayarannya:`;
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/${whatsappAdmin}?text=${encodedMessage}`;
+        window.open(whatsappUrl, "_blank");
+    };
+
     return (
         <div className="bg-white border border-neutral-base-100 rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-xl shadow-neutral-base-900/5 xl:sticky xl:top-24">
-            <h2 className="text-[16px] md:text-[18px] font-bold text-neutral-base-900 mb-6 md:mb-8">
-                Ringkasan Pembayaran
-            </h2>
+            <div className="flex items-center gap-4 mb-8 md:mb-10">
+                <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10">
+                    <Receipt className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-[16px] md:text-[18px] font-bold text-neutral-base-900">
+                    Ringkasan Pembayaran
+                </h2>
+            </div>
 
             <div className="space-y-4 md:space-y-5 pb-6 md:pb-8 border-b border-neutral-base-50">
                 <div className="flex items-center justify-between text-[13px] md:text-[14px]">
@@ -108,7 +125,10 @@ export default function OrderSummaryCard({
                 </div>
 
                 {statusTagihan === "BELUM BAYAR" && (
-                    <Button className="w-full h-12 md:h-14 bg-neutral-base-900 text-white rounded-2xl text-[11px] md:text-[12px] font-black uppercase tracking-widest hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-95 gap-3">
+                    <Button
+                        onClick={handleWhatsAppConfirm}
+                        className="w-full h-12 md:h-14 bg-neutral-base-900 text-white rounded-2xl text-[11px] md:text-[12px] font-black uppercase tracking-widest hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-95 gap-3"
+                    >
                         Konfirmasi Pembayaran
                         <CreditCard className="w-4 h-4" />
                     </Button>

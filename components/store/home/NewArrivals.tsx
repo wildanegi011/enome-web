@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useNewArrivals } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
 import ProductCard from "@/components/store/product/ProductCard";
+import { formatCurrency } from "@/lib/utils";
 
 export default function NewArrivals() {
     const { data: rawProducts = [], isLoading: productsLoading } = useNewArrivals();
@@ -100,8 +101,8 @@ export default function NewArrivals() {
                                 const formatPriceRange = (min: any, max: any) => {
                                     const nMin = parseInt(min);
                                     const nMax = parseInt(max);
-                                    if (!nMax || nMin === nMax) return `Rp ${nMin.toLocaleString()}`;
-                                    return `Rp ${nMin.toLocaleString()} - Rp ${nMax.toLocaleString()}`;
+                                    if (!nMax || nMin === nMax) return formatCurrency(nMin);
+                                    return `${formatCurrency(nMin)} - ${formatCurrency(nMax)}`;
                                 };
 
                                 const mappedProduct = {

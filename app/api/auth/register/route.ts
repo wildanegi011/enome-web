@@ -55,31 +55,30 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const {
-            username,
+            name,
             email,
             password
         } = body;
 
+        const username = Math.random().toString(36).substring(2, 10);
         const trimmedEmail = email?.trim().toLowerCase();
-        const trimmedUsername = username?.trim().toLowerCase();
-        // const trimmedNama = trimmedUsername; // Default nama to username
 
-        logger.info("Auth Request: Simple registration attempt", { email: trimmedEmail, username: trimmedUsername });
+        logger.info("Auth Request: Simple registration attempt", { email: trimmedEmail, username: username });
 
         // Validasi input
-        if (!trimmedEmail || !password || !trimmedUsername) {
+        if (!trimmedEmail || !password || !username) {
             logger.warn("Auth Warning: Missing registration fields", { email: trimmedEmail });
             return NextResponse.json({ error: "Username, email, dan password wajib diisi" }, { status: 400 });
         }
 
         // Cek apakah email atau username sudah terdaftar di tabel user
         const existingUsers = await db.select().from(user).where(
-            or(eq(user.email, trimmedEmail), eq(user.username, trimmedUsername))
+            or(eq(user.email, trimmedEmail), eq(user.username, username))
         );
 
         if (existingUsers.length > 0) {
             const conflict = existingUsers[0].email === trimmedEmail ? "Email" : "Username";
-            logger.warn(`Auth Warning: ${conflict} already registered in user table`, { email: trimmedEmail, username: trimmedUsername });
+            logger.warn(`Auth Warning: ${conflict} already registered in user table`, { email: trimmedEmail, username: username });
             return NextResponse.json({ error: `${conflict} sudah terdaftar` }, { status: 400 });
         }
 
@@ -113,11 +112,11 @@ export async function POST(request: NextRequest) {
         await db.transaction(async (tx) => {
             // 1. Simpan ke tabel user
             const [userResult]: any = await tx.insert(user).values({
-                username: trimmedUsername,
+                username: username,
                 email: trimmedEmail,
                 passwordHash: passwordHash,
                 authKey: authKey,
-                nama: "",
+                nama: name,
                 role: 2, // Customer
                 status: 10, // Active
                 isDeleted: 2, // Pending Verification
@@ -136,7 +135,7 @@ export async function POST(request: NextRequest) {
             // 2. Simpan ke tabel customer
             await tx.insert(customer).values({
                 custId: custId,
-                namaCustomer: "",
+                namaCustomer: name,
                 userId: insertedUserId,
                 email: trimmedEmail,
                 telp: "",

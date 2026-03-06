@@ -100,6 +100,7 @@ export function useCheckout() {
         fullAddress?: string,
         courierName?: string,
         courierService?: string,
+        expiredTime?: string | number | null,
     } | null>(null);
     const [lastOrderedItems, setLastOrderedItems] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -118,7 +119,23 @@ export function useCheckout() {
 
     // Subtotal and weight calculation is handled in the effect below fetchCartQuery definition
 
-    const packingFee = CONFIG.PACKING_FEE;
+    const [packingFee, setPackingFee] = useState(CONFIG.PACKING_FEE);
+    const [whatsappAdmin, setWhatsappAdmin] = useState("628997179308");
+
+    // Fetch Config on mount
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const config = await checkoutApi.getConfig(["biaya_packing", "packing_fee", "whatsapp_nomor"]);
+                const pFee = config.biaya_packing || config.packing_fee;
+                if (pFee) setPackingFee(parseInt(pFee) || CONFIG.PACKING_FEE);
+                if (config.whatsapp_nomor) setWhatsappAdmin(config.whatsapp_nomor);
+            } catch (err) {
+                console.error("Failed to fetch dynamic config:", err);
+            }
+        };
+        fetchConfig();
+    }, []);
 
     // Derived State
     const voucherDiscount = useMemo(() => {
@@ -534,7 +551,8 @@ export function useCheckout() {
                     customerPhone: shippingForm.phone,
                     fullAddress: `${shippingForm.address}, ${shippingForm.kecamatan}, ${shippingForm.kota}, ${shippingForm.provinsi} ${shippingForm.kodePos}`,
                     courierName: shippingForm.courierName || shippingForm.courier,
-                    courierService: shippingForm.service
+                    courierService: shippingForm.service,
+                    expiredTime: data.expiredTime,
                 });
                 setLastOrderedItems([...cartItems]);
 

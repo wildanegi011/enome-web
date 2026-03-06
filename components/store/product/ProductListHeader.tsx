@@ -28,7 +28,7 @@ export default function ProductListHeader({ sortBy, onSortChange }: ProductListH
             <Breadcrumb
                 items={[
                     { label: "Beranda", href: "/" },
-                    { label: "Katalog" }
+                    { label: "Products" }
                 ]}
             />
 

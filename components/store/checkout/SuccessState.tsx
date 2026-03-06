@@ -27,12 +27,16 @@ interface SuccessStateProps {
         courierName?: string,
         courierService?: string,
         bankLogo?: string
+        expiredTime?: string | number | null,
     };
     lastOrderedItems: any[];
     formatPrice: (price: number) => string;
 }
 
 export default function SuccessState({ orderResult, lastOrderedItems, formatPrice }: SuccessStateProps) {
+
+    console.log("orderResultxxx", orderResult);
+
     const isTransfer = !!orderResult.bankAccount;
     const [timeLeft, setTimeLeft] = useState(600);
     const [isCopied, setIsCopied] = useState<{ [key: string]: boolean }>({});
@@ -56,6 +60,14 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
         setIsCopied({ ...isCopied, [id]: true });
         toast.success("Berhasil disalin ke clipboard");
         setTimeout(() => setIsCopied({ ...isCopied, [id]: false }), 2000);
+    };
+
+    const handleWhatsAppConfirm = () => {
+        const message = `Halo Admin Enome,\n\nSaya ingin konfirmasi pembayaran untuk pesanan:\n\nOrder ID: ${orderResult.orderId}\nTotal Tagihan: ${formatPrice(orderResult.total)}\nMetode Pembayaran: ${orderResult.paymentMethod || "Transfer"}\n\nBerikut bukti pembayarannya:`;
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappNumber = (orderResult as any).whatsappAdmin || "628997179308";
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+        window.open(whatsappUrl, "_blank");
     };
 
     return (
@@ -93,11 +105,25 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                         {isTransfer && (
                             <div className="bg-white border border-neutral-base-100 rounded-2xl md:rounded-[32px] overflow-hidden shadow-lg shadow-neutral-base-900/5">
                                 {/* Transfer header bar */}
-                                <div className="bg-neutral-base-900 px-5 md:px-8 py-3.5 md:py-4 flex items-center justify-between">
+                                <div className="bg-neutral-base-900 px-5 md:px-8 py-4 md:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
                                     <div className="flex items-center gap-2.5">
                                         <CreditCard className="w-4 h-4 text-white/60" />
                                         <span className="text-[11px] md:text-[12px] font-black uppercase tracking-widest text-white">Transfer Bank</span>
                                     </div>
+                                    {orderResult.expiredTime && (
+                                        <div className="flex flex-col items-start sm:items-end md:items-end">
+                                            <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none mb-1.5 md:mb-1">Batas Waktu Pembayaran</p>
+                                            <p className="text-[11px] font-bold text-white leading-none">
+                                                {new Date(orderResult.expiredTime).toLocaleString("id-ID", {
+                                                    day: "numeric",
+                                                    month: "short",
+                                                    year: "numeric",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                })}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="p-5 md:p-8 flex flex-col gap-5 md:gap-7">
@@ -109,12 +135,11 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                                 className="flex items-baseline font-black tracking-tighter cursor-pointer select-none"
                                                 onClick={() => copyToClipboard(orderResult.total.toString(), "amt")}
                                             >
-                                                <span className="text-[14px] md:text-[32px] text-neutral-base-400 mr-0.5 md:mr-1">Rp</span>
                                                 <span className="text-[24px] md:text-[48px] text-neutral-base-900 leading-none">
-                                                    {orderResult.total.toLocaleString('id-ID').slice(0, -3)}
+                                                    {formatPrice(orderResult.total).slice(0, -3)}
                                                 </span>
                                                 <span className="text-[24px] md:text-[48px] text-amber-600 leading-none relative">
-                                                    {orderResult.total.toLocaleString('id-ID').slice(-3)}
+                                                    {formatPrice(orderResult.total).slice(-3)}
                                                     <span className="absolute -bottom-0.5 left-0 w-full h-[2px] md:h-[3px] bg-amber-300 rounded-full opacity-60" />
                                                 </span>
                                             </div>
@@ -187,19 +212,18 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
 
                         {/* Action Buttons */}
                         <div className="flex flex-col md:flex-row gap-4">
-                            <Link
-                                href={`/account/orders/${encodeURIComponent(orderResult.orderId)}`}
+                            <button
+                                onClick={handleWhatsAppConfirm}
                                 className="flex-1 md:flex-[1.5] py-5 md:py-6 rounded-2xl bg-neutral-base-900 flex items-center justify-center gap-2.5 text-[13px] md:text-[14px] font-black uppercase tracking-[0.12em] text-white hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-[0.98]"
                             >
-                                Detail Order
+                                Konfirmasi Pembayaran
                                 <ChevronRight className="w-4 h-4" />
-                            </Link>
+                            </button>
                             <Link
-                                href="/products"
+                                href={`/account/orders/${encodeURIComponent(orderResult.orderId)}`}
                                 className="flex-1 py-5 md:py-6 rounded-2xl border-2 border-neutral-base-200 flex items-center justify-center gap-2.5 text-[13px] md:text-[14px] font-black uppercase tracking-[0.12em] text-neutral-base-900 bg-white hover:bg-neutral-base-50 transition-all active:scale-[0.98]"
                             >
-                                <ShoppingBag className="w-4 h-4" />
-                                Lanjut Belanja
+                                Detail Order
                             </Link>
                         </div>
                     </div>
@@ -274,7 +298,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                 <div className="flex justify-between text-[11px] md:text-[12px] text-neutral-base-500">
                                     <span>Pengiriman</span>
                                     <span className="text-neutral-base-900 font-medium tabular-nums">
-                                        {(orderResult.shippingPrice || 0) > 0 ? formatPrice(orderResult.shippingPrice || 0) : "Rp. 0"}
+                                        {(orderResult.shippingPrice || 0) > 0 ? formatPrice(orderResult.shippingPrice || 0) : formatPrice(0)}
                                     </span>
                                 </div>
                                 {(orderResult.packingFee || 0) > 0 && (

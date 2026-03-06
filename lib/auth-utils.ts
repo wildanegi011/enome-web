@@ -9,7 +9,7 @@ export async function encrypt(payload: any) {
     return await new SignJWT(payload)
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
-        .setExpirationTime("2h")
+        .setExpirationTime("7d")
         .sign(key);
 }
 
@@ -22,7 +22,7 @@ export async function decrypt(input: string): Promise<any> {
 
 export async function login(user: any) {
     // Create the session
-    const expires = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
     const session = await encrypt({ user, expires });
 
     // Save the session in a cookie
@@ -49,7 +49,7 @@ export async function updateSession(request: NextRequest) {
 
     // Refresh the session so it doesn't expire
     const parsed = await decrypt(session);
-    parsed.expires = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    parsed.expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const res = NextResponse.next();
     res.cookies.set({
         name: "session",

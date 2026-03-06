@@ -8,12 +8,13 @@ export const CONFIG = {
     SERVICE_NAME: "enome-api",
     MASTER_PASSWORD: process.env.NEXT_PUBLIC_MASTER_PASSWORD || "",
 
-    // Database & Business Logic Defaults
+    // Database & Business Logic Defaults (Note: some are now dynamic via ConfigService)
     DEFAULT_KATEGORI_CUSTOMER_ID: 4, // Retail / Harga Jual
     DEFAULT_ORIGIN_CITY: "115",      // Default: Kota Bekasi
     RAJAONGKIR_KEY_VAR: "RAJAONGKIR_APP_KEY",
     DEFAULT_COMPANY_PROFILE_ID: 6,
-    PACKING_FEE: 2000,
+    PACKING_FEE: 2000, // Fallback value, now dynamic via central_config
+    TRACKABLE_COURIERS: ["jne", "pos", "jnt", "sicepat", "tiki", "wahana", "ninja", "lion", "anteraja", "idexpress"],
 
     // Pagination Defaults
     PAGINATION: {
@@ -46,7 +47,7 @@ export const CONFIG = {
         TABS: [
             { id: "OPEN", label: "Belum Bayar", dbStatus: "OPEN" },
             { id: "PROSES", label: "Dikemas", dbStatus: "PROSES PACKING" },
-            { id: "KIRIM", label: "Dikirim", dbStatus: "PESANAN DIKIRIM" },
+            { id: "KIRIM", label: "Dikirim", dbStatus: "KIRIM" },
             { id: "SELESAI", label: "Selesai", dbStatus: "CLOSE" },
             { id: "BATAL", label: "Batal", dbStatus: "BATAL" },
         ],

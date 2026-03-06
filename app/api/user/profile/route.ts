@@ -118,10 +118,13 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
             const buffer = Buffer.from(await photo.arrayBuffer());
 
             const uploadDir = join(process.cwd(), "public/img/user");
+
+            // Ensure directory exists with proper permissions (0o755)
+            await fs.mkdir(uploadDir, { recursive: true });
             try {
-                await fs.access(uploadDir);
-            } catch {
-                await fs.mkdir(uploadDir, { recursive: true });
+                await fs.chmod(uploadDir, 0o755);
+            } catch (chmodError) {
+                logger.warn("Profile Photo: Failed to set directory permissions", { uploadDir, error: chmodError });
             }
 
             const filePath = join(uploadDir, fileName);

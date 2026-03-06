@@ -15,6 +15,7 @@ import { eq, and, or, sql, like } from "drizzle-orm";
 import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CustomerService } from "@/lib/services/customer-service";
+import { ConfigService } from "@/lib/services/config-service";
 
 /**
  * Mengambil detail lengkap satu pesanan berdasarkan Order ID.
@@ -147,6 +148,7 @@ export const GET = withAuth(async (
             voucherKode: paymentTable.voucherKode,
             voucherNominal: paymentTable.voucherNominal,
             uniqueCode: paymentTable.uniqueCode,
+            expiredTime: paymentTable.expiredTime,
         })
             .from(paymentTable)
             .where(like(paymentTable.paymentTransactionId, `%${orderId}%`))
@@ -170,6 +172,8 @@ export const GET = withAuth(async (
             paymentInfo,
             voucherInfo,
             uniqueCode,
+            expiredTime: paymentRow?.expiredTime,
+            whatsappAdmin: await ConfigService.get("whatsapp_nomor", "628997179308"),
         });
 
     } catch (error: any) {

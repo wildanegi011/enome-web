@@ -40,4 +40,8 @@ export const checkoutApi = {
             method: "POST",
             body: JSON.stringify(data),
         }),
+    getConfig: (keys?: string[]) => {
+        const query = keys ? `?keys=${keys.join(",")}` : "";
+        return apiClient<Record<string, string>>(`/api/config${query}`);
+    },
 };

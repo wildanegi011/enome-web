@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import logger from "./logger";
+import path from "path";
+import { ConfigService } from "./services/config-service";
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -18,7 +20,7 @@ function getPremiumEmailTemplate(title: string, message: string, buttonText: str
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Énome Luxury Interior</title>
+    <title>Énome</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #F8F7F3; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
@@ -28,8 +30,7 @@ function getPremiumEmailTemplate(title: string, message: string, buttonText: str
                     <!-- Header -->
                     <tr>
                         <td align="center" style="padding: 40px 40px 30px 40px; background-color: #171717;">
-                            <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: #ffffff; text-transform: uppercase;">Énome</h1>
-                            <p style="margin: 5px 0 0 0; font-size: 12px; letter-spacing: 0.3em; color: #A3A3A3; text-transform: uppercase; font-weight: 500;">Luxury Interior</p>
+                            <img src="cid:logo" alt="Énome" width="160" style="display: block; border: 0; outline: none; text-decoration: none;">
                         </td>
                     </tr>
                     
@@ -76,7 +77,7 @@ function getPremiumEmailTemplate(title: string, message: string, buttonText: str
     `;
 }
 
-export async function sendResetPasswordEmail(to: string, resetLink: string) {
+export async function sendResetPasswordEmail(to: string, resetLink: string, attachments: any[] = []) {
     try {
         const mailOptions = {
             from: process.env.SMTP_FROM || '"Énome" <noreply@enome.test>',
@@ -89,6 +90,14 @@ export async function sendResetPasswordEmail(to: string, resetLink: string) {
                 resetLink,
                 "Jika Anda tidak merasa melakukan permintaan ini, silakan abaikan email ini. Tautan ini akan kedaluwarsa dalam 1 jam."
             ),
+            attachments: [
+                {
+                    filename: 'logo-enome-white.png',
+                    path: path.join(process.cwd(), 'public', 'logo-enome-white.png'),
+                    cid: 'logo'
+                },
+                ...attachments
+            ]
         };
 
         const info = await transporter.sendMail(mailOptions);
@@ -100,7 +109,7 @@ export async function sendResetPasswordEmail(to: string, resetLink: string) {
     }
 }
 
-export async function sendActivationEmail(to: string, activationLink: string) {
+export async function sendActivationEmail(to: string, activationLink: string, attachments: any[] = []) {
     try {
         const mailOptions = {
             from: process.env.SMTP_FROM || '"Énome" <noreply@enome.test>',
@@ -108,11 +117,19 @@ export async function sendActivationEmail(to: string, activationLink: string) {
             subject: "Aktivasi Akun - Énome",
             html: getPremiumEmailTemplate(
                 "Selamat Bergabung",
-                "Terima kasih telah memilih Énome Luxury Interior. Untuk mengaktifkan akun Anda dan mulai menjelajahi koleksi eksklusif kami, silakan konfirmasi email Anda.",
+                "Terima kasih telah memilih Énome. Untuk mengaktifkan akun Anda dan mulai menjelajahi koleksi eksklusif kami, silakan konfirmasi email Anda.",
                 "Konfirmasi Email",
                 activationLink,
                 "Jika Anda tidak merasa melakukan pendaftaran ini, Anda dapat mengabaikan email ini dengan aman."
             ),
+            attachments: [
+                {
+                    filename: 'logo-enome-white.png',
+                    path: path.join(process.cwd(), 'public', 'logo-enome-white.png'),
+                    cid: 'logo'
+                },
+                ...attachments
+            ]
         };
 
         const info = await transporter.sendMail(mailOptions);
@@ -120,6 +137,74 @@ export async function sendActivationEmail(to: string, activationLink: string) {
         return { success: true, messageId: info.messageId };
     } catch (error: any) {
         logger.error("Error sending activation email: ", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendNewOrderAdminNotification(adminEmail: string, orderData: any) {
+    try {
+        const { orderId, customerName, totalTagihan, items, shippingAddress } = orderData;
+
+        const itemsList = items.map((item: any) => `
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.namaProduk} (${item.size}/${item.warna})</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">Rp ${Math.round(item.harga).toLocaleString('id-ID')}</td>
+            </tr>
+        `).join('');
+
+        const orderDetailsHtml = `
+            <div style="text-align: left; background-color: #f9f9f9; padding: 20px; border-radius: 12px; margin-top: 20px;">
+                <p><strong>Order ID:</strong> ${orderId}</p>
+                <p><strong>Customer:</strong> ${customerName}</p>
+                <p><strong>Total Tagihan:</strong> Rp ${Math.round(totalTagihan).toLocaleString('id-ID')}</p>
+                <p><strong>Alamat Pengiriman:</strong> ${shippingAddress}</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background-color: #eee;">
+                            <th style="padding: 10px; text-align: left;">Produk</th>
+                            <th style="padding: 10px; text-align: center;">Qty</th>
+                            <th style="padding: 10px; text-align: right;">Harga</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsList}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        // Fetch backend URL for the admin portal link
+        // The URL format is expected to be: {backend_url}/administrator/pesanan-online/status?id={orderId}
+        const backendUrl = await ConfigService.get("backend_url", "http://enome.test");
+        const adminDetailLink = `${backendUrl}/pesanan-online/status?id=${encodeURIComponent(orderId)}`;
+
+        const mailOptions = {
+            from: process.env.SMTP_FROM || '"Énome" <noreply@enome.test>',
+            to: adminEmail,
+            subject: `[PESANAN BARU] ${orderId} - ${customerName}`,
+            html: getPremiumEmailTemplate(
+                "Pesanan Baru Diterima",
+                `Halo Admin, pesanan baru telah masuk dengan ID <strong>${orderId}</strong>. Berikut adalah rincian pesanan dari pelanggan <strong>${customerName}</strong>.`,
+                "Lihat Detail Pesanan",
+                adminDetailLink,
+                "Ini adalah notifikasi otomatis untuk admin. Silakan login ke dashboard untuk memproses pesanan."
+            ).replace('<p style="margin: 0 0 30px 0; font-size: 16px; line-height: 1.6; color: #525252;">', `<p style="margin: 0 0 30px 0; font-size: 16px; line-height: 1.6; color: #525252;">${orderDetailsHtml}`),
+            attachments: [
+                {
+                    filename: 'logo-enome-white.png',
+                    path: path.join(process.cwd(), 'public', 'logo-enome-white.png'),
+                    cid: 'logo'
+                }
+            ]
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        logger.info("Admin notification email sent: %s", info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error: any) {
+        logger.error("Error sending admin notification email: ", error);
         return { success: false, error: error.message };
     }
 }

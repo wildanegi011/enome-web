@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { ShoppingBag } from "lucide-react";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { ASSET_URL } from "@/config/config";
 import { formatCurrency } from "@/lib/utils";
@@ -24,9 +25,14 @@ export default function OrderItemsCard({ items }: OrderItemsCardProps) {
     return (
         <div className="bg-white border border-neutral-base-100 rounded-[28px] md:rounded-[32px] overflow-hidden shadow-sm">
             <div className="px-6 md:px-8 py-5 md:py-6 border-b border-neutral-base-50 flex items-center justify-between">
-                <h2 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900">
-                    Rincian Barang
-                </h2>
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10">
+                        <ShoppingBag className="w-5 h-5 text-white" />
+                    </div>
+                    <h2 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900">
+                        Rincian Barang
+                    </h2>
+                </div>
                 <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-neutral-base-400">
                     {items.length} Barang
                 </span>
@@ -41,7 +47,7 @@ export default function OrderItemsCard({ items }: OrderItemsCardProps) {
                             <FallbackImage
                                 src={
                                     item.gambar
-                                        ? `${ASSET_URL}/img/produk/${item.gambar}`
+                                        ? `${ASSET_URL} /img/produk / ${item.gambar} `
                                         : "/placeholder-product.jpg"
                                 }
                                 alt={item.namaProduk}
