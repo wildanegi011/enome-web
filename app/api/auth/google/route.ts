@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
             });
 
             if (isRedirect) {
-                return NextResponse.redirect(new URL("/login?registered=true", request.url));
+                return NextResponse.redirect(new URL("/login?registered=true", process.env.NEXT_PUBLIC_URL!));
             }
 
             return NextResponse.json({
@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
 
         if (isRedirect) {
             // Redirect to home page if using Google's Redirect Mode
-            return NextResponse.redirect(new URL("/", request.url));
+            return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_URL!));
         }
 
         return NextResponse.json({ success: true });
