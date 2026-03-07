@@ -49,7 +49,7 @@ interface Collection {
 const MOCK_COLLECTIONS: Collection[] = [
     {
         id: "home",
-        title: "HOME",
+        title: "BERANDA",
         images: [
             { url: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?q=80&w=1000&auto=format&fit=crop", aspectRatio: "aspect-[3/4]" },
             { url: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=1000&auto=format&fit=crop", aspectRatio: "aspect-[3/4]" },
@@ -93,28 +93,28 @@ const MOCK_PRODUCTS = [
     {
         id: "p1",
         name: "Abimanyu Silk Blouse",
-        category: "Women's Collection",
+        category: "Koleksi Wanita",
         price: "Rp 1.250.000",
         image: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?q=80&w=400&auto=format&fit=crop"
     },
     {
         id: "p2",
         name: "Arjuna Slim Fit Shirt",
-        category: "Men's Classic",
+        category: "Klasik Pria",
         price: "Rp 850.000",
         image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400&auto=format&fit=crop"
     },
     {
         id: "p3",
         name: "Kencana Maxi Dress",
-        category: "Exclusive Evening",
+        category: "Gaun Malam Eksklusif",
         price: "Rp 2.100.000",
         image: "https://images.unsplash.com/photo-1574015974293-817f0efebb1b?q=80&w=400&auto=format&fit=crop"
     },
     {
         id: "p4",
         name: "Prameswari Silk Scarf",
-        category: "Accessories",
+        category: "Aksesoris",
         price: "Rp 450.000",
         image: "https://images.unsplash.com/photo-1572493122750-394dd95cee7a?q=80&w=400&auto=format&fit=crop"
     }
@@ -336,7 +336,7 @@ export default function CollectionSlider() {
                         onClick={() => setAuthModal({ open: true, tab: "register" })}
                         className="pointer-events-auto h-11 md:h-12 px-5 md:px-7 rounded-full bg-white text-stone-900 text-[12px] md:text-[13px] font-semibold hover:bg-stone-100 transition-all duration-300 active:scale-[0.97] shrink-0"
                     >
-                        Sign Up
+                        Daftar
                     </button>
                 </div>
             </div>
@@ -449,7 +449,7 @@ export default function CollectionSlider() {
                             className="flex flex-col items-center gap-3 group pointer-events-auto cursor-pointer"
                         >
                             <span className="text-[11px] font-black text-white tracking-[0.6em] group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] transition-all uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                                Scroll Down
+                                Gulir ke Bawah
                             </span>
 
                             {/* Animated Progress Line */}
@@ -485,7 +485,7 @@ export default function CollectionSlider() {
                             </motion.div>
 
                             <span className="text-[11px] font-black text-white tracking-[0.6em] group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] transition-all uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                                Back to Top
+                                Kembali ke Atas
                             </span>
                         </motion.button>
                     )}

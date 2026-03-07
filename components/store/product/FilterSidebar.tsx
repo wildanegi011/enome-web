@@ -18,6 +18,11 @@ const categoryIcons: Record<string, any> = {
     "Bags": Box,
 };
 
+export type FilterCollectionItem = {
+    name: string;
+    icon?: string | null;
+};
+
 const DEFAULT_SIZES = ["S", "M", "L", "XL"];
 const DEFAULT_COLORS = [
     { name: "Navy", value: "#1A1B2D" },
@@ -27,7 +32,7 @@ const DEFAULT_COLORS = [
 ];
 
 const priceRanges = [
-    "Under Rp 500k", "Rp 500k - Rp 1.5M", "Above Rp 1.5M"
+    "Di bawah Rp 500rb", "Rp 500rb - Rp 1.5jt", "Di atas Rp 1.5jt"
 ];
 
 const INITIAL_VISIBLE_COUNT = 5;
@@ -45,7 +50,7 @@ interface FilterSidebarProps {
     activeFilters: FilterState;
     onFilterChange: (category: keyof FilterState, value: string) => void;
     className?: string;
-    collections?: string[];
+    collections?: FilterCollectionItem[];
     colors?: { name: string; value: string }[];
     sizes?: string[];
 }
@@ -129,7 +134,11 @@ export default function FilterSidebar({ activeFilters, onFilterChange, className
         );
     };
 
-    const allCategories = dynamicCollections || ["Kemeja", "Outer", "Aksesori"];
+    const allCategories: FilterCollectionItem[] = dynamicCollections || [
+        { name: "Kemeja" },
+        { name: "Outer" },
+        { name: "Aksesori" }
+    ];
     const visibleCategories = expandedSections.collection ? allCategories : allCategories.slice(0, INITIAL_VISIBLE_COUNT);
 
     const allColors = dynamicColors || DEFAULT_COLORS;
@@ -167,9 +176,11 @@ export default function FilterSidebar({ activeFilters, onFilterChange, className
                                     className="overflow-hidden"
                                 >
                                     <div className="space-y-1 pt-1">
-                                        {visibleCategories.map((cat) => {
-                                            const Icon = categoryIcons[cat] || Box;
+                                        {visibleCategories.map((catItem) => {
+                                            const cat = catItem.name;
                                             const isActive = activeFilters.collection.includes(cat);
+                                            const FallbackIcon = categoryIcons[cat] || Box;
+
                                             return (
                                                 <button
                                                     key={cat}
@@ -181,7 +192,11 @@ export default function FilterSidebar({ activeFilters, onFilterChange, className
                                                             : "text-neutral-base-600 hover:bg-neutral-base-50 hover:text-neutral-base-900"
                                                     )}
                                                 >
-                                                    <Icon className={cn("w-4 h-4 transition-colors", isActive ? "text-white" : "text-neutral-base-400 group-hover:text-neutral-base-900")} strokeWidth={isActive ? 2.5 : 2} />
+                                                    {catItem.icon ? (
+                                                        <i className={cn(catItem.icon, "w-4 h-4 flex items-center justify-center transition-colors", isActive ? "text-white" : "text-neutral-base-400 group-hover:text-neutral-base-900")}></i>
+                                                    ) : (
+                                                        <FallbackIcon className={cn("w-4 h-4 transition-colors", isActive ? "text-white" : "text-neutral-base-400 group-hover:text-neutral-base-900")} strokeWidth={isActive ? 2.5 : 2} />
+                                                    )}
                                                     {cat}
                                                 </button>
                                             );

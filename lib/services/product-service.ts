@@ -51,51 +51,50 @@ export class ProductService {
             .leftJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
             .groupBy(produk.produkId);
 
-        if (where) {
-            query = query.where(where) as any;
-        }
+        const conditions: any[] = [];
+        if (where) conditions.push(where);
 
         if (options.categories && options.categories.length > 0) {
-            const categoryFilter = sql`${produk.kategori} IN ${options.categories}`;
-            query = query.where(and(where, categoryFilter)) as any;
+            conditions.push(sql`${produk.kategori} IN ${options.categories}`);
         }
 
         if (options.colors && options.colors.length > 0) {
-            const colorFilter = sql`${warna.warna} IN ${options.colors}`;
-            query = query.where(and(where, colorFilter)) as any;
+            conditions.push(sql`${warna.warna} IN ${options.colors}`);
         }
 
         if (options.sizes && options.sizes.length > 0) {
-            const sizeFilter = sql`${produkDetail.size} IN ${options.sizes}`;
-            query = query.where(and(where, sizeFilter)) as any;
+            conditions.push(sql`${produkDetail.size} IN ${options.sizes}`);
         }
 
-        // Price range filtering is complex because of final price calculations.
-        // For simplicity and to match the previous in-memory logic, 
-        // we'll filter based on the base min price in the DB layer if possible, 
-        // or refine it in the processProductData.
-        // But the user wants database integration, so we'll use WHERE on minPrice.
         if (options.priceRanges && options.priceRanges.length > 0) {
-            const conditions = options.priceRanges.map(range => {
-                if (range === "Under Rp 500k") return sql`${priceColumn} < 500000`;
-                if (range === "Rp 500k - Rp 1.5M") return sql`${priceColumn} BETWEEN 500000 AND 1500000`;
-                if (range === "Above Rp 1.5M") return sql`${priceColumn} > 1500000`;
+            const rangeConditions = options.priceRanges.map(range => {
+                if (range === "Di bawah Rp 500rb") return sql`${priceColumn} < 500000`;
+                if (range === "Rp 500rb - Rp 1.5jt") return sql`${priceColumn} BETWEEN 500000 AND 1500000`;
+                if (range === "Di atas Rp 1.5jt") return sql`${priceColumn} > 1500000`;
                 return null;
             }).filter((c): c is any => c !== null);
 
-            if (conditions.length > 0) {
-                const priceFilter = sql`(${sql.join(conditions, sql` OR `)})`;
-                query = query.where(and(where, priceFilter)) as any;
+            if (rangeConditions.length > 0) {
+                conditions.push(sql`(${sql.join(rangeConditions, sql` OR `)})`);
             }
         }
 
         if (options.search) {
-            const searchTerm = `%${options.search}%`;
-            const searchFilter = or(
-                like(produk.namaProduk, searchTerm),
-                like(produk.produkId, searchTerm)
-            );
-            query = query.where(and(where, searchFilter as any)) as any;
+            const keywords = options.search.trim().split(/\s+/).filter(Boolean);
+            if (keywords.length > 0) {
+                const keywordConditions = keywords.map(kw => {
+                    const term = `%${kw}%`;
+                    return or(
+                        like(produk.namaProduk, term),
+                        like(produk.produkId, term)
+                    );
+                });
+                conditions.push(and(...keywordConditions));
+            }
+        }
+
+        if (conditions.length > 0) {
+            query = query.where(and(...conditions)) as any;
         }
 
         if (orderBy) {

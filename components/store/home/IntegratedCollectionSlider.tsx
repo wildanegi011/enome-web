@@ -224,7 +224,7 @@ export default function IntegratedCollectionSlider() {
                                 {/* Vertical Side Logo - Left Center */}
                                 <motion.div
                                     initial={{ opacity: 0, x: -30 }}
-                                    whileInView={{ opacity: 0.35, x: 0 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
                                     transition={{ duration: 1, delay: 0.3 }}
                                     viewport={{ once: false }}
                                     className="absolute left-12 md:left-20 top-1/2 -translate-y-1/2 z-10 pointer-events-none select-none"

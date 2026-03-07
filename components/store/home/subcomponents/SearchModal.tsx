@@ -75,8 +75,8 @@ const SearchMenuContent = ({
                 <Search className="size-6 text-stone-300" />
             </div>
             <div className="text-center space-y-1">
-                <p className="text-stone-700 text-sm font-semibold">No results found</p>
-                <p className="text-stone-400 text-xs">Try a different keyword</p>
+                <p className="text-stone-700 text-sm font-semibold">Tidak ada hasil ditemukan</p>
+                <p className="text-stone-400 text-xs">Coba dengan kata kunci lain</p>
             </div>
         </CommandEmpty>
 
@@ -96,7 +96,7 @@ const SearchMenuContent = ({
                                     onClick={onClearRecent}
                                     className="text-[10px] font-medium text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
                                 >
-                                    Clear all
+                                    Bersihkan semua
                                 </button>
                             </div>
                         }
@@ -127,7 +127,7 @@ const SearchMenuContent = ({
                         heading={
                             <div className="flex items-center gap-2 px-4 pt-3 pb-2">
                                 <TrendingUp className="size-3 text-stone-300" />
-                                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Category</span>
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Kategori</span>
                             </div>
                         }
                     >
@@ -162,7 +162,7 @@ const SearchMenuContent = ({
                     <div className="flex items-center gap-2 px-4 pt-1 pb-2">
                         <ShoppingBag className="size-3 text-stone-300" />
                         <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">
-                            Results
+                            Hasil
                         </span>
                     </div>
                 }
@@ -207,7 +207,7 @@ const SearchMenuContent = ({
                     heading={
                         <div className="flex items-center gap-2 px-4 pt-1 pb-2">
                             <Compass className="size-3 text-stone-300" />
-                            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Quick Links</span>
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Tautan cepat</span>
                         </div>
                     }
                 >
@@ -311,7 +311,7 @@ export default function SearchModal({
             <Drawer open={isOpen} onOpenChange={onOpenChange}>
                 <DrawerContent className="bg-linear-to-b from-amber-50/40 via-stone-50 to-rose-50/30 text-stone-900 rounded-t-3xl h-[90vh] border-t border-stone-200/60 p-0 overflow-hidden">
                     <DrawerHeader className="sr-only">
-                        <DrawerTitle>Search</DrawerTitle>
+                        <DrawerTitle>Cari</DrawerTitle>
                     </DrawerHeader>
 
                     <div className="mx-auto mt-3 h-1 w-10 rounded-full bg-stone-200" />
@@ -319,7 +319,7 @@ export default function SearchModal({
                     <Command shouldFilter={false} className="bg-transparent flex flex-col h-full overflow-hidden">
                         <div className="px-4 pt-4 pb-2 shrink-0">
                             <CommandInput
-                                placeholder="Search products..."
+                                placeholder="Cari produk..."
                                 value={searchValue}
                                 onValueChange={(val) => {
                                     setSearchValue(val);
@@ -359,7 +359,7 @@ export default function SearchModal({
             {/* Search Input */}
             <div className="px-4 pt-4 pb-3 bg-white">
                 <CommandInput
-                    placeholder="Search products"
+                    placeholder="Cari produk"
                     value={searchValue}
                     onValueChange={setSearchValue}
                     onKeyDown={(e) => {

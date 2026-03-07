@@ -38,4 +38,21 @@ export class SlideService {
         // Filter out empty collections if any
         return Array.from(collectionsMap.values()).filter(c => c.images.length > 0);
     }
+
+    static async getFrontendLogo() {
+        const slides = await db.select()
+            .from(slide)
+            .where(and(
+                eq(slide.kategori, "logo_frontend"),
+                eq(slide.publish, 1),
+                eq(slide.isDeleted, 0)
+            ))
+            .limit(1);
+
+        if (slides.length > 0) {
+            return `${ASSET_URL}/img/slide/${slides[0].image}`;
+        }
+
+        return null;
+    }
 }
