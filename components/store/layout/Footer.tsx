@@ -4,9 +4,11 @@ import Link from "next/link";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { useState } from "react";
 import { useSubscribeNewsletter } from "@/hooks/use-newsletter";
+import { useLogo } from "@/hooks/use-logo";
 import { toast } from "sonner";
 
 export default function Footer() {
+    const { data: logoUrl } = useLogo();
 
     return (
         <footer className="bg-white border-t border-neutral-100 pt-16 pb-8">
@@ -17,11 +19,10 @@ export default function Footer() {
                         <Link href="/" className="relative block group">
                             <div className="relative w-32 h-20 transition-transform duration-500 group-hover:scale-105">
                                 <FallbackImage
-                                    src="/logo-enome.png"
+                                    src={logoUrl || "/logo-enome.png"}
                                     alt="ÉNOMÉ"
                                     fill
                                     className="object-contain"
-                                    priority
                                 />
                             </div>
                         </Link>
@@ -101,7 +102,7 @@ function NewsletterSection() {
     return (
         <div className="md:col-span-4">
             <h4 className="text-[13px] font-black text-slate-900 uppercase tracking-widest mb-6">
-                Newsletter
+                Buletin
             </h4>
             <p className="text-[13px] text-slate-500 font-medium mb-6">
                 Dapatkan update koleksi terbaru.

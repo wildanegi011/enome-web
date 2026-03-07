@@ -3,6 +3,7 @@ import { apiClient } from "./api-client";
 export interface Category {
     kategoriId: number;
     kategori: string;
+    gambarKategori?: string | null;
 }
 
 export interface Color {

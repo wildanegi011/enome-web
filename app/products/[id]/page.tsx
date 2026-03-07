@@ -104,7 +104,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
                         <Breadcrumb
                             items={[
                                 { label: "Beranda", href: "/" },
-                                { label: "Product", href: "/products" },
+                                { label: "Produk", href: "/products" },
                                 { label: product.namaProduk }
                             ]}
                         />

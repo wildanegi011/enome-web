@@ -64,6 +64,7 @@ export const produkDetail = mysqlTable("produkdetail", {
 export const kategoriProduk = mysqlTable("kategoriproduk", {
     kategoriId: serial("kategori_id").primaryKey(),
     kategori: varchar("kategori", { length: 50 }).notNull(),
+    gambarKategori: varchar("gambar_kategori", { length: 255 }),
 });
 
 export const warna = mysqlTable("warna", {

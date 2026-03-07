@@ -9,6 +9,7 @@ import AuthModal from "@/components/store/auth/AuthModal";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
+import { useLogo } from "@/hooks/use-logo";
 import { cn } from "@/lib/utils";
 import {
     DropdownMenu,
@@ -30,6 +31,7 @@ export default function Navbar() {
     const { count: cartCount } = useCart();
     const { data: wishlistData } = useWishlist();
     const wishlistCount = wishlistData?.items?.length || 0;
+    const { data: logoUrl } = useLogo();
 
     useEffect(() => {
         const handleOpenAuth = (e: any) => {
@@ -40,8 +42,8 @@ export default function Navbar() {
     }, []);
 
     const navLinks = [
-        { name: "Home", path: "/" },
-        { name: "Products", path: "/products" },
+        { name: "Beranda", path: "/" },
+        { name: "Produk", path: "/products" },
     ];
 
     return (
@@ -56,11 +58,10 @@ export default function Navbar() {
                     <Link href="/" className="relative flex items-center h-full">
                         <div className="relative w-14 h-14 md:w-20 md:h-20 transition-all duration-500 hover:scale-105 active:scale-95 group">
                             <FallbackImage
-                                src="/logo-enome.png"
+                                src={logoUrl || "/logo-enome.png"}
                                 alt="Logo Enome"
                                 fill
-                                className="object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.12)] group-hover:drop-shadow-[0_5px_15px_rgba(0,0,0,0.18)] transition-all duration-500"
-                                priority
+                                className="object-contain"
                                 quality={100}
                             />
                         </div>
@@ -162,14 +163,14 @@ export default function Navbar() {
                                             <div className="text-left hidden lg:block">
                                                 <p className="text-[11px] font-bold text-neutral-base-900 leading-none truncate max-w-[100px] mb-0.5">{user?.name}</p>
                                                 <p className="text-[9px] text-neutral-base-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                                                    Account <ChevronDown className="w-2.5 h-2.5" />
+                                                    Akun <ChevronDown className="w-2.5 h-2.5" />
                                                 </p>
                                             </div>
                                         </button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-[240px] mt-4 p-2 rounded-[24px] shadow-2xl border-neutral-base-100/60 bg-white/95 backdrop-blur-xl">
                                         <div className="px-4 py-4 mb-2 bg-neutral-base-50 rounded-[20px]">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-base-400 mb-1">Signed in as</p>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-base-400 mb-1">Masuk sebagai</p>
                                             <p className="text-[14px] font-bold text-neutral-base-900 truncate">{user?.email}</p>
                                         </div>
 
@@ -219,14 +220,14 @@ export default function Navbar() {
                                         onClick={() => router.push("/login")}
                                         className="text-[13px] font-medium text-neutral-base-500 hover:text-neutral-base-900 transition-colors"
                                     >
-                                        SIGN IN
+                                        MASUK
                                     </button>
                                     <span className="text-neutral-base-200 text-xs">/</span>
                                     <button
                                         onClick={() => router.push("/register")}
                                         className="text-[12px] font-bold bg-neutral-base-900 text-white px-6 py-2.5 hover:bg-neutral-base-800 transition-all tracking-widest uppercase shadow-lg shadow-neutral-base-900/10"
                                     >
-                                        SIGN UP
+                                        DAFTAR
                                     </button>
                                 </>
                             )}
@@ -312,13 +313,13 @@ export default function Navbar() {
                                         onClick={() => { setMobileOpen(false); router.push("/login"); }}
                                         className="text-[12px] font-bold uppercase tracking-widest text-neutral-base-900 py-3 border border-neutral-base-200 rounded-xl"
                                     >
-                                        Sign In
+                                        Masuk
                                     </button>
                                     <button
                                         onClick={() => { setMobileOpen(false); router.push("/register"); }}
                                         className="text-[12px] font-bold uppercase tracking-widest text-white py-3 bg-neutral-base-900 rounded-xl shadow-lg shadow-neutral-base-900/10"
                                     >
-                                        Sign Up
+                                        Daftar
                                     </button>
                                 </div>
                             )}

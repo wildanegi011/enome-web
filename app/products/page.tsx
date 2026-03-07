@@ -74,7 +74,10 @@ function ProductsContent() {
     }, [activeFilters, pathname]);
 
     const dynamicCollections = useMemo(() => {
-        return categoriesData.map((c: Category) => c.kategori);
+        return categoriesData.map((c: Category) => ({
+            name: c.kategori,
+            icon: c.gambarKategori || null
+        }));
     }, [categoriesData]);
 
     const dynamicColors = useMemo(() => {
@@ -166,17 +169,17 @@ function ProductsContent() {
                     <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                         {/* Mobile Filter Trigger */}
                         <div className="flex lg:hidden justify-between items-center mb-6">
-                            <h2 className="font-serif text-[24px] font-bold text-neutral-base-900">Products</h2>
+                            <h2 className="font-serif text-[24px] font-bold text-neutral-base-900">Produk</h2>
                             <Sheet>
                                 <SheetTrigger asChild>
                                     <button className="flex items-center gap-2 border border-neutral-base-200 px-4 py-2 text-[12px] font-bold shadow-sm hover:bg-neutral-base-50 transition-colors uppercase tracking-widest">
                                         <SlidersHorizontal className="w-[14px] h-[14px]" />
-                                        Filters
+                                        Filter
                                     </button>
                                 </SheetTrigger>
                                 <SheetContent side="right" className="w-[300px] sm:w-[350px] overflow-y-auto px-6 pt-16 border-l border-neutral-base-200">
-                                    <SheetTitle className="sr-only">Product Filters</SheetTitle>
-                                    <SheetDescription className="sr-only">Filter products by size, color, collection, and more.</SheetDescription>
+                                    <SheetTitle className="sr-only">Filter Produk</SheetTitle>
+                                    <SheetDescription className="sr-only">Filter produk berdasarkan ukuran, warna, koleksi, dan lainnya.</SheetDescription>
                                     <div className="pb-10">
                                         <FilterSidebar
                                             activeFilters={activeFilters}

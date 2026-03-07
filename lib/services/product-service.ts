@@ -68,9 +68,9 @@ export class ProductService {
 
         if (options.priceRanges && options.priceRanges.length > 0) {
             const rangeConditions = options.priceRanges.map(range => {
-                if (range === "Under Rp 500k") return sql`${priceColumn} < 500000`;
-                if (range === "Rp 500k - Rp 1.5M") return sql`${priceColumn} BETWEEN 500000 AND 1500000`;
-                if (range === "Above Rp 1.5M") return sql`${priceColumn} > 1500000`;
+                if (range === "Di bawah Rp 500rb") return sql`${priceColumn} < 500000`;
+                if (range === "Rp 500rb - Rp 1.5jt") return sql`${priceColumn} BETWEEN 500000 AND 1500000`;
+                if (range === "Di atas Rp 1.5jt") return sql`${priceColumn} > 1500000`;
                 return null;
             }).filter((c): c is any => c !== null);
 

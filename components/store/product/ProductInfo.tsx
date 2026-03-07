@@ -378,7 +378,7 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
                     </span>
                     <button className="text-[11px] font-bold text-neutral-base-400 hover:text-neutral-base-900 underline flex items-center gap-1 transition-colors">
                         <Ruler className="w-3 h-3" />
-                        Size Guide
+                        Panduan ukuran
                     </button>
                 </div>
                 <div className="flex flex-wrap gap-2 md:gap-3">

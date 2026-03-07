@@ -37,11 +37,11 @@ const menuItems = [
         icon: Heart,
         href: "/account/wishlist",
     },
-    {
-        title: "Wallet",
-        icon: Wallet,
-        href: "/account/wallet",
-    },
+    // {
+    //     title: "Wallet",
+    //     icon: Wallet,
+    //     href: "/account/wallet",
+    // },
 ];
 
 export default function UserSidebar({ className, isSheet }: { className?: string, isSheet?: boolean }) {

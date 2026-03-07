@@ -187,7 +187,7 @@ export default function ProfilePage() {
                                                     onSelect={(date) => setFormData({ ...formData, brithdate: date ? format(date, "yyyy-MM-dd") : "" })}
                                                     captionLayout="dropdown"
                                                     startMonth={new Date(1900, 0)}
-                                                    endMonth={new Date()}
+                                                    endMonth={new Date(new Date().getFullYear(), 11)}
                                                     className="p-3"
                                                 />
                                             </PopoverContent>

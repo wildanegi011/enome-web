@@ -30,14 +30,14 @@ export default function NewArrivals() {
         }
     }, [derivedCategories, activeCategory]);
 
-    // Combine dynamic categories with permanent "Discount Deals" (Total max 4)
+    // Combine dynamic categories with permanent "Promo Diskon" (Total max 4)
     const categories = useMemo(() => {
-        return [...derivedCategories, "Discount Deals"];
+        return [...derivedCategories, "Promo Diskon"];
     }, [derivedCategories]);
 
     // Filter products based on active category
     const products = useMemo(() => {
-        if (activeCategory === "Discount Deals") return rawProducts.filter(p => (p as any).isOnFlashSale);
+        if (activeCategory === "Promo Diskon") return rawProducts.filter(p => (p as any).isOnFlashSale);
         return rawProducts.filter(p => p.kategori === activeCategory);
     }, [rawProducts, activeCategory]);
 
@@ -64,9 +64,9 @@ export default function NewArrivals() {
                         transition={{ duration: 0.8, ease: "easeOut" }}
                         className="text-center mb-12 md:mb-16"
                     >
-                        <h2 className="font-heading text-[32px] md:text-[40px] lg:text-[48px] font-bold text-neutral-base-900 leading-tight">New Arrivals</h2>
+                        <h2 className="font-heading text-[32px] md:text-[40px] lg:text-[48px] font-bold text-neutral-base-900 leading-tight">Koleksi Terbaru</h2>
                         <p className="text-neutral-base-500 mt-3 md:mt-4 max-w-2xl mx-auto text-[15px] md:text-[16px] leading-relaxed">
-                            Discover our latest drop. A perfect blend of cultural heritage and contemporary style, meticulously crafted for the modern individual.
+                            Temukan koleksi terbaru kami. Perpaduan sempurna antara warisan budaya dan gaya kontemporer, dirancang dengan cermat untuk individu modern.
                         </p>
                     </motion.div>
 
@@ -114,7 +114,7 @@ export default function NewArrivals() {
                                     originalPrice: (product.finalMinPrice !== product.baseMinPrice || product.finalMaxPrice !== product.baseMaxPrice)
                                         ? formatPriceRange(product.baseMinPrice, product.baseMaxPrice)
                                         : undefined,
-                                    designer: "Handmade Batik by Énome",
+                                    designer: "Batik Buatan Tangan oleh Énome",
                                     totalStock: product.totalStock ? parseInt(product.totalStock.toString()) : 0,
                                     isOnFlashSale: product.isOnFlashSale,
                                     discountPercentage: product.discountPercentage,
@@ -128,7 +128,7 @@ export default function NewArrivals() {
                             })
                         ) : (
                             <div className="col-span-full py-20 text-center text-gray-400 italic">
-                                No products found in this category.
+                                Tidak ada produk yang ditemukan di kategori ini.
                             </div>
                         )}
                     </div>
@@ -139,7 +139,7 @@ export default function NewArrivals() {
                             href="/products"
                             className="inline-flex items-center gap-2 text-[12px] font-bold tracking-[0.2em] uppercase text-neutral-base-900 border-b-2 border-transparent hover:border-neutral-base-900 pb-1 transition-all"
                         >
-                            View More
+                            Lihat Lebih Banyak
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M5 12h14M12 5l7 7-7 7" />
                             </svg>
