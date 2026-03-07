@@ -13,7 +13,7 @@ export async function apiClient<T>(url: string, options?: RequestInit): Promise<
         let errorMessage = "An error occurred while fetching the data.";
         try {
             const errorData = await res.json();
-            errorMessage = errorData.message || errorData.pesan || errorMessage;
+            errorMessage = errorData.error || errorData.message || errorData.pesan || errorMessage;
         } catch (e) {
             // Fallback if not JSON
         }
