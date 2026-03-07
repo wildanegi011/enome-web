@@ -62,7 +62,9 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         e.preventDefault();
         e.stopPropagation();
         if (product.id) {
-            toggleWishlist.mutate({ produkId: product.id });
+            toggleWishlist.mutate({
+                produkId: product.id,
+            });
         }
     };
 

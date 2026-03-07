@@ -34,6 +34,10 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
                 MAX(kl.id) as wishlist_id,
                 kl.produk_id,
                 MAX(kl.created_at) as created_at,
+                kl.variant,
+                kl.warna,
+                kl.size,
+                MAX(kl.harga_poduk) as harga_poduk,
                 p.nama_produk,
                 p.kategori,
                 p.gambar,
@@ -56,8 +60,8 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
             INNER JOIN produk p ON kl.produk_id = p.produk_id
             WHERE kl.cust_id = ${custId}
               AND kl.is_deleted = 0
-              AND p.isaktif = 1
-            GROUP BY kl.produk_id, p.nama_produk, p.kategori, p.gambar, p.isaktif, p.is_online
+              AND p.is_online = 1
+            GROUP BY kl.produk_id, p.nama_produk, p.kategori, p.gambar, p.isaktif, p.is_online, kl.variant, kl.warna, kl.size
             ORDER BY MAX(kl.created_at) DESC
         `);
 

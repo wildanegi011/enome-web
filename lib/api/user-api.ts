@@ -114,6 +114,9 @@ export interface WishlistItem {
     kategori: string;
     gambar: string | null;
     variant?: string | null;
+    warna?: string | null;
+    size?: string | null;
+    harga_poduk?: number | null;
     isaktif: number;
     is_online: number;
     min_price: string | null;
@@ -204,10 +207,10 @@ export const userApi = {
         const data = await apiClient<{ items: WishlistItem[] }>("/api/wishlist/details");
         return data.items;
     },
-    toggleWishlist: async (produkId: string, variant?: string) => {
+    toggleWishlist: async (data: { produkId: string; variant?: string; size?: string; warna?: string; price?: number }) => {
         return await apiClient<{ action: "added" | "removed"; produkId: string }>("/api/wishlist", {
             method: "POST",
-            body: JSON.stringify({ produkId, variant }),
+            body: JSON.stringify(data),
         });
     },
     trackWaybill: async (awb: string, courier: string, phone: string) => {

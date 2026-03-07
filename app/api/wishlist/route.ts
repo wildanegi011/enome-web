@@ -30,7 +30,7 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
                 and(
                     eq(keranjangLove.custId, custId),
                     eq(keranjangLove.isDeleted, 0),
-                    eq(produk.isAktif, 1)
+                    eq(produk.isOnline, 1)
                 )
             );
 
@@ -59,8 +59,9 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
     logger.info("API Request: POST /api/wishlist");
     try {
         const custId = Number(session.user.id);
-        const body = await request.json();
-        const { produkId, variant } = body;
+        const b = await request.json();
+        const { produkId } = b;
+
 
         if (!produkId) {
             return NextResponse.json({ error: "produkId is required" }, { status: 400 });
@@ -98,10 +99,8 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
             // Add to wishlist
             await db.insert(keranjangLove).values({
                 produkId,
-                variant: variant || null,
                 custId: custId,
                 qtyProduk: 1,
-                hargaPoduk: 0,
                 status: 0,
                 keterangan: "",
                 tipeDiskon: "allin",

@@ -8,6 +8,7 @@ import { Loader2, Trash2 } from "lucide-react";
 import { ASSET_URL } from "@/config/config";
 import { WishlistItem } from "@/lib/api/user-api";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { formatCurrency } from "@/lib/utils";
 
 interface WishlistItemCardProps {
     item: WishlistItem;
@@ -135,8 +136,29 @@ const WishlistItemCard = ({ item, idx, isRemoving, onRemove, formatPriceRange }:
                                     )}
                                 </div>
                             )}
+
+                            {(item.warna || item.size || item.variant) && (
+                                <div className="flex flex-wrap items-center gap-1.5 mb-1.5 mt-1">
+                                    {item.variant && (
+                                        <span className="text-[10px] font-medium bg-neutral-base-100 text-neutral-base-600 px-1.5 py-0.5 rounded border border-neutral-base-200">
+                                            {item.variant}
+                                        </span>
+                                    )}
+                                    {item.warna && (
+                                        <span className="text-[10px] font-medium bg-neutral-base-100 text-neutral-base-600 px-1.5 py-0.5 rounded border border-neutral-base-200">
+                                            Warna: {item.warna}
+                                        </span>
+                                    )}
+                                    {item.size && (
+                                        <span className="text-[10px] font-medium bg-neutral-base-100 text-neutral-base-600 px-1.5 py-0.5 rounded border border-neutral-base-200">
+                                            Ukuran: {item.size}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+
                             <p className="text-[15px] md:text-[16px] font-bold text-neutral-base-900 tracking-tight">
-                                {displayPrice}
+                                {item.harga_poduk ? formatCurrency(item.harga_poduk) : displayPrice}
                             </p>
                         </div>
                     </div>
