@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Check, Ruler, Truck, ShieldCheck, ShoppingBag, Plus, Minus, Loader2, Heart, Package, Zap } from "lucide-react";
+import { ChevronDown, Check, Ruler, Truck, ShieldCheck, ShoppingBag, Plus, Minus, Loader2, Heart, Package, Zap, List, Info } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useWishlist, useToggleWishlist } from "@/hooks/use-wishlist";
@@ -29,6 +29,10 @@ interface ProductInfoProps {
         isOnFlashSale?: boolean;
         flashSaleEndTime?: string;
         discountPercentage?: number;
+        jenisProduk?: string | null;
+        jenisBahan?: string | null;
+        isFuring?: number | null;
+        berat?: number | null;
     };
     selectedColor: string;
     setSelectedColor: (color: string) => void;
@@ -510,18 +514,50 @@ export default function ProductInfo({ product, selectedColor, setSelectedColor }
 
             {/* Accordions */}
             <div className="border-t border-neutral-base-100">
-                <AccordionItem id="details" title="Detail Produk" openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
+                <AccordionItem id="shipping" title="Spesifikasi Produk" icon={Info} openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                        <div className="space-y-3">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] uppercase tracking-wider text-neutral-base-400 font-bold mb-1">Jenis Produk</span>
+                                <span className="text-[14px] text-neutral-base-900 font-medium flex items-center gap-2">
+                                    <Package className="w-3.5 h-3.5 text-neutral-base-300" />
+                                    {product.jenisProduk || "-"}
+                                </span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] uppercase tracking-wider text-neutral-base-400 font-bold mb-1">Material Utama</span>
+                                <span className="text-[14px] text-neutral-base-900 font-medium flex items-center gap-2">
+                                    <Zap className="w-3.5 h-3.5 text-neutral-base-300" />
+                                    {product.jenisBahan || "-"}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] uppercase tracking-wider text-neutral-base-400 font-bold mb-1">Lapisan Furing</span>
+                                <span className="text-[14px] text-neutral-base-900 font-medium flex items-center gap-2">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-neutral-base-300" />
+                                    {product.isFuring ? "Ya, Dilapisi Furing" : "Tidak"}
+                                </span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] uppercase tracking-wider text-neutral-base-400 font-bold mb-1">Berat Produk</span>
+                                <span className="text-[14px] text-neutral-base-900 font-medium flex items-center gap-2">
+                                    <Truck className="w-3.5 h-3.5 text-neutral-base-300" />
+                                    {product.berat ? `${product.berat} gram` : ""}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-dotted border-neutral-base-100 italic text-[11px] text-neutral-base-400">
+                        * Spesifikasi dapat sedikit berubah tergantung pada proses pembuatan handmade.
+                    </div>
+                </AccordionItem>
+                <AccordionItem id="details" title="Detail Produk" icon={List} openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
                     <div
                         dangerouslySetInnerHTML={{ __html: product.detail || product.description }}
                         className="prose prose-sm font-sans text-neutral-base-500 max-w-none overflow-hidden wrap-break-word"
                     />
-                </AccordionItem>
-                <AccordionItem id="shipping" title="Pengiriman" icon={Truck} openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
-                    <p className="mb-2">Gratis ongkir untuk pembelian di atas Rp 2.000.000.</p>
-                    <p>Pengembalian diterima dalam 14 hari setelah pengiriman. Barang harus dalam kondisi asli dengan label masih terpasang.</p>
-                </AccordionItem>
-                <AccordionItem id="care" title="Perawatan" icon={ShieldCheck} openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
-                    <p>Hanya dry clean. Jangan gunakan pemutih. Setrika dengan suhu rendah pada sisi belakang untuk menjaga warna alami.</p>
                 </AccordionItem>
             </div>
         </div>

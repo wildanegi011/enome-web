@@ -56,6 +56,7 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
             INNER JOIN produk p ON kl.produk_id = p.produk_id
             WHERE kl.cust_id = ${custId}
               AND kl.is_deleted = 0
+              AND p.isaktif = 1
             GROUP BY kl.produk_id, p.nama_produk, p.kategori, p.gambar, p.isaktif, p.is_online
             ORDER BY MAX(kl.created_at) DESC
         `);

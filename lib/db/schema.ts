@@ -37,6 +37,9 @@ export const produk = mysqlTable("produk", {
     isHighlighted: tinyint("is_highlighted").notNull().default(0),
     highlightedAt: datetime("highlighted_at"),
     highlightOrder: int("highlight_order"),
+    jenisProduk: varchar("jenis_produk", { length: 255 }),
+    jenisBahan: varchar("jenis_bahan", { length: 255 }),
+    isFuring: tinyint("is_furing").default(0),
 });
 
 export const produkDetail = mysqlTable("produkdetail", {

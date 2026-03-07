@@ -52,6 +52,9 @@ export interface Product {
     commissionMin?: string | number | null;
     commissionMax?: string | number | null;
     discountPercentage?: number;
+    jenisProduk?: string | null;
+    jenisBahan?: string | null;
+    isFuring?: number | null;
 }
 
 export interface ProductDetailResponse {
@@ -66,6 +69,7 @@ export interface ProductDetailResponse {
         sizes: string[];
         types: string[];
         matrix: { color: string; size: string; variant: string; stock: number; price: string; image: string | null }[];
+        berat?: number | null;
     };
     images: string[];
     relatedProducts: any[];

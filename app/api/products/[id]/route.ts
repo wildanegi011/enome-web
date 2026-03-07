@@ -114,6 +114,7 @@ export const GET = withOptionalAuth(async (
                 price: priceColumn,
                 basePrice: produkDetail.hargaJual,
                 image: produkDetail.gambar,
+                berat: produkDetail.berat,
             })
             .from(produkDetail)
             .leftJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
@@ -250,6 +251,7 @@ export const GET = withOptionalAuth(async (
                         : d.price;
                     return { ...d, price: dPrice, originalCategoryPrice: d.price };
                 }),
+                berat: details[0]?.berat || 0,
             },
             images: allImages,
             relatedProducts: processRelated,

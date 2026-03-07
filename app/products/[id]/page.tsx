@@ -86,7 +86,11 @@ function ProductDetailContent({ productData }: { productData: any }) {
         commission: stats.hasCommission ? formatPriceRange(stats.commissionMin, stats.commissionMax) : undefined,
         hasCommission: stats.hasCommission,
         isOnFlashSale: stats.isOnFlashSale,
-        flashSaleEndTime: stats.flashSaleEndTime
+        flashSaleEndTime: stats.flashSaleEndTime,
+        jenisProduk: product.jenisProduk,
+        jenisBahan: product.jenisBahan,
+        isFuring: product.isFuring,
+        berat: variants.berat,
     };
 
     return (

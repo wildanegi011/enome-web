@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { keranjangLove } from "@/lib/db/schema";
+import { keranjangLove, produk } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth, withOptionalAuth } from "@/lib/auth-utils";
@@ -25,10 +25,12 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
         const items = await db
             .select({ produkId: keranjangLove.produkId })
             .from(keranjangLove)
+            .innerJoin(produk, eq(keranjangLove.produkId, produk.produkId))
             .where(
                 and(
                     eq(keranjangLove.custId, custId),
-                    eq(keranjangLove.isDeleted, 0)
+                    eq(keranjangLove.isDeleted, 0),
+                    eq(produk.isAktif, 1)
                 )
             );
 
