@@ -90,7 +90,7 @@ const SearchMenuContent = ({
                             <div className="flex items-center justify-between px-4 pt-2 pb-2">
                                 <div className="flex items-center gap-2">
                                     <Clock className="size-3 text-zinc-400" />
-                                    <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-400">Recent</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-plus-jakarta">Recent</span>
                                 </div>
                                 <button
                                     onClick={onClearRecent}
@@ -127,7 +127,7 @@ const SearchMenuContent = ({
                         heading={
                             <div className="flex items-center gap-2 px-4 pt-3 pb-2">
                                 <TrendingUp className="size-3 text-zinc-500" />
-                                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Kategori</span>
+                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 font-plus-jakarta">Kategori</span>
                             </div>
                         }
                     >
@@ -140,7 +140,7 @@ const SearchMenuContent = ({
                                         router.push(`/products?category=${cat.kategori}`);
                                         setIsSearchOpen(false);
                                     }}
-                                    className="inline-flex items-center px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/10 data-[selected=true]:bg-white/10 text-xs font-medium text-zinc-300 hover:text-white data-[selected=true]:text-white cursor-pointer transition-colors"
+                                    className="inline-flex items-center px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/10 data-[selected=true]:bg-white/10 text-xs font-semibold text-zinc-300 hover:text-white data-[selected=true]:text-white cursor-pointer transition-colors font-plus-jakarta"
                                 >
                                     {cat.kategori}
                                 </CommandItem>
@@ -157,7 +157,7 @@ const SearchMenuContent = ({
                 heading={
                     <div className="flex items-center gap-2 px-4 pt-1 pb-2">
                         <ShoppingCart className="size-3 text-zinc-500" />
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-500">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 font-plus-jakarta">
                             Hasil
                         </span>
                     </div>
@@ -183,10 +183,10 @@ const SearchMenuContent = ({
                                 />
                             </div>
                             <div className="flex flex-col min-w-0 gap-0.5">
-                                <span className="font-medium text-sm text-zinc-200 truncate">{product.namaProduk}</span>
-                                <span className="text-[11px] text-zinc-500">{product.kategori}</span>
+                                <span className="font-semibold text-sm text-zinc-200 truncate font-plus-jakarta leading-tight">{product.namaProduk}</span>
+                                <span className="text-[11px] text-zinc-500 font-inter">{product.kategori}</span>
                             </div>
-                            <span className="ml-auto text-sm font-semibold text-white shrink-0">
+                            <span className="ml-auto text-sm font-bold text-white shrink-0 font-inter tracking-tight">
                                 {product.finalMinPrice ? formatCurrency(Number(product.finalMinPrice)) : "—"}
                             </span>
                         </CommandItem>
@@ -203,7 +203,7 @@ const SearchMenuContent = ({
                     heading={
                         <div className="flex items-center gap-2 px-4 pt-1 pb-2">
                             <Compass className="size-3 text-zinc-500" />
-                            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Tautan cepat</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 font-plus-jakarta">Tautan cepat</span>
                         </div>
                     }
                 >
@@ -325,7 +325,7 @@ export default function SearchModal({
                                         handleSearchSubmit();
                                     }
                                 }}
-                                className="h-12 text-base bg-white/5 focus:bg-white/10 rounded-xl border border-white/10 focus:border-white/20 focus:ring-0 placeholder:text-zinc-600 text-white font-medium w-full transition-all"
+                                className="h-12 text-base bg-white/5 focus:bg-white/10 rounded-xl border border-white/10 focus:border-white/20 focus:ring-0 placeholder:text-zinc-600 text-white font-semibold w-full transition-all font-plus-jakarta tracking-tight"
                             />
                         </div>
                         <ScrollArea className="flex-1">
@@ -363,7 +363,7 @@ export default function SearchModal({
                             handleSearchSubmit();
                         }
                     }}
-                    className="h-11 text-sm border-none focus:ring-0 placeholder:text-zinc-600 text-white font-medium bg-white/5 focus:bg-white/7 rounded-xl px-4 w-full transition-all"
+                    className="h-11 text-sm border-none focus:ring-0 placeholder:text-zinc-600 text-white font-semibold bg-white/5 focus:bg-white/7 rounded-xl px-4 w-full transition-all font-plus-jakarta tracking-tight"
                 />
             </div>
 
@@ -378,16 +378,16 @@ export default function SearchModal({
             {/* Footer */}
             <div className="px-4 py-2.5 border-t border-white/5 bg-zinc-950/40 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
-                        <kbd className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] font-medium text-zinc-500">ESC</kbd>
+                    <div className="flex items-center gap-1.5 font-inter">
+                        <kbd className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] font-bold text-zinc-500">ESC</kbd>
                         <span className="text-[10px] text-zinc-600">close</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                        <kbd className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] font-medium text-zinc-500">↵</kbd>
+                    <div className="flex items-center gap-1.5 font-inter">
+                        <kbd className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] font-bold text-zinc-500">↵</kbd>
                         <span className="text-[10px] text-zinc-600">select</span>
                     </div>
                 </div>
-                <span className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase">ÉNOMÉ</span>
+                <span className="text-[10px] text-zinc-600 font-bold tracking-[0.3em] uppercase font-plus-jakarta">ÉNOMÉ</span>
             </div>
         </CommandDialog>
     );
