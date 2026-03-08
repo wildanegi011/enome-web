@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
         const trimmedEmail = email.toLowerCase().trim();
         const userData = await db.select().from(user).where(eq(user.email, trimmedEmail)).limit(1);
 
-        if (userData.length === 0) {
+        if (userData.length === 0 || userData[0].isDeleted === 1) {
+            logger.warn("Forgot Password Warning: Email not registered or account deleted", { email: trimmedEmail });
             return NextResponse.json({ error: "Email tidak terdaftar" }, { status: 404 });
         }
 

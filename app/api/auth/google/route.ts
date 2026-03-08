@@ -123,6 +123,32 @@ export async function POST(request: NextRequest) {
                 passwordHash = "GOOGLE_OAUTH_USER"; // Fallback if PHP fails (though unlikely)
             }
 
+            // Check for orphaned customer record
+            const existingCustomers = await db.select().from(customer).where(eq(customer.email, trimmedEmail)).limit(1);
+            let inheritedCustomer = null;
+
+            if (existingCustomers.length > 0) {
+                const linkedUserId = existingCustomers[0].userId;
+                let isOrphaned = !linkedUserId;
+
+                if (linkedUserId) {
+                    const linkedUser = await db.select().from(user).where(eq(user.id, linkedUserId)).limit(1);
+                    if (linkedUser.length === 0 || linkedUser[0].isDeleted === 1) {
+                        isOrphaned = true;
+                    }
+                }
+
+                if (isOrphaned) {
+                    inheritedCustomer = existingCustomers[0];
+                    logger.info("Auth Info: Google registration inheriting orphaned/deleted linked customer record", { email: trimmedEmail });
+                } else {
+                    // This case should theoretically be handled by the user existence check above, 
+                    // but as a safety measure for email-only matches:
+                    logger.warn("Auth Warning: Google registration blocked, email already linked to active user in customer table", { email: trimmedEmail });
+                    return NextResponse.json({ error: "Email sudah terdaftar" }, { status: 400 });
+                }
+            }
+
             await db.transaction(async (tx) => {
                 const [userResult]: any = await tx.insert(user).values({
                     username: trimmedEmail,
@@ -143,40 +169,54 @@ export async function POST(request: NextRequest) {
                 });
 
                 const insertedUserId = userResult.insertId;
-                const custId = await getNextCustId();
 
-                await tx.insert(customer).values({
-                    custId: custId,
-                    namaCustomer: name || "Google User",
-                    userId: insertedUserId,
-                    email: trimmedEmail,
-                    telp: "",
-                    alamat: "",
-                    alamatLengkap: "",
-                    namaToko: "",
-                    kecamatan: "",
-                    kota: "",
-                    provinsi: "",
-                    kodepos: "",
-                    kategoriCustomerId: 4, // Default to Pelanggan
-                    completedDepositTime: sql`CURRENT_TIMESTAMP`,
-                    isDeleted: 0,
-                });
+                if (inheritedCustomer) {
+                    // Reclaim existing customer
+                    await tx.update(customer)
+                        .set({
+                            namaCustomer: name || "Google User",
+                            userId: insertedUserId,
+                            isDeleted: 0,
+                        })
+                        .where(eq(customer.custId, inheritedCustomer.custId));
+                    logger.info("Auth Success: Updated orphaned customer record via Google", { custId: inheritedCustomer.custId, userId: insertedUserId });
+                } else {
+                    // Create new customer
+                    const custId = await getNextCustId();
+                    await tx.insert(customer).values({
+                        custId: custId,
+                        namaCustomer: name || "Google User",
+                        userId: insertedUserId,
+                        email: trimmedEmail,
+                        telp: "",
+                        alamat: "",
+                        alamatLengkap: "",
+                        namaToko: "",
+                        kecamatan: "",
+                        kota: "",
+                        provinsi: "",
+                        kodepos: "",
+                        kategoriCustomerId: 4, // Default to Pelanggan
+                        completedDepositTime: sql`CURRENT_TIMESTAMP`,
+                        isDeleted: 0,
+                    });
 
-                await tx.insert(customerAlamat).values({
-                    custId: custId,
-                    labelAlamat: "Utama",
-                    namaPenerima: name || "Google User",
-                    alamatLengkap: "",
-                    noHandphone: "",
-                    kecamatan: "",
-                    kota: "",
-                    provinsi: "",
-                    kodePos: "",
-                    isPrimary: 1,
-                    createdAt: sql`CURRENT_TIMESTAMP`,
-                    createdBy: insertedUserId,
-                });
+                    await tx.insert(customerAlamat).values({
+                        custId: custId,
+                        labelAlamat: "Utama",
+                        namaPenerima: name || "Google User",
+                        alamatLengkap: "",
+                        noHandphone: "",
+                        kecamatan: "",
+                        kota: "",
+                        provinsi: "",
+                        kodePos: "",
+                        isPrimary: 1,
+                        createdAt: sql`CURRENT_TIMESTAMP`,
+                        createdBy: insertedUserId,
+                    });
+                    logger.info("Auth Success: Created new customer record via Google", { custId, userId: insertedUserId });
+                }
             });
 
             // Re-fetch the newly created user to get the full record (especially the ID)

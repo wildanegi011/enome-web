@@ -76,20 +76,34 @@ export async function POST(request: NextRequest) {
             or(eq(user.email, trimmedEmail), eq(user.username, username))
         );
 
-        if (existingUsers.length > 0) {
-            const conflict = existingUsers[0].email === trimmedEmail ? "Email" : "Username";
-            logger.warn(`Auth Warning: ${conflict} already registered in user table`, { email: trimmedEmail, username: username });
+        // Find an active user with same email or username
+        const activeUser = existingUsers.find(u => u.isDeleted !== 1);
+
+        if (activeUser) {
+            const conflict = activeUser.email === trimmedEmail ? "Email" : "Username";
+            logger.warn(`Auth Warning: ${conflict} already registered and active`, { email: trimmedEmail, username: username });
             return NextResponse.json({ error: `${conflict} sudah terdaftar` }, { status: 400 });
         }
 
-        // Cek apakah email sudah terdaftar di tabel customer (untuk antisipasi orphaned records)
+        // Cek apakah email sudah terdaftar di tabel customer
         const existingCustomers = await db.select().from(customer).where(
             eq(customer.email, trimmedEmail)
         );
 
+        let inheritedCustomer = null;
         if (existingCustomers.length > 0) {
-            logger.warn(`Auth Warning: Email already registered in customer table`, { email: trimmedEmail });
-            return NextResponse.json({ error: "Email sudah terdaftar" }, { status: 400 });
+            // Check if this customer is linked to an active user
+            const linkedUserId = existingCustomers[0].userId;
+            if (linkedUserId) {
+                const linkedUser = await db.select().from(user).where(eq(user.id, linkedUserId)).limit(1);
+                if (linkedUser.length > 0 && linkedUser[0].isDeleted !== 1) {
+                    logger.warn(`Auth Warning: Email already registered in customer table and linked to active user`, { email: trimmedEmail });
+                    return NextResponse.json({ error: "Email sudah terdaftar" }, { status: 400 });
+                }
+            }
+            // If we reached here, it's either orphaned (userId is null) or linked to a deleted user
+            inheritedCustomer = existingCustomers[0];
+            logger.info("Auth Info: Inheriting orphaned/deleted linked customer record", { email: trimmedEmail });
         }
 
         // Hash password menggunakan PHP
@@ -130,26 +144,39 @@ export async function POST(request: NextRequest) {
             });
 
             const insertedUserId = userResult.insertId;
-            const custId = await getNextCustId();
 
-            // 2. Simpan ke tabel customer
-            await tx.insert(customer).values({
-                custId: custId,
-                namaCustomer: name,
-                userId: insertedUserId,
-                email: trimmedEmail,
-                telp: "",
-                alamat: "",
-                alamatLengkap: "",
-                namaToko: "",
-                kecamatan: "",
-                kota: "",
-                provinsi: "",
-                kodepos: "",
-                kategoriCustomerId: 4, // Default to Pelanggan
-                completedDepositTime: sql`CURRENT_TIMESTAMP`,
-                isDeleted: 0,
-            });
+            if (inheritedCustomer) {
+                // 2a. Update existing orphaned customer
+                await tx.update(customer)
+                    .set({
+                        namaCustomer: name,
+                        userId: insertedUserId,
+                        isDeleted: 0,
+                    })
+                    .where(eq(customer.custId, inheritedCustomer.custId));
+                logger.info("Auth Success: Updated orphaned customer record", { custId: inheritedCustomer.custId, userId: insertedUserId });
+            } else {
+                // 2b. Simpan ke tabel baru customer
+                const custId = await getNextCustId();
+                await tx.insert(customer).values({
+                    custId: custId,
+                    namaCustomer: name,
+                    userId: insertedUserId,
+                    email: trimmedEmail,
+                    telp: "",
+                    alamat: "",
+                    alamatLengkap: "",
+                    namaToko: "",
+                    kecamatan: "",
+                    kota: "",
+                    provinsi: "",
+                    kodepos: "",
+                    kategoriCustomerId: 4, // Default to Pelanggan
+                    completedDepositTime: sql`CURRENT_TIMESTAMP`,
+                    isDeleted: 0,
+                });
+                logger.info("Auth Success: Created new customer record", { custId, userId: insertedUserId });
+            }
 
             // // 3. Simpan ke tabel customer_alamat (Alamat Utama)
             // await tx.insert(customerAlamat).values({
