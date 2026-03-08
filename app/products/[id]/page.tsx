@@ -60,21 +60,23 @@ function ProductDetailContent({ productData }: { productData: any }) {
         // Bottom gallery: All images from additionalImages (always in 'produk' folder)
         bottomImages = additionalImages?.map((img: any) => `${ASSET_URL}/img/produk/${img.gambar}`) || [];
     } else {
-        // Color selected: 
-        // 1. Top gallery priority:
-        //    a. Specific image from produkDetail (variants.colors) -> 'produk' folder
-        //    b. Primary fallback -> 'produk_utama' folder
-        const colorVariant = variants.colors.find((c: any) => c.id === selectedColor);
-        if (colorVariant?.image) {
-            mainGalleryImages = [`${ASSET_URL}/img/produk/${colorVariant.image}`];
+        // Color selected:
+        // 1. Bottom gallery: All images from additionalImages matching color -> 'produk' folder
+        // Filter based on color name (selectedColor name)
+        const selectedColorObj = variants.colors.find((c: any) => c.id === selectedColor);
+        const colorName = selectedColorObj?.name || "";
+
+        bottomImages = additionalImages
+            ?.filter((img: any) => String(img.warna).toLowerCase() === colorName.toLowerCase())
+            ?.map((img: any) => `${ASSET_URL}/img/produk/${img.gambar}`) || [];
+
+        // 2. Top gallery priority: The FIRST image from bottomImages (produk_image)
+        if (bottomImages.length > 0) {
+            mainGalleryImages = [bottomImages[0]];
         } else {
+            // Fallback to primary image if no specific color images in produk_image
             mainGalleryImages = [`${ASSET_URL}/img/produk_utama/${product.gambar}`];
         }
-
-        // 2. Bottom gallery: All images from additionalImages matching color -> 'produk' folder
-        bottomImages = additionalImages
-            ?.filter((img: any) => String(img.warna) === String(selectedColor))
-            ?.map((img: any) => `${ASSET_URL}/img/produk/${img.gambar}`) || [];
     }
 
 

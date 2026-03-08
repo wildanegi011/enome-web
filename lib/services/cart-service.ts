@@ -28,11 +28,12 @@ export class CartService {
             qty: keranjang.qtyProduk,
             harga: keranjang.hargaPoduk,
             gambar: sql<string>`COALESCE(
-                (SELECT CONCAT('produk/', pd2.gambar) 
-                 FROM produkdetail pd2 
-                 WHERE pd2.produk_id = ${keranjang.produkId} 
-                   AND pd2.warna = ${keranjang.warna} 
-                   AND pd2.gambar IS NOT NULL AND pd2.gambar != '' 
+                (SELECT CONCAT('produk/', pi2.gambar) 
+                 FROM produk_image pi2 
+                 LEFT JOIN warna w3 ON (pi2.warna = w3.warna OR pi2.warna = w3.warna_id)
+                 WHERE pi2.produk_id = ${keranjang.produkId} 
+                   AND (pi2.warna = ${keranjang.warna} OR w3.warna_id = ${keranjang.warna} OR w3.warna = ${keranjang.warna})
+                 ORDER BY pi2.id ASC
                  LIMIT 1),
                 CONCAT('produk_utama/', ${produk.gambar})
             )`.as('gambar'),
