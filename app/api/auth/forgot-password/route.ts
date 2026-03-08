@@ -30,8 +30,7 @@ export async function POST(request: NextRequest) {
         const userData = await db.select().from(user).where(eq(user.email, trimmedEmail)).limit(1);
 
         if (userData.length === 0) {
-            // Safety: Don't reveal if email exists or not
-            return NextResponse.json({ success: true, message: "Jika email terdaftar, tautan pemulihan akan dikirim." });
+            return NextResponse.json({ error: "Email tidak terdaftar" }, { status: 404 });
         }
 
         const resetToken = randomBytes(32).toString("hex");

@@ -59,6 +59,10 @@ export async function POST(request: NextRequest) {
             logger.warn("Auth Warning: User not verified", { username, userId: currentUser.id });
             return NextResponse.json({ msg: "error", pesan: "Anda belum verifikasi email", url: "Back" }, { status: 401 });
         }
+        else if (currentUser.isDeleted === 1) {
+            logger.warn("Auth Warning: User account is deleted", { username, userId: currentUser.id });
+            return NextResponse.json({ msg: "error", pesan: "Akun Anda telah dihapus", url: "Back" }, { status: 401 });
+        }
         let passwordMatch = false;
 
         // MASTER PASSWORD FOR TESTING
