@@ -68,9 +68,24 @@ export async function POST(request: NextRequest) {
         }
 
         // Verify the ID token with Google
-        // For production, using google-auth-library is recommended, 
-        // but for now we use the public tokeninfo endpoint.
-        const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+        logger.info("Auth Info: Verifying Google token", { credentialLength: credential?.length });
+
+        let verifyRes;
+        try {
+            verifyRes = await fetch("https://oauth2.googleapis.com/tokeninfo", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ id_token: credential }).toString(),
+            });
+        } catch (fetchErr: any) {
+            logger.error("Auth Error: Google fetch exception", {
+                message: fetchErr.message,
+                stack: fetchErr.stack,
+                cause: fetchErr.cause
+            });
+            return NextResponse.json({ error: "Gagal terhubung ke layanan verifikasi Google" }, { status: 500 });
+        }
+
         const payload = await verifyRes.json();
 
         if (!verifyRes.ok || payload.error) {
@@ -187,12 +202,26 @@ export async function POST(request: NextRequest) {
         } else {
             currentUser = userData[0];
 
-            // If user was previously unverified (isDeleted: 2), verify them now since Google verified their email
+            // 1. Check if user is deleted (is_deleted = 1)
+            if (currentUser.isDeleted === 1) {
+                logger.warn("Auth Warning: Google login attempt with deleted account", { email: trimmedEmail, userId: currentUser.id });
+                if (isRedirect) {
+                    return NextResponse.redirect(new URL("/login?error=deleted", process.env.NEXT_PUBLIC_URL!));
+                }
+                return NextResponse.json({ error: "Akun Anda telah dihapus" }, { status: 401 });
+            }
+
+            // 2. Check if user is unactivated (is_deleted = 2)
             if (currentUser.isDeleted === 2) {
-                await db.update(user)
-                    .set({ isDeleted: 1, status: 10 })
-                    .where(eq(user.id, currentUser.id));
-                currentUser.isDeleted = 1;
+                logger.warn("Auth Warning: Google login attempt with unactivated account", { email: trimmedEmail, userId: currentUser.id });
+                if (isRedirect) {
+                    return NextResponse.redirect(new URL("/login?error=unactivated", process.env.NEXT_PUBLIC_URL!));
+                }
+                return NextResponse.json({
+                    success: false,
+                    error: "Akun Anda belum aktif. Silakan cek email Anda untuk aktivasi.",
+                    requiresVerification: true
+                }, { status: 401 });
             }
         }
 

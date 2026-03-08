@@ -22,7 +22,9 @@ import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
 
 const loginSchema = z.object({
     email: z.string().email("Format email tidak valid"),
@@ -33,11 +35,28 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { login } = useAuth();
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [info, setInfo] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+    useEffect(() => {
+        const errorParam = searchParams.get("error");
+        const registeredParam = searchParams.get("registered");
+
+        if (errorParam === "deleted") {
+            setError("Akun Anda telah dihapus. Silakan hubungi admin untuk informasi lebih lanjut.");
+        } else if (errorParam === "unactivated") {
+            setError("Akun Anda belum aktif. Silakan cek email Anda untuk melakukan aktivasi.");
+        }
+
+        if (registeredParam === "true") {
+            setInfo("Pendaftaran berhasil! Silakan cek email Anda untuk melakukan aktivasi akun sebelum masuk.");
+        }
+    }, [searchParams]);
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -215,6 +234,22 @@ export default function LoginPage() {
                                 </div>
                             </div>
                             <AnimatePresence>
+                                {info && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-start gap-3"
+                                    >
+                                        <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-0.5">
+                                            <span className="text-white text-[10px] font-bold">i</span>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-bold text-emerald-600 leading-tight">Informasi</p>
+                                            <p className="text-[11px] text-emerald-500 font-medium leading-relaxed">{info}</p>
+                                        </div>
+                                    </motion.div>
+                                )}
                                 {error && (
                                     <motion.div
                                         initial={{ opacity: 0, height: 0 }}
