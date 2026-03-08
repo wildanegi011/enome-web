@@ -9,7 +9,10 @@ import {
     rekeningPembayaran,
     statusOrder,
     statusTagihan,
-    payment as paymentTable
+    payment as paymentTable,
+    provinsi,
+    kota,
+    kecamatan
 } from "@/lib/db/schema";
 import { eq, and, or, sql, like } from "drizzle-orm";
 import { withAuth } from "@/lib/auth-utils";
@@ -74,14 +77,26 @@ export const GET = withAuth(async (
             namaPengirim: orders.namaPengirim,
             teleponPengirim: orders.teleponPengirim,
             updatedAt: orders.updatedAt,
+            // Map IDs back to Names for frontend display if they happen to be IDs
+            provinsiName: provinsi.province,
+            cityName: kota.cityName,
+            distrikName: kecamatan.subdistrictName,
         })
             .from(orders)
+            .leftJoin(provinsi, eq(orders.provinsiKirim, provinsi.provinceId))
+            .leftJoin(kota, eq(orders.kotaKirim, kota.cityId))
+            .leftJoin(kecamatan, eq(orders.distrikKirim, kecamatan.subdistrictId))
             .where(and(eq(orders.orderId, orderId), userCondition as any))
             .limit(1);
 
         if (!order) {
             return NextResponse.json({ message: "order not found" }, { status: 404 });
         }
+
+        // Apply mapping if joins successful
+        if (order.provinsiName) order.provinsiKirim = order.provinsiName;
+        if (order.cityName) order.kotaKirim = order.cityName;
+        if (order.distrikName) order.distrikKirim = order.distrikName;
 
         // 2. Fetch Order Items with variant-specific images
         const items = await db.select({

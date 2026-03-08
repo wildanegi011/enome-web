@@ -65,7 +65,9 @@ export default function AddressSection({
         setShippingForm({
             ...shippingForm,
             provinsi: loc.province,
+            provinceId: loc.provinceId,
             kota: loc.city,
+            cityId: loc.cityId,
             kecamatan: loc.subdistrict,
             districtId: loc.subdistrictId
         });
@@ -106,7 +108,9 @@ export default function AddressSection({
                             phone: newAddr.phoneNumber,
                             address: newAddr.fullAddress,
                             provinsi: newAddr.province,
+                            provinceId: newAddr.provinceId || "",
                             kota: newAddr.city,
+                            cityId: newAddr.cityId || "",
                             kecamatan: newAddr.district,
                             districtId: newAddr.districtId || newAddr.district,
                             kodePos: newAddr.postalCode,

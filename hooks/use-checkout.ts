@@ -35,6 +35,8 @@ export function useCheckout() {
         kecamatan: "",
         kota: "",
         provinsi: "",
+        provinceId: "",
+        cityId: "",
         districtId: "",
         kodePos: "",
         service: "",
@@ -316,6 +318,9 @@ export function useCheckout() {
                     shippingForm.provinsi !== currentAddr.province ||
                     shippingForm.kota !== currentAddr.city ||
                     shippingForm.kecamatan !== currentAddr.district ||
+                    shippingForm.provinceId !== currentAddr.provinceId ||
+                    shippingForm.cityId !== currentAddr.cityId ||
+                    (shippingForm as any).districtId !== currentAddr.districtId ||
                     shippingForm.kodePos !== currentAddr.postalCode;
 
                 if (hasChanged) {
@@ -327,6 +332,8 @@ export function useCheckout() {
                         provinsi: currentAddr.province,
                         kota: currentAddr.city,
                         kecamatan: currentAddr.district,
+                        provinceId: currentAddr.provinceId || "",
+                        cityId: currentAddr.cityId || "",
                         districtId: currentAddr.districtId || currentAddr.district,
                         kodePos: currentAddr.postalCode,
                     }));
@@ -351,6 +358,8 @@ export function useCheckout() {
                     provinsi: defaultAddr.province,
                     kota: defaultAddr.city,
                     kecamatan: defaultAddr.district,
+                    provinceId: defaultAddr.provinceId || "",
+                    cityId: defaultAddr.cityId || "",
                     districtId: defaultAddr.districtId || defaultAddr.district,
                     kodePos: defaultAddr.postalCode,
                 }));
@@ -378,7 +387,9 @@ export function useCheckout() {
             kecamatan: addr.district || "",
             districtId: addr.districtId || addr.district,
             kota: addr.city || "",
+            cityId: addr.cityId || "",
             provinsi: addr.province || "",
+            provinceId: addr.provinceId || "",
             kodePos: addr.postalCode || "",
         });
         setIsSelectionModalOpen(false);
