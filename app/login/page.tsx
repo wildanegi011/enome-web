@@ -26,6 +26,8 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 
+import { Suspense } from "react";
+
 const loginSchema = z.object({
     email: z.string().email("Format email tidak valid"),
     password: z.string().min(1, "Password minimal 1 karakter"),
@@ -33,7 +35,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { login } = useAuth();
@@ -382,5 +384,17 @@ export default function LoginPage() {
             </div>
             {/* End Main Content Card */}
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6]">
+                <Loader2 className="w-10 h-10 animate-spin text-neutral-base-900" />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 }

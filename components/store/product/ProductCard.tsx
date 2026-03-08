@@ -144,13 +144,20 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     href={`/products/${product.id || 'batik-elegance-123'}`}
                     className="flex justify-between items-start gap-4 px-1 hover:no-underline"
                 >
-                    <div className="flex-1 space-y-1.5">
+                    <div className="flex-1 min-w-0 space-y-1.5">
                         <p className="text-[11px] text-neutral-base-400 font-bold uppercase tracking-wider">
                             {product.category || "Kemeja"}
                         </p>
-                        <h3 className="text-[16px] font-medium text-neutral-base-900 leading-tight group-hover:text-amber-900 transition-colors duration-300">
-                            {product.name}
-                        </h3>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <h3 className="text-[16px] font-medium text-neutral-base-900 leading-tight group-hover:text-amber-900 transition-colors duration-300 truncate">
+                                    {product.name}
+                                </h3>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-neutral-base-900 text-white border-none text-[12px] font-medium py-1.5 px-3">
+                                {product.name}
+                            </TooltipContent>
+                        </Tooltip>
                         <div className="pt-0.5">
                             {product.originalPrice && product.isOnFlashSale && (
                                 <div className="flex items-center gap-1.5 mb-0.5">
