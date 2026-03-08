@@ -91,13 +91,13 @@ export const GET = withAuth(async (request: NextRequest, context: any, session: 
             firstItemName: sql<string>`(SELECT p.nama_produk FROM orderdetail od JOIN produk p ON od.produk_id = p.produk_id WHERE od.order_id = orders.order_id LIMIT 1)`,
             firstItemImage: sql<string>`(
                 SELECT COALESCE(
-                    (SELECT CONCAT('produk/', pd2.gambar) 
-                     FROM produkdetail pd2 
-                     JOIN orderdetail od2 ON (pd2.produk_id = od2.produk_id)
-                     LEFT JOIN warna w2 ON (od2.warna = w2.warna_id OR od2.warna = w2.warna)
+                    (SELECT CONCAT('produk/', pi2.gambar) 
+                     FROM produk_image pi2 
+                     JOIN orderdetail od2 ON (pi2.produk_id = od2.produk_id)
+                     LEFT JOIN warna w3 ON (pi2.warna = w3.warna OR pi2.warna = w3.warna_id)
                      WHERE od2.order_id = orders.order_id 
-                       AND pd2.warna = w2.warna_id
-                       AND pd2.gambar IS NOT NULL AND pd2.gambar != '' 
+                       AND (pi2.warna = od2.warna OR w3.warna_id = od2.warna OR w3.warna = od2.warna)
+                     ORDER BY pi2.id ASC
                      LIMIT 1),
                     (SELECT CONCAT('produk_utama/', p2.gambar)
                      FROM orderdetail od2
