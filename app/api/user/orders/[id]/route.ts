@@ -118,7 +118,10 @@ export const GET = withAuth(async (
             .leftJoin(produkDetail, and(
                 eq(orderdetail.produkId, produkDetail.produkId),
                 eq(orderdetail.ukuran, produkDetail.size),
-                eq(warna.warna, produkDetail.warnaId)
+                or(
+                    eq(orderdetail.warna, produkDetail.warnaId),
+                    eq(warna.warnaId, produkDetail.warnaId)
+                )
             ))
             .where(eq(orderdetail.orderId, orderId));
 

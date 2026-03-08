@@ -61,7 +61,7 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
                 (SELECT SUM(produkdetail.stok_normal) FROM produkdetail WHERE produkdetail.produk_id = p.produk_id) as total_stock,
                 (SELECT GROUP_CONCAT(DISTINCT CONCAT(w.warna, '|', COALESCE(w.kode_warna, '#CCCCCC')) SEPARATOR ',')
                  FROM produkdetail 
-                 LEFT JOIN warna w ON produkdetail.warna = w.warna_id 
+                 LEFT JOIN warna w ON (produkdetail.warna = w.warna_id OR produkdetail.warna = w.warna)
                  WHERE produkdetail.produk_id = p.produk_id AND produkdetail.stok_normal > 0) as colors,
                 (SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id 
                  WHERE fs.is_aktif = 1 AND fsd.produk_id = p.produk_id AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai 

@@ -48,7 +48,7 @@ export class ProductService {
             })
             .from(produk)
             .leftJoin(produkDetail, eq(produk.produkId, produkDetail.produkId))
-            .leftJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
+            .leftJoin(warna, or(eq(produkDetail.warnaId, warna.warnaId), eq(produkDetail.warnaId, warna.warna)))
             .groupBy(produk.produkId);
 
         const conditions: any[] = [];

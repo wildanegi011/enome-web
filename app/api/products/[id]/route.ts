@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { produk, produkDetail, warna, size, customer, flashSale, flashSaleDetail, customerKategori, variant, productImage } from "@/lib/db/schema";
 
-import { eq, and, sql, not, min, max } from "drizzle-orm";
+import { eq, and, sql, not, min, max, or } from "drizzle-orm";
 import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
@@ -116,24 +116,25 @@ export const GET = withOptionalAuth(async (
                 basePrice: produkDetail.hargaJual,
                 image: produkDetail.gambar,
                 berat: produkDetail.berat,
+                colorId: produkDetail.warnaId,
             })
             .from(produkDetail)
-            .leftJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
+            .leftJoin(warna, or(eq(produkDetail.warnaId, warna.warnaId), eq(produkDetail.warnaId, warna.warna)))
             .where(eq(produkDetail.produkId, id));
 
         // 4. Ekstrak warna unik yang tersedia
-        const colorMap: Record<string, { name: string; value: string; image: string | null; totalStock: number }> = {};
+        const colorMap: Record<string, { id: string; name: string; value: string; image: string | null; totalStock: number }> = {};
         const rawColors = await db
             .selectDistinct({
                 name: sql<string>`COALESCE(${warna.warna}, ${produkDetail.warnaId})`,
                 value: sql<string>`COALESCE(${warna.kodeWarna}, '#cccccc')`,
             })
             .from(produkDetail)
-            .leftJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
+            .leftJoin(warna, or(eq(produkDetail.warnaId, warna.warnaId), eq(produkDetail.warnaId, warna.warna)))
             .where(eq(produkDetail.produkId, id));
 
         rawColors.forEach(c => {
-            colorMap[c.name] = { name: c.name, value: c.value || "", image: null, totalStock: 0 };
+            colorMap[c.name] = { id: String(c.name), name: c.name, value: c.value || "", image: null, totalStock: 0 };
         });
 
         details.forEach(d => {
@@ -222,7 +223,7 @@ export const GET = withOptionalAuth(async (
             })
             .from(produk)
             .innerJoin(produkDetail, eq(produk.produkId, produkDetail.produkId))
-            .innerJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
+            .innerJoin(warna, or(eq(produkDetail.warnaId, warna.warnaId), eq(produkDetail.warnaId, warna.warna)))
             .where(
                 and(
                     eq(produk.kategori, mainProduct.kategori),

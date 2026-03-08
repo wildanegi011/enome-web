@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { flashSale, flashSaleDetail, produk, produkDetail, warna } from "@/lib/db/schema";
-import { and, eq, sql, max, min, inArray, isNotNull } from "drizzle-orm";
+import { and, eq, sql, max, min, inArray, isNotNull, or } from "drizzle-orm";
 import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { getJakartaDate } from "@/lib/date-utils";
@@ -108,7 +108,7 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
         })
             .from(produk)
             .leftJoin(produkDetail, eq(produk.produkId, produkDetail.produkId))
-            .leftJoin(warna, eq(produkDetail.warnaId, warna.warnaId))
+            .leftJoin(warna, or(eq(produkDetail.warnaId, warna.warnaId), eq(produkDetail.warnaId, warna.warna)))
             .where(
                 and(
                     eq(produk.isOnline, 1),

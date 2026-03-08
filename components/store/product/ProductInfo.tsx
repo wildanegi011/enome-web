@@ -17,13 +17,13 @@ interface ProductInfoProps {
         price: string;
         originalPrice?: string;
         description: string;
-        colors: { name: string; value: string; image: string | null; totalStock: number }[];
+        colors: { id: string; name: string; value: string; image: string | null; totalStock: number }[];
         sizes: string[];
         types: string[]; // <-- Added variant types
         collection: string;
         detail: string | null;
         totalStock: string | null;
-        matrix: { color: string; size: string; variant: string; stock: number; price: string; image: string | null }[];
+        matrix: { color: string; colorId: string; size: string; variant: string; stock: number; price: string; image: string | null }[];
         commission?: string;
         hasCommission?: boolean;
         isOnFlashSale?: boolean;
@@ -69,7 +69,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
         .filter(item => {
             const variantMatch = !selectedVariant || (item.variant || "") === (selectedVariant || "") || item.keterangan?.includes(selectedVariant);
             return item.produkId === product.id &&
-                item.warna === selectedColor &&
+                String(item.warna) === String(selectedColor) &&
                 item.size === selectedSize &&
                 variantMatch;
         })
@@ -121,7 +121,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
 
     // Matrix lookup
     const currentCombination = product.matrix.find(
-        m => m.color === selectedColor &&
+        m => m.colorId === selectedColor &&
             m.size === selectedSize &&
             (m.variant || "") === (selectedVariant || "")
     );
@@ -133,7 +133,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
     // Get stock for a specific size (given current color and variant)
     const getStockForSize = (size: string) => {
         const variantEntry = product.matrix.find(m =>
-            m.color === selectedColor &&
+            m.colorId === selectedColor &&
             m.size === size &&
             (m.variant || "") === (selectedVariant || "")
         );
@@ -142,7 +142,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             .filter(item => {
                 const variantMatch = !selectedVariant || (item.variant || "") === (selectedVariant || "") || item.keterangan?.includes(selectedVariant);
                 return item.produkId === product.id &&
-                    item.warna === selectedColor &&
+                    String(item.warna) === String(selectedColor) &&
                     item.size === size &&
                     variantMatch;
             })
@@ -153,7 +153,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
     // Get available colors for selected variant
     const availableColors = product.colors.filter(color => {
         if (!selectedVariant) return true;
-        const matchingMatrices = product.matrix.filter(m => m.color === color.name);
+        const matchingMatrices = product.matrix.filter(m => m.colorId === color.id);
         const hasAvailable = matchingMatrices.some(m =>
             (!m.variant || !selectedVariant || m.variant === selectedVariant || m.variant.includes(selectedVariant) || selectedVariant.includes(m.variant)) &&
             m.stock > 0
@@ -333,7 +333,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                         );
 
                                         if (firstEntry) {
-                                            setSelectedColor(firstEntry.color);
+                                            setSelectedColor(firstEntry.color); // Assuming firstEntry.color is now the ID
                                         } else {
                                             setSelectedColor("");
                                         }
@@ -359,7 +359,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             <div className="mb-6 md:mb-8">
                 <div className="flex items-center justify-between mb-3 md:mb-4">
                     <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-base-900">
-                        Warna: <span className="font-medium text-neutral-base-500 ml-1 normal-case">{selectedColor || "Pilih warna"}</span>
+                        Warna: <span className="font-medium text-neutral-base-500 ml-1 normal-case">{product.colors.find(c => c.id === selectedColor)?.name || "Pilih warna"}</span>
                     </span>
                 </div>
                 <div className="flex flex-wrap gap-3 md:gap-4">
@@ -369,7 +369,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
 
                         if (selectedVariant) {
                             // If a Motif IS selected, check if this color exists for that Motif with stock > 0
-                            const matchingMatrices = product.matrix.filter(m => m.color === color.name);
+                            const matchingMatrices = product.matrix.filter(m => m.colorId === color.id);
                             hasStockForSelectedVariant = matchingMatrices.some(m =>
                                 (!m.variant || !selectedVariant || m.variant === selectedVariant || m.variant.includes(selectedVariant) || selectedVariant.includes(m.variant)) &&
                                 m.stock > 0
@@ -382,10 +382,10 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
 
                         return (
                             <button
-                                key={color.name}
+                                key={color.id} // Changed to color.id
                                 onClick={() => {
-                                    setSelectedColor(color.name);
-                                    setSelectedSize(""); // reset size when color changes
+                                    setSelectedColor(color.id); // Use ID
+                                    setSelectedSize(""); // Reset size on color change
                                     setQuantity(1);
                                 }}
                                 disabled={isDisabled}
@@ -393,11 +393,11 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                 aria-label={`Select ${color.name} ${isOutOfStock ? "(Sold Out)" : needsMotifFirst ? "(Pilih Motif Dahulu)" : ""}`}
                             >
                                 <span
-                                    className={`w-8 h-8 rounded-full border border-neutral-base-200 transition-all flex items-center justify-center ${selectedColor === color.name ? "ring-2 ring-offset-2 ring-neutral-base-900 scale-110 shadow-md" : "hover:scale-110 shadow-sm"
+                                    className={`w-8 h-8 rounded-full border border-neutral-base-200 transition-all flex items-center justify-center ${selectedColor === color.id ? "ring-2 ring-offset-2 ring-neutral-base-900 scale-110 shadow-md" : "hover:scale-110 shadow-sm" // Changed to color.id
                                         }`}
                                     style={{ backgroundColor: color.value }}
                                 >
-                                    {selectedColor === color.name && <Check className="w-4 h-4 text-white drop-shadow-md" strokeWidth={3} />}
+                                    {selectedColor === color.id && <Check className="w-4 h-4 text-white drop-shadow-md" strokeWidth={3} />} {/* Changed to color.id */}
                                     {isOutOfStock && <div className="absolute inset-0 flex items-center justify-center"><div className="w-full h-px bg-red-500 rotate-45"></div></div>}
                                 </span>
                                 {isOutOfStock && (

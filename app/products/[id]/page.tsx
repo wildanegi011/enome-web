@@ -64,7 +64,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
         // 1. Top gallery priority:
         //    a. Specific image from produkDetail (variants.colors) -> 'produk' folder
         //    b. Primary fallback -> 'produk_utama' folder
-        const colorVariant = variants.colors.find((c: any) => c.name === selectedColor);
+        const colorVariant = variants.colors.find((c: any) => c.id === selectedColor);
         if (colorVariant?.image) {
             mainGalleryImages = [`${ASSET_URL}/img/produk/${colorVariant.image}`];
         } else {
@@ -73,7 +73,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
 
         // 2. Bottom gallery: All images from additionalImages matching color -> 'produk' folder
         bottomImages = additionalImages
-            ?.filter((img: any) => img.warna === selectedColor)
+            ?.filter((img: any) => String(img.warna) === String(selectedColor))
             ?.map((img: any) => `${ASSET_URL}/img/produk/${img.gambar}`) || [];
     }
 

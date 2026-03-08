@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { keranjang, produk, warna, produkDetail, variant as variantTable } from "@/lib/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, or } from "drizzle-orm";
 
 export class CartService {
     /**
@@ -51,7 +51,7 @@ export class CartService {
         })
             .from(keranjang)
             .leftJoin(produk, eq(keranjang.produkId, produk.produkId))
-            .leftJoin(warna, eq(keranjang.warna, warna.warnaId))
+            .leftJoin(warna, or(eq(keranjang.warna, warna.warnaId), eq(keranjang.warna, warna.warna)))
             .leftJoin(produkDetail, and(
                 eq(keranjang.produkId, produkDetail.produkId),
                 eq(keranjang.warna, produkDetail.warnaId),
