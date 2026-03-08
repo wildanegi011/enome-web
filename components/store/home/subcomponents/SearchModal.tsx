@@ -148,10 +148,6 @@ const SearchMenuContent = ({
                         </div>
                     </CommandGroup>
                 )}
-
-                <div className="my-3 h-px bg-stone-100 mx-4" />
-
-                <div className="my-3 h-px bg-stone-100 mx-4" />
             </>
         )}
 

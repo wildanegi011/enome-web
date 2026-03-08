@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { produk, produkDetail, warna, size, customer, flashSale, flashSaleDetail, customerKategori, variant } from "@/lib/db/schema";
+import { produk, produkDetail, warna, size, customer, flashSale, flashSaleDetail, customerKategori, variant, productImage } from "@/lib/db/schema";
+
 import { eq, and, sql, not, min, max } from "drizzle-orm";
 import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
@@ -173,11 +174,35 @@ export const GET = withOptionalAuth(async (
             .orderBy(size.sizeId);
 
         // 6. Kumpulkan semua gambar produk (gambar utama + gambar size + gambar per varian warna)
-        const allImages = [
+        let additionalImages: { gambar: string; warna: string | null }[] = [];
+        try {
+            additionalImages = await db
+                .select({
+                    gambar: productImage.gambar,
+                    warna: productImage.warna
+                })
+                .from(productImage)
+                .where(eq(productImage.produkId, id))
+                .orderBy(productImage.id);
+        } catch (err) {
+            logger.error("Product Detail: Error fetching additional images", { productId: id, error: err });
+            // Fallback to empty if table doesn't exist or query fails
+            additionalImages = [];
+        }
+
+        const mainImages = [
             mainProduct.gambar,
             mainProduct.gambarSize,
             ...colors.map(c => c.image).filter(Boolean)
         ].filter((v, i, a) => v && a.indexOf(v) === i);
+
+        const allImages = [
+            ...mainImages,
+            ...additionalImages.map(img => img.gambar)
+        ].filter((v, i, a) => v && a.indexOf(v) === i);
+
+
+
 
         // 7. Ambil daftar produk terkait dalam kategori yang sama
         const related = await db
@@ -253,9 +278,12 @@ export const GET = withOptionalAuth(async (
                 }),
                 berat: details[0]?.berat || 0,
             },
-            images: allImages,
+            images: mainImages,
+            allImages: allImages,
+            additionalImages: additionalImages,
             relatedProducts: processRelated,
         });
+
 
     } catch (error: any) {
         apiLogger.error(request, error, { productId: id });

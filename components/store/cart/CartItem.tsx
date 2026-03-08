@@ -52,12 +52,14 @@ export default function CartItem({
                 {/* Image */}
                 <div className={`w-20 h-20 xs:w-24 xs:h-24 md:w-32 md:h-32 bg-neutral-base-50 rounded-xl md:rounded-3xl overflow-hidden relative shrink-0 border border-neutral-base-100 shadow-sm group-hover:shadow-md transition-all ${isOffline ? "opacity-40 grayscale-[0.5]" : ""}`}>
                     <FallbackImage
-                        src={item.gambar ? `${ASSET_URL}/img/produk/${item.gambar}` : "/placeholder-product.jpg"}
+                        src={item.gambar ? `${ASSET_URL}/img/${item.gambar}` : "/placeholder-product.jpg"}
                         alt={item.namaProduk}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                         sizes="(max-width: 768px) 80px, 150px"
                     />
+
+
                 </div>
 
                 {/* Info */}

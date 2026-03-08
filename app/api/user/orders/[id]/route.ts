@@ -88,7 +88,19 @@ export const GET = withAuth(async (
             id: orderdetail.id,
             produkId: orderdetail.produkId,
             namaProduk: produk.namaProduk,
-            gambar: sql<string>`COALESCE(${produkDetail.gambar}, ${produk.gambar})`.as('gambar'),
+            gambar: sql<string>`COALESCE(
+                (SELECT CONCAT('produk/', pd2.gambar) 
+                 FROM produkdetail pd2 
+                 WHERE pd2.produk_id = ${orderdetail.produkId} 
+                   AND (pd2.warna = ${orderdetail.warna} OR pd2.warna = (SELECT w2.warna_id FROM warna w2 WHERE w2.warna = ${orderdetail.warna} LIMIT 1))
+                   AND pd2.gambar IS NOT NULL AND pd2.gambar != '' 
+                 LIMIT 1),
+                CONCAT('produk_utama/', ${produk.gambar})
+            )`.as('gambar'),
+
+
+
+
             ukuran: orderdetail.ukuran,
             warna: sql<string>`COALESCE(${warna.warna}, ${orderdetail.warna})`.as('warna'),
             harga: orderdetail.harga,

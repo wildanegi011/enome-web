@@ -71,7 +71,7 @@ export default function CourierSection({
                                         : "text-neutral-base-400 hover:text-neutral-base-600 font-bold"
                                 )}
                             >
-                                <Zap className={cn("w-3.5 h-3.5", activeTab === 'automated' ? "text-amber-800" : "text-neutral-base-300")} />
+                                <Truck className={cn("w-3.5 h-3.5", activeTab === 'manual' ? "text-rose-800" : "text-neutral-base-300")} />
                                 <span className="text-[10px] md:text-[11px] uppercase tracking-widest">Ekspedisi Reguler</span>
                             </button>
                             <button
@@ -83,8 +83,8 @@ export default function CourierSection({
                                         : "text-neutral-base-400 hover:text-neutral-base-600 font-bold"
                                 )}
                             >
-                                <Truck className={cn("w-3.5 h-3.5", activeTab === 'manual' ? "text-rose-800" : "text-neutral-base-300")} />
-                                <span className="text-[10px] md:text-[11px] uppercase tracking-widest">Cargo</span>
+                                <Zap className={cn("w-3.5 h-3.5", activeTab === 'automated' ? "text-amber-800" : "text-neutral-base-300")} />
+                                <span className="text-[10px] md:text-[11px] uppercase tracking-widest">Ambil Sendiri</span>
                             </button>
                         </div>
 

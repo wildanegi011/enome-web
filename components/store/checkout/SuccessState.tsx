@@ -165,12 +165,13 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                             <div className="flex items-center gap-3 md:gap-4 min-w-0">
                                                 <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-white flex items-center justify-center p-2 md:p-2.5 shrink-0 border border-neutral-base-100 shadow-sm">
                                                     <Image
-                                                        src={orderResult.bankLogo ? `${ASSET_URL}/img/rekening_pembayaran/${orderResult.bankLogo}` : `${ASSET_URL}/img/rekening_pembayaran/bca.png`}
+                                                        src={orderResult.bankLogo ? `${ASSET_URL}/img/${orderResult.bankLogo}` : `${ASSET_URL}/img/rekening_pembayaran/bca.png`}
                                                         alt={orderResult.bankName || "Bank"}
                                                         width={48}
                                                         height={16}
                                                         className="object-contain"
                                                     />
+
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="text-[15px] md:text-[20px] font-black text-neutral-base-900 tracking-tight leading-none mb-1 md:mb-1.5">{orderResult.bankAccount}</p>
@@ -242,12 +243,13 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                     <div key={idx} className="flex gap-3 md:gap-4">
                                         <div className="w-12 h-[58px] md:w-14 md:h-[66px] bg-neutral-base-50 rounded-xl overflow-hidden shrink-0 relative border border-neutral-base-100">
                                             <FallbackImage
-                                                src={item.gambar ? `${ASSET_URL}/img/produk/${item.gambar}` : "/placeholder-product.jpg"}
+                                                src={item.gambar ? `${ASSET_URL}/img/${item.gambar}` : "/placeholder-product.jpg"}
                                                 alt={item.namaProduk}
                                                 fill
                                                 className="object-cover"
                                                 sizes="56px"
                                             />
+
                                         </div>
                                         <div className="flex-1 py-0.5 flex flex-col justify-between min-w-0">
                                             <p className="text-[12px] md:text-[13px] font-semibold text-neutral-base-900 line-clamp-2 leading-snug">{item.namaProduk}</p>

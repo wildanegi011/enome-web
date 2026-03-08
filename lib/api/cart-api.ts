@@ -16,7 +16,9 @@ export interface CartItem {
     isFlashsale?: number;
     keterangan?: string;
     warnaName?: string;
+    isGambarUtama?: number;
 }
+
 
 export interface CartResponse {
     items: CartItem[];

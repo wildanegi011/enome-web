@@ -81,7 +81,8 @@ export default function OrderCard({ order }: OrderCardProps) {
                 <div className="flex items-center gap-4 md:gap-6 w-full">
                     <div className="w-16 h-20 md:w-20 md:h-24 bg-neutral-base-50 rounded-xl md:rounded-2xl overflow-hidden relative shrink-0 border border-neutral-base-50">
                         <FallbackImage
-                            src={order.firstItemImage ? `${ASSET_URL}/img/produk/${order.firstItemImage}` : "/placeholder-product.jpg"}
+                            src={order.firstItemImage ? `${ASSET_URL}/img/${order.firstItemImage}` : "/placeholder-product.jpg"}
+
                             alt={order.firstItemName || "Produk"}
                             fill
                             className="object-cover"

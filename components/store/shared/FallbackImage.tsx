@@ -3,6 +3,8 @@
 import Image, { ImageProps } from "next/image";
 import { useState, useEffect } from "react";
 import { ImageOff } from "lucide-react";
+import { motion } from "framer-motion";
+
 
 interface FallbackImageProps extends ImageProps {
     fallbackSrc?: string;
@@ -54,15 +56,23 @@ export default function FallbackImage({
     }
 
     return (
-        <Image
-            {...props}
-            src={src}
-            alt={alt}
-            fill={fill}
-            className={className}
-            onError={() => {
-                setError(true);
-            }}
-        />
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            className={`w-full h-full ${fill ? "absolute inset-0" : ""}`}
+        >
+            <Image
+                {...props}
+                src={src}
+                alt={alt}
+                fill={fill}
+                className={className}
+                onError={() => {
+                    setError(true);
+                }}
+            />
+        </motion.div>
     );
+
 }

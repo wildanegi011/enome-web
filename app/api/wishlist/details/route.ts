@@ -34,20 +34,35 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
                 MAX(kl.id) as wishlist_id,
                 kl.produk_id,
                 MAX(kl.created_at) as created_at,
+                kl.variant,
+                kl.warna,
+                kl.size,
+                MAX(kl.harga_poduk) as harga_poduk,
                 p.nama_produk,
                 p.kategori,
-                p.gambar,
+                COALESCE(
+                    (SELECT CONCAT('produk/', pd2.gambar) 
+                     FROM produkdetail pd2 
+                     WHERE pd2.produk_id = kl.produk_id 
+                       AND (pd2.warna = kl.warna OR pd2.warna = (SELECT w2.warna_id FROM warna w2 WHERE w2.warna = kl.warna LIMIT 1))
+                       AND pd2.gambar IS NOT NULL AND pd2.gambar != '' 
+                     LIMIT 1),
+                    CONCAT('produk_utama/', p.gambar)
+                ) as gambar,
+
+
+
                 p.isaktif,
                 p.is_online,
-                (SELECT MIN(${priceColumn}) FROM produkdetail pd WHERE pd.produk_id = p.produk_id) as min_price,
-                (SELECT MAX(${priceColumn}) FROM produkdetail pd WHERE pd.produk_id = p.produk_id) as max_price,
-                (SELECT MIN(pd.harga_jual) FROM produkdetail pd WHERE pd.produk_id = p.produk_id) as base_min_price,
-                (SELECT MAX(pd.harga_jual) FROM produkdetail pd WHERE pd.produk_id = p.produk_id) as base_max_price,
-                (SELECT SUM(pd.stok_normal) FROM produkdetail pd WHERE pd.produk_id = p.produk_id) as total_stock,
+                (SELECT MIN(${priceColumn}) FROM produkdetail WHERE produkdetail.produk_id = p.produk_id) as min_price,
+                (SELECT MAX(${priceColumn}) FROM produkdetail WHERE produkdetail.produk_id = p.produk_id) as max_price,
+                (SELECT MIN(produkdetail.harga_jual) FROM produkdetail WHERE produkdetail.produk_id = p.produk_id) as base_min_price,
+                (SELECT MAX(produkdetail.harga_jual) FROM produkdetail WHERE produkdetail.produk_id = p.produk_id) as base_max_price,
+                (SELECT SUM(produkdetail.stok_normal) FROM produkdetail WHERE produkdetail.produk_id = p.produk_id) as total_stock,
                 (SELECT GROUP_CONCAT(DISTINCT CONCAT(w.warna, '|', COALESCE(w.kode_warna, '#CCCCCC')) SEPARATOR ',')
-                 FROM produkdetail pd 
-                 LEFT JOIN warna w ON pd.warna = w.warna_id 
-                 WHERE pd.produk_id = p.produk_id AND pd.stok_normal > 0) as colors,
+                 FROM produkdetail 
+                 LEFT JOIN warna w ON produkdetail.warna = w.warna_id 
+                 WHERE produkdetail.produk_id = p.produk_id AND produkdetail.stok_normal > 0) as colors,
                 (SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id 
                  WHERE fs.is_aktif = 1 AND fsd.produk_id = p.produk_id AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai 
                  AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1) as flash_sale_id,
@@ -56,8 +71,8 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
             INNER JOIN produk p ON kl.produk_id = p.produk_id
             WHERE kl.cust_id = ${custId}
               AND kl.is_deleted = 0
-              AND p.isaktif = 1
-            GROUP BY kl.produk_id, p.nama_produk, p.kategori, p.gambar, p.isaktif, p.is_online
+              AND p.is_online = 1
+            GROUP BY kl.produk_id, p.nama_produk, p.kategori, p.gambar, p.isaktif, p.is_online, kl.variant, kl.warna, kl.size
             ORDER BY MAX(kl.created_at) DESC
         `);
 

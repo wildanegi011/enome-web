@@ -14,7 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Breadcrumb from "@/components/store/shared/Breadcrumb";
 import Link from "next/link";
 import FallbackImage from "@/components/store/shared/FallbackImage";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+
 import { formatCurrency } from "@/lib/utils";
 import { notFound } from "next/navigation";
 
@@ -34,10 +35,12 @@ export default function ProductDetailPage(props: { params: Promise<{ id: string 
 }
 
 function ProductDetailContent({ productData }: { productData: any }) {
-    const { product, stats, variants, images, relatedProducts } = productData;
+    const { product, stats, variants, images, additionalImages, relatedProducts } = productData;
 
     // Deferred Initial Selection: Start with no color selected
+    const [selectedVariant, setSelectedVariant] = useState("");
     const [selectedColor, setSelectedColor] = useState("");
+
 
     const formatPriceRange = (min: any, max: any) => {
         const nMin = parseInt(min);
@@ -46,26 +49,35 @@ function ProductDetailContent({ productData }: { productData: any }) {
         return `${formatCurrency(nMin)} - ${formatCurrency(nMax)}`;
     };
 
-    // Map images to full URLs
-    let galleryImages: string[] = [];
+    // Map images to full URLs with correct folder routing
+    let mainGalleryImages: string[] = [];
+    let bottomImages: string[] = [];
 
     if (selectedColor === "") {
-        // Initial state: Top image from produk_utama, others from produk
-        galleryImages = [
-            `${ASSET_URL}/img/produk_utama/${images[0]}`,
-            ...images.slice(1).map((img: string) => `${ASSET_URL}/img/produk/${img}`)
-        ];
-    } else {
-        // Color selected: Everything from produk, with color-specific image prioritized
-        const colorObj = variants.colors.find((c: any) => c.name === selectedColor);
-        const colorImage = colorObj?.image;
+        // Initial state: Top gallery from produk_utama
+        mainGalleryImages = [`${ASSET_URL}/img/produk_utama/${product.gambar}`];
 
-        let processedImages = [...images];
-        if (colorImage && processedImages.includes(colorImage)) {
-            processedImages = [colorImage, ...processedImages.filter(img => img !== colorImage)];
+        // Bottom gallery: All images from additionalImages (always in 'produk' folder)
+        bottomImages = additionalImages?.map((img: any) => `${ASSET_URL}/img/produk/${img.gambar}`) || [];
+    } else {
+        // Color selected: 
+        // 1. Top gallery priority:
+        //    a. Specific image from produkDetail (variants.colors) -> 'produk' folder
+        //    b. Primary fallback -> 'produk_utama' folder
+        const colorVariant = variants.colors.find((c: any) => c.name === selectedColor);
+        if (colorVariant?.image) {
+            mainGalleryImages = [`${ASSET_URL}/img/produk/${colorVariant.image}`];
+        } else {
+            mainGalleryImages = [`${ASSET_URL}/img/produk_utama/${product.gambar}`];
         }
-        galleryImages = processedImages.map((img: string) => `${ASSET_URL}/img/produk/${img}`);
+
+        // 2. Bottom gallery: All images from additionalImages matching color -> 'produk' folder
+        bottomImages = additionalImages
+            ?.filter((img: any) => img.warna === selectedColor)
+            ?.map((img: any) => `${ASSET_URL}/img/produk/${img.gambar}`) || [];
     }
+
+
 
     // Map product for ProductInfo
     const infoProduct = {
@@ -118,73 +130,89 @@ function ProductDetailContent({ productData }: { productData: any }) {
                             {/* Left Side - Image Gallery (Top Image) */}
                             <div className="lg:col-span-7 min-w-0">
                                 <ProductGallery
-                                    images={galleryImages.slice(0, 1)}
+                                    images={mainGalleryImages}
                                     isSoldOut={parseInt(stats.totalStock) === 0}
                                     isOnFlashSale={stats.isOnFlashSale}
                                 />
                             </div>
 
+
                             {/* Right Side - Product Info */}
                             <div className="lg:col-span-5 min-w-0 lg:sticky lg:top-36">
                                 <ProductInfo
                                     product={{ ...infoProduct, id: product.produkId } as any}
+                                    selectedVariant={selectedVariant}
+                                    setSelectedVariant={setSelectedVariant}
                                     selectedColor={selectedColor}
                                     setSelectedColor={setSelectedColor}
                                 />
+
                             </div>
 
                         </div>
 
-                        {/* Remaining Images Section - Dynamic Masonry Grid */}
-                        {galleryImages.length > 1 && (
-                            <div className="mt-8 md:mt-16">
-                                <motion.div
-                                    initial="hidden"
-                                    whileInView="show"
-                                    viewport={{ once: true, margin: "-100px" }}
-                                    variants={{
-                                        hidden: { opacity: 0 },
-                                        show: {
-                                            opacity: 1,
-                                            transition: {
-                                                staggerChildren: 0.15
-                                            }
+                        {/* Remaining Images Section - Dynamic Masonry Grid (from produk_image table) */}
+                        <div className="mt-8 md:mt-16">
+                            <motion.div
+                                layout
+                                initial="hidden"
+                                whileInView="show"
+                                viewport={{ once: true, margin: "-100px" }}
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    show: {
+                                        opacity: 1,
+                                        transition: {
+                                            staggerChildren: 0.1
                                         }
-                                    }}
-                                    className="columns-1 md:columns-2 gap-4 md:gap-8 space-y-4 md:space-y-8"
-                                >
-                                    {galleryImages.slice(1).map((img: string, idx: number) => {
-                                        // Varied heights/ratios for a true dynamic masonry look
-                                        const ratios = ["aspect-[4/5]", "aspect-[3/4]", "aspect-[2/3]", "aspect-[3/5]"];
+                                    }
+                                }}
+                                className="columns-1 md:columns-2 gap-8 space-y-8 min-h-[50vh]"
+
+                            >
+                                <AnimatePresence mode="popLayout">
+                                    {bottomImages.map((img: string, idx: number) => {
+                                        // More extreme variations for true masonry look
+                                        const ratios = [
+                                            "aspect-square",
+                                            "aspect-[3/4]",
+                                            "aspect-[2/3]",
+                                            "aspect-[3/5]",
+                                            "aspect-[4/5]"
+                                        ];
                                         const ratioClass = ratios[idx % ratios.length];
 
                                         return (
                                             <motion.div
-                                                key={idx}
-                                                variants={{
-                                                    hidden: { opacity: 0, y: 30 },
-                                                    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+                                                key={img}
+                                                layout
+                                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                                transition={{
+                                                    duration: 0.8,
+                                                    ease: [0.22, 1, 0.36, 1]
                                                 }}
-                                                className={`relative bg-neutral-base-50 overflow-hidden break-inside-avoid group shadow-sm hover:shadow-2xl transition-all duration-700 rounded-lg ${ratioClass}`}
+                                                className={`relative bg-neutral-base-50 overflow-hidden break-inside-avoid group shadow-md hover:shadow-xl transition-all duration-700 rounded-xl ${ratioClass}`}
                                             >
                                                 <FallbackImage
                                                     src={img}
-                                                    alt={`Product detail image ${idx + 2}`}
-                                                    width={2000}
-                                                    height={3000}
-                                                    quality={100}
-                                                    unoptimized={true}
-                                                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                                                    sizes="(max-width: 768px) 100vw, 50vw"
-                                                    style={{ imageRendering: "high-quality" } as any}
+                                                    alt={`Product detail image ${idx + 1}`}
+                                                    fill
+                                                    quality={90}
+                                                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                                                    sizes="(max-width: 768px) 50vw, 33vw"
                                                 />
                                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
                                             </motion.div>
                                         );
                                     })}
-                                </motion.div>
-                            </div>
-                        )}
+                                </AnimatePresence>
+                            </motion.div>
+                        </div>
+
+
+
                     </div>
                 </section>
 

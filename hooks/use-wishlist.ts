@@ -28,26 +28,26 @@ export function useWishlistDetails() {
     });
 }
 
-export function useToggleWishlist() {
+export const useToggleWishlist = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ produkId, variant }: { produkId: string, variant?: string }) => userApi.toggleWishlist(produkId, variant),
-        onMutate: async ({ produkId }) => {
+        mutationFn: (data: { produkId: string; variant?: string; size?: string; warna?: string; price?: number }) => userApi.toggleWishlist(data),
+        onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey: queryKeys.user.wishlist.all });
             await queryClient.cancelQueries({ queryKey: queryKeys.user.wishlist.details });
 
             const previousWishlist = queryClient.getQueryData<{ items: string[] }>(queryKeys.user.wishlist.all);
-            const previousDetails = queryClient.getQueryData<WishlistItem[]>(queryKeys.user.wishlist.details);
+            const previousDetails = queryClient.getQueryData(queryKeys.user.wishlist.details);
 
-            // Optimistically update the ID list
-            queryClient.setQueryData<{ items: string[] }>(queryKeys.user.wishlist.all, (old) => {
-                if (!old) return { items: [produkId] };
-                const exists = old.items.includes(produkId);
+            // Optimistically update basic list
+            queryClient.setQueryData(queryKeys.user.wishlist.all, (old: { items: string[] } | undefined) => {
+                if (!old) return { items: [variables.produkId] };
+                const exists = old.items.includes(variables.produkId);
                 return {
                     items: exists
-                        ? old.items.filter(id => id !== produkId)
-                        : [...old.items, produkId],
+                        ? old.items.filter(id => id !== variables.produkId)
+                        : [...old.items, variables.produkId]
                 };
             });
 

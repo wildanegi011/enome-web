@@ -42,6 +42,16 @@ export const produk = mysqlTable("produk", {
     isFuring: tinyint("is_furing").default(0),
 });
 
+export const productImage = mysqlTable("produk_image", {
+    id: serial("id").primaryKey(),
+    produkId: varchar("produk_id", { length: 20 }).notNull(),
+    gambar: varchar("gambar", { length: 255 }).notNull(),
+    warna: varchar("warna", { length: 20 }),
+    createdAt: timestamp("created_at").defaultNow(),
+});
+
+
+
 export const produkDetail = mysqlTable("produkdetail", {
     detailId: serial("detail_id").primaryKey(),
     produkId: varchar("produk_id", { length: 20 }).notNull(),

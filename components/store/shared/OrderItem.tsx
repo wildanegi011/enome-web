@@ -91,12 +91,14 @@ export default function OrderItem({
                 isOffline && "opacity-40 grayscale-[0.5]"
             )}>
                 <FallbackImage
-                    src={item.gambar ? `${ASSET_URL}/img/produk/${item.gambar}` : "/placeholder-product.jpg"}
+                    src={item.gambar ? `${ASSET_URL}/img/${item.gambar}` : "/placeholder-product.jpg"}
                     alt={item.namaProduk}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                     sizes="(max-width: 768px) 80px, 150px"
                 />
+
+
             </div>
 
             {/* 3. Info Section */}
@@ -237,3 +239,4 @@ export default function OrderItem({
         </div>
     );
 }
+

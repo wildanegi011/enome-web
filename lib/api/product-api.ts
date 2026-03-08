@@ -73,8 +73,10 @@ export interface ProductDetailResponse {
         berat?: number | null;
     };
     images: string[];
+    additionalImages: { gambar: string; warna: string | null }[];
     relatedProducts: any[];
 }
+
 
 export const productApi = {
     getAll: (filters?: any) => {

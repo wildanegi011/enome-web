@@ -27,8 +27,20 @@ export class CartService {
             variant: keranjang.variant,
             qty: keranjang.qtyProduk,
             harga: keranjang.hargaPoduk,
-            gambar: sql<string>`COALESCE(${keranjang.gambarProduk}, ${produk.gambar})`.as('gambar'),
+            gambar: sql<string>`COALESCE(
+                (SELECT CONCAT('produk/', pd2.gambar) 
+                 FROM produkdetail pd2 
+                 WHERE pd2.produk_id = ${keranjang.produkId} 
+                   AND pd2.warna = ${keranjang.warna} 
+                   AND pd2.gambar IS NOT NULL AND pd2.gambar != '' 
+                 LIMIT 1),
+                CONCAT('produk_utama/', ${produk.gambar})
+            )`.as('gambar'),
+
             keterangan: keranjang.keterangan,
+
+
+
             isFlashsale: keranjang.isFlashsale,
             flashsaleId: keranjang.flashsaleId,
             flashsaleExpired: keranjang.flashsaleExpired,

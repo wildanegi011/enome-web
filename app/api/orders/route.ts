@@ -139,15 +139,16 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 result.bankAccount = bank.noRekening;
                 result.bankOwner = bank.namaPemilik;
                 result.bankName = `Bank ${bank.namaBank}`;
-                result.bankLogo = bank.logoBank;
+                result.bankLogo = bank.logoBank ? `rekening_pembayaran/${bank.logoBank}` : "rekening_pembayaran/bca.png";
             } else {
                 // Fallback if not found in DB
                 result.paymentMethod = payment;
                 result.bankAccount = "2810377740";
                 result.bankOwner = "TRYSETYO0603";
                 result.bankName = "Bank BCA";
-                result.bankLogo = "bca.png";
+                result.bankLogo = "rekening_pembayaran/bca.png";
             }
+
         }
 
         // Attach breakdown details for success page

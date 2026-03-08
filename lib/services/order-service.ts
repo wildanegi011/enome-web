@@ -93,7 +93,9 @@ export class OrderService {
                 .where(and(
                     eq(produkDetail.produkId, item.produkId!),
                     eq(produkDetail.warnaId, item.warna!),
-                    eq(produkDetail.size, item.size!)
+                    eq(produkDetail.size, item.size!),
+                    // Protect against matching the wrong stock variant
+                    eq(produkDetail.variant, item.variant || "")
                 ))
                 .limit(1);
 

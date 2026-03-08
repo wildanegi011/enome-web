@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       locale: "id_ID",
-      url: "https://batik-enome.com", // Replace with actual production URL if available
+      url: "https://batik-enome.com",
       title: "ÉNOMÉ - Fashion & Batik Collection 2026",
       description: "Discover the finest batik and fashion collections at ÉNOMÉ. Shop the latest 2026 arrivals, deals of the month, and exclusive kain batik panjang.",
       siteName: "ÉNOMÉ",

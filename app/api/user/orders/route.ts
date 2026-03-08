@@ -89,7 +89,26 @@ export const GET = withAuth(async (request: NextRequest, context: any, session: 
             teleponPenerima: orders.teleponPenerima,
             // Additional details for card UI
             firstItemName: sql<string>`(SELECT p.nama_produk FROM orderdetail od JOIN produk p ON od.produk_id = p.produk_id WHERE od.order_id = orders.order_id LIMIT 1)`,
-            firstItemImage: sql<string>`(SELECT p.gambar FROM orderdetail od JOIN produk p ON od.produk_id = p.produk_id WHERE od.order_id = orders.order_id LIMIT 1)`,
+            firstItemImage: sql<string>`(
+                SELECT COALESCE(
+                    (SELECT CONCAT('produk/', pd2.gambar) 
+                     FROM produkdetail pd2 
+                     JOIN orderdetail od2 ON (pd2.produk_id = od2.produk_id)
+                     LEFT JOIN warna w2 ON (od2.warna = w2.warna_id OR od2.warna = w2.warna)
+                     WHERE od2.order_id = orders.order_id 
+                       AND pd2.warna = w2.warna_id
+                       AND pd2.gambar IS NOT NULL AND pd2.gambar != '' 
+                     LIMIT 1),
+                    (SELECT CONCAT('produk_utama/', p2.gambar)
+                     FROM orderdetail od2
+                     JOIN produk p2 ON od2.produk_id = p2.produk_id
+                     WHERE od2.order_id = orders.order_id
+                     LIMIT 1)
+                )
+            )`,
+
+
+
             firstItemSize: sql<string>`(SELECT od.ukuran FROM orderdetail od WHERE od.order_id = orders.order_id LIMIT 1)`,
             itemCount: sql<number>`(SELECT SUM(od.qty) FROM orderdetail od WHERE od.order_id = orders.order_id)`
         })
