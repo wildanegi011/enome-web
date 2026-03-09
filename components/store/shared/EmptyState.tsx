@@ -35,14 +35,14 @@ const EmptyState = ({
                         <Link
                             href={actionHref}
                             onClick={onActionClick}
-                            className="inline-flex h-12 items-center px-8 bg-neutral-base-900 text-white rounded-xl text-[12px] font-black uppercase tracking-widest hover:bg-neutral-base-800 transition-all font-sans"
+                            className="inline-flex h-12 items-center px-8 bg-neutral-base-900 text-white rounded-xl text-[12px] font-black uppercase tracking-widest hover:bg-neutral-base-800 transition-all font-montserrat"
                         >
                             {actionLabel}
                         </Link>
                     ) : (
                         <button
                             onClick={onActionClick}
-                            className="inline-flex h-12 items-center px-8 bg-neutral-base-900 text-white rounded-xl text-[12px] font-black uppercase tracking-widest hover:bg-neutral-base-800 transition-all font-sans"
+                            className="inline-flex h-12 items-center px-8 bg-neutral-base-900 text-white rounded-xl text-[12px] font-black uppercase tracking-widest hover:bg-neutral-base-800 transition-all font-montserrat"
                         >
                             {actionLabel}
                         </button>

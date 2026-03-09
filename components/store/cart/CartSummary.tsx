@@ -22,7 +22,7 @@ export default function CartSummary({
                 <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4">
                     <div className="flex flex-col">
                         <span className="text-[10px] font-bold text-neutral-base-400 uppercase tracking-widest leading-none mb-1">Total ({selectedCount} item)</span>
-                        <span className="text-[18px] font-black text-neutral-base-900 tracking-tighter leading-none">
+                        <span className="text-[18px] font-medium text-neutral-base-900 tracking-tighter leading-none">
                             {formatCurrency(totalAmount)}
                         </span>
                     </div>
@@ -52,7 +52,7 @@ export default function CartSummary({
                 <div className="flex flex-col gap-4 mb-6">
                     <div className="flex justify-between items-center">
                         <span className="text-[10px] font-bold text-neutral-base-400 uppercase tracking-[0.15em]">Subtotal ({selectedCount} item)</span>
-                        <span className="text-[13px] font-black text-neutral-base-900 tabular-nums">
+                        <span className="text-[13px] font-medium text-neutral-base-900 tabular-nums">
                             {formatCurrency(totalAmount)}
                         </span>
                     </div>
@@ -60,7 +60,7 @@ export default function CartSummary({
                     <div className="flex flex-col gap-1.5">
                         <div className="flex justify-between items-end">
                             <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-base-900">Total Tagihan</span>
-                            <span className="text-[24px] md:text-[26px] font-black text-neutral-base-900 tracking-tighter leading-none tabular-nums">
+                            <span className="text-[24px] md:text-[26px] font-medium text-neutral-base-900 tracking-tighter leading-none tabular-nums">
                                 {formatCurrency(totalAmount)}
                             </span>
                         </div>

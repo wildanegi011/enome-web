@@ -42,7 +42,7 @@ export default function NewArrivals() {
     }, [rawProducts, activeCategory]);
 
     if (isLoading) {
-        return <section className="py-16 md:py-24 bg-white font-sans animate-pulse">
+        return <section className="py-16 md:py-24 bg-white font-montserrat animate-pulse">
             <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                 <div className="h-12 w-48 bg-gray-100 rounded mx-auto mb-16"></div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
@@ -54,7 +54,7 @@ export default function NewArrivals() {
 
     return (
         <TooltipProvider>
-            <section className="py-16 md:py-24 bg-white font-sans">
+            <section className="py-16 md:py-24 bg-white font-montserrat">
                 <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                     {/* Header */}
                     <motion.div

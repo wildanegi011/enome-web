@@ -90,7 +90,7 @@ export default function FeaturedBanner() {
                         <span className="text-neutral-base-400 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em]">
                             Limited Edition
                         </span>
-                        <h2 className="font-serif text-[36px] md:text-[42px] lg:text-[60px] text-neutral-base-900 leading-[1.1] mt-2 md:mt-3 line-clamp-2">
+                        <h2 className="font-montserrat text-[36px] md:text-[42px] lg:text-[60px] text-neutral-base-900 leading-[1.1] mt-2 md:mt-3 line-clamp-2">
                             {featuredProduct.namaProduk}
                         </h2>
 
@@ -110,7 +110,7 @@ export default function FeaturedBanner() {
                             }
                         </div>
 
-                        <p className="text-2xl md:text-3xl font-black text-neutral-base-900 mt-8 md:mt-10">
+                        <p className="text-2xl md:text-3xl font-medium text-neutral-base-900 mt-8 md:mt-10">
                             {price}
                         </p>
 

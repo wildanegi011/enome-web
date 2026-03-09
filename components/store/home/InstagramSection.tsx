@@ -29,7 +29,7 @@ export default function InstagramSection() {
     }, []);
 
     return (
-        <section ref={ref} className="py-16 md:py-24 bg-white overflow-hidden font-sans">
+        <section ref={ref} className="py-16 md:py-24 bg-white overflow-hidden font-montserrat">
             <div className="max-w-[1400px] mx-auto">
                 {/* Header */}
                 <motion.div
@@ -38,7 +38,7 @@ export default function InstagramSection() {
                     transition={{ duration: 0.8 }}
                     className="text-center mb-12 md:mb-20"
                 >
-                    <h2 className="font-serif text-[36px] md:text-[42px] lg:text-[64px] text-neutral-base-900 leading-tight italic">
+                    <h2 className="font-montserrat text-[36px] md:text-[42px] lg:text-[64px] text-neutral-base-900 leading-tight italic">
                         Follow Us On Instagram
                     </h2>
                     <p className="text-neutral-base-500 mt-4 md:mt-6 leading-relaxed max-w-2xl mx-auto text-[15px] md:text-[16px]">

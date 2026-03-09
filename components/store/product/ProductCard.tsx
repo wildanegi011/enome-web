@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { useWishlist, useToggleWishlist } from "@/hooks/use-wishlist";
 import { useCartItems } from "@/hooks/use-cart-items";
 import { CartItem } from "@/lib/api/cart-api";
+import { cn } from "@/lib/utils";
 
 interface Color {
     name: string;
@@ -43,7 +44,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, index }: ProductCardProps) {
-    const [isHovered, setIsHovered] = useState(false);
+    const [hoverState, setHoverState] = useState<'none' | 'card' | 'colors'>('none');
     const colors = product.colors || [];
 
     const { data: wishlistData } = useWishlist();
@@ -68,31 +69,43 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         }
     };
 
+    const isCardHovered = hoverState === 'card';
+    const isColorsHovered = hoverState === 'colors';
+
     return (
         <div
             className="group relative"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onMouseEnter={() => setHoverState('card')}
+            onMouseLeave={() => setHoverState('none')}
         >
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
-                className="flex flex-col h-full bg-white transition-all duration-500 ease-out group-hover:-translate-y-1"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{
+                    opacity: 1,
+                    y: isCardHovered ? -6 : 0
+                }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="flex flex-col h-full bg-white transition-none"
             >
                 {/* Product Image - Taller Aspect Ratio */}
-                <div className="relative aspect-3/4 overflow-hidden bg-neutral-base-50 rounded-sm mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-500">
+                <div className="relative aspect-3/4 overflow-hidden bg-neutral-base-50 rounded-sm mb-4 transition-shadow duration-200 shadow-sm group-hover:shadow-xl">
                     <Link
                         href={`/products/${product.id || 'batik-elegance-123'}`}
                         className="absolute inset-0 z-1"
                     >
-                        <FallbackImage
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
-                            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        />
+                        <motion.div
+                            className="absolute inset-0 z-1"
+                            animate={{ scale: isCardHovered ? 1.05 : 1 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                        >
+                            <FallbackImage
+                                src={product.image}
+                                alt={product.name}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                            />
+                        </motion.div>
                     </Link>
 
                     {/* Status Badges */}
@@ -120,9 +133,11 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                             onClick={handleWishlist}
                             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-md shadow-sm"
                             initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: isHovered || isWishlisted ? 1 : 0, scale: isHovered || isWishlisted ? 1 : 0.8 }}
+                            animate={{
+                                opacity: (hoverState !== 'none' || isWishlisted) ? 1 : 0,
+                                scale: (hoverState !== 'none' || isWishlisted) ? 1 : 0.8
+                            }}
                             transition={{ duration: 0.2, ease: "easeOut" }}
-                            whileHover={{ scale: 1.15 }}
                             whileTap={{ scale: 0.9 }}
                         >
                             <Heart
@@ -136,7 +151,10 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     </div>
 
                     {/* Subtle Overlay on Hover */}
-                    <div className="absolute inset-0 bg-neutral-base-900/0 group-hover:bg-neutral-base-900/5 transition-colors duration-500 pointer-events-none z-5" />
+                    <div className={cn(
+                        "absolute inset-0 bg-neutral-base-900/5 transition-opacity duration-200 pointer-events-none z-5",
+                        isCardHovered ? "opacity-100" : "opacity-0"
+                    )} />
                 </div>
 
                 {/* Product Info */}
@@ -145,23 +163,26 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     className="flex justify-between items-start gap-4 px-1 hover:no-underline"
                 >
                     <div className="flex-1 min-w-0 space-y-1.5">
-                        <p className="text-[11px] text-neutral-base-400 font-bold uppercase tracking-wider">
+                        <p className="text-[12px] text-neutral-base-400 font-bold uppercase tracking-widest font-montserrat">
                             {product.category || "Kemeja"}
                         </p>
-                        <Tooltip>
+                        <Tooltip delayDuration={0}>
                             <TooltipTrigger asChild>
-                                <h3 className="text-[16px] font-medium text-neutral-base-900 leading-tight group-hover:text-amber-900 transition-colors duration-300 truncate">
+                                <h3 className={cn(
+                                    "text-[18px] font-bold leading-tight transition-colors duration-200 truncate font-montserrat tracking-tight",
+                                    isCardHovered ? "text-amber-900" : "text-neutral-base-900"
+                                )}>
                                     {product.name}
                                 </h3>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-neutral-base-900 text-white border-none text-[12px] font-medium py-1.5 px-3">
+                            <TooltipContent className="bg-neutral-base-900 text-white border-none text-[12px] font-semibold py-1.5 px-3 font-montserrat">
                                 {product.name}
                             </TooltipContent>
                         </Tooltip>
                         <div className="pt-0.5">
                             {product.originalPrice && product.isOnFlashSale && (
                                 <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className="text-[12px] text-neutral-base-400 line-through">
+                                    <span className="text-[12px] text-neutral-base-400 line-through font-montserrat">
                                         {product.originalPrice}
                                     </span>
                                     {!!product.discountPercentage && product.discountPercentage > 0 && (
@@ -171,7 +192,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                                     )}
                                 </div>
                             )}
-                            <p className="text-[17px] font-bold text-neutral-base-900 tracking-tight">
+                            <p className="text-[16px] font-medium text-neutral-base-900 tracking-tight font-montserrat">
                                 {product.price}
                             </p>
                         </div>
@@ -179,26 +200,38 @@ export default function ProductCard({ product, index }: ProductCardProps) {
 
                     {/* Color Dots */}
                     {colors.length > 0 && (
-                        <div className="flex flex-col items-end pt-10 pb-2 shrink-0">
+                        <div
+                            className="flex flex-col items-end pt-10 pb-2 shrink-0 relative z-40"
+                            onMouseEnter={(e) => {
+                                e.stopPropagation();
+                                setHoverState('colors');
+                            }}
+                            onMouseLeave={(e) => {
+                                e.stopPropagation();
+                                setHoverState('card');
+                            }}
+                        >
                             <div className="h-6 flex items-center">
                                 <motion.div
+                                    layout
                                     className="flex items-center"
-                                    animate={{ gap: isHovered ? 6 : 0 }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                    animate={{ gap: isColorsHovered ? 6 : 0 }}
+                                    transition={{ duration: 0.2, ease: "circOut" }}
                                 >
-                                    <AnimatePresence>
-                                        {(isHovered ? colors : colors.slice(0, 2)).map((color, cIdx) => (
-                                            <Tooltip key={`${color.name}-${cIdx}`}>
+                                    <AnimatePresence mode="popLayout">
+                                        {(isColorsHovered ? colors : colors.slice(0, 2)).map((color, cIdx) => (
+                                            <Tooltip key={`${color.name}-${cIdx}`} delayDuration={0}>
                                                 <TooltipTrigger asChild>
                                                     <motion.div
+                                                        layout
                                                         initial={{ opacity: 0, scale: 0, x: -4 }}
                                                         animate={{ opacity: 1, scale: 1, x: 0 }}
                                                         exit={{ opacity: 0, scale: 0, x: -4 }}
                                                         transition={{
                                                             type: "spring",
-                                                            stiffness: 300,
-                                                            damping: 25,
-                                                            delay: isHovered ? cIdx * 0.02 : 0,
+                                                            stiffness: 500,
+                                                            damping: 35,
+                                                            delay: isColorsHovered ? cIdx * 0.01 : 0,
                                                         }}
                                                         whileHover={{ scale: 1.25, zIndex: 10 }}
                                                         className="w-3.5 h-3.5 rounded-full ring-2 ring-white shadow-sm cursor-pointer shrink-0"
@@ -211,7 +244,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                                             </Tooltip>
                                         ))}
                                     </AnimatePresence>
-                                    {!isHovered && colors.length > 2 && (
+                                    {!isColorsHovered && colors.length > 2 && (
                                         <div className="w-3.5 h-3.5 rounded-full bg-neutral-base-100 ring-2 ring-white flex items-center justify-center text-[6px] font-bold text-neutral-base-500">
                                             +{colors.length - 2}
                                         </div>
@@ -219,7 +252,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                                 </motion.div>
                             </div>
                             <AnimatePresence>
-                                {isHovered && colors.length > 2 && (
+                                {isColorsHovered && colors.length > 2 && (
                                     <motion.p
                                         initial={{ opacity: 0, y: 4 }}
                                         animate={{ opacity: 1, y: 0 }}

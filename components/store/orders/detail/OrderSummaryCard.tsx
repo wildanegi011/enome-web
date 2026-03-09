@@ -57,18 +57,18 @@ export default function OrderSummaryCard({
             <div className="space-y-4 md:space-y-5 pb-6 md:pb-8 border-b border-neutral-base-50">
                 <div className="flex items-center justify-between text-[13px] md:text-[14px]">
                     <span className="text-neutral-base-400 font-medium">Subtotal</span>
-                    <span className="text-neutral-base-900 font-black">
+                    <span className="text-neutral-base-900 font-medium">
                         {formatCurrency(totalHarga)}
                     </span>
                 </div>
                 <div className="flex items-center justify-between text-[13px] md:text-[14px]">
                     <span className="text-neutral-base-400 font-medium">Biaya Pengiriman</span>
-                    <span className="text-neutral-base-900 font-black">{formatCurrency(ongkir)}</span>
+                    <span className="text-neutral-base-900 font-medium">{formatCurrency(ongkir)}</span>
                 </div>
                 {biayalain > 0 && (
                     <div className="flex items-center justify-between text-[13px] md:text-[14px]">
                         <span className="text-neutral-base-400 font-medium">Biaya Kemasan</span>
-                        <span className="text-neutral-base-900 font-black">
+                        <span className="text-neutral-base-900 font-medium">
                             {formatCurrency(biayalain)}
                         </span>
                     </div>
@@ -80,7 +80,7 @@ export default function OrderSummaryCard({
                             <Tag className="w-3.5 h-3.5 shrink-0" />
                             Voucher ({voucherInfo.kode})
                         </span>
-                        <span className="text-emerald-600 font-black">
+                        <span className="text-emerald-600 font-medium">
                             -{formatCurrency(voucherInfo.nominal)}
                         </span>
                     </div>
@@ -89,7 +89,7 @@ export default function OrderSummaryCard({
                 {viaWallet > 0 && (
                     <div className="flex items-center justify-between text-[13px] md:text-[14px]">
                         <span className="text-emerald-600 font-medium">Wallet Deduction</span>
-                        <span className="text-emerald-600 font-black">
+                        <span className="text-emerald-600 font-medium">
                             -{formatCurrency(viaWallet)}
                         </span>
                     </div>
@@ -98,7 +98,7 @@ export default function OrderSummaryCard({
                 {uniqueCodeValue > 0 && (
                     <div className="flex items-center justify-between text-[13px] md:text-[14px]">
                         <span className="text-amber-600 font-medium">Kode Unik</span>
-                        <span className="text-amber-600 font-black">
+                        <span className="text-amber-600 font-medium">
                             +{formatCurrency(uniqueCodeValue)}
                         </span>
                     </div>
@@ -109,7 +109,7 @@ export default function OrderSummaryCard({
                 <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-neutral-base-400">
                     Total Tagihan
                 </span>
-                <span className="text-[20px] md:text-[24px] font-black text-neutral-base-900 tracking-tight">
+                <span className="text-[20px] md:text-[24px] font-medium text-neutral-base-900 tracking-tight">
                     {formatCurrency(totalTagihan)}
                 </span>
             </div>

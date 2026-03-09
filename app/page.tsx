@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export default function Home() {
   return (
     <ScrollArea className="h-screen w-full" scrollBarClassName="hidden">
-      <div className="min-h-screen bg-white font-sans overflow-x-hidden no-scrollbar">
+      <div className="min-h-screen bg-white font-montserrat overflow-x-hidden no-scrollbar">
         {/* <Navbar /> */}
         <IntegratedCollectionSlider />
 

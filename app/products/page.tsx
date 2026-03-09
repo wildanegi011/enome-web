@@ -13,7 +13,7 @@ import Navbar from "@/components/store/layout/Navbar";
 import Footer from "@/components/store/layout/Footer";
 import ResultsInfo from "@/components/store/shared/ResultsInfo";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { SlidersHorizontal, Loader2, Search } from "lucide-react";
+import { SlidersHorizontal, Loader2, Search, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { useProducts, useCategories, useColors, useSizes } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
@@ -159,9 +159,9 @@ function ProductsContent() {
             <main className="min-h-screen bg-white">
                 <Navbar />
 
-                <div className="sticky top-[80px] z-30 bg-white/90 backdrop-blur-md border-b border-neutral-base-50">
+                <div className="bg-white border-b border-neutral-base-50">
                     <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
-                        <ProductListHeader sortBy={sortBy} onSortChange={setSortBy} />
+                        <ProductListHeader />
                     </div>
                 </div>
 
@@ -169,10 +169,10 @@ function ProductsContent() {
                     <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                         {/* Mobile Filter Trigger */}
                         <div className="flex lg:hidden justify-between items-center mb-6">
-                            <h2 className="font-serif text-[24px] font-bold text-neutral-base-900">Produk</h2>
+                            <h2 className="font-montserrat text-[32px] font-bold text-neutral-base-900 tracking-tight">Produk</h2>
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <button className="flex items-center gap-2 border border-neutral-base-200 px-4 py-2 text-[12px] font-bold shadow-sm hover:bg-neutral-base-50 transition-colors uppercase tracking-widest">
+                                    <button className="flex items-center gap-2 border border-neutral-base-200 px-4 py-2 text-[13px] font-bold shadow-sm hover:bg-neutral-base-50 transition-colors uppercase tracking-widest font-montserrat">
                                         <SlidersHorizontal className="w-[14px] h-[14px]" />
                                         Filter
                                     </button>
@@ -218,19 +218,53 @@ function ProductsContent() {
                                         >
                                             <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-neutral-base-100 h-fit">
                                                 <Loader2 className="w-4 h-4 animate-spin text-neutral-base-900" />
-                                                <span className="text-[10px] font-bold tracking-widest uppercase">Updating...</span>
+                                                <span className="text-[10px] font-bold tracking-[0.2em] uppercase font-montserrat italic">Updating...</span>
                                             </div>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
 
-                                {/* Total Products Count */}
-                                <div className="flex items-center justify-between mb-6">
-                                    <ResultsInfo
-                                        currentPage={currentPage}
-                                        itemsPerPage={ITEMS_PER_PAGE}
-                                        totalItems={filteredProducts.length}
-                                    />
+                                {/* Sticky Results & Sorting Bar */}
+                                <div className="sticky top-[80px] z-20 bg-white/95 backdrop-blur-md py-4 mb-6 border-b border-neutral-base-50 -mx-4 px-4 md:-mx-8 md:px-8 lg:mx-0 lg:px-0">
+                                    <div className="flex items-center justify-between">
+                                        <ResultsInfo
+                                            currentPage={currentPage}
+                                            itemsPerPage={ITEMS_PER_PAGE}
+                                            totalItems={filteredProducts.length}
+                                        />
+
+                                        {/* Sorting Dropdown */}
+                                        <div className="flex items-center gap-2">
+                                            <span className="hidden sm:inline text-[13px] text-neutral-base-400 font-montserrat">Urutkan:</span>
+                                            <div className="relative group">
+                                                <button className="flex items-center gap-2 text-[13px] font-bold text-neutral-base-900 hover:text-neutral-base-600 transition-colors font-montserrat tracking-tight">
+                                                    {sortBy === "newest" ? "Terbaru" :
+                                                        sortBy === "price_asc" ? "Harga Terendah" :
+                                                            sortBy === "price_desc" ? "Harga Tertinggi" : "Nama A-Z"}
+                                                    <ChevronDown className="w-4 h-4" />
+                                                </button>
+                                                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-neutral-base-100 shadow-xl rounded-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
+                                                    {[
+                                                        { value: "newest", label: "Terbaru" },
+                                                        { value: "price_asc", label: "Harga Terendah" },
+                                                        { value: "price_desc", label: "Harga Tertinggi" },
+                                                        { value: "name_asc", label: "Nama A-Z" },
+                                                    ].map((option) => (
+                                                        <button
+                                                            key={option.value}
+                                                            onClick={() => setSortBy(option.value as SortOption)}
+                                                            className={cn(
+                                                                "w-full text-left px-4 py-2 text-[13px] hover:bg-neutral-base-50 transition-colors font-montserrat",
+                                                                sortBy === option.value ? "text-neutral-base-900 font-bold" : "text-neutral-base-500"
+                                                            )}
+                                                        >
+                                                            {option.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {filteredProducts.length === 0 ? (
@@ -402,7 +436,7 @@ function PaginationControls({ currentPage, totalPages, onPageChange }: {
             <button
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="h-10 px-3 flex items-center justify-center text-[13px] font-semibold text-neutral-base-600 hover:text-neutral-base-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="h-10 px-3 flex items-center justify-center text-[13px] font-bold text-neutral-base-600 hover:text-neutral-base-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-montserrat"
             >
                 ← Prev
             </button>
@@ -416,7 +450,7 @@ function PaginationControls({ currentPage, totalPages, onPageChange }: {
                         key={page}
                         onClick={() => onPageChange(page)}
                         className={cn(
-                            "h-10 w-10 flex items-center justify-center rounded-lg text-[13px] font-bold transition-all",
+                            "h-10 w-10 flex items-center justify-center rounded-lg text-[13px] font-bold transition-all font-montserrat",
                             currentPage === page
                                 ? "bg-neutral-base-900 text-white shadow-md"
                                 : "text-neutral-base-400 hover:bg-neutral-base-50 hover:text-neutral-base-900"
@@ -429,7 +463,7 @@ function PaginationControls({ currentPage, totalPages, onPageChange }: {
             <button
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="h-10 px-3 flex items-center justify-center text-[13px] font-semibold text-neutral-base-600 hover:text-neutral-base-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="h-10 px-3 flex items-center justify-center text-[13px] font-bold text-neutral-base-600 hover:text-neutral-base-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-montserrat"
             >
                 Next →
             </button>

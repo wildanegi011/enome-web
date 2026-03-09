@@ -16,7 +16,7 @@ interface BreadcrumbProps {
 
 export default function Breadcrumb({ items, className }: BreadcrumbProps) {
     return (
-        <nav className={cn("flex items-center gap-2 text-[14px] text-neutral-base-400 font-sans", className)}>
+        <nav className={cn("flex items-center gap-2 text-[14px] text-neutral-base-400 font-montserrat", className)}>
             {items.map((item, index) => (
                 <React.Fragment key={index}>
                     {index > 0 && <span className="text-neutral-base-300">›</span>}

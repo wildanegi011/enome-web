@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Shirt, Box, Watch, ChevronDown, Check, ChevronRight } from "lucide-react";
+import { Shirt, Box, Watch, ChevronDown, Check, ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -32,7 +32,7 @@ const DEFAULT_COLORS = [
 ];
 
 const priceRanges = [
-    "Di bawah Rp 500rb", "Rp 500rb - Rp 1.5jt", "Di atas Rp 1.5jt"
+    "< Rp 500.000", "Rp 500.000 - Rp 1.500.000", "> Rp 1.500.000"
 ];
 
 const INITIAL_VISIBLE_COUNT = 5;
@@ -100,7 +100,7 @@ export default function FilterSidebar({ activeFilters, onFilterChange, className
                 className="flex items-center justify-between w-full py-2 group"
             >
                 <div className="flex items-center gap-2">
-                    <h3 className="text-[11px] font-bold tracking-widest uppercase text-neutral-base-900 transition-colors group-hover:text-blue-600">
+                    <h3 className="text-[18px] font-bold tracking-[0.2em] uppercase text-neutral-base-900 transition-colors group-hover:text-amber-800 font-montserrat">
                         {title}
                     </h3>
                     {count > 0 && (
@@ -126,7 +126,7 @@ export default function FilterSidebar({ activeFilters, onFilterChange, className
         return (
             <button
                 onClick={() => toggleExpanded(section)}
-                className="flex items-center gap-1 text-[12px] font-bold text-neutral-900 hover:text-neutral-500 transition-colors mt-3 pl-3"
+                className="flex items-center gap-2 text-[14px] font-bold text-neutral-base-900 hover:text-neutral-base-600 transition-colors font-montserrat tracking-tight mt-3 pl-3"
             >
                 {isExpanded ? "Sembunyikan" : `Lihat Semua (${remaining} lainnya)`}
                 <ChevronRight className={cn("w-3 h-3 transition-transform duration-200", isExpanded && "rotate-90")} />
@@ -148,14 +148,17 @@ export default function FilterSidebar({ activeFilters, onFilterChange, className
     const visibleSizes = expandedSections.size ? allSizes : allSizes.slice(0, 8);
 
     return (
-        <aside className={cn("w-full shrink-0 font-sans", className)}>
+        <aside className={cn("w-full shrink-0 font-montserrat", className)}>
             <div className="flex items-center justify-between mb-8 pr-6">
-                <h2 className="text-[18px] font-bold text-neutral-base-900">Filter</h2>
+                <h2 className="text-[26px] font-bold text-neutral-base-900 font-montserrat tracking-tight">Filter</h2>
                 {hasActiveFilters && (
                     <button
                         onClick={clearAllFilters}
-                        className="text-[12px] font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                        className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-neutral-base-400 hover:text-amber-800 transition-all group"
                     >
+                        <div className="w-5 h-5 rounded-full bg-neutral-base-50 flex items-center justify-center group-hover:bg-amber-50 transition-colors">
+                            <X className="w-3 h-3" />
+                        </div>
                         Hapus Semua
                     </button>
                 )}
@@ -186,7 +189,7 @@ export default function FilterSidebar({ activeFilters, onFilterChange, className
                                                     key={cat}
                                                     onClick={() => onFilterChange("collection", cat)}
                                                     className={cn(
-                                                        "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all text-[13px] font-medium group",
+                                                        "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all text-[14px] font-semibold group font-montserrat tracking-tight",
                                                         isActive
                                                             ? "bg-neutral-base-900 text-white shadow-md shadow-neutral-base-200"
                                                             : "text-neutral-base-600 hover:bg-neutral-base-50 hover:text-neutral-base-900"
@@ -229,10 +232,10 @@ export default function FilterSidebar({ activeFilters, onFilterChange, className
                                                     key={range}
                                                     onClick={() => onFilterChange("price", range)}
                                                     className={cn(
-                                                        "flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-left text-[13px] font-medium transition-all group",
+                                                        "flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-left text-[14px] font-semibold transition-all group font-montserrat tracking-tight",
                                                         isActive
-                                                            ? "bg-blue-50 text-blue-700"
-                                                            : "text-neutral-base-600 hover:bg-neutral-base-50 hover:text-neutral-base-900"
+                                                            ? "bg-amber-50 text-amber-900"
+                                                            : "text-neutral-base-600 hover:bg-neutral-base-50 hover:text-neutral-base-900 font-medium"
                                                     )}
                                                 >
                                                     <span className="flex items-center gap-3">
@@ -326,7 +329,7 @@ export default function FilterSidebar({ activeFilters, onFilterChange, className
                                                     key={s}
                                                     onClick={() => onFilterChange("size", s)}
                                                     className={cn(
-                                                        "h-10 rounded-lg border text-[12px] font-bold transition-all",
+                                                        "h-10 rounded-lg border text-[13px] font-bold transition-all font-montserrat",
                                                         isActive
                                                             ? "bg-neutral-base-900 border-neutral-base-900 text-white shadow-md shadow-neutral-base-200 scale-[1.03]"
                                                             : "bg-white border-neutral-base-200 text-neutral-base-600 hover:border-neutral-base-900 hover:text-neutral-base-900"

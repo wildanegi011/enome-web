@@ -17,7 +17,7 @@ import TrackingManifest from "@/components/store/orders/detail/TrackingManifest"
 import { CONFIG } from "@/lib/config";
 
 const OrderDetailSkeleton = () => (
-    <div className="min-h-screen bg-[#F9FAFB] font-sans text-neutral-base-900">
+    <div className="min-h-screen bg-[#F9FAFB] font-montserrat text-neutral-base-900">
         <Navbar />
         <main className="max-w-[1340px] mx-auto px-4 md:px-8 py-10">
             <div className="flex flex-col lg:flex-row gap-12">
@@ -132,7 +132,7 @@ export default function OrderDetailPage() {
     const { order, items, paymentInfo, voucherInfo, uniqueCode: uniqueCodeValue = 0, expiredTime, whatsappAdmin } = data;
 
     return (
-        <div className="min-h-screen bg-[#F9FAFB] font-sans text-neutral-base-900">
+        <div className="min-h-screen bg-[#F9FAFB] font-montserrat text-neutral-base-900">
             <Navbar />
 
             <main className="max-w-[1340px] mx-auto px-3 sm:px-4 md:px-8 py-6 md:py-10">

@@ -157,7 +157,7 @@ const WishlistItemCard = ({ item, idx, isRemoving, onRemove, formatPriceRange }:
                                 </div>
                             )}
 
-                            <p className="text-[15px] md:text-[16px] font-bold text-neutral-base-900 tracking-tight">
+                            <p className="text-[15px] md:text-[16px] font-medium text-neutral-base-900 tracking-tight">
                                 {item.harga_poduk ? formatCurrency(item.harga_poduk) : displayPrice}
                             </p>
                         </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, ShoppingBag, User, Settings, LogOut, Package, Wallet, ChevronDown, Menu, X, MapPin, Heart } from "lucide-react";
+import { Search, ShoppingBag, User, Settings, LogOut, Package, Wallet, ChevronDown, Menu, X, MapPin, Heart, ShoppingCart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthModal from "@/components/store/auth/AuthModal";
@@ -78,7 +78,7 @@ export default function Navbar() {
                                         key={link.name}
                                         href={link.path}
                                         className={cn(
-                                            "text-[12px] font-bold tracking-widest uppercase transition-all duration-300 relative",
+                                            "text-[14px] font-semibold tracking-widest uppercase transition-all duration-300 relative font-montserrat",
                                             isActive ? "text-neutral-base-900" : "text-neutral-base-500 hover:text-amber-800"
                                         )}
                                     >
@@ -132,7 +132,7 @@ export default function Navbar() {
                                 className="text-neutral-base-500 hover:text-neutral-base-900 transition-colors p-1 relative"
                                 aria-label="Cart"
                             >
-                                <ShoppingBag className="w-[18px] h-[18px]" strokeWidth={1.2} />
+                                <ShoppingCart className="w-[18px] h-[18px]" strokeWidth={1.2} />
                                 <AnimatePresence>
                                     {cartCount > 0 && (
                                         <motion.span
@@ -160,9 +160,9 @@ export default function Navbar() {
                                             <div className="w-9 h-9 rounded-full bg-neutral-base-100 flex items-center justify-center border-2 border-white shadow-sm group-hover:bg-neutral-base-200 transition-all overflow-hidden">
                                                 <User className="w-5 h-5 text-neutral-base-600" />
                                             </div>
-                                            <div className="text-left hidden lg:block">
-                                                <p className="text-[11px] font-bold text-neutral-base-900 leading-none truncate max-w-[100px] mb-0.5">{user?.name}</p>
-                                                <p className="text-[9px] text-neutral-base-400 font-bold uppercase tracking-widest flex items-center gap-1">
+                                            <div className="text-left hidden lg:block font-montserrat">
+                                                <p className="text-[13px] font-bold text-neutral-base-900 leading-none truncate max-w-[100px] mb-1">{user?.name}</p>
+                                                <p className="text-[10px] text-neutral-base-400 font-bold uppercase tracking-widest flex items-center gap-1">
                                                     Akun <ChevronDown className="w-2.5 h-2.5" />
                                                 </p>
                                             </div>
@@ -218,14 +218,14 @@ export default function Navbar() {
                                 <>
                                     <button
                                         onClick={() => router.push("/login")}
-                                        className="text-[13px] font-medium text-neutral-base-500 hover:text-neutral-base-900 transition-colors"
+                                        className="text-[14px] font-semibold text-neutral-base-500 hover:text-neutral-base-900 transition-colors font-montserrat"
                                     >
                                         MASUK
                                     </button>
                                     <span className="text-neutral-base-200 text-xs">/</span>
                                     <button
                                         onClick={() => router.push("/register")}
-                                        className="text-[12px] font-bold bg-neutral-base-900 text-white px-6 py-2.5 hover:bg-neutral-base-800 transition-all tracking-widest uppercase shadow-lg shadow-neutral-base-900/10"
+                                        className="text-[13px] font-bold bg-neutral-base-900 text-white px-6 py-2.5 hover:bg-neutral-base-800 transition-all tracking-widest uppercase shadow-lg shadow-neutral-base-900/10 font-montserrat"
                                     >
                                         DAFTAR
                                     </button>

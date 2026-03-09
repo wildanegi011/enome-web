@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { Minus, Plus, Trash2, Zap, MessageSquare } from "lucide-react";
 import { ASSET_URL } from "@/config/config";
@@ -44,6 +45,20 @@ export default function OrderItem({
 }: OrderItemProps) {
     const isOffline = item.isOnline === 0 || item.stock === 0;
     const isStockInsufficient = (item.stock || 0) < item.qty && item.stock !== 0;
+
+    const [localNotes, setLocalNotes] = useState(item.keterangan || "");
+
+    // Sync local state with item data (e.g., when refetching)
+    useEffect(() => {
+        setLocalNotes(item.keterangan || "");
+    }, [item.keterangan]);
+
+    const handleNotesBlur = () => {
+        // Only trigger update if notes actually changed
+        if (onUpdateNotes && localNotes !== (item.keterangan || "")) {
+            onUpdateNotes(item.id, localNotes);
+        }
+    };
 
     // Cart-specific logic
     const showCheckbox = variant === "cart" && onToggleSelect;
@@ -211,7 +226,7 @@ export default function OrderItem({
                     {/* Price */}
                     <div className="flex flex-col items-end">
                         <span className={cn(
-                            "font-black text-neutral-base-900 tracking-tighter tabular-nums leading-none",
+                            "font-medium text-neutral-base-900 tracking-tighter tabular-nums leading-none",
                             isCheckout ? "text-[15px] md:text-[20px]" : "text-[16px] md:text-[24px]",
                             isOffline && "text-neutral-base-300 line-through"
                         )}>
@@ -228,8 +243,9 @@ export default function OrderItem({
                         </div>
                         <input
                             type="text"
-                            value={item.keterangan || ""}
-                            onChange={(e) => onUpdateNotes && onUpdateNotes(item.id, e.target.value)}
+                            value={localNotes}
+                            onChange={(e) => setLocalNotes(e.target.value)}
+                            onBlur={handleNotesBlur}
                             placeholder="Tambahkan catatan untuk penjual..."
                             className="flex-1 bg-transparent text-[11px] md:text-[13px] font-medium outline-none placeholder:text-neutral-base-200 min-w-0"
                         />

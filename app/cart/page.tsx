@@ -75,7 +75,7 @@ export default function CartPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white text-neutral-base-900 font-sans selection:bg-amber-100 selection:text-amber-900">
+        <div className="min-h-screen bg-white text-neutral-base-900 font-montserrat selection:bg-amber-100 selection:text-amber-900">
             <Navbar />
 
             {/* Sticky Header with Breadcrumb and Actions */}

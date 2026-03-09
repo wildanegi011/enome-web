@@ -236,7 +236,7 @@ export default function ResetPasswordPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-start lg:justify-center p-0 sm:p-8 md:p-12 bg-[#FAF9F6] font-sans overflow-x-hidden relative selection:bg-neutral-base-900/10">
+        <div className="min-h-screen flex flex-col items-center justify-start lg:justify-center p-0 sm:p-8 md:p-12 bg-[#FAF9F6] font-montserrat overflow-x-hidden relative selection:bg-neutral-base-900/10">
             {/* Main Content Card */}
             <div className="w-full max-w-[1100px] bg-white rounded-none sm:rounded-[2.5rem] shadow-none sm:shadow-[0_20px_80px_-15px_rgba(0,0,0,0.08)] overflow-hidden flex h-auto lg:h-[720px] lg:max-h-[95vh] relative z-10 border-none sm:border border-neutral-base-100/80">
 

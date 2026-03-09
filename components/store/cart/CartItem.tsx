@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CheckSquare, Square, Zap, Minus, Plus, MessageSquare, Trash2 } from "lucide-react";
 import FallbackImage from "@/components/store/shared/FallbackImage";
@@ -26,6 +27,19 @@ export default function CartItem({
     onRemove
 }: CartItemProps) {
     const isOffline = item.isOnline === 0;
+    const [localNotes, setLocalNotes] = useState(item.keterangan || "");
+
+    // Sync local state with item data (e.g., when refetching)
+    useEffect(() => {
+        setLocalNotes(item.keterangan || "");
+    }, [item.keterangan]);
+
+    const handleNotesBlur = () => {
+        // Only trigger update if notes actually changed
+        if (localNotes !== (item.keterangan || "")) {
+            onUpdateNotes(item.id, localNotes);
+        }
+    };
 
     return (
         <motion.div
@@ -131,7 +145,7 @@ export default function CartItem({
                         </div>
 
                         <div className="flex flex-col items-end gap-0.5">
-                            <span className={`text-[18px] md:text-[24px] font-black text-neutral-base-900 tracking-tighter tabular-nums leading-none ${isOffline ? "text-neutral-base-300 line-through" : ""}`}>
+                            <span className={`text-[18px] md:text-[24px] font-medium text-neutral-base-900 tracking-tighter tabular-nums leading-none ${isOffline ? "text-neutral-base-300 line-through" : ""}`}>
                                 {formatCurrency(Number(item.harga || 0) * Number(item.qty || 0))}
                             </span>
                         </div>
@@ -147,8 +161,9 @@ export default function CartItem({
                     </div>
                     <input
                         type="text"
-                        value={item.keterangan || ""}
-                        onChange={(e) => onUpdateNotes(item.id, e.target.value)}
+                        value={localNotes}
+                        onChange={(e) => setLocalNotes(e.target.value)}
+                        onBlur={handleNotesBlur}
                         placeholder="Tambahkan catatan..."
                         className="flex-1 bg-transparent text-[11px] md:text-[12px] font-medium outline-none placeholder:text-neutral-base-300 min-w-0"
                     />

@@ -1,15 +1,9 @@
-import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import React, { Suspense } from "react";
 import "./globals.css";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta",
-  subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
@@ -72,7 +66,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}>
+      <body className={`${montserrat.variable} antialiased`}>
         <ReactQueryProvider>
           <TooltipProvider>
             <Suspense fallback={null}>

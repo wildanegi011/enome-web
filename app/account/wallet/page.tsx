@@ -33,7 +33,7 @@ export default function WalletPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-[#F9FAFB] font-sans text-neutral-base-900">
+        <div className="min-h-screen bg-[#F9FAFB] font-montserrat text-neutral-base-900">
             <Navbar />
 
             <main className="max-w-[1340px] mx-auto px-4 md:px-8 py-6 md:py-10">
@@ -61,7 +61,7 @@ export default function WalletPage() {
                         {/* Transactions Section */}
                         <div className="space-y-5 md:space-y-6">
                             <div className="flex items-center justify-between px-1">
-                                <h3 className="text-lg md:text-xl font-serif font-black text-neutral-base-900 tracking-tight">Riwayat Transaksi</h3>
+                                <h3 className="text-lg md:text-xl font-montserrat font-black text-neutral-base-900 tracking-tight">Riwayat Transaksi</h3>
                             </div>
 
                             <div className="bg-white border border-neutral-base-100 rounded-[24px] md:rounded-[32px] overflow-hidden shadow-sm">

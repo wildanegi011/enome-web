@@ -144,7 +144,7 @@ export default function WishlistPage() {
 
     return (
         <TooltipProvider>
-            <div className="min-h-screen bg-neutral-base-50/30 font-sans text-neutral-base-900">
+            <div className="min-h-screen bg-neutral-base-50/30 font-montserrat text-neutral-base-900">
                 <Navbar />
 
                 <main className="max-w-[1340px] mx-auto px-3 sm:px-4 md:px-8 py-6 md:py-10">

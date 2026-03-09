@@ -70,7 +70,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                 </div>
                 <div className="text-left sm:text-right shrink-0">
                     <p className="text-[10px] md:text-[11px] font-black text-neutral-base-300 uppercase tracking-widest mb-1">Total Belanja</p>
-                    <p className="text-[16px] md:text-[18px] font-black text-neutral-base-900 leading-none">
+                    <p className="text-[16px] md:text-[18px] font-medium text-neutral-base-900 leading-none">
                         {formatCurrency(order.totalTagihan)}
                     </p>
                 </div>

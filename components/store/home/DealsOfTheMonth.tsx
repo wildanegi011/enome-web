@@ -54,7 +54,7 @@ export default function DealsOfTheMonth() {
     if (!currentProduct) return null;
 
     return (
-        <section ref={ref} className="py-16 md:py-24 bg-white overflow-hidden text-neutral-base-900 font-sans">
+        <section ref={ref} className="py-16 md:py-24 bg-white overflow-hidden text-neutral-base-900 font-montserrat">
             <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                 <div className="grid lg:grid-cols-12 gap-8 md:gap-12 items-center">
                     {/* Text Content - Left Side */}
@@ -70,7 +70,7 @@ export default function DealsOfTheMonth() {
                                 {currentProduct.namaProduk}
                             </h3>
                             <div className="flex items-center gap-2">
-                                <p className="text-red-600 font-bold text-lg">
+                                <p className="text-red-600 font-medium text-lg">
                                     {formatCurrency(Number(currentProduct.finalMinPrice))}
                                 </p>
                                 {!!currentProduct.discountPercentage && currentProduct.discountPercentage > 0 && (

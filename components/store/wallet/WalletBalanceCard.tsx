@@ -33,7 +33,7 @@ const WalletBalanceCard = ({ balance, isLoading, onTopUpClick, mounted }: Wallet
                         {!mounted || isLoading ? (
                             <Skeleton className="h-10 md:h-12 w-48 md:w-64 bg-white/10 rounded-xl" />
                         ) : (
-                            <h2 className="text-3xl md:text-5xl font-serif font-black tracking-tight">
+                            <h2 className="text-3xl md:text-5xl font-montserrat font-black tracking-tight">
                                 {formatCurrency(balance)}
                             </h2>
                         )}

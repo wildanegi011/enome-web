@@ -44,7 +44,7 @@ export default function AddressesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F9FAFB] font-sans text-neutral-base-900">
+        <div className="min-h-screen bg-[#F9FAFB] font-montserrat text-neutral-base-900">
             <Navbar />
 
             <main className="max-w-[1340px] mx-auto px-3 sm:px-4 md:px-8 py-6 md:py-10">

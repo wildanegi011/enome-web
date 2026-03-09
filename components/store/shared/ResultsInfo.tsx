@@ -19,13 +19,13 @@ export default function ResultsInfo({
     const end = Math.min(currentPage * itemsPerPage, totalItems);
 
     return (
-        <p className={`text-[12px] text-neutral-base-400 font-medium ${className}`}>
+        <p className={`text-[13px] text-neutral-base-400 font-medium font-montserrat ${className}`}>
             Menampilkan{" "}
-            <span className="font-bold text-neutral-base-700">
+            <span className="font-bold text-neutral-base-700 font-montserrat">
                 {start}–{end}
             </span>
             {" "}dari{" "}
-            <span className="font-bold text-neutral-base-700">{totalItems}</span>
+            <span className="font-bold text-neutral-base-700 font-montserrat">{totalItems}</span>
             {" "}{label}
         </p>
     );

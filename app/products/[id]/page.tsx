@@ -9,7 +9,7 @@ import ProductInfo from "@/components/store/product/ProductInfo";
 import ProductCard from "@/components/store/product/ProductCard";
 import { useProduct } from "@/hooks/use-products";
 import { ASSET_URL } from "@/config/config";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShoppingBag, Check, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Breadcrumb from "@/components/store/shared/Breadcrumb";
 import Link from "next/link";
@@ -40,6 +40,24 @@ function ProductDetailContent({ productData }: { productData: any }) {
     // Deferred Initial Selection: Start with no color selected
     const [selectedVariant, setSelectedVariant] = useState("");
     const [selectedColor, setSelectedColor] = useState("");
+    const [showSticky, setShowSticky] = useState(false);
+
+    // Scroll listener for sticky header
+    useState(() => {
+        if (typeof window === "undefined") return;
+
+        const handleScroll = () => {
+            // Show sticky after passing the main product info (around 600px)
+            if (window.scrollY > 600) {
+                setShowSticky(true);
+            } else {
+                setShowSticky(false);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    });
 
 
     const formatPriceRange = (min: any, max: any) => {
@@ -127,10 +145,10 @@ function ProductDetailContent({ productData }: { productData: any }) {
 
                 <section className="py-8 md:py-16">
                     <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-12 lg:gap-16 items-start">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-16 lg:gap-24 items-start">
 
                             {/* Left Side - Image Gallery (Top Image) */}
-                            <div className="lg:col-span-7 min-w-0">
+                            <div className="lg:col-span-6 min-w-0">
                                 <ProductGallery
                                     images={mainGalleryImages}
                                     isSoldOut={parseInt(stats.totalStock) === 0}
@@ -140,7 +158,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
 
 
                             {/* Right Side - Product Info */}
-                            <div className="lg:col-span-5 min-w-0 lg:sticky lg:top-36">
+                            <div className="lg:col-span-6 min-w-0 lg:sticky lg:top-36">
                                 <ProductInfo
                                     product={{ ...infoProduct, id: product.produkId } as any}
                                     selectedVariant={selectedVariant}
@@ -154,7 +172,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
                         </div>
 
                         {/* Remaining Images Section - Dynamic Masonry Grid (from produk_image table) */}
-                        <div className="mt-8 md:mt-16">
+                        <div className="mt-12 md:mt-24">
                             <motion.div
                                 layout
                                 initial="hidden"
@@ -170,11 +188,10 @@ function ProductDetailContent({ productData }: { productData: any }) {
                                     }
                                 }}
                                 className="columns-1 md:columns-2 gap-8 space-y-8 min-h-[50vh]"
-
                             >
                                 <AnimatePresence mode="popLayout">
                                     {bottomImages.map((img: string, idx: number) => {
-                                        // More extreme variations for true masonry look
+                                        // Varied ratios for true masonry look
                                         const ratios = [
                                             "aspect-square",
                                             "aspect-[3/4]",
@@ -201,7 +218,8 @@ function ProductDetailContent({ productData }: { productData: any }) {
                                                     src={img}
                                                     alt={`Product detail image ${idx + 1}`}
                                                     fill
-                                                    quality={90}
+                                                    quality={80}
+                                                    loading="lazy"
                                                     className="object-cover transition-transform duration-1000 group-hover:scale-105"
                                                     sizes="(max-width: 768px) 50vw, 33vw"
                                                 />
@@ -222,9 +240,9 @@ function ProductDetailContent({ productData }: { productData: any }) {
                 {relatedProducts.length > 0 && (
                     <section className="py-10 md:py-20 border-t border-neutral-base-100">
                         <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
-                            <div className="mb-6 md:mb-12">
-                                <h2 className="font-heading text-[22px] md:text-[32px] text-neutral-base-900">Rekomendasi Untuk Anda</h2>
-                                <p className="text-neutral-base-500 mt-1 md:mt-2 text-[13px] md:text-base">Koleksi lainnya dari kategori {product.kategori}.</p>
+                            <div className="mb-6 md:mb-12 font-montserrat">
+                                <h2 className="text-[22px] md:text-[32px] text-neutral-base-900 font-bold tracking-tight">Rekomendasi Untuk Anda</h2>
+                                <p className="text-neutral-base-500 mt-1 md:mt-2 text-[13px] md:text-base leading-relaxed">Koleksi lainnya dari kategori {product.kategori}.</p>
                             </div>
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
                                 {relatedProducts.map((p: any, idx: number) => {
@@ -268,6 +286,95 @@ function ProductDetailContent({ productData }: { productData: any }) {
                 )}
 
                 <Footer />
+
+                {/* Desktop Sticky Header */}
+                <AnimatePresence>
+                    {showSticky && (
+                        <motion.div
+                            initial={{ y: -100, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -100, opacity: 0 }}
+                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                            className="fixed top-0 left-0 right-0 z-50 hidden lg:block bg-white/95 backdrop-blur-md border-b border-neutral-base-100 shadow-sm"
+                        >
+                            <div className="w-full max-w-[1400px] mx-auto px-8 lg:px-12 py-3 flex items-center justify-between">
+                                <div className="flex items-center gap-4 min-w-0">
+                                    <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-neutral-base-100 shrink-0">
+                                        <FallbackImage
+                                            src={mainGalleryImages[0]}
+                                            alt={product.namaProduk}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <h3 className="text-[14px] font-bold text-neutral-base-900 truncate">{product.namaProduk}</h3>
+                                        <div className="flex items-center gap-2 text-[12px] text-neutral-base-500 font-medium">
+                                            <span>{infoProduct.price}</span>
+                                            {selectedColor && (
+                                                <>
+                                                    <span className="w-1 h-1 rounded-full bg-neutral-base-300" />
+                                                    <span>{variants.colors.find((c: any) => c.id === selectedColor)?.name}</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <button
+                                        onClick={() => {
+                                            const el = document.getElementById("product-info-top");
+                                            el?.scrollIntoView({ behavior: "smooth" });
+                                        }}
+                                        className="text-[11px] font-bold uppercase tracking-widest text-neutral-base-500 hover:text-neutral-base-900 transition-colors"
+                                    >
+                                        Ubah Pilihan
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const el = document.getElementById("add-to-cart-button");
+                                            el?.click();
+                                        }}
+                                        className="bg-neutral-base-900 text-white px-8 py-3 rounded-lg text-[12px] font-bold uppercase tracking-widest hover:bg-neutral-base-800 transition-all shadow-lg active:scale-95"
+                                    >
+                                        Tambah ke Keranjang
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Mobile Floating Action Bar */}
+                <AnimatePresence>
+                    {showSticky && (
+                        <motion.div
+                            initial={{ y: 100, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 100, opacity: 0 }}
+                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                            className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-4 pb-6 pt-4 bg-linear-to-t from-white via-white to-transparent"
+                        >
+                            <div className="bg-neutral-base-900 text-white rounded-2xl shadow-2xl p-4 flex items-center justify-between">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-white/60 font-medium uppercase tracking-wider">Harga Sekarang</span>
+                                    <span className="text-[16px] font-bold">{infoProduct.price}</span>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        const el = document.getElementById("add-to-cart-button");
+                                        el?.click();
+                                    }}
+                                    className="bg-white text-neutral-base-900 px-6 py-3 rounded-xl text-[12px] font-bold uppercase tracking-wider flex items-center gap-2 shadow-inner active:scale-95 transition-transform"
+                                >
+                                    <ShoppingBag className="w-3.5 h-3.5" />
+                                    Beli Sekarang
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </main>
         </TooltipProvider>
     );

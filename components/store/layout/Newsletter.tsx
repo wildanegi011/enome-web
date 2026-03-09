@@ -16,7 +16,7 @@ export default function Newsletter() {
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.6 }}
                 >
-                    <h2 className="font-serif text-[42px] lg:text-[56px] text-white italic leading-[1.1]">
+                    <h2 className="font-montserrat text-[42px] lg:text-[56px] text-white italic leading-[1.1]">
                         Join The Énome Circle
                     </h2>
                     <p className="text-neutral-base-400 mt-6 max-w-lg mx-auto text-[16px] leading-relaxed">

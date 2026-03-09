@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Check, Ruler, Truck, ShieldCheck, ShoppingBag, Plus, Minus, Loader2, Heart, Package, Zap, List, Info } from "lucide-react";
+import { ChevronDown, Check, Ruler, Truck, ShieldCheck, ShoppingBag, Plus, Minus, Loader2, Heart, Package, Zap, List, Info, Sparkles, Weight } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useWishlist, useToggleWishlist } from "@/hooks/use-wishlist";
@@ -48,6 +48,8 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
     const [quantity, setQuantity] = useState(1);
     const [isAdding, setIsAdding] = useState(false);
     const [openAccordion, setOpenAccordion] = useState<string | null>("details");
+    const [shakeKey, setShakeKey] = useState(0); // For triggering shake animation
+    const [hintType, setHintType] = useState<"motif" | "color" | "size" | null>(null);
     const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
     const { isAuthenticated } = useAuth();
     const router = useRouter();
@@ -130,6 +132,10 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
     const rawStock = currentCombination?.stock ?? 0;
     const currentStock = Math.max(0, rawStock - qtyInCartForVariant);
 
+    const isSelectionComplete = (!!selectedVariant || !product.types || product.types.length === 0) && !!selectedColor && !!selectedSize;
+    const isOutOfStockCombination = isSelectionComplete && currentStock <= 0;
+    const canClickAddToCart = !isAdding;
+
     // Get stock for a specific size (given current color and variant)
     const getStockForSize = (size: string) => {
         const variantEntry = product.matrix.find(m =>
@@ -184,10 +190,42 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             router.push('/login');
             return;
         }
-        if (!selectedSize || !selectedColor || !selectedVariant) {
-            toast.error("Silakan pilih motif, warna, dan ukuran terlebih dahulu");
+        if (!selectedVariant && product.types && product.types.length > 0) {
+            setHintType("motif");
+            setShakeKey(prev => prev + 1);
+            toast.error("Silakan pilih Motif terlebih dahulu", { id: "hint-motif" });
+            const el = document.getElementById("motif-selection");
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
             return;
         }
+        if (!selectedColor) {
+            setHintType("color");
+            setShakeKey(prev => prev + 1);
+            toast.error("Silakan pilih Warna terlebih dahulu", { id: "hint-color" });
+            const el = document.getElementById("color-selection");
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
+        if (!selectedSize) {
+            setHintType("size");
+            setShakeKey(prev => prev + 1);
+            toast.error("Silakan pilih Ukuran terlebih dahulu", { id: "hint-size" });
+            const el = document.getElementById("size-selection");
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
+
+        if (isSoldOut) {
+            toast.error("Maaf, produk ini sudah habis terjual secara keseluruhan", { id: "sold-out" });
+            return;
+        }
+
+        if (isOutOfStockCombination) {
+            toast.error("Maaf, stok untuk varian ini sudah habis terjual", { id: "out-of-stock" });
+            return;
+        }
+
+        setHintType(null);
 
         setIsAdding(true);
         try {
@@ -222,13 +260,13 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
     };
 
     return (
-        <div className="flex flex-col lg:pl-8 xl:pl-12 font-sans min-w-0">
+        <div id="product-info-top" className="flex flex-col lg:pl-8 xl:pl-12 font-montserrat min-w-0">
             {/* Header / Badges */}
             <div className="mb-4 md:mb-6">
-                <span className="inline-block px-3 py-1 bg-neutral-base-100 text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-base-500 mb-3 md:mb-4 font-sans">
+                <span className="inline-block px-3 py-1 bg-neutral-base-100 text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-base-500 mb-3 md:mb-4 font-montserrat">
                     {product.collection}
                 </span>
-                <h1 className="font-serif text-[24px] md:text-[36px] lg:text-[48px] text-neutral-base-900 leading-[1.2] mb-3 md:mb-6">
+                <h1 className="font-montserrat text-[28px] md:text-[42px] lg:text-[56px] font-bold text-neutral-base-900 leading-[1.1] mb-4 md:mb-8 tracking-tight">
                     {product.name}
                 </h1>
 
@@ -245,8 +283,8 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             )}
                         </div>
                     )}
-                    <div className="flex flex-col md:flex-row md:items-end gap-3 md:gap-5">
-                        <p className={`text-[20px] md:text-[28px] lg:text-[36px] font-semibold tracking-tighter leading-none shadow-sm pb-1 ${product.originalPrice ? 'text-red-600' : 'text-neutral-base-900'}`}>
+                    <div className="flex flex-col md:flex-row md:items-baseline gap-3 md:gap-5">
+                        <p className={`text-[24px] md:text-[32px] lg:text-[42px] font-medium tracking-tighter leading-none ${product.originalPrice ? 'text-red-600' : 'text-neutral-base-900'}`}>
                             {selectedPrice}
                         </p>
                     </div>
@@ -272,7 +310,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                         <>
                                             <div className="bg-white/10 backdrop-blur-md border border-white/20 px-1.5 py-0.5 md:py-1 rounded text-center min-w-[28px] shadow-inner">
                                                 {timeLeft.days}
-                                                <span className="text-[9px] ml-0.5 font-sans uppercase">Hr</span>
+                                                <span className="text-[9px] ml-0.5 font-montserrat uppercase">Hr</span>
                                             </div>
                                             <span className="text-white/60">:</span>
                                         </>
@@ -303,22 +341,27 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             </div>
 
             {/* Description */}
-            <div className="mb-8 md:mb-10 min-w-0">
+            <div className="mb-10 md:mb-12 min-w-0">
                 <div
                     dangerouslySetInnerHTML={{ __html: product.description }}
-                    className="text-[14px] md:text-[15px] leading-[1.8] text-neutral-base-500 italic prose prose-sm max-w-none line-clamp-3 overflow-hidden wrap-break-word"
+                    className="text-[15px] md:text-[16px] leading-[1.8] text-neutral-base-500 prose prose-sm max-w-none line-clamp-4 overflow-hidden wrap-break-word font-montserrat"
                 />
             </div>
 
             {/* Variant Selection */}
             {product.types && product.types.length > 0 && (
-                <div className="mb-6 md:mb-8">
+                <div id="motif-selection" className="mb-8 md:mb-10">
                     <div className="flex items-center justify-between mb-3 md:mb-4">
-                        <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-base-900">
+                        <span className={`text-[12px] font-bold uppercase tracking-[0.15em] transition-colors ${hintType === 'motif' ? 'text-red-500' : 'text-neutral-base-900'}`}>
                             Motif: <span className="font-medium text-neutral-base-500 ml-1 normal-case">{selectedVariant || "Pilih motif"}</span>
                         </span>
                     </div>
-                    <div className="flex flex-wrap gap-2 md:gap-3">
+                    <motion.div
+                        key={`motif-${shakeKey}`}
+                        animate={hintType === 'motif' ? { x: [0, -4, 4, -4, 4, 0] } : {}}
+                        transition={{ duration: 0.4 }}
+                        className="flex flex-wrap gap-2 md:gap-3"
+                    >
                         {product.types.map(type => {
                             const isSelected = selectedVariant === type;
                             return (
@@ -326,6 +369,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                     key={type}
                                     onClick={() => {
                                         setSelectedVariant(type);
+                                        setHintType(null);
 
                                         // Auto-select first available color for this motif
                                         const firstEntry = product.matrix.find(m =>
@@ -341,7 +385,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                         setSelectedSize("");
                                         setQuantity(1);
                                     }}
-                                    className={`px-4 py-2 text-[11px] md:text-[13px] font-bold rounded-lg transition-all ${isSelected
+                                    className={`px-5 py-2.5 md:py-3 text-[11px] md:text-[13px] font-bold rounded-lg transition-all ${isSelected
                                         ? "bg-neutral-base-900 text-white shadow-lg"
                                         : "border border-neutral-base-200 text-neutral-base-600 hover:border-neutral-base-900 bg-white"
                                         }`}
@@ -351,18 +395,23 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             );
                         })}
 
-                    </div>
+                    </motion.div>
                 </div>
             )}
 
             {/* Color Selection */}
-            <div className="mb-6 md:mb-8">
+            <div id="color-selection" className="mb-8 md:mb-10">
                 <div className="flex items-center justify-between mb-3 md:mb-4">
-                    <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-base-900">
+                    <span className={`text-[12px] font-bold uppercase tracking-[0.15em] transition-colors ${hintType === 'color' ? 'text-red-500' : 'text-neutral-base-900'}`}>
                         Warna: <span className="font-medium text-neutral-base-500 ml-1 normal-case">{product.colors.find(c => c.id === selectedColor)?.name || "Pilih warna"}</span>
                     </span>
                 </div>
-                <div className="flex flex-wrap gap-3 md:gap-4">
+                <motion.div
+                    key={`color-${shakeKey}`}
+                    animate={hintType === 'color' ? { x: [0, -4, 4, -4, 4, 0] } : {}}
+                    transition={{ duration: 0.4 }}
+                    className="flex flex-wrap gap-3 md:gap-4"
+                >
                     {availableColors.map(color => {
                         const hasGeneralStock = color.totalStock > 0;
                         let hasStockForSelectedVariant = true;
@@ -384,13 +433,20 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             <button
                                 key={color.id} // Changed to color.id
                                 onClick={() => {
+                                    if (needsMotifFirst) {
+                                        setHintType("motif");
+                                        setShakeKey(prev => prev + 1);
+                                        toast.error("Silakan pilih Motif terlebih dahulu", { id: "hint-motif" });
+                                        return;
+                                    }
                                     setSelectedColor(color.id); // Use ID
                                     setSelectedSize(""); // Reset size on color change
                                     setQuantity(1);
+                                    setHintType(null);
                                 }}
-                                disabled={isDisabled}
-                                className={`relative flex flex-col items-center gap-1 group transition-opacity ${isDisabled ? "opacity-40 cursor-not-allowed" : "opacity-100"}`}
-                                aria-label={`Select ${color.name} ${isOutOfStock ? "(Sold Out)" : needsMotifFirst ? "(Pilih Motif Dahulu)" : ""}`}
+                                disabled={isOutOfStock}
+                                className={`relative flex flex-col items-center gap-1 group transition-opacity ${isOutOfStock ? "opacity-40 cursor-not-allowed" : "opacity-100"}`}
+                                aria-label={`Select ${color.name} ${isOutOfStock ? "(Sold Out)" : ""}`}
                             >
                                 <span
                                     className={`w-8 h-8 rounded-full border border-neutral-base-200 transition-all flex items-center justify-center ${selectedColor === color.id ? "ring-2 ring-offset-2 ring-neutral-base-900 scale-110 shadow-md" : "hover:scale-110 shadow-sm" // Changed to color.id
@@ -406,13 +462,13 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             </button>
                         );
                     })}
-                </div>
+                </motion.div>
             </div>
 
             {/* Size Selection with Inline Stock */}
-            <div className="mb-6 md:mb-8">
+            <div id="size-selection" className="mb-8 md:mb-10">
                 <div className="flex items-center justify-between mb-3 md:mb-4">
-                    <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-base-900">
+                    <span className={`text-[12px] font-bold uppercase tracking-[0.15em] transition-colors ${hintType === 'size' ? 'text-red-500' : 'text-neutral-base-900'}`}>
                         Ukuran: <span className="font-medium text-neutral-base-500 ml-1 normal-case">{selectedSize || "Pilih ukuran"}</span>
                     </span>
                     <button className="text-[11px] font-bold text-neutral-base-400 hover:text-neutral-base-900 underline flex items-center gap-1 transition-colors">
@@ -420,7 +476,12 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                         Panduan ukuran
                     </button>
                 </div>
-                <div className="flex flex-wrap gap-2 md:gap-3">
+                <motion.div
+                    key={`size-${shakeKey}`}
+                    animate={hintType === 'size' ? { x: [0, -4, 4, -4, 4, 0] } : {}}
+                    transition={{ duration: 0.4 }}
+                    className="flex flex-wrap gap-2 md:gap-3"
+                >
                     {product.sizes.map(size => {
                         const isSelected = selectedSize === size;
                         const stock = getStockForSize(size);
@@ -431,24 +492,30 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             <button
                                 key={size}
                                 onClick={() => {
+                                    if (!selectedColor) {
+                                        setHintType("color");
+                                        setShakeKey(prev => prev + 1);
+                                        toast.error("Silakan pilih Warna terlebih dahulu", { id: "hint-color" });
+                                        return;
+                                    }
                                     setSelectedSize(size);
                                     setQuantity(1);
+                                    setHintType(null);
                                 }}
                                 className={`group relative px-4 py-2.5 md:px-5 md:py-3 flex items-center justify-center text-[11px] md:text-[13px] font-bold rounded-lg transition-all ${isSelected
                                     ? "bg-neutral-base-900 text-white shadow-lg ring-1 ring-neutral-base-900"
                                     : "border border-neutral-base-200 text-neutral-base-600 hover:border-neutral-base-900 hover:text-neutral-base-900 bg-white"
-                                    } ${!isAvailable ? "opacity-30 line-through cursor-not-allowed" : "opacity-100"}`}
-                                disabled={!isAvailable}
+                                    } ${(!isAvailable && !!selectedColor) ? "opacity-30 line-through cursor-not-allowed" : "opacity-100"}`}
+                                disabled={!isAvailable && !!selectedColor}
                             >
                                 {size}
-                                {/* Low stock dot indicator */}
                                 {isLowStock && !isSelected && (
                                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full" />
                                 )}
                             </button>
                         );
                     })}
-                </div>
+                </motion.div>
 
                 {/* Elegant Stock Status Bar */}
                 <AnimatePresence mode="wait">
@@ -476,7 +543,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
+            </div >
 
             {/* Quantity and Actions */}
             <div className="flex flex-row gap-2 md:gap-3 mb-8 md:mb-12">
@@ -516,11 +583,12 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
 
                 {/* Add to Cart Button */}
                 <motion.button
-                    whileHover={!isSoldOut && currentStock > 0 && quantity <= currentStock && !isAdding ? { scale: 1.02 } : {}}
-                    whileTap={!isSoldOut && currentStock > 0 && quantity <= currentStock && !isAdding ? { scale: 0.98 } : {}}
-                    disabled={isSoldOut || currentStock <= 0 || quantity > currentStock || isAdding || !selectedSize}
+                    id="add-to-cart-button"
+                    whileHover={canClickAddToCart ? { scale: 1.02 } : {}}
+                    whileTap={canClickAddToCart ? { scale: 0.98 } : {}}
+                    disabled={!canClickAddToCart}
                     onClick={handleAddToCart}
-                    className={`flex-1 h-11 md:h-14 text-[11px] md:text-[13px] font-bold uppercase tracking-widest md:tracking-[0.2em] shadow-xl flex items-center justify-center gap-2 transition-colors rounded-lg ${(isSoldOut || currentStock <= 0 || quantity > currentStock || isAdding || !selectedSize)
+                    className={`flex-1 h-11 md:h-14 text-[11px] md:text-[14px] font-bold uppercase tracking-widest md:tracking-[0.2em] shadow-xl flex items-center justify-center gap-2 transition-colors rounded-lg ${!canClickAddToCart
                         ? "bg-neutral-base-200 text-neutral-base-400 cursor-not-allowed shadow-none"
                         : "bg-neutral-base-900 text-white hover:bg-neutral-base-800"
                         }`}
@@ -530,7 +598,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                     ) : (
                         <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     )}
-                    {!selectedVariant && product.types && product.types.length > 0 ? "Pilih Motif" : !selectedColor ? "Pilih Warna" : !selectedSize ? "Pilih Ukuran" : (isSoldOut || rawStock === 0) ? "Stok Habis" : currentStock === 0 ? "Stok Maksimal" : isAdding ? "Adding..." : "Keranjang"}
+                    {isAdding ? "Menambahkan..." : "Tambah ke Keranjang"}
                 </motion.button>
 
                 {/* Wishlist Button */}
@@ -554,52 +622,55 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             {/* Accordions */}
             <div className="border-t border-neutral-base-100">
                 <AccordionItem id="shipping" title="Spesifikasi Produk" icon={Info} openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        <div className="space-y-3">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] uppercase tracking-wider text-neutral-base-400 font-bold mb-1">Jenis Produk</span>
-                                <span className="text-[14px] text-neutral-base-900 font-medium flex items-center gap-2">
-                                    <Package className="w-3.5 h-3.5 text-neutral-base-300" />
-                                    {product.jenisProduk || "-"}
-                                </span>
+                    <div className="grid grid-cols-2 gap-y-6 gap-x-8">
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2 text-neutral-base-400">
+                                <Package className="w-3.5 h-3.5" />
+                                <span className="text-[10px] uppercase tracking-widest font-bold">Kategori</span>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-[10px] uppercase tracking-wider text-neutral-base-400 font-bold mb-1">Material Utama</span>
-                                <span className="text-[14px] text-neutral-base-900 font-medium flex items-center gap-2">
-                                    <Zap className="w-3.5 h-3.5 text-neutral-base-300" />
-                                    {product.jenisBahan || "-"}
+                            <span className="text-[13px] text-neutral-base-900 font-medium pl-5.5">{product.collection || "-"}</span>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2 text-neutral-base-400">
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span className="text-[10px] uppercase tracking-widest font-bold">Material</span>
+                            </div>
+                            <span className="text-[13px] text-neutral-base-900 font-medium pl-5.5">{product.jenisBahan || "-"}</span>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2 text-neutral-base-400">
+                                <ShieldCheck className="w-3.5 h-3.5" />
+                                <span className="text-[10px] uppercase tracking-widest font-bold">Lining / Furing</span>
+                            </div>
+                            <div className="pl-5.5 flex items-center gap-2">
+                                <span className="text-[13px] text-neutral-base-900 font-medium">
+                                    {product.isFuring ? "Full Furing" : "Tanpa Furing"}
                                 </span>
+                                {product.isFuring ? (
+                                    <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[9px] font-bold rounded-sm border border-emerald-100 uppercase tracking-tighter">Premium</span>
+                                ) : null}
                             </div>
                         </div>
-                        <div className="space-y-3">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] uppercase tracking-wider text-neutral-base-400 font-bold mb-1">Lapisan Furing</span>
-                                <span className="text-[14px] text-neutral-base-900 font-medium flex items-center gap-2">
-                                    <ShieldCheck className="w-3.5 h-3.5 text-neutral-base-300" />
-                                    {product.isFuring ? "Ya, Dilapisi Furing" : "Tidak"}
-                                </span>
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2 text-neutral-base-400">
+                                <Weight className="w-3.5 h-3.5" />
+                                <span className="text-[10px] uppercase tracking-widest font-bold">Berat</span>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-[10px] uppercase tracking-wider text-neutral-base-400 font-bold mb-1">Berat Produk</span>
-                                <span className="text-[14px] text-neutral-base-900 font-medium flex items-center gap-2">
-                                    <Truck className="w-3.5 h-3.5 text-neutral-base-300" />
-                                    {product.berat ? `${product.berat} gram` : ""}
-                                </span>
-                            </div>
+                            <span className="text-[13px] text-neutral-base-900 font-medium pl-5.5">{product.berat ? `${product.berat}g` : "-"}</span>
                         </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-dotted border-neutral-base-100 italic text-[11px] text-neutral-base-400">
-                        * Spesifikasi dapat sedikit berubah tergantung pada proses pembuatan handmade.
                     </div>
                 </AccordionItem>
+
                 <AccordionItem id="details" title="Detail Produk" icon={List} openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
-                    <div
-                        dangerouslySetInnerHTML={{ __html: product.detail || product.description }}
-                        className="prose prose-sm font-sans text-neutral-base-500 max-w-none overflow-hidden wrap-break-word"
-                    />
+                    <div className="relative">
+                        <div
+                            dangerouslySetInnerHTML={{ __html: product.detail || product.description }}
+                            className="prose prose-sm font-montserrat text-neutral-base-500 max-w-none leading-relaxed prose-p:mb-4 prose-li:mb-2"
+                        />
+                    </div>
                 </AccordionItem>
             </div>
-        </div>
+        </div >
     );
 }
 
@@ -631,7 +702,7 @@ const AccordionItem = ({ id, title, icon: Icon, children, openAccordion, toggleA
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                 >
-                    <div className="pt-4 pb-2 text-[14px] text-neutral-base-500 leading-relaxed font-sans">
+                    <div className="pt-4 pb-2 text-[14px] text-neutral-base-500 leading-relaxed font-montserrat">
                         {children}
                     </div>
                 </motion.div>
