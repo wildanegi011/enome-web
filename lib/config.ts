@@ -36,9 +36,9 @@ export const CONFIG = {
         2: "hargaAgen",
         3: "hargaReseller",
         4: "hargaJual",
-        5: "harga_super_gold",
-        6: "harga_sub_agen",
-        7: "harga_marketer",
+        5: "hargaSuperGold",
+        6: "hargaSubAgen",
+        7: "hargaMarketer",
     } as Record<number, string>,
 
     // Order Status Configurations

@@ -2,6 +2,7 @@
 
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Tooltip,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Heart } from "lucide-react";
 import Link from 'next/link';
+import { useAuth } from "@/hooks/use-auth";
 import { useWishlist, useToggleWishlist } from "@/hooks/use-wishlist";
 import { useCartItems } from "@/hooks/use-cart-items";
 import { CartItem } from "@/lib/api/cart-api";
@@ -46,6 +48,8 @@ interface ProductCardProps {
 export default function ProductCard({ product, index }: ProductCardProps) {
     const [hoverState, setHoverState] = useState<'none' | 'card' | 'colors'>('none');
     const colors = product.colors || [];
+    const { isAuthenticated } = useAuth();
+    const router = useRouter();
 
     const { data: wishlistData } = useWishlist();
     const toggleWishlist = useToggleWishlist();
@@ -62,6 +66,10 @@ export default function ProductCard({ product, index }: ProductCardProps) {
     const handleWishlist = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        if (!isAuthenticated) {
+            router.push('/login');
+            return;
+        }
         if (product.id) {
             toggleWishlist.mutate({
                 produkId: product.id,

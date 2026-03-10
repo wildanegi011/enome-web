@@ -41,7 +41,7 @@ export class CartService {
             variant: keranjang.variant,
             qty: keranjang.qtyProduk,
             storedHarga: keranjang.hargaPoduk,
-            normalHarga: (produkDetail as any)[priceColumnName],
+            normalHarga: (produkDetail as any)[priceColumnName] ?? produkDetail.hargaJual,
             gambar: sql<string>`COALESCE(
                 (SELECT CONCAT('produk/', pi2.gambar) 
                  FROM produk_image pi2 
