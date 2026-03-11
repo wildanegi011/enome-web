@@ -182,7 +182,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
     // Components for Header, Form, and Footer moved into variables or defined outside
     // to prevent re-mounting on every state update (fixing the typing bug)
 
-    const headerTitle = mode === "edit" ? "Ubah Alamat" : "Tambah Alamat Baru";
+    const headerTitle = mode === "edit" ? "Ubah Alamat" : "Alamat Baru";
     const headerDescription = mode === "edit" ? "Perbarui informasi pengiriman kamu" : "Kirim pesanan kamu ke lokasi yang tepat";
 
     const HeaderContent = (
@@ -191,7 +191,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                 <MapPin className="w-6 h-6 md:w-7 md:h-7 text-amber-800" />
             </div>
             <div>
-                <h2 className="text-[20px] md:text-[24px] font-black tracking-tight text-neutral-base-900 leading-tight">
+                <h2 className="text-[20px] md:text-[24px] font-semibold tracking-tight text-neutral-base-900 leading-tight">
                     {headerTitle}
                 </h2>
                 <p className="text-[12px] md:text-[13px] font-bold text-neutral-base-400 mt-0.5 md:mt-1">
@@ -236,7 +236,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                                 type="tel"
                                 placeholder="0812..."
                                 value={formData.noHandphone}
-                                onChange={(e) => setFormData({ ...formData, noHandphone: e.target.value })}
+                                onChange={(e) => setFormData({ ...formData, noHandphone: e.target.value.replace(/\D/g, "") })}
                                 className="h-14 bg-neutral-base-50/30 border-neutral-base-100/60 rounded-[20px] pl-12 pr-6 font-bold text-[14px] focus:bg-white focus:border-amber-800 focus:ring-4 focus:ring-amber-50/50 transition-all placeholder:text-neutral-base-300"
                             />
                         </div>
@@ -351,7 +351,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                             required
                             placeholder="12345"
                             value={formData.kodePos}
-                            onChange={(e) => setFormData({ ...formData, kodePos: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, kodePos: e.target.value.replace(/\D/g, "") })}
                             className="h-14 bg-neutral-base-50/30 border-neutral-base-100/60 rounded-[20px] px-6 font-bold text-[14px] focus:bg-white focus:border-amber-800 focus:ring-4 focus:ring-amber-50/50 transition-all placeholder:text-neutral-base-300"
                         />
                     </div>

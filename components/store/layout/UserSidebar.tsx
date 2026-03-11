@@ -70,12 +70,12 @@ export default function UserSidebar({ className, isSheet }: { className?: string
                         ) : user ? (
                             <>
                                 <h3 className="text-[14px] font-bold text-neutral-base-900 truncate">{user.name}</h3>
-                                <p className="text-[11px] text-neutral-base-400 font-medium truncate">{user.email}</p>
+                                <p className="text-[12px] text-neutral-base-400 font-medium truncate">{user.email}</p>
                             </>
                         ) : (
                             <>
                                 <h3 className="text-[14px] font-bold text-neutral-base-900 truncate">Tamu</h3>
-                                <p className="text-[11px] text-neutral-base-400 font-medium truncate">Silakan login</p>
+                                <p className="text-[12px] text-neutral-base-400 font-medium truncate">Silakan login</p>
                             </>
                         )}
                     </div>

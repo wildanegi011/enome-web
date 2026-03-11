@@ -61,7 +61,7 @@ export default function AddressesPage() {
                         >
                             <Button
                                 onClick={handleAdd}
-                                className="hidden h-12 md:h-14 px-6 md:px-8 rounded-xl md:rounded-2xl bg-neutral-base-900 text-white font-bold tracking-widest uppercase hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 gap-3 group shrink-0 w-full sm:w-auto text-[11px] md:text-[13px]"
+                                className="hidden h-12 px-6 md:px-8 rounded-xl md:rounded-2xl bg-neutral-base-900 text-white font-bold tracking-widest uppercase hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 gap-3 group shrink-0 w-full sm:w-auto text-[11px] md:text-[13px]"
                             >
                                 <Plus className="w-4 h-4 md:w-5 md:h-5 group-hover:rotate-90 transition-transform duration-300" />
                                 Tambah Alamat
@@ -78,7 +78,7 @@ export default function AddressesPage() {
                                     className="bg-white/60 backdrop-blur-md"
                                 />
                                 <div className="px-6 py-3 bg-white/60 backdrop-blur-md border border-neutral-base-100/60 rounded-[20px] shadow-sm hidden md:block shrink-0">
-                                    <span className="text-[11px] font-black uppercase tracking-widest text-neutral-base-400">Total: {addresses.length} Alamat</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-base-400">Total: {addresses.length} Alamat</span>
                                 </div>
                             </div>
                         </div>
@@ -117,8 +117,8 @@ export default function AddressesPage() {
                                         <Plus className="w-8 h-8" />
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-sm font-black uppercase tracking-widest text-neutral-base-900 mb-1">Tambah Lokasi Baru</p>
-                                        <p className="text-[12px] font-bold text-neutral-base-400">Simpan alamat pengiriman lainnya</p>
+                                        <p className="text-[13px] font-black uppercase tracking-widest text-neutral-base-900 mb-1">Tambah Lokasi Baru</p>
+                                        <p className="text-[11px] font-bold text-neutral-base-400">Simpan alamat pengiriman lainnya</p>
                                     </div>
                                 </motion.button>
                             </div>

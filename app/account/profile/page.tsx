@@ -131,8 +131,8 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="flex flex-col items-center sm:items-start text-center sm:text-left space-y-4">
                                     <div className="space-y-1">
-                                        <h3 className="text-[16px] font-bold text-[#111827]">Foto Profil</h3>
-                                        <p className="text-[12px] md:text-[13px] text-neutral-base-400 font-medium">Maksimal 2MB. Format JPG, PNG, atau GIF.</p>
+                                        <h3 className="text-[18px] font-bold text-[#111827]">Foto Profil</h3>
+                                        <p className="text-[12px] text-neutral-base-400 font-medium leading-relaxed">Maksimal 2MB. Format JPG, PNG, atau GIF.</p>
                                     </div>
                                     <input
                                         type="file"
@@ -144,7 +144,7 @@ export default function ProfilePage() {
                                     <Button
                                         type="button"
                                         onClick={handlePhotoClick}
-                                        className="h-9 md:h-10 px-6 bg-[#111827] text-white rounded-xl text-[11px] md:text-[12px] font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-900/10"
+                                        className="h-9 md:h-10 px-6 bg-[#111827] text-white rounded-xl text-[14px] font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-900/10"
                                     >
                                         Ubah Foto
                                     </Button>
@@ -209,7 +209,7 @@ export default function ProfilePage() {
                                                 )}
                                             >
                                                 <RadioGroupItem value="1" id="gender-male" className="border-neutral-base-300 text-amber-800" />
-                                                <Label htmlFor="gender-male" className="font-bold text-[13px] cursor-pointer w-full py-1 text-neutral-base-900">Laki-laki</Label>
+                                                <Label htmlFor="gender-male" className="font-bold text-[14px] cursor-pointer w-full py-1 text-neutral-base-900">Laki-laki</Label>
                                             </div>
                                             <div
                                                 className={cn(
@@ -218,7 +218,7 @@ export default function ProfilePage() {
                                                 )}
                                             >
                                                 <RadioGroupItem value="2" id="gender-female" className="border-neutral-base-300 text-amber-800" />
-                                                <Label htmlFor="gender-female" className="font-bold text-[13px] cursor-pointer w-full py-1 text-neutral-base-900">Perempuan</Label>
+                                                <Label htmlFor="gender-female" className="font-bold text-[14px] cursor-pointer w-full py-1 text-neutral-base-900">Perempuan</Label>
                                             </div>
                                         </RadioGroup>
                                     </div>
@@ -254,7 +254,7 @@ export default function ProfilePage() {
                                     <Button
                                         type="submit"
                                         disabled={updateProfileMutation.isPending}
-                                        className="h-11 md:h-12 px-10 bg-[#111827] text-white rounded-xl text-[13px] md:text-[14px] font-bold shadow-xl shadow-gray-900/10 hover:bg-gray-800 transition-all w-full sm:min-w-[140px] sm:w-auto flex items-center justify-center gap-2"
+                                        className="h-11 md:h-12 px-10 bg-[#111827] text-white rounded-xl text-[14px] font-bold shadow-xl shadow-gray-900/10 hover:bg-gray-800 transition-all w-full sm:min-w-[140px] sm:w-auto flex items-center justify-center gap-2"
                                     >
                                         {updateProfileMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                                         Simpan Perubahan

@@ -47,7 +47,7 @@ export default function ShippingInfoCard({
                 <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10">
                     <Truck className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-[15px] md:text-[16px] font-bold text-neutral-base-900 uppercase tracking-tight">Informasi Pengiriman</h2>
+                <h2 className="text-[18px] font-bold text-neutral-base-900 uppercase tracking-tight">Informasi Pengiriman</h2>
             </div>
 
             <div className="space-y-8">
@@ -57,11 +57,11 @@ export default function ShippingInfoCard({
                         <User className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-neutral-base-300 mb-1.5">Penerima</p>
-                        <p className="text-[15px] font-black text-neutral-base-900 uppercase">{namaPenerima}</p>
+                        <p className="text-[12px] font-bold uppercase tracking-widest text-neutral-base-300 mb-1.5">Penerima</p>
+                        <p className="text-[16px] font-bold text-neutral-base-900 uppercase">{namaPenerima}</p>
                         <div className="flex items-center gap-2 mt-1.5 text-neutral-base-500">
                             <Phone className="w-3.5 h-3.5" />
-                            <span className="text-[13px] font-bold">{phone}</span>
+                            <span className="text-[14px] font-bold">{phone}</span>
                         </div>
                     </div>
                 </div>
@@ -74,11 +74,11 @@ export default function ShippingInfoCard({
                         <MapPin className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-neutral-base-300 mb-1.5">Alamat Tujuan</p>
-                        <p className="text-[13px] font-medium text-neutral-base-500 leading-relaxed max-w-[500px]">
+                        <p className="text-[12px] font-bold uppercase tracking-widest text-neutral-base-300 mb-1.5">Alamat Tujuan</p>
+                        <p className="text-[14px] font-medium text-neutral-base-500 leading-relaxed max-w-[500px]">
                             {alamatKirim}
                         </p>
-                        <p className="text-[13px] font-black text-neutral-base-900 mt-2 uppercase tracking-tight">
+                        <p className="text-[14px] font-bold text-neutral-base-900 mt-2 uppercase tracking-tight">
                             {distrikKirim}, {kotaKirim}, {provinsiKirim}
                         </p>
                     </div>
@@ -92,7 +92,7 @@ export default function ShippingInfoCard({
                         <Truck className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-neutral-base-300 mb-1.5">Ekspedisi & Layanan</p>
+                        <p className="text-[12px] font-bold uppercase tracking-widest text-neutral-base-300 mb-1.5">Ekspedisi & Layanan</p>
                         <p className="text-[14px] font-black text-neutral-base-900 uppercase flex items-center gap-2">
                             {ekspedisi}
                             <span className="w-1 h-1 rounded-full bg-neutral-base-200" />
@@ -109,10 +109,10 @@ export default function ShippingInfoCard({
                         <Search className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-neutral-base-300 mb-1.5">Nomor Resi</p>
+                        <p className="text-[12px] font-bold uppercase tracking-widest text-neutral-base-300 mb-1.5">Nomor Resi</p>
                         <div className="flex items-center gap-3">
                             <p className={cn(
-                                "text-[16px] font-black tracking-tight",
+                                "text-[16px] font-bold tracking-tight",
                                 noResi ? "text-neutral-base-900" : "text-neutral-base-300 italic"
                             )}>
                                 {noResi || "MENUNGGU UPDATE"}

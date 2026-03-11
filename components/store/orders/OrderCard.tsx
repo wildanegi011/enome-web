@@ -58,7 +58,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                     </div>
                     <div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-[14px] md:text-[15px] font-bold text-neutral-base-900 uppercase tracking-tight">{order.orderId}</h3>
+                            <h3 className="text-[14px] font-bold text-neutral-base-900 uppercase tracking-tight">{order.orderId}</h3>
                             <span className={cn("px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest", status.bg, status.color)}>
                                 {status.label}
                             </span>
@@ -68,14 +68,14 @@ export default function OrderCard({ order }: OrderCardProps) {
                                 </span>
                             )}
                         </div>
-                        <p className="text-[11px] md:text-[12px] text-neutral-base-400 font-medium mt-0.5 md:mt-1">
+                        <p className="text-[11px] text-neutral-base-400 font-medium mt-0.5 md:mt-1">
                             {order.updatedAt ? format(new Date(order.updatedAt.replace(" ", "T").replace("Z", "")), "dd MMM yyyy • HH:mm", { locale: id }) : order.tglOrder} WIB
                         </p>
                     </div>
                 </div>
                 <div className="text-left sm:text-right shrink-0">
-                    <p className="text-[10px] md:text-[11px] font-black text-neutral-base-300 uppercase tracking-widest mb-1">Total Belanja</p>
-                    <p className="text-[16px] md:text-[18px] font-medium text-neutral-base-900 leading-none">
+                    <p className="text-[12px] font-bold text-neutral-base-300 uppercase tracking-widest mb-1.5">Total Belanja</p>
+                    <p className="text-[16px] font-medium text-neutral-base-900 leading-none">
                         {formatCurrency(order.totalTagihan)}
                     </p>
                 </div>
@@ -94,8 +94,8 @@ export default function OrderCard({ order }: OrderCardProps) {
                         />
                     </div>
                     <div className="min-w-0 pr-4">
-                        <h4 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900 truncate max-w-full">{order.firstItemName}</h4>
-                        <p className="text-[11px] md:text-[12px] text-neutral-base-400 font-medium mt-1">
+                        <h4 className="text-[16px] font-bold text-neutral-base-900 truncate max-w-full">{order.firstItemName}</h4>
+                        <p className="text-[14px] text-neutral-base-400 font-medium mt-1">
                             {order.firstItemSize && `Ukuran: ${order.firstItemSize} • `}
                             {order.itemCount && order.itemCount > 1 ? `${order.totalOrder} barang` : "1 barang"}
                         </p>

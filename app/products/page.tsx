@@ -1,34 +1,32 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback, Suspense } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import FilterSidebar, { FilterState } from "@/components/store/product/FilterSidebar";
+import ProductListHeader, { SortOption } from "@/components/store/product/ProductListHeader";
+import Navbar from "@/components/store/layout/Navbar";
+import Footer from "@/components/store/layout/Footer";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { SlidersHorizontal, Search } from "lucide-react";
+import { useProducts, useCategories, useColors, useSizes } from "@/hooks/use-products";
+import type { Category, Color, Size } from "@/hooks/use-products";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import EmptyState from "@/components/store/shared/EmptyState";
+import CONFIG from "@/lib/config";
+
+// New Components
+import ProductListSkeleton from "@/components/store/product/ProductListSkeleton";
+import Pagination from "@/components/store/shared/Pagination";
+import ProductGrid from "@/components/store/product/ProductGrid";
+import StickyHeader from "@/components/store/product/StickyHeader";
+
 export interface FilterStateWithSearch extends FilterState {
     search?: string;
 }
-import ProductListHeader, { SortOption } from "@/components/store/product/ProductListHeader";
-import ProductCard from "@/components/store/product/ProductCard";
-import Navbar from "@/components/store/layout/Navbar";
-import Footer from "@/components/store/layout/Footer";
-import ResultsInfo from "@/components/store/shared/ResultsInfo";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { SlidersHorizontal, Loader2, Search, ChevronDown } from "lucide-react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { useProducts, useCategories, useColors, useSizes } from "@/hooks/use-products";
-import { ASSET_URL } from "@/config/config";
-import type { Category, Color, Size } from "@/hooks/use-products";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn, formatCurrency } from "@/lib/utils";
-
-import HeroSection from "@/components/store/home/HeroSection";
-import CONFIG from "@/lib/config";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import EmptyState from "@/components/store/shared/EmptyState";
 
 function ProductsContent() {
     const searchParams = useSearchParams();
-    const router = useRouter();
     const pathname = usePathname();
     const categoryFromUrl = searchParams.get("category");
     const searchFromUrl = searchParams.get("search");
@@ -40,119 +38,89 @@ function ProductsContent() {
         collection: categoryFromUrl ? [categoryFromUrl] : [],
         search: searchFromUrl || undefined
     });
+
     const [sortBy, setSortBy] = useState<SortOption>("newest");
+    const [currentPage, setCurrentPage] = useState(1);
+
     const { data: rawProducts = [], isLoading: productsLoading, isFetching: productsFetching } = useProducts(activeFilters);
     const { data: categoriesData = [], isLoading: categoriesLoading } = useCategories();
     const { data: colorsData = [], isLoading: colorsLoading } = useColors();
     const { data: sizesData = [], isLoading: sizesLoading } = useSizes();
 
-    // Only show skeleton on initial load when there's no data at all
     const isInitialLoading = (productsLoading && rawProducts.length === 0) || categoriesLoading || colorsLoading || sizesLoading;
     const isRefreshing = productsFetching && !productsLoading;
 
-    // Sync filters → URL (silently, no navigation/re-render)
+    // Sync filters to URL
     useEffect(() => {
         const params = new URLSearchParams();
-        if (activeFilters.collection.length > 0) {
-            params.set("category", activeFilters.collection.join(","));
-        }
-        if (activeFilters.search) {
-            params.set("search", activeFilters.search);
-        }
-        if (activeFilters.color.length > 0) {
-            params.set("color", activeFilters.color.join(","));
-        }
-        if (activeFilters.size.length > 0) {
-            params.set("size", activeFilters.size.join(","));
-        }
-        if (activeFilters.price.length > 0) {
-            params.set("price", activeFilters.price.join(","));
-        }
+        if (activeFilters.collection.length > 0) params.set("category", activeFilters.collection.join(","));
+        if (activeFilters.search) params.set("search", activeFilters.search);
+        if (activeFilters.color.length > 0) params.set("color", activeFilters.color.join(","));
+        if (activeFilters.size.length > 0) params.set("size", activeFilters.size.join(","));
+        if (activeFilters.price.length > 0) params.set("price", activeFilters.price.join(","));
+
         const qs = params.toString();
         const newUrl = qs ? `${pathname}?${qs}` : pathname;
         window.history.replaceState(null, "", newUrl);
     }, [activeFilters, pathname]);
 
-    const dynamicCollections = useMemo(() => {
-        return categoriesData.map((c: Category) => ({
-            name: c.kategori,
-            icon: c.gambarKategori || null
-        }));
-    }, [categoriesData]);
+    const dynamicCollections = useMemo(() => categoriesData.map((c: Category) => ({
+        name: c.kategori,
+        icon: c.gambarKategori || null
+    })), [categoriesData]);
 
-    const dynamicColors = useMemo(() => {
-        return colorsData.map((c: Color) => ({ name: c.warna, value: c.kodeWarna || "#CCCCCC" }));
-    }, [colorsData]);
+    const dynamicColors = useMemo(() => colorsData.map((c: Color) => ({
+        name: c.warna,
+        value: c.kodeWarna || "#CCCCCC"
+    })), [colorsData]);
 
-    const dynamicSizes = useMemo(() => {
-        return sizesData.map((s: Size) => s.size).filter(Boolean) as string[];
-    }, [sizesData]);
+    const dynamicSizes = useMemo(() => sizesData.map((s: Size) => s.size).filter(Boolean) as string[], [sizesData]);
 
     const handleFilterChange = useCallback((category: keyof FilterStateWithSearch, value: string) => {
         setActiveFilters(prev => {
             const current = prev[category];
-
             if (Array.isArray(current)) {
                 const updated = current.includes(value)
                     ? current.filter(item => item !== value)
                     : [...current, value];
                 return { ...prev, [category]: updated };
             } else {
-                const updated = current === value ? undefined : value;
-                return { ...prev, [category]: updated };
+                return { ...prev, [category]: current === value ? undefined : value };
             }
         });
+        setCurrentPage(1); // Reset to first page on filter change
     }, []);
 
-    // Use database-filtered products directly and apply client-side sorting
     const filteredProducts = useMemo(() => {
         let items = [...rawProducts];
-
-        // Sort items
         items.sort((a, b) => {
             switch (sortBy) {
-                case "price_asc":
-                    return Number(a.finalMinPrice || 0) - Number(b.finalMinPrice || 0);
-                case "price_desc":
-                    return Number(b.finalMinPrice || 0) - Number(a.finalMinPrice || 0);
-                case "name_asc":
-                    return a.namaProduk.localeCompare(b.namaProduk);
+                case "price_asc": return Number(a.finalMinPrice || 0) - Number(b.finalMinPrice || 0);
+                case "price_desc": return Number(b.finalMinPrice || 0) - Number(a.finalMinPrice || 0);
+                case "name_asc": return a.namaProduk.localeCompare(b.namaProduk);
                 case "newest":
                 default:
-                    // For "newest", if the API doesn't guarantee it, we sort by product ID descending or tglRilis
-                    // Assuming higher product ID or tglRilis is newer
-                    if (a.tglRilis && b.tglRilis) {
-                        return new Date(b.tglRilis).getTime() - new Date(a.tglRilis).getTime();
-                    }
+                    if (a.tglRilis && b.tglRilis) return new Date(b.tglRilis).getTime() - new Date(a.tglRilis).getTime();
                     return b.produkId.localeCompare(a.produkId);
             }
         });
-
         return items;
     }, [rawProducts, sortBy]);
 
-    // Pagination
     const ITEMS_PER_PAGE = CONFIG.PAGINATION.DEFAULT_LIMIT;
-    const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
     const paginatedProducts = useMemo(() => {
         const start = (currentPage - 1) * ITEMS_PER_PAGE;
         return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
-    }, [filteredProducts, currentPage]);
-
-    // Reset page when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [activeFilters]);
+    }, [filteredProducts, currentPage, ITEMS_PER_PAGE]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const viewport = document.querySelector('[data-radix-scroll-area-viewport]');
+        if (viewport) viewport.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    if (isInitialLoading) {
-        return <ProductListSkeleton />;
-    }
+    if (isInitialLoading) return <ProductListSkeleton />;
 
     return (
         <TooltipProvider>
@@ -194,8 +162,8 @@ function ProductsContent() {
                             </div>
 
                             <div className="flex flex-col lg:flex-row gap-16">
-                                {/* Desktop Sidebar (Left) */}
-                                <div className="hidden lg:block w-80 shrink-0 sticky top-[120px] h-[calc(100vh-140px)] z-50">
+                                {/* Desktop Sidebar */}
+                                <aside className="hidden lg:block w-80 shrink-0 sticky top-[120px] h-[calc(100vh-140px)] z-50">
                                     <FilterSidebar
                                         activeFilters={activeFilters}
                                         onFilterChange={handleFilterChange}
@@ -203,69 +171,18 @@ function ProductsContent() {
                                         colors={dynamicColors}
                                         sizes={dynamicSizes}
                                     />
-                                </div>
+                                </aside>
 
                                 {/* Main Content */}
                                 <div className="flex-1 relative">
-                                    {/* Subtle Loading Overlay */}
-                                    <AnimatePresence>
-                                        {isRefreshing && (
-                                            <motion.div
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                className="absolute inset-0 z-10 bg-white/20 backdrop-blur-[1px] flex justify-center pt-20"
-                                            >
-                                                <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-neutral-base-100 h-fit">
-                                                    <Loader2 className="w-4 h-4 animate-spin text-neutral-base-900" />
-                                                    <span className="text-[10px] font-bold tracking-[0.2em] uppercase font-montserrat italic">Updating...</span>
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-
-                                    {/* Sticky Results & Sorting Bar */}
-                                    <div className="sticky top-[80px] z-40 bg-white/95 backdrop-blur-md py-4 mb-6 border-b border-neutral-base-50 -mx-4 px-4 md:-mx-8 md:px-8 lg:mx-0 lg:px-0">
-                                        <div className="flex items-center justify-between">
-                                            <ResultsInfo
-                                                currentPage={currentPage}
-                                                itemsPerPage={ITEMS_PER_PAGE}
-                                                totalItems={filteredProducts.length}
-                                            />
-
-                                            {/* Sorting Dropdown */}
-                                            <div className="flex items-center gap-2">
-                                                <span className="hidden sm:inline text-[13px] text-neutral-base-400 font-montserrat">Urutkan:</span>
-                                                <div className="relative group">
-                                                    <button className="flex items-center gap-2 text-[13px] font-bold text-neutral-base-900 hover:text-neutral-base-600 transition-colors font-montserrat tracking-tight">
-                                                        {sortBy === "newest" ? "Terbaru" :
-                                                            sortBy === "price_asc" ? "Harga Terendah" :
-                                                                sortBy === "price_desc" ? "Harga Tertinggi" : "Nama A-Z"}
-                                                        <ChevronDown className="w-4 h-4" />
-                                                    </button>
-                                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-neutral-base-100 shadow-xl rounded-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
-                                                        {[
-                                                            { value: "newest", label: "Terbaru" },
-                                                            { value: "price_asc", label: "Harga Terendah" },
-                                                            { value: "price_desc", label: "Harga Tertinggi" },
-                                                            { value: "name_asc", label: "Nama A-Z" },
-                                                        ].map((option) => (
-                                                            <button
-                                                                key={option.value}
-                                                                onClick={() => setSortBy(option.value as SortOption)}
-                                                                className={cn(
-                                                                    "w-full text-left px-4 py-2 text-[13px] hover:bg-neutral-base-50 transition-colors font-montserrat",
-                                                                    sortBy === option.value ? "text-neutral-base-900 font-bold" : "text-neutral-base-500"
-                                                                )}
-                                                            >
-                                                                {option.label}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <StickyHeader
+                                        currentPage={currentPage}
+                                        itemsPerPage={ITEMS_PER_PAGE}
+                                        totalItems={filteredProducts.length}
+                                        sortBy={sortBy}
+                                        onSortChange={setSortBy}
+                                        isRefreshing={isRefreshing}
+                                    />
 
                                     {filteredProducts.length === 0 ? (
                                         <EmptyState
@@ -277,72 +194,15 @@ function ProductsContent() {
                                             className="py-20 border-dashed"
                                         />
                                     ) : (
-                                        <LayoutGroup>
-                                            <motion.div
-                                                layout
-                                                className={cn(
-                                                    "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-x-6 gap-y-12 transition-opacity duration-500",
-                                                    isRefreshing ? "opacity-40" : "opacity-100"
-                                                )}
-                                            >
-                                                <AnimatePresence mode="popLayout">
-                                                    {paginatedProducts.map((p: any, idx) => {
-                                                        const colorArray = p.colors
-                                                            ? p.colors.split(",").map((c: string) => {
-                                                                const [name, value] = c.split("|");
-                                                                return { name, value };
-                                                            })
-                                                            : [];
-
-                                                        const formatPriceRange = (min: any, max: any) => {
-                                                            const nMin = parseInt(min);
-                                                            const nMax = parseInt(max);
-                                                            if (!nMax || nMin === nMax) return formatCurrency(nMin);
-                                                            return `${formatCurrency(nMin)} - ${formatCurrency(nMax)}`;
-                                                        };
-
-                                                        const mappedProduct = {
-                                                            id: p.produkId,
-                                                            name: p.namaProduk,
-                                                            image: p.gambar ? `${ASSET_URL}/img/produk_utama/${p.gambar}` : "/placeholder.jpg",
-                                                            category: p.kategori,
-                                                            colors: colorArray,
-                                                            price: formatPriceRange(p.finalMinPrice, p.finalMaxPrice),
-                                                            originalPrice: (p.finalMinPrice !== p.baseMinPrice || p.finalMaxPrice !== p.baseMaxPrice)
-                                                                ? formatPriceRange(p.baseMinPrice, p.baseMaxPrice)
-                                                                : undefined,
-                                                            designer: "Handmade Batik by Énome",
-                                                            totalStock: p.totalStock ? parseInt(p.totalStock.toString()) : 0,
-                                                            isOnFlashSale: p.isOnFlashSale,
-                                                            discountPercentage: p.discountPercentage,
-                                                            isOnPreOrder: p.isOnPreOrder,
-                                                            commission: p.hasCommission ? formatPriceRange(p.commissionMin, p.commissionMax) : undefined,
-                                                            hasCommission: p.hasCommission
-                                                        };
-                                                        return (
-                                                            <motion.div
-                                                                key={p.produkId}
-                                                                layout
-                                                                initial={{ opacity: 0, scale: 0.95 }}
-                                                                animate={{ opacity: 1, scale: 1 }}
-                                                                exit={{ opacity: 0, scale: 0.95 }}
-                                                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                                            >
-                                                                <ProductCard product={mappedProduct as any} index={idx} />
-                                                            </motion.div>
-                                                        );
-                                                    })}
-                                                </AnimatePresence>
-                                            </motion.div>
-                                        </LayoutGroup>
+                                        <ProductGrid products={paginatedProducts} isRefreshing={isRefreshing} />
                                     )}
 
-                                    {/* Pagination */}
                                     {totalPages > 1 && (
                                         <div className="mt-16">
-                                            <PaginationControls
+                                            <Pagination
                                                 currentPage={currentPage}
-                                                totalPages={totalPages}
+                                                totalItems={filteredProducts.length}
+                                                itemsPerPage={ITEMS_PER_PAGE}
                                                 onPageChange={handlePageChange}
                                             />
                                         </div>
@@ -363,114 +223,5 @@ export default function ProductsPage() {
         <Suspense fallback={<ProductListSkeleton />}>
             <ProductsContent />
         </Suspense>
-    );
-}
-
-function ProductListSkeleton() {
-    return (
-        <main className="h-screen overflow-hidden bg-white flex flex-col">
-            <ScrollArea className="flex-1">
-                <Navbar />
-                <div className="bg-white border-b border-neutral-base-50 h-[80px] flex items-center">
-                    <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 w-full">
-                        <Skeleton className="h-8 w-64" />
-                    </div>
-                </div>
-                <section className="py-12">
-                    <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
-                        <div className="flex flex-col lg:flex-row gap-16">
-                            <div className="hidden lg:block w-80 shrink-0 space-y-8 sticky top-[120px]">
-                                {[1, 2, 3].map((i) => (
-                                    <div key={i} className="space-y-4">
-                                        <Skeleton className="h-6 w-32" />
-                                        <div className="space-y-2">
-                                            <Skeleton className="h-4 w-full" />
-                                            <Skeleton className="h-4 w-5/6" />
-                                            <Skeleton className="h-4 w-4/6" />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="flex-1">
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-12">
-                                    {[1, 2, 3, 4, 6].map((i) => (
-                                        <div key={i} className="space-y-4">
-                                            <Skeleton className="aspect-3/4 w-full rounded-2xl bg-neutral-100" />
-                                            <div className="space-y-2">
-                                                <Skeleton className="h-4 w-3/4" />
-                                                <Skeleton className="h-4 w-1/2" />
-                                                <Skeleton className="h-4 w-1/4" />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <Footer />
-            </ScrollArea>
-        </main>
-    );
-}
-
-function PaginationControls({ currentPage, totalPages, onPageChange }: {
-    currentPage: number;
-    totalPages: number;
-    onPageChange: (page: number) => void;
-}) {
-    const getPageNumbers = () => {
-        const pages: (number | string)[] = [];
-        if (totalPages <= 7) {
-            for (let i = 1; i <= totalPages; i++) pages.push(i);
-        } else {
-            pages.push(1);
-            if (currentPage > 3) pages.push("...");
-            const start = Math.max(2, currentPage - 1);
-            const end = Math.min(totalPages - 1, currentPage + 1);
-            for (let i = start; i <= end; i++) pages.push(i);
-            if (currentPage < totalPages - 2) pages.push("...");
-            pages.push(totalPages);
-        }
-        return pages;
-    };
-
-    return (
-        <div className="flex items-center justify-center gap-1.5">
-            <button
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="h-10 px-3 flex items-center justify-center text-[13px] font-bold text-neutral-base-600 hover:text-neutral-base-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-montserrat"
-            >
-                ← Prev
-            </button>
-            {getPageNumbers().map((page, idx) =>
-                typeof page === "string" ? (
-                    <span key={`ellipsis-${idx}`} className="h-10 w-10 flex items-center justify-center text-neutral-base-300 text-[13px]">
-                        ···
-                    </span>
-                ) : (
-                    <button
-                        key={page}
-                        onClick={() => onPageChange(page)}
-                        className={cn(
-                            "h-10 w-10 flex items-center justify-center rounded-lg text-[13px] font-bold transition-all font-montserrat",
-                            currentPage === page
-                                ? "bg-neutral-base-900 text-white shadow-md"
-                                : "text-neutral-base-400 hover:bg-neutral-base-50 hover:text-neutral-base-900"
-                        )}
-                    >
-                        {page}
-                    </button>
-                )
-            )}
-            <button
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="h-10 px-3 flex items-center justify-center text-[13px] font-bold text-neutral-base-600 hover:text-neutral-base-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-montserrat"
-            >
-                Next →
-            </button>
-        </div>
     );
 }

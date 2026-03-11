@@ -78,7 +78,7 @@ export default function Navbar() {
                                         key={link.name}
                                         href={link.path}
                                         className={cn(
-                                            "text-[14px] font-semibold tracking-widest uppercase transition-all duration-300 relative font-montserrat",
+                                            "text-[12px] font-bold tracking-[0.15em] uppercase transition-all duration-300 relative font-montserrat",
                                             isActive ? "text-neutral-base-900" : "text-neutral-base-500 hover:text-amber-800"
                                         )}
                                     >
@@ -218,7 +218,7 @@ export default function Navbar() {
                                 <>
                                     <button
                                         onClick={() => router.push("/login")}
-                                        className="text-[14px] font-semibold text-neutral-base-500 hover:text-neutral-base-900 transition-colors font-montserrat"
+                                        className="text-[12px] font-bold tracking-[0.1em] text-neutral-base-500 hover:text-neutral-base-900 transition-colors font-montserrat"
                                     >
                                         MASUK
                                     </button>
@@ -278,7 +278,7 @@ export default function Navbar() {
                                     key={link.name}
                                     href={link.path}
                                     className={cn(
-                                        "text-sm font-bold uppercase tracking-widest py-2 px-4 rounded-xl transition-all",
+                                        "text-[12px] font-bold uppercase tracking-[0.15em] py-3 px-5 rounded-xl transition-all font-montserrat",
                                         pathname === link.path ? "text-neutral-base-900 bg-neutral-base-50" : "text-neutral-base-400"
                                     )}
                                 >
@@ -311,13 +311,13 @@ export default function Navbar() {
                                 <div className="flex flex-col gap-3">
                                     <button
                                         onClick={() => { setMobileOpen(false); router.push("/login"); }}
-                                        className="text-[12px] font-bold uppercase tracking-widest text-neutral-base-900 py-3 border border-neutral-base-200 rounded-xl"
+                                        className="text-[12px] font-bold uppercase tracking-[0.1em] text-neutral-base-900 py-4 border border-neutral-base-200 rounded-xl font-montserrat"
                                     >
                                         Masuk
                                     </button>
                                     <button
                                         onClick={() => { setMobileOpen(false); router.push("/register"); }}
-                                        className="text-[12px] font-bold uppercase tracking-widest text-white py-3 bg-neutral-base-900 rounded-xl shadow-lg shadow-neutral-base-900/10"
+                                        className="text-[12px] font-bold uppercase tracking-[0.1em] text-white py-4 bg-neutral-base-900 rounded-xl shadow-lg shadow-neutral-base-900/10 font-montserrat"
                                     >
                                         Daftar
                                     </button>
