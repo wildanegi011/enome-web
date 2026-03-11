@@ -380,7 +380,12 @@ export const companyProfile = mysqlTable("companyprofile", {
     id: serial("id").primaryKey(),
     namaPerusahaan: varchar("nama", { length: 255 }),
     alamat: text("alamat"),
+    kecamatan: varchar("kecamatan", { length: 100 }),
     kota: varchar("kota", { length: 100 }),
+    propinsi: varchar("propinsi", { length: 100 }),
+    telp: varchar("telp", { length: 15 }),
+    email: varchar("email", { length: 100 }),
+    logo: varchar("logo", { length: 50 }),
     isAktif: int("is_aktif").default(0),
 });
 

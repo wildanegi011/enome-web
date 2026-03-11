@@ -39,16 +39,12 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Ambil Kota Asal (Origin) dari Config atau Profil Perusahaan
-        const configOrigin = await ConfigService.get("origin_city");
-        let origin = configOrigin;
+        const [company]: any = await db.select()
+            .from(companyProfile)
+            .where(eq(companyProfile.isAktif, 1))
+            .limit(1);
 
-        if (!origin) {
-            const [company]: any = await db.select()
-                .from(companyProfile)
-                .where(eq(companyProfile.isAktif, 1))
-                .limit(1);
-            origin = company?.kota || CONFIG.DEFAULT_ORIGIN_CITY;
-        }
+        const origin = company?.kecamatan || CONFIG.DEFAULT_ORIGIN_CITY;
 
         // 3. Ambil daftar kurir aktif dari DB
         const activeCouriers = await db.select()
@@ -77,7 +73,13 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Panggil API Komerce untuk SEMUA kurir aktif
-        logger.debug("Shipping Calc: Calling Komerce API", { origin, destination, weight, courierCodes });
+        logger.info("Shipping Calc: Calling Komerce API", {
+            origin,
+            destination,
+            weight,
+            courierCodes,
+            originSource: company ? "Database (companyprofile.kecamatan)" : "Default Config"
+        });
 
         const automatedCodes = ['jne', 'pos', 'wahana', 'tiki', 'jnt', 'sicepat', 'ninja', 'lion', 'anteraja', 'idexpress'];
         let rajaOngkirResults: any[] = [];

@@ -70,13 +70,13 @@ const SearchMenuContent = ({
 }) => (
     <CommandList className="max-h-none pb-6">
         {/* Empty State */}
-        <CommandEmpty className="py-16 flex flex-col items-center justify-center gap-4 text-zinc-100">
-            <div className="size-14 rounded-2xl bg-white/5 flex items-center justify-center">
-                <Search className="size-6 text-zinc-500" />
+        <CommandEmpty className="py-16 flex flex-col items-center justify-center gap-4 text-zinc-400">
+            <div className="size-14 rounded-2xl bg-zinc-100 flex items-center justify-center border border-zinc-200/50">
+                <Search className="size-6 text-zinc-300" />
             </div>
             <div className="text-center space-y-1">
-                <p className="text-zinc-300 text-sm font-semibold">Tidak ada hasil ditemukan</p>
-                <p className="text-zinc-500 text-xs">Coba dengan kata kunci lain</p>
+                <p className="text-zinc-600 text-sm font-semibold">Tidak ada hasil ditemukan</p>
+                <p className="text-zinc-400 text-xs">Coba dengan kata kunci lain</p>
             </div>
         </CommandEmpty>
 
@@ -94,7 +94,7 @@ const SearchMenuContent = ({
                                 </div>
                                 <button
                                     onClick={onClearRecent}
-                                    className="text-[10px] font-medium text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+                                    className="text-[10px] font-medium text-zinc-400 hover:text-zinc-900 transition-colors cursor-pointer"
                                 >
                                     Bersihkan semua
                                 </button>
@@ -106,12 +106,12 @@ const SearchMenuContent = ({
                                 <CommandItem
                                     key={term}
                                     onSelect={() => onSelectRecent(term)}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 data-[selected=true]:bg-white/10 text-[13px] font-medium text-zinc-300 hover:text-white data-[selected=true]:text-white cursor-pointer transition-colors group/item font-montserrat"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 data-[selected=true]:bg-zinc-200 text-[13px] font-medium text-zinc-600 hover:text-zinc-900 data-[selected=true]:text-zinc-900 cursor-pointer transition-colors group/item font-montserrat"
                                 >
                                     {term}
                                     <button
                                         onClick={(e) => { e.stopPropagation(); onRemoveRecent(term); }}
-                                        className="size-3.5 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors cursor-pointer text-zinc-500 group-hover/item:text-zinc-300"
+                                        className="size-3.5 rounded-full hover:bg-zinc-300 flex items-center justify-center transition-colors cursor-pointer text-zinc-400 group-hover/item:text-zinc-600"
                                     >
                                         <X className="size-2.5" />
                                     </button>
@@ -140,7 +140,7 @@ const SearchMenuContent = ({
                                         router.push(`/products?category=${cat.kategori}`);
                                         setIsSearchOpen(false);
                                     }}
-                                    className="inline-flex items-center px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/10 data-[selected=true]:bg-white/10 text-[13px] font-semibold text-zinc-300 hover:text-white data-[selected=true]:text-white cursor-pointer transition-colors font-montserrat"
+                                    className="inline-flex items-center px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 data-[selected=true]:bg-zinc-50 text-[13px] font-semibold text-zinc-500 hover:text-zinc-900 data-[selected=true]:text-zinc-900 cursor-pointer transition-colors font-montserrat"
                                 >
                                     {cat.kategori}
                                 </CommandItem>
@@ -172,9 +172,9 @@ const SearchMenuContent = ({
                                 router.push(`/products/${product.produkId}`);
                                 setIsSearchOpen(false);
                             }}
-                            className="group/prod flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 data-[selected=true]:bg-white/5 cursor-pointer transition-colors"
+                            className="group/prod flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-50 data-[selected=true]:bg-zinc-50 cursor-pointer transition-colors"
                         >
-                            <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-white/5 shrink-0">
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-zinc-100 shrink-0 border border-zinc-200/50">
                                 <Image
                                     src={`${ASSET_URL}/img/produk_utama/${product.gambar}` || "/placeholder.png"}
                                     alt={product.namaProduk}
@@ -183,10 +183,10 @@ const SearchMenuContent = ({
                                 />
                             </div>
                             <div className="flex flex-col min-w-0 gap-0.5">
-                                <span className="font-bold text-[16px] text-zinc-200 truncate font-montserrat leading-tight tracking-tight">{product.namaProduk}</span>
+                                <span className="font-bold text-[16px] text-zinc-900 truncate font-montserrat leading-tight tracking-tight">{product.namaProduk}</span>
                                 <span className="text-[12px] text-zinc-500 font-montserrat">{product.kategori}</span>
                             </div>
-                            <span className="ml-auto text-[16px] font-medium text-white shrink-0 font-montserrat tracking-tight">
+                            <span className="ml-auto text-[16px] font-medium text-zinc-950 shrink-0 font-montserrat tracking-tight">
                                 {product.finalMinPrice ? formatCurrency(Number(product.finalMinPrice)) : "—"}
                             </span>
                         </CommandItem>
@@ -198,12 +198,12 @@ const SearchMenuContent = ({
         {/* Quick Links (idle only) */}
         {!searchQuery && (
             <>
-                <div className="my-3 h-px bg-white/5 mx-4" />
+                <div className="my-3 h-px bg-zinc-100 mx-4" />
                 <CommandGroup
                     heading={
                         <div className="flex items-center gap-2 px-4 pt-1 pb-2">
-                            <Compass className="size-3 text-zinc-500" />
-                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 font-montserrat">Tautan cepat</span>
+                            <Compass className="size-3 text-zinc-400" />
+                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-montserrat">Tautan cepat</span>
                         </div>
                     }
                 >
@@ -218,13 +218,13 @@ const SearchMenuContent = ({
                                     router.push(link.path);
                                     setIsSearchOpen(false);
                                 }}
-                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 data-[selected=true]:bg-white/5 cursor-pointer transition-colors"
+                                className="group flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-50 data-[selected=true]:bg-zinc-50 cursor-pointer transition-colors"
                             >
-                                <div className="size-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white/10 group-data-[selected=true]:bg-white/10 transition-colors">
-                                    <link.icon className="size-4 text-zinc-400 group-hover:text-white group-data-[selected=true]:text-white" />
+                                <div className="size-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0 group-hover:bg-zinc-200 group-data-[selected=true]:bg-zinc-200 transition-colors">
+                                    <link.icon className="size-4 text-zinc-500 group-hover:text-zinc-900 group-data-[selected=true]:text-zinc-900" />
                                 </div>
-                                <span className="text-sm font-medium text-zinc-300 group-hover:text-white group-data-[selected=true]:text-white">{link.label}</span>
-                                <ChevronRight className="ml-auto size-4 text-zinc-600 group-hover:text-zinc-400" />
+                                <span className="text-sm font-medium text-zinc-600 group-hover:text-zinc-900 group-data-[selected=true]:text-zinc-900">{link.label}</span>
+                                <ChevronRight className="ml-auto size-4 text-zinc-300 group-hover:text-zinc-500" />
                             </CommandItem>
                         ))}
                     </div>
@@ -305,12 +305,12 @@ export default function SearchModal({
     if (isMobile) {
         return (
             <Drawer open={isOpen} onOpenChange={onOpenChange}>
-                <DrawerContent className="bg-zinc-950/90 backdrop-blur-xl text-white rounded-t-3xl h-[90vh] border-t border-white/10 p-0 overflow-hidden">
+                <DrawerContent className="bg-white text-zinc-900 rounded-t-3xl h-[90vh] border-t border-zinc-100 p-0 overflow-hidden">
                     <DrawerHeader className="sr-only">
                         <DrawerTitle>Cari</DrawerTitle>
                     </DrawerHeader>
 
-                    <div className="mx-auto mt-3 h-1 w-10 rounded-full bg-stone-200" />
+                    <div className="mx-auto mt-3 h-1 w-10 rounded-full bg-zinc-100" />
 
                     <Command shouldFilter={false} className="bg-transparent flex flex-col h-full overflow-hidden">
                         <div className="px-4 pt-4 pb-2 shrink-0 [&_svg]:text-zinc-400 [&_svg]:opacity-100 [&_svg]:shrink-0">
@@ -325,7 +325,7 @@ export default function SearchModal({
                                         handleSearchSubmit();
                                     }
                                 }}
-                                className="h-12 text-base bg-white/5 focus:bg-white/10 rounded-xl border border-white/10 focus:border-white/20 focus:ring-0 placeholder:text-zinc-600 text-white font-semibold w-full transition-all font-montserrat tracking-tight"
+                                className="h-12 text-base bg-zinc-50 focus:bg-zinc-100/50 rounded-xl border border-zinc-200 focus:border-zinc-300 focus:ring-0 placeholder:text-zinc-400 text-zinc-900 font-semibold w-full transition-all font-montserrat tracking-tight"
                             />
                         </div>
                         <ScrollArea className="flex-1">
@@ -347,13 +347,13 @@ export default function SearchModal({
                 }
                 onOpenChange(open);
             }}
-            className="bg-zinc-950/90 backdrop-blur-xl border border-white/10 text-white rounded-2xl overflow-hidden shadow-[0_25px_60px_-12px_rgba(0,0,0,0.5)] max-w-lg"
+            className="bg-white border border-zinc-200 text-zinc-900 rounded-2xl overflow-hidden shadow-[0_25px_60px_-12px_rgba(0,0,0,0.15)] max-w-lg"
             commandClassName="bg-transparent"
             showCloseButton={false}
             shouldFilter={false}
         >
             {/* Search Input */}
-            <div className="px-4 pt-4 pb-3 bg-zinc-950/40 [&_svg]:text-zinc-400 [&_svg]:opacity-100 [&_svg]:shrink-0">
+            <div className="px-4 pt-4 pb-3 bg-zinc-50/50 [&_svg]:text-zinc-400 [&_svg]:opacity-100 [&_svg]:shrink-0">
                 <CommandInput
                     placeholder="Cari produk"
                     value={searchValue}
@@ -363,12 +363,12 @@ export default function SearchModal({
                             handleSearchSubmit();
                         }
                     }}
-                    className="h-11 text-sm border-none focus:ring-0 placeholder:text-zinc-600 text-white font-semibold bg-white/5 focus:bg-white/7 rounded-xl px-4 w-full transition-all font-montserrat tracking-tight"
+                    className="h-11 text-sm border-none focus:ring-0 placeholder:text-zinc-400 text-zinc-900 font-semibold bg-white focus:bg-zinc-50 rounded-xl px-4 w-full transition-all font-montserrat tracking-tight shadow-sm"
                 />
             </div>
 
             {/* Divider */}
-            <div className="h-px bg-white/5" />
+            <div className="h-px bg-zinc-100" />
 
             {/* Results */}
             <ScrollArea className="h-[440px]">
@@ -376,18 +376,18 @@ export default function SearchModal({
             </ScrollArea>
 
             {/* Footer */}
-            <div className="px-4 py-2.5 border-t border-white/5 bg-zinc-950/40 flex items-center justify-between">
+            <div className="px-4 py-2.5 border-t border-zinc-100 bg-zinc-50/30 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1.5 font-montserrat">
-                        <kbd className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] font-bold text-zinc-500">ESC</kbd>
-                        <span className="text-[10px] text-zinc-600">close</span>
+                        <kbd className="px-1.5 py-0.5 rounded bg-zinc-100 text-[10px] font-bold text-zinc-400">ESC</kbd>
+                        <span className="text-[10px] text-zinc-400">close</span>
                     </div>
                     <div className="flex items-center gap-1.5 font-montserrat">
-                        <kbd className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] font-bold text-zinc-500">↵</kbd>
-                        <span className="text-[10px] text-zinc-600">select</span>
+                        <kbd className="px-1.5 py-0.5 rounded bg-zinc-100 text-[10px] font-bold text-zinc-400">↵</kbd>
+                        <span className="text-[10px] text-zinc-400">select</span>
                     </div>
                 </div>
-                <span className="text-[10px] text-zinc-600 font-bold tracking-[0.3em] uppercase font-montserrat">ÉNOMÉ</span>
+                <span className="text-[10px] text-zinc-300 font-bold tracking-[0.3em] uppercase font-montserrat">ÉNOMÉ</span>
             </div>
         </CommandDialog>
     );
