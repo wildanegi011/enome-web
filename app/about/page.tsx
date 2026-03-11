@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     description: "Kenali lebih dekat perjalanan ÉNOMÉ dalam melestarikan batik dan warisan budaya Indonesia melalui desain modern.",
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * About Enome Page
  * Fetches content from blog table (ID 10)
@@ -25,7 +28,7 @@ export default async function Page() {
 
 async function AboutInformasi() {
     // Current target ID for About content is 11 (default)
-    const ABOUT_BLOG_ID = await ConfigService.getInt("footer_about", 11);
+    const ABOUT_BLOG_ID = await ConfigService.getInt("footer_about", 11, true);
     const post = await BlogService.getPublishedBlogById(ABOUT_BLOG_ID);
 
     if (!post) {

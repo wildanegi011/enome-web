@@ -1,15 +1,15 @@
 import { db } from "@/lib/db";
 import {
     keranjang, orders, orderdetail, produk, produkDetail,
-    preOrder, wallet, voucher, voucherHistory, payment as paymentTable, flashSale, centralConfig
+    preOrder, wallet, voucher, voucherHistory, payment as paymentTable, flashSale, centralConfig, rekeningPembayaran
 } from "@/lib/db/schema";
 
-import { eq, and, sql, desc, like } from "drizzle-orm";
+import { eq, and, sql, desc, like, or } from "drizzle-orm";
 import { CONFIG } from "@/lib/config";
 import logger from "@/lib/logger";
 import { nowJakartaYYMMDD, nowJakartaDate, nowJakartaFull, getJakartaDate } from "@/lib/date-utils";
 import { ConfigService } from "./config-service";
-import { sendNewOrderAdminNotification } from "@/lib/mail";
+import { sendNewOrderAdminNotification, sendOrderConfirmationEmail } from "@/lib/mail";
 
 export class OrderService {
     /**
@@ -460,15 +460,19 @@ export class OrderService {
             return { success: true, orderId, totalAmount: totalTagihan, expiredTime: expiredTimeValue };
         });
 
-        // Trigger Admin Notification Email (Async, don't wait to respond to user faster)
         if (result.success) {
             (async () => {
                 try {
-                    const adminEmail = await ConfigService.get("admin_email", process.env.SMTP_USER || "admin@enome.test");
-                    await sendNewOrderAdminNotification(adminEmail, {
-                        orderId: result.orderId,
-                        customerName: orderData.customerData?.namaCustomer || "Pelanggan",
-                        totalTagihan: result.totalAmount,
+                    const { orderId, totalAmount } = result;
+                    const customerName = orderData.customerData?.namaCustomer || "Pelanggan";
+                    const customerEmail = orderData.customerData?.emailCustomer || orderData.customerData?.email;
+
+                    const emailPayload: any = {
+                        orderId,
+                        customerName,
+                        totalTagihan: totalAmount,
+                        statusOrder: statusOrder,
+                        statusTagihan: finalBankAmount > 0 ? "BELUM BAYAR" : "BAYAR",
                         items: verifiedItems.map(item => ({
                             namaProduk: item.namaProduk,
                             size: item.size,
@@ -477,9 +481,44 @@ export class OrderService {
                             harga: item.harga
                         })),
                         shippingAddress: orderData.shipping?.address || "-"
-                    });
+                    };
+
+                    // 1. Fetch Payment Info if it's a bank transfer
+                    if (finalBankAmount > 0) {
+                        const [bank]: any = await db.select()
+                            .from(rekeningPembayaran)
+                            .where(or(
+                                eq(rekeningPembayaran.namaBank, orderData.payment),
+                                like(rekeningPembayaran.namaBank, `%${orderData.payment}%`)
+                            ))
+                            .limit(1);
+
+                        if (bank) {
+                            emailPayload.paymentInfo = {
+                                bankName: `Bank ${bank.namaBank}`,
+                                bankAccount: bank.noRekening,
+                                bankOwner: bank.namaPemilik
+                            };
+                        } else {
+                            // Default Fallback
+                            emailPayload.paymentInfo = {
+                                bankName: "Bank BCA",
+                                bankAccount: "2810377740",
+                                bankOwner: "TRYSETYO0603"
+                            };
+                        }
+                    }
+
+                    // 2. Admin Email
+                    const adminEmail = await ConfigService.get("admin_email", process.env.SMTP_USER || "admin@enome.test");
+                    await sendNewOrderAdminNotification(adminEmail, emailPayload);
+
+                    // 3. Customer Email (if email exists)
+                    if (customerEmail) {
+                        await sendOrderConfirmationEmail(customerEmail, emailPayload);
+                    }
                 } catch (emailError) {
-                    logger.error("OrderService: Failed to send admin notification email", emailError);
+                    logger.error("OrderService: Failed to send notification emails", emailError);
                 }
             })();
         }

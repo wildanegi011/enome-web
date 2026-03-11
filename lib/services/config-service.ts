@@ -16,11 +16,11 @@ export class ConfigService {
      * Get a configuration value by key.
      * Uses in-memory cache to reduce database load.
      */
-    static async get(key: string, defaultValue: string = ""): Promise<string> {
+    static async get(key: string, defaultValue: string = "", bypassCache: boolean = false): Promise<string> {
         const now = Date.now();
         const cached = this.cache.get(key);
 
-        if (cached && cached.expiresAt > now) {
+        if (!bypassCache && cached && cached.expiresAt > now) {
             return cached.value;
         }
 
@@ -48,8 +48,8 @@ export class ConfigService {
     /**
      * Get a configuration value as an integer.
      */
-    static async getInt(key: string, defaultValue: number = 0): Promise<number> {
-        const val = await this.get(key, defaultValue.toString());
+    static async getInt(key: string, defaultValue: number = 0, bypassCache: boolean = false): Promise<number> {
+        const val = await this.get(key, defaultValue.toString(), bypassCache);
         const parsed = parseInt(val, 10);
         return isNaN(parsed) ? defaultValue : parsed;
     }
