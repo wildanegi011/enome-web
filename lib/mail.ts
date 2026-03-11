@@ -279,7 +279,7 @@ export async function sendOrderConfirmationEmail(to: string, orderData: any) {
             ${paymentInstructionsHtml}
         `;
 
-        const frontendUrl = await ConfigService.get("frontend_url", "http://enome.test");
+        const frontendUrl = await ConfigService.get("main_url", "http://enome.test");
         const orderDetailLink = `${frontendUrl}/account/orders/${encodeURIComponent(orderId)}`;
 
         const mailOptions = {
