@@ -135,7 +135,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     )}
 
                     {/* Wishlist Icon */}
-                    <div className="absolute top-3 right-3 z-20">
+                    <div className="absolute top-3 right-3 z-10">
                         <motion.button
                             type="button"
                             onClick={handleWishlist}
@@ -209,7 +209,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     {/* Color Dots */}
                     {colors.length > 0 && (
                         <div
-                            className="flex flex-col items-end pt-10 pb-2 shrink-0 relative z-40"
+                            className="flex flex-col items-end pt-10 pb-2 shrink-0 relative z-10"
                             onMouseEnter={(e) => {
                                 e.stopPropagation();
                                 setHoverState('colors');
