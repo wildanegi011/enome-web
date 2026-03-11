@@ -81,7 +81,10 @@ export async function POST(request: NextRequest) {
             originSource: company ? "Database (companyprofile.kecamatan)" : "Default Config"
         });
 
-        const automatedCodes = ['jne', 'pos', 'wahana', 'tiki', 'jnt', 'sicepat', 'ninja', 'lion', 'anteraja', 'idexpress'];
+        const automatedCodes = activeCouriers
+            .filter(c => (c as any).isManual === 0)
+            .map(c => c.code?.toLowerCase())
+            .filter(Boolean) as string[];
         let rajaOngkirResults: any[] = [];
 
         try {
@@ -131,31 +134,35 @@ export async function POST(request: NextRequest) {
             logger.error("Shipping Calc: Komerce API fetch FAILED (Timeout or Network Error)", { message: fetchError.message });
         }
 
-        // 5. Add manual cargo - ALWAYS include these even if RajaOngkir fails
-        // Manual cargo are those in the 'cargo' table that aren't in RajaOngkir's automated list
+        // 5. Add manual/pickup options - ALWAYS include these even if RajaOngkir fails
         const returnedCodes = new Set(rajaOngkirResults.map((r: any) => r.code.toLowerCase()));
 
         const manualResults = activeCouriers
             .filter(c => {
                 const code = c.code?.toLowerCase();
-                // Include if it's NOT an automated courier type (like jne/jnt) 
-                // OR if RajaOngkir didn't return it (fallback)
-                return code && (!automatedCodes.includes(code) || !returnedCodes.has(code));
+                const dbIsManual = (c as any).isManual === 1;
+                // Return if it's explicitly marked as manual/pickup in DB
+                // OR if it's a fallback for automated codes that RajaOngkir didn't return
+                return code && (dbIsManual || (!automatedCodes.includes(code) || !returnedCodes.has(code)));
             })
-            .map(c => ({
-                code: (c.code || "CARGO").toUpperCase(),
-                name: c.name || c.code || "Cargo",
-                costs: [{
-                    service: (c.name || c.code || "Cargo").toUpperCase(),
-                    description: `Pengiriman via ${c.name || c.code}`,
-                    type: 'manual',
-                    cost: [{
-                        value: 0,
-                        etd: "",
-                        note: "Biaya akan dihitung manual atau gratis"
+            .map(c => {
+                const dbIsManual = (c as any).isManual === 1;
+                return {
+                    code: (c.code || "CARGO").toUpperCase(),
+                    name: c.name || c.code || "Cargo",
+                    costs: [{
+                        service: (c.name || c.code || "Cargo").toUpperCase(),
+                        description: dbIsManual ? `Ambil sendiri di lokasi: ${c.name}` : `Pengiriman via ${c.name || c.code}`,
+                        // Use 'manual' type string exclusively for Ambil Sendiri tab in Frontend
+                        type: dbIsManual ? 'manual' : 'automated',
+                        cost: [{
+                            value: 0,
+                            etd: dbIsManual ? "0 Hari" : "",
+                            note: dbIsManual ? "Silakan ambil pesanan Anda" : "Biaya akan dihitung manual atau gratis"
+                        }]
                     }]
-                }]
-            }));
+                };
+            });
 
         return NextResponse.json({
             rajaongkir: {

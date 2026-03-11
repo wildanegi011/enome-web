@@ -420,6 +420,7 @@ export const cargo = mysqlTable("cargo", {
     code: varchar("code", { length: 50 }),
     name: varchar("name", { length: 100 }),
     isAktif: int("is_aktif").default(1),
+    isManual: int("is_manual").default(0),
 });
 
 export const voucher = mysqlTable("voucher", {

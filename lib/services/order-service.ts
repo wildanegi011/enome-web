@@ -10,6 +10,7 @@ import logger from "@/lib/logger";
 import { nowJakartaYYMMDD, nowJakartaDate, nowJakartaFull, getJakartaDate } from "@/lib/date-utils";
 import { ConfigService } from "./config-service";
 import { sendNewOrderAdminNotification, sendOrderConfirmationEmail } from "@/lib/mail";
+import pusher from "@/lib/pusher";
 
 export class OrderService {
     /**
@@ -477,6 +478,7 @@ export class OrderService {
                             namaProduk: item.namaProduk,
                             size: item.size,
                             warna: item.warna,
+                            variant: item.variant || "-",
                             qty: item.qty,
                             harga: item.harga
                         })),
@@ -516,6 +518,22 @@ export class OrderService {
                     // 3. Customer Email (if email exists)
                     if (customerEmail) {
                         await sendOrderConfirmationEmail(customerEmail, emailPayload);
+                    }
+
+                    // 4. Trigger Real-time Notification via Pusher
+                    try {
+                        const formattedTotal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalAmount);
+
+                        await pusher.trigger("my-channel", "my-event", {
+                            orderId,
+                            customerName,
+                            totalAmount,
+                            totalAmountFormatted: formattedTotal,
+                            title: "Pesanan Baru!",
+                            message: `Pesanan ${orderId} dari ${customerName}. Total: ${formattedTotal}`
+                        });
+                    } catch (pusherError) {
+                        console.error("Pusher trigger error:", pusherError);
                     }
                 } catch (emailError) {
                     logger.error("OrderService: Failed to send notification emails", emailError);

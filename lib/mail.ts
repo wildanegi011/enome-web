@@ -149,7 +149,11 @@ export async function sendNewOrderAdminNotification(adminEmail: string, orderDat
             <tr>
                 <td style="padding: 12px 10px; border-bottom: 1px solid #f2f2f2; font-size: 14px; color: #404040;">
                     <div style="font-weight: 600; color: #171717; margin-bottom: 2px;">${item.namaProduk}</div>
-                    <div style="font-size: 12px; color: #737373;">${item.size} / ${item.warna}</div>
+                    <div style="font-size: 12px; color: #737373;">
+                        <strong>Size:</strong> ${item.size} | 
+                        <strong>Warna:</strong> ${item.warna} | 
+                        <strong>Motif:</strong> ${item.variant || "-"}
+                    </div>
                 </td>
                 <td style="padding: 12px 10px; border-bottom: 1px solid #f2f2f2; text-align: center; font-size: 14px; color: #171717; font-weight: 500;">
                     ${item.qty}
@@ -253,7 +257,12 @@ export async function sendOrderConfirmationEmail(to: string, orderData: any) {
 
         const itemsList = items.map((item: any) => `
             <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.namaProduk}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                    <div style="font-weight: 600; color: #171717;">${item.namaProduk}</div>
+                    <div style="font-size: 11px; color: #737373;">
+                        Size: ${item.size} | Warna: ${item.warna} | Motif: ${item.variant || "-"}
+                    </div>
+                </td>
                 <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">Rp ${Math.round(item.harga).toLocaleString('id-ID')}</td>
             </tr>

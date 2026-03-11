@@ -33,6 +33,26 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/backend/:path*",
+        destination: `${rawAssetUrl}/backend/:path*`,
+      },
+      {
+        source: "/frontend/:path*",
+        destination: `${rawAssetUrl}/frontend/:path*`,
+      },
+      {
+        source: "/event/:path*",
+        destination: `${rawAssetUrl}/event/:path*`,
+      },
+      {
+        source: "/downloads/:path*",
+        destination: `${rawAssetUrl}/downloads/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
