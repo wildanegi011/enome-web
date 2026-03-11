@@ -7,16 +7,11 @@ import { CONFIG } from "@/lib/config";
 import { ConfigService } from "@/lib/services/config-service";
 
 /**
- * Menghitung ongkos kirim menggunakan API Komerce (RajaOngkir).
- * Alur: ambil API Key dari DB → ambil kota asal → ambil kurir aktif → panggil API.
- *
- * @auth none
- * @method POST
- * @body {{ destination: string, weight: number, courier: string }}
- * @response 200 — { rajaongkir: { results: [{ costs: [{ service, courierCode, cost: [{ value, etd, note }] }] }] } }
- * @response 400 — { message: "missing_params" }
- * @response 500 — { message: "error", error: "Terjadi kesalahan sistem" }
+ * Simple in-memory cache for shipping results to avoid excessive RajaOngkir API hits.
  */
+const shippingCache = new Map<string, { data: any[], expires: number }>();
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
 export async function POST(request: NextRequest) {
     logger.info("API Request: POST /api/shipping");
     try {
@@ -51,6 +46,11 @@ export async function POST(request: NextRequest) {
             .from(cargo)
             .where(eq(cargo.isAktif, 1));
 
+        const automatedCodes = activeCouriers
+            .filter(c => (c as any).isManual === 0)
+            .map(c => c.code?.toLowerCase())
+            .filter(Boolean) as string[];
+
         const excludedCodes = ["jtr", "cod", "instantkurir", "pickup", "cashless", "gratis"];
         const courierCodes = activeCouriers
             .map(c => c.code?.toLowerCase())
@@ -73,65 +73,76 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Panggil API Komerce untuk SEMUA kurir aktif
-        logger.info("Shipping Calc: Calling Komerce API", {
-            origin,
-            destination,
-            weight,
-            courierCodes,
-            originSource: company ? "Database (companyprofile.kecamatan)" : "Default Config"
-        });
+        const cacheKey = `${origin}-${destination}-${weight}-${courierCodes}`;
+        const now = Date.now();
+        const cached = shippingCache.get(cacheKey);
 
-        const automatedCodes = activeCouriers
-            .filter(c => (c as any).isManual === 0)
-            .map(c => c.code?.toLowerCase())
-            .filter(Boolean) as string[];
         let rajaOngkirResults: any[] = [];
 
-        try {
-            const response = await fetch("https://rajaongkir.komerce.id/api/v1/calculate/district/domestic-cost", {
-                method: "POST",
-                headers: {
-                    "content-type": "application/x-www-form-urlencoded",
-                    "key": apiKey
-                },
-                body: new URLSearchParams({
-                    origin: origin,
-                    destination: destination.toString(),
-                    weight: weight.toString(),
-                    courier: courierCodes,
-                    price: "lowest"
-                }),
-                signal: AbortSignal.timeout(10000) // 10 second timeout
+        if (cached && cached.expires > now) {
+            logger.info("Shipping Calc: Using server-side cache", { cacheKey });
+            rajaOngkirResults = cached.data;
+        } else {
+            logger.info("Shipping Calc: Calling Komerce API", {
+                origin,
+                destination,
+                weight,
+                courierCodes,
+                originSource: company ? "Database (companyprofile.kecamatan)" : "Default Config"
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                logger.info("Shipping Calc: Success", { data });
+            try {
+                const response = await fetch("https://rajaongkir.komerce.id/api/v1/calculate/district/domestic-cost", {
+                    method: "POST",
+                    headers: {
+                        "content-type": "application/x-www-form-urlencoded",
+                        "key": apiKey
+                    },
+                    body: new URLSearchParams({
+                        origin: origin,
+                        destination: destination.toString(),
+                        weight: weight.toString(),
+                        courier: courierCodes,
+                        price: "lowest"
+                    }),
+                    signal: AbortSignal.timeout(10000) // 10 second timeout
+                });
 
-                rajaOngkirResults = data?.data?.reduce((acc: any[], item: any) => {
-                    const code = item.code.toUpperCase();
-                    let existing = acc.find(r => r.code === code);
-                    if (!existing) {
-                        existing = { code, name: item.name, costs: [] };
-                        acc.push(existing);
-                    }
-                    existing.costs.push({
-                        service: item.service,
-                        description: item.description || item.service,
-                        type: 'automated',
-                        cost: [{
-                            value: item.cost,
-                            etd: item.etd,
-                            note: item.description || ""
-                        }]
+                if (response.ok) {
+                    const data = await response.json();
+                    logger.info("Shipping Calc: Success", { data });
+
+                    rajaOngkirResults = data?.data?.reduce((acc: any[], item: any) => {
+                        const code = item.code.toUpperCase();
+                        let existing = acc.find(r => r.code === code);
+                        if (!existing) {
+                            existing = { code, name: item.name, costs: [] };
+                            acc.push(existing);
+                        }
+                        existing.costs.push({
+                            service: item.service,
+                            description: item.description || item.service,
+                            type: 'automated',
+                            cost: [{
+                                value: item.cost,
+                                etd: item.etd,
+                                note: item.description || ""
+                            }]
+                        });
+                        return acc;
+                    }, []) || [];
+
+                    // Store in cache
+                    shippingCache.set(cacheKey, {
+                        data: rajaOngkirResults,
+                        expires: now + CACHE_TTL
                     });
-                    return acc;
-                }, []) || [];
-            } else {
-                logger.error("Shipping Calc: Komerce API returned error status", { status: response.status });
+                } else {
+                    logger.error("Shipping Calc: Komerce API returned error status", { status: response.status });
+                }
+            } catch (fetchError: any) {
+                logger.error("Shipping Calc: Komerce API fetch FAILED (Timeout or Network Error)", { message: fetchError.message });
             }
-        } catch (fetchError: any) {
-            logger.error("Shipping Calc: Komerce API fetch FAILED (Timeout or Network Error)", { message: fetchError.message });
         }
 
         // 5. Add manual/pickup options - ALWAYS include these even if RajaOngkir fails

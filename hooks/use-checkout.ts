@@ -217,9 +217,6 @@ export function useCheckout() {
 
         // Use districtId for shipping API if available, fallback to kecamatan string
         const destination = (shippingForm as any).districtId || shippingForm.kecamatan;
-        const cacheKey = `shippingCost_v4_${destination}_${totalWeight}`;
-        const cachedStr = sessionStorage.getItem(cacheKey);
-
         const handleCosts = (costs: any[]) => {
             setShippingOptions(costs);
             if (costs.length > 0) {
@@ -252,16 +249,6 @@ export function useCheckout() {
             }
         };
 
-        if (cachedStr) {
-            try {
-                const costs = JSON.parse(cachedStr);
-                handleCosts(costs);
-                return; // Gunakan cache
-            } catch (e) {
-                console.error("Failed to parse cached shipping cost");
-            }
-        }
-
         setIsLoadingShipping(true);
         try {
             const data = await checkoutApi.getShippingCost({
@@ -278,7 +265,6 @@ export function useCheckout() {
                         courierName: r.name || r.code || "Kurir"
                     }))
                 );
-                sessionStorage.setItem(cacheKey, JSON.stringify(allCosts));
                 handleCosts(allCosts);
             }
         } catch (error) {
