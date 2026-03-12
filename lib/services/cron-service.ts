@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { orders, payment as paymentTable, orderdetail, produkDetail, preOrder, flashSale, produk, keranjang } from "@/lib/db/schema";
-import { eq, and, lt, sql, inArray, lte, or, gte } from "drizzle-orm";
+import { eq, and, lt, sql, inArray, lte, or, gte, desc } from "drizzle-orm";
 import { CONFIG } from "@/lib/config";
 import logger from "@/lib/logger";
 import { nowJakartaFull, getJakartaDate } from "@/lib/date-utils";
@@ -398,9 +398,7 @@ export class CronService {
                     const data = await response.json();
 
                     // Handle potential different response structures if URL changes
-                    const status = data?.rajaongkir?.result?.delivery_status?.status ||
-                        data?.result?.delivery_status?.status ||
-                        data?.delivery_status?.status;
+                    const status = data?.data?.delivery_status?.status;
 
                     if (status === "DELIVERED" || status === "Terkirim") {
                         isDelivered = true;
