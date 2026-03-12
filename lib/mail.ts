@@ -324,7 +324,7 @@ export async function sendOrderConfirmationEmail(to: string, orderData: any) {
             ${paymentInstructionsHtml}
         `;
 
-        const frontendUrl = await ConfigService.get("main_url", "http://enome.test");
+        const frontendUrl = await ConfigService.get("mobile_main_url", "http://enome.test");
         const orderDetailLink = `${frontendUrl}/account/orders/${encodeURIComponent(orderId)}`;
 
         const mailOptions = {
@@ -364,7 +364,7 @@ export async function sendOrderStatusUpdateEmail(to: string, orderData: any) {
         let buttonText = "Lihat Detail Pesanan";
         let footerNote = "Terima kasih telah berbelanja di Énome.";
 
-        const frontendUrl = await ConfigService.get("main_url", "http://localhost:3000");
+        const frontendUrl = await ConfigService.get("mobile_main_url", "http://localhost:3000");
         let link = `${frontendUrl}/account/orders/${encodeURIComponent(orderId)}`;
 
         // Customize based on status

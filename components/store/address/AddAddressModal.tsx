@@ -51,11 +51,15 @@ interface Address {
     phoneNumber: string;
     fullAddress: string;
     city: string;
+    cityId?: string;
     province: string;
+    provinceId?: string;
     district: string;
+    districtId?: string;
     postalCode: string;
     shopName: string;
     isPrimary: number;
+    customerId?: string;
 }
 
 interface AddAddressModalProps {
@@ -97,6 +101,19 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
             });
             const locStr = `${initialData.province}, ${initialData.city}, ${initialData.district}`;
             setLocationQuery(locStr);
+
+            // Fix: Initialize selectedLocation from initialData to prevent ID loss on edit
+            if (initialData.provinceId && initialData.cityId && initialData.districtId) {
+                setSelectedLocation({
+                    label: locStr,
+                    province: initialData.province,
+                    provinceId: initialData.provinceId,
+                    city: initialData.city,
+                    cityId: initialData.cityId,
+                    subdistrict: initialData.district,
+                    subdistrictId: initialData.districtId
+                });
+            }
         } else if (!open) {
             resetForm();
         }
@@ -111,7 +128,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
             const data = await res.json();
             return data.locations as LocationResult[];
         },
-        enabled: locationQuery.length >= 2 && locationQuery !== selectedLocation?.label,
+        enabled: locationQuery.length >= 2 && locationQuery !== (selectedLocation?.label || ""),
     });
 
     const mutation = useMutation({
@@ -129,10 +146,31 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
             return res.json();
         },
         onSuccess: (data) => {
+            const addressId = data.addressId || initialData?.id;
             toast.success(mode === "edit" ? "Alamat berhasil diperbarui" : "Alamat berhasil ditambahkan");
             queryClient.invalidateQueries({ queryKey: queryKeys.user.addresses });
             onOpenChange(false);
-            if (onSuccess) onSuccess(data.data || data);
+
+            if (onSuccess) {
+                // Construct a full address object to pass back
+                const fullAddr = {
+                    id: addressId,
+                    label: formData.labelAlamat,
+                    receiverName: formData.namaPenerima,
+                    shopName: formData.namaToko,
+                    phoneNumber: formData.noHandphone,
+                    fullAddress: formData.alamatLengkap,
+                    postalCode: formData.kodePos,
+                    isPrimary: formData.isPrimary,
+                    province: selectedLocation?.province || initialData?.province || "",
+                    provinceId: selectedLocation?.provinceId || initialData?.provinceId || "",
+                    city: selectedLocation?.city || initialData?.city || "",
+                    cityId: selectedLocation?.cityId || initialData?.cityId || "",
+                    district: selectedLocation?.subdistrict || initialData?.district || "",
+                    districtId: selectedLocation?.subdistrictId || initialData?.districtId || ""
+                };
+                onSuccess(fullAddr);
+            }
             resetForm();
         },
         onError: (error: any) => {
@@ -179,9 +217,6 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
         mutation.mutate(payload);
     };
 
-    // Components for Header, Form, and Footer moved into variables or defined outside
-    // to prevent re-mounting on every state update (fixing the typing bug)
-
     const headerTitle = mode === "edit" ? "Ubah Alamat" : "Alamat Baru";
     const headerDescription = mode === "edit" ? "Perbarui informasi pengiriman kamu" : "Kirim pesanan kamu ke lokasi yang tepat";
 
@@ -202,7 +237,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
     );
 
     const FormContent = (
-        <form id="address-form" onSubmit={handleSubmit} className="space-y-8 md:space-y-10 py-6 md:py-8">
+        <form id="address-form" onSubmit={handleSubmit} className="space-y-8 md:space-y-10 py-6 md:py-3">
             {/* Section: Contact Info */}
             <div className="space-y-4 md:space-y-6">
                 <div className="flex items-center gap-3 mb-2">
@@ -301,7 +336,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                                     initial={{ opacity: 0, y: -10, scale: 0.98 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                                    className="absolute z-60 w-full mt-2 bg-white border border-neutral-base-100 rounded-[24px] shadow-[0_12px_32px_rgba(0,0,0,0.12)] max-h-[220px] overflow-y-auto overflow-x-hidden no-scrollbar py-2"
+                                    className="absolute z-100 w-full mt-2 bg-white border border-neutral-base-100 rounded-[24px] shadow-[0_12px_32px_rgba(0,0,0,0.12)] max-h-[220px] overflow-y-auto overflow-x-hidden no-scrollbar py-2"
                                 >
                                     {locations.map((loc, i) => (
                                         <button
@@ -373,7 +408,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
     );
 
     const FooterContent = (
-        <div className="flex flex-col sm:flex-row gap-4 pt-4 md:pt-6">
+        <div className="flex flex-col sm:flex-row gap-4 pt-4 md:pt-6 pb-6 md:pb-0">
             <Button
                 type="button"
                 variant="ghost"
@@ -405,9 +440,9 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
     if (isMobile) {
         return (
             <Drawer open={open} onOpenChange={onOpenChange}>
-                <DrawerContent className="max-h-[85vh] bg-white rounded-t-[32px] border-none shadow-2xl">
-                    <div className="mx-auto w-12 h-1.5 bg-neutral-base-100 rounded-full mt-3" />
-                    <DrawerHeader className="p-6 pb-2">
+                <DrawerContent className="h-[95dvh] p-0 bg-white rounded-t-[32px] border-none flex flex-col outline-hidden">
+                    <div className="mx-auto w-12 h-1.5 shrink-0 rounded-full bg-neutral-base-100 mt-3" />
+                    <DrawerHeader className="px-6 py-6 border-b border-neutral-base-50 text-left">
                         <DrawerTitle asChild>
                             {HeaderContent}
                         </DrawerTitle>
@@ -415,12 +450,15 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                             {headerDescription}
                         </DrawerDescription>
                     </DrawerHeader>
-                    <div className="flex-1 overflow-y-auto px-6 pb-6 no-scrollbar">
+
+                    <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-10">
+                        <style jsx global>{`
+                            .no-scrollbar::-webkit-scrollbar { display: none; }
+                            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                        `}</style>
                         {FormContent}
-                    </div>
-                    <DrawerFooter className="p-6 pt-2 border-t border-neutral-base-50">
                         {FooterContent}
-                    </DrawerFooter>
+                    </div>
                 </DrawerContent>
             </Drawer>
         );
@@ -428,8 +466,8 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-[720px] max-h-[70vh] p-0 bg-white rounded-[32px] md:rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] border-none overflow-hidden flex flex-col">
-                <DialogHeader className="px-10 py-8 border-b border-neutral-base-50 flex flex-row items-center justify-between shrink-0">
+            <DialogContent className="w-full sm:max-w-[720px] h-dvh sm:h-auto sm:max-h-[90vh] p-0 bg-white rounded-none sm:rounded-[32px] md:rounded-[40px] shadow-none sm:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] border-none overflow-hidden flex flex-col outline-hidden">
+                <DialogHeader className="px-6 md:px-10 py-6 md:py-8 border-b border-neutral-base-50 flex flex-row items-center justify-between shrink-0">
                     <div>
                         <DialogTitle asChild>
                             {HeaderContent}
@@ -438,17 +476,13 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                             {headerDescription}
                         </DialogDescription>
                     </div>
-                    {/* <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onOpenChange(false)}
-                        className="rounded-full w-10 h-10 hover:bg-neutral-base-50"
-                    >
-                        <X className="w-5 h-5 text-neutral-base-400" />
-                    </Button> */}
                 </DialogHeader>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar px-10 pb-10">
+                <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-6 md:px-10 pb-10">
+                    <style jsx global>{`
+                        .no-scrollbar::-webkit-scrollbar { display: none; }
+                        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                    `}</style>
                     {FormContent}
                     {FooterContent}
                 </div>

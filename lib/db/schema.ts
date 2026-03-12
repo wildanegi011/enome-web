@@ -47,6 +47,7 @@ export const productImage = mysqlTable("produk_image", {
     produkId: varchar("produk_id", { length: 20 }).notNull(),
     gambar: varchar("gambar", { length: 255 }).notNull(),
     warna: varchar("warna", { length: 20 }),
+    urutan: int("urutan"),
     createdAt: timestamp("created_at").defaultNow(),
 });
 

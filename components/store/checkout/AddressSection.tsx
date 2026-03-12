@@ -99,8 +99,8 @@ export default function AddressSection({
                 }}
                 initialData={editData}
                 onSuccess={(newAddr) => {
-                    // Only auto-select if it's set as primary address
-                    if (newAddr && newAddr.isPrimary === 1) {
+                    // Auto-select the address that was just added or edited
+                    if (newAddr) {
                         setShippingForm({
                             ...shippingForm,
                             addressId: newAddr.id,

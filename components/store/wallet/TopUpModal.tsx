@@ -1,12 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import {
+    Drawer,
+    DrawerContent,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerDescription,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Wallet, Loader2 } from "lucide-react";
+import { Wallet, Loader2, X } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
 import CONFIG from "@/lib/config";
@@ -61,10 +73,32 @@ export default function TopUpModal({ isOpen, onClose, onTopUp, isLoading }: TopU
         }
     };
 
+    const TopUpHeader = () => (
+        <div className="p-8 pb-4 bg-white shrink-0 space-y-4 relative">
+            <div className="w-14 h-14 bg-neutral-base-900 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-neutral-base-900/20">
+                <Wallet className="w-7 h-7" />
+            </div>
+            <div className="space-y-1">
+                <h2 className="text-2xl font-black tracking-tight text-neutral-base-900">Top Up Wallet</h2>
+                <p className="text-neutral-base-400 font-medium text-sm">
+                    Tambah saldo wallet Anda untuk kemudahan bertransaksi.
+                </p>
+            </div>
+            {isMobile && (
+                <button
+                    onClick={onClose}
+                    className="absolute top-6 right-6 p-2 rounded-full bg-neutral-base-50 text-neutral-base-400 hover:text-neutral-base-900 transition-colors"
+                >
+                    <X size={20} />
+                </button>
+            )}
+        </div>
+    );
+
     const TopUpForm = () => (
         <form onSubmit={handleSubmit} className="space-y-8 py-4">
             <div className="space-y-4 text-left">
-                <Label htmlFor="amount" className="text-[12px] font-bold uppercase tracking-[0.2em] text-neutral-base-400 pl-1">
+                <Label htmlFor="amount" className="text-[12px] font-black uppercase tracking-[0.2em] text-neutral-base-400 pl-1">
                     Nominal Top Up
                 </Label>
                 <div className="relative group">
@@ -76,7 +110,7 @@ export default function TopUpModal({ isOpen, onClose, onTopUp, isLoading }: TopU
                         placeholder="0"
                         value={formatNumber(amount)}
                         onChange={handleInputChange}
-                        className="h-16 pl-12 text-2xl font-bold bg-neutral-base-50 border-none rounded-2xl focus-visible:ring-2 focus-visible:ring-neutral-base-900 transition-all"
+                        className="h-16 pl-12 text-2xl font-bold bg-neutral-base-50 border-none rounded-2xl focus-visible:ring-2 focus-visible:ring-neutral-base-900 transition-all outline-hidden"
                         autoFocus
                     />
                 </div>
@@ -88,7 +122,7 @@ export default function TopUpModal({ isOpen, onClose, onTopUp, isLoading }: TopU
                             type="button"
                             onClick={() => handlePredefinedClick(val)}
                             className={cn(
-                                "h-12 rounded-xl text-[13px] font-bold transition-all border-2",
+                                "h-12 rounded-xl text-[13px] font-bold transition-all border-2 active:scale-95",
                                 amount === val.toString()
                                     ? "bg-neutral-base-900 border-neutral-base-900 text-white shadow-lg shadow-neutral-base-900/10"
                                     : "bg-white border-neutral-base-100 text-neutral-base-600 hover:border-neutral-base-200"
@@ -117,17 +151,19 @@ export default function TopUpModal({ isOpen, onClose, onTopUp, isLoading }: TopU
     if (isMobile) {
         return (
             <Drawer open={isOpen} onOpenChange={onClose}>
-                <DrawerContent className="p-6">
-                    <DrawerHeader className="px-0 pb-6 text-left">
-                        <div className="w-14 h-14 bg-neutral-base-900 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-neutral-base-900/20 mb-4 mx-auto sm:mx-0">
-                            <Wallet className="w-7 h-7" />
-                        </div>
-                        <DrawerTitle className="text-2xl font-black tracking-tight text-neutral-base-900">Top Up Wallet</DrawerTitle>
-                        <DrawerDescription className="text-neutral-base-400 font-medium">
-                            Tambah saldo wallet Anda untuk kemudahan bertransaksi.
-                        </DrawerDescription>
+                <DrawerContent className="p-0 border-none bg-white rounded-t-[32px] outline-hidden max-h-[90dvh]">
+                    <DrawerHeader className="p-0 shrink-0">
+                        <DrawerTitle className="sr-only">Top Up Wallet</DrawerTitle>
+                        <DrawerDescription className="sr-only">Tambah saldo wallet Anda</DrawerDescription>
+                        <TopUpHeader />
                     </DrawerHeader>
-                    <TopUpForm />
+                    <div className="overflow-y-auto no-scrollbar px-8 pb-8">
+                        <style jsx global>{`
+                            .no-scrollbar::-webkit-scrollbar { display: none; }
+                            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                        `}</style>
+                        <TopUpForm />
+                    </div>
                 </DrawerContent>
             </Drawer>
         );
@@ -135,19 +171,20 @@ export default function TopUpModal({ isOpen, onClose, onTopUp, isLoading }: TopU
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px] rounded-[32px] border-none shadow-2xl">
-                <DialogHeader className="space-y-4">
-                    <div className="w-14 h-14 bg-neutral-base-900 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-neutral-base-900/20">
-                        <Wallet className="w-7 h-7" />
-                    </div>
-                    <div className="space-y-1">
-                        <DialogTitle className="text-2xl font-black tracking-tight text-neutral-base-900">Top Up Wallet</DialogTitle>
-                        <DialogDescription className="text-neutral-base-400 font-medium">
-                            Tambah saldo wallet Anda untuk kemudahan bertransaksi.
-                        </DialogDescription>
-                    </div>
+            <DialogContent className="w-full sm:max-w-[425px] p-0 overflow-hidden rounded-3xl border-none shadow-2xl flex flex-col outline-hidden">
+                <DialogHeader className="p-0">
+                    <DialogTitle className="sr-only">Top Up Wallet</DialogTitle>
+                    <DialogDescription className="sr-only">Tambah saldo wallet Anda</DialogDescription>
+                    <TopUpHeader />
                 </DialogHeader>
-                <TopUpForm />
+
+                <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-8 pb-8">
+                    <style jsx global>{`
+                        .no-scrollbar::-webkit-scrollbar { display: none; }
+                        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                    `}</style>
+                    <TopUpForm />
+                </div>
             </DialogContent>
         </Dialog>
     );

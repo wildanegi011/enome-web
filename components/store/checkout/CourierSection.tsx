@@ -57,75 +57,79 @@ export default function CourierSection({
                             <p className="text-[12px] md:text-[13px] font-bold text-neutral-base-300">Menghitung ongkos kirim...</p>
                         </div>
                     ) : shippingOptions.length > 0 ? (
-                        <div className="flex flex-col gap-4">
-                            <div className="flex flex-col gap-3">
-                                {shippingOptions.map((opt, i) => {
-                                    const isSelected = shippingForm.service === opt.service && shippingForm.courier === (opt.courierCode || opt.courierName);
-                                    const isManual = opt.type === 'manual' || (opt.type !== 'automated' && opt.cost[0].value === 0);
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {shippingOptions.map((opt, i) => {
+                                const isSelected = shippingForm.service === opt.service && shippingForm.courier === (opt.courierCode || opt.courierName);
+                                const isManual = opt.type === 'manual' || (opt.type !== 'automated' && opt.cost[0].value === 0);
 
-                                    return (
-                                        <div className="flex flex-col gap-3" key={i}>
-                                            <button
-                                                onClick={() => {
-                                                    const courierId = (opt.courierCode || opt.courierName || "Kurir").toUpperCase();
-                                                    setShippingForm((prev: any) => ({
-                                                        ...prev,
-                                                        service: opt.service,
-                                                        courier: courierId,
-                                                        courierName: opt.courierName || opt.courierCode || "Kurir",
-                                                        shippingPrice: opt.cost[0].value,
-                                                        shippingType: opt.type
-                                                    }));
-                                                    onFieldChange?.();
-                                                }}
-                                                className={cn(
-                                                    "flex p-4 md:p-6 rounded-[24px] md:rounded-[28px] border transition-all duration-300 items-center gap-3 md:gap-5",
-                                                    isSelected
-                                                        ? "border-neutral-base-900 bg-white shadow-xl shadow-neutral-base-900/5 ring-1 ring-neutral-base-900/20"
-                                                        : "border-neutral-base-100/50 bg-white hover:bg-neutral-base-50/20"
-                                                )}
-                                            >
-                                                <div className={cn(
-                                                    "w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-xl md:rounded-2xl shrink-0 transition-colors",
-                                                    isSelected
-                                                        ? "bg-neutral-base-900 text-white"
-                                                        : "bg-neutral-base-50 text-neutral-base-400"
-                                                )}>
-                                                    <Truck className="w-5 h-5 md:w-6 md:h-6" />
-                                                </div>
-
-                                                <div className="flex-1 text-left min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-8">
-                                                    <div className="min-w-0">
-                                                        <div className="flex items-center gap-2 mb-0.5 md:mb-1">
-                                                            <h4 className="text-[13px] md:text-[15px] font-black text-neutral-base-900 uppercase tracking-tight truncate">
-                                                                {opt.courierCode ? `${opt.courierCode.toUpperCase()} - ` : ""}{opt.service}
-                                                            </h4>
-                                                        </div>
-                                                        <p className="text-[10px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest truncate">
-                                                            {opt.description || opt.cost[0].note}
-                                                        </p>
-                                                        <div className="flex items-center gap-2 mt-1.5">
-                                                            <Clock className="w-3.5 h-3.5 text-neutral-base-200" />
-                                                            <span className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-widest">
-                                                                Est: {opt.cost[0].etd ? `${opt.cost[0].etd.replace(" HARI", "").replace(" Hari", "")} Hari` : (isManual ? 'Cek Manual' : 'Menyusul')}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="md:text-right shrink-0 mt-1 md:mt-0">
-                                                        <span className={cn(
-                                                            "text-[15px] md:text-[18px] font-black tabular-nums",
-                                                            "text-neutral-base-900"
-                                                        )}>
-                                                            {!isManual ? formatPrice(opt.cost[0].value) : "Rp. 0"}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </button>
+                                return (
+                                    <button
+                                        key={i}
+                                        onClick={() => {
+                                            const courierId = (opt.courierCode || opt.courierName || "Kurir").toUpperCase();
+                                            setShippingForm((prev: any) => ({
+                                                ...prev,
+                                                service: opt.service,
+                                                courier: courierId,
+                                                courierName: opt.courierName || opt.courierCode || "Kurir",
+                                                shippingPrice: opt.cost[0].value,
+                                                shippingType: opt.type
+                                            }));
+                                            onFieldChange?.();
+                                        }}
+                                        className={cn(
+                                            "flex p-4 md:p-6 rounded-[24px] md:rounded-[28px] border transition-all duration-300 items-start gap-4 text-left group relative",
+                                            isSelected
+                                                ? "border-neutral-base-900 bg-white shadow-xl shadow-neutral-base-900/5 ring-1 ring-neutral-base-900/20"
+                                                : "border-neutral-base-100/50 bg-white hover:bg-neutral-base-50/20"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl md:rounded-2xl shrink-0 transition-colors",
+                                            isSelected
+                                                ? "bg-neutral-base-900 text-white"
+                                                : "bg-neutral-base-50 text-neutral-base-400 group-hover:bg-neutral-base-100 group-hover:text-neutral-base-600"
+                                        )}>
+                                            <Truck className="w-5 h-5 md:w-6 md:h-6" />
                                         </div>
-                                    );
-                                })}
-                            </div>
+
+                                        <div className="flex-1 min-w-0 pr-4">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h4 className="text-[13px] md:text-[14px] font-black text-neutral-base-900 uppercase tracking-tight truncate">
+                                                    {opt.courierCode ? `${opt.courierCode.toUpperCase()} - ` : ""}{opt.service}
+                                                </h4>
+                                            </div>
+
+                                            <div className="flex flex-col gap-1.5">
+                                                <p className="text-[10px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest truncate">
+                                                    {opt.description || opt.cost[0].note}
+                                                </p>
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="w-3.5 h-3.5 text-neutral-base-200" />
+                                                    <span className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-widest">
+                                                        Est: {opt.cost[0].etd ? `${opt.cost[0].etd.replace(" HARI", "").replace(" Hari", "")} Hari` : (isManual ? 'Cek Manual' : 'Menyusul')}
+                                                    </span>
+                                                </div>
+                                                <div className="mt-1">
+                                                    <span className={cn(
+                                                        "text-[14px] md:text-[16px] font-black tabular-nums",
+                                                        isSelected ? "text-neutral-base-950" : "text-neutral-base-900"
+                                                    )}>
+                                                        {!isManual ? formatPrice(opt.cost[0].value) : "Rp. 0"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className={cn(
+                                            "absolute top-4 right-4 md:top-6 md:right-6 w-5 h-5 md:w-6 md:h-6 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
+                                            isSelected ? "border-neutral-base-900" : "border-neutral-base-200"
+                                        )}>
+                                            {isSelected && <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-neutral-base-900 animate-in zoom-in duration-300" />}
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="h-32 md:h-40 rounded-xl md:rounded-[32px] border-2 border-dashed border-rose-100 flex flex-col items-center justify-center gap-2 md:gap-3 bg-rose-50/10">

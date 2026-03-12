@@ -1,9 +1,8 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { userApi } from "@/lib/api/user-api";
 import { Loader2, Package, MapPin, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
 interface TrackingManifestProps {
     awb: string;
@@ -14,31 +13,17 @@ interface TrackingManifestProps {
 }
 
 export default function TrackingManifest({ awb, courier, phone, showTitle = false, isCollapsible = false }: TrackingManifestProps) {
-    const [trackingData, setTrackingData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
 
-    useEffect(() => {
-        const fetchTracking = async () => {
-            if (!awb) return;
-            try {
-                setLoading(true);
-                const data = await userApi.trackWaybill(awb, courier, phone);
-                if (data?.meta?.status === "success") {
-                    setTrackingData(data.data);
-                } else {
-                    setError(data?.meta?.message || "Gagal mengambil data pelacakan");
-                }
-            } catch (err) {
-                setError("Terjadi kesalahan sistem saat melacak pesanan");
-            } finally {
-                setLoading(false);
-            }
-        };
+    const { data: trackingResponse, isLoading: loading, error: queryError, refetch } = useQuery({
+        queryKey: ["tracking", awb, courier, phone],
+        queryFn: () => userApi.trackWaybill(awb, courier, phone),
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        enabled: !!awb,
+    });
 
-        fetchTracking();
-    }, [awb, courier, phone]);
+    const trackingData = trackingResponse?.data;
+    const error = (queryError as any)?.message || (trackingResponse?.meta?.status !== "success" && trackingResponse?.meta?.message) || null;
 
     if (loading) {
         return (
@@ -59,6 +44,12 @@ export default function TrackingManifest({ awb, courier, phone, showTitle = fals
                     <h3 className="text-[15px] font-bold text-neutral-base-900">Oops! Terjadi Masalah</h3>
                     <p className="text-[12px] text-neutral-base-400 mt-1">{error}</p>
                 </div>
+                <button
+                    onClick={() => refetch()}
+                    className="text-[12px] font-bold text-neutral-base-900 underline underline-offset-4"
+                >
+                    Coba Lagi
+                </button>
             </div>
         );
     }
@@ -74,14 +65,16 @@ export default function TrackingManifest({ awb, courier, phone, showTitle = fals
                     <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10 shrink-0">
                         <Package className="w-5 h-5 text-white" />
                     </div>
-                    <h2 className="text-[15px] md:text-[16px] font-bold text-neutral-base-900 uppercase tracking-tight">Riwayat Pengiriman</h2>
+                    <div className="flex-1">
+                        <h2 className="text-[15px] md:text-[16px] font-bold text-neutral-base-900 uppercase tracking-tight">Riwayat Pengiriman</h2>
+                    </div>
                 </div>
             )}
 
             {!allManifest || allManifest.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
                     <Package className="w-10 h-10 text-neutral-base-100" />
-                    <p className="text-[13px] text-neutral-base-400 font-medium">Belu ada data manifest tersedia.</p>
+                    <p className="text-[13px] text-neutral-base-400 font-medium">Belum ada data manifest tersedia.</p>
                 </div>
             ) : (
                 <div className="space-y-6">

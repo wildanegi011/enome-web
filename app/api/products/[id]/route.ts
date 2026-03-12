@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { produk, produkDetail, warna, size, customer, flashSale, flashSaleDetail, customerKategori, variant, productImage } from "@/lib/db/schema";
 
-import { eq, and, sql, not, min, max, or } from "drizzle-orm";
+import { eq, and, sql, not, min, max, or, asc } from "drizzle-orm";
 import { withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
@@ -185,7 +185,7 @@ export const GET = withOptionalAuth(async (
                 })
                 .from(productImage)
                 .where(eq(productImage.produkId, id))
-                .orderBy(productImage.id);
+                .orderBy(asc(productImage.urutan));
         } catch (err) {
             logger.error("Product Detail: Error fetching additional images", { productId: id, error: err });
             // Fallback to empty if table doesn't exist or query fails

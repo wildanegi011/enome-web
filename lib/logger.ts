@@ -51,7 +51,7 @@ const logger = winston.createLogger({
     level: process.env.NODE_ENV === "development" ? "debug" : "info",
     format: logFormat,
     defaultMeta: { service: CONFIG.SERVICE_NAME },
-    transports: [
+    transports: process.env.SKIP_LOG_FILES === "1" ? [] : [
         // Error logs → file terpisah untuk monitoring cepat
         new winston.transports.DailyRotateFile({
             ...dailyRotateConfig,

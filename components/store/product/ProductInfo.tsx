@@ -8,7 +8,7 @@
  * Logic sudah dipisahkan ke:
  * - lib/product-utils.ts    → kalkulasi stok & matrix
  * - hooks/use-flash-sale-timer.ts → countdown timer
- * - hooks/use-add-to-cart.ts      → mutasi keranjang
+ * - hooks/use-add-to-cart.tsx     → mutasi keranjang (Rich Toast)
  * - AccordionItem.tsx              → komponen accordion reusable
  */
 
@@ -32,6 +32,7 @@ import {
     isColorAvailableForVariant,
 } from "@/lib/product-utils";
 import type { MatrixEntry, ProductColor } from "@/lib/product-utils";
+import { ASSET_URL } from "@/config/config";
 import AccordionItem from "./AccordionItem";
 
 interface ProductInfoProps {
@@ -170,6 +171,10 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             return;
         }
 
+        const selectedColorData = product.colors.find(c => c.id === selectedColor);
+        const imageName = currentCombination?.image || selectedColorData?.image;
+        const fullImageUrl = imageName ? `${ASSET_URL}/img/produk/${imageName}` : null;
+
         setHintType(null);
         addToCart({
             id_produk: product.id,
@@ -178,6 +183,10 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             variant: selectedVariant,
             qty_produk: quantity,
             is_flash_sale: product.isOnFlashSale,
+            metadata: {
+                name: product.name,
+                image: fullImageUrl || undefined
+            }
         });
     };
 

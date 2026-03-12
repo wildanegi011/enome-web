@@ -37,7 +37,11 @@ export default function AddressSelectionModal({
 
     const Content = () => (
         <>
-            <div className="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-10 pb-6 md:pb-10 pt-6 md:pt-8 bg-neutral-base-50/10">
+            <style jsx global>{`
+                .no-scrollbar::-webkit-scrollbar { display: none; }
+                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            `}</style>
+            <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-6 md:px-10 pb-6 md:pb-10 pt-6 md:pt-8 bg-neutral-base-50/10">
                 {isLoading ? (
                     <div className="py-20 flex flex-col items-center justify-center gap-6">
                         <div className="relative">
@@ -119,18 +123,13 @@ export default function AddressSelectionModal({
     if (isMobile) {
         return (
             <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-                <DrawerContent className="max-h-[85vh] bg-white rounded-t-[32px] border-none shadow-2xl">
-                    <div className="mx-auto w-12 h-1.5 bg-neutral-base-100 rounded-full mt-3" />
-                    <DrawerHeader className="p-6 pb-4">
+                <DrawerContent className="h-[90dvh] p-0 bg-white rounded-t-[32px] border-none flex flex-col outline-hidden">
+                    <div className="mx-auto w-12 h-1.5 shrink-0 rounded-full bg-neutral-base-100 mt-3" />
+                    <DrawerHeader className="px-6 py-6 border-b border-neutral-base-50 text-left">
                         <Header />
                     </DrawerHeader>
                     <div className="flex-1 overflow-hidden flex flex-col">
                         <Content />
-                    </div>
-                    <div className="p-4 bg-white border-t border-neutral-base-50">
-                        <DrawerClose asChild>
-                            <button className="w-full h-14 rounded-2xl bg-neutral-base-900 text-white font-black text-[12px] uppercase tracking-widest">Tutup</button>
-                        </DrawerClose>
                     </div>
                 </DrawerContent>
             </Drawer>
@@ -139,7 +138,7 @@ export default function AddressSelectionModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="w-[95vw] max-h-[90vh] sm:max-w-[800px] p-0 bg-white rounded-[32px] md:rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] border-none overflow-hidden flex flex-col">
+            <DialogContent className="w-full sm:max-w-[800px] h-dvh sm:h-auto sm:max-h-[85vh] p-0 bg-white rounded-none sm:rounded-[32px] md:rounded-[40px] shadow-none sm:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] border-none overflow-hidden flex flex-col outline-hidden">
                 <DialogHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between shrink-0">
                     <Header isDialog />
                 </DialogHeader>

@@ -118,9 +118,9 @@ function LoginContent() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-start lg:justify-center p-0 sm:p-8 md:p-12 bg-[#FAF9F6] font-montserrat overflow-x-hidden relative selection:bg-neutral-base-900/10">
+        <div className="min-h-screen flex flex-col items-center justify-start lg:justify-center py-6 sm:py-12 px-0 sm:px-8 bg-[#FAF9F6] font-montserrat overflow-x-hidden relative selection:bg-neutral-base-900/10">
             {/* Main Content Card */}
-            <div className="w-full max-w-[1100px] bg-white rounded-none sm:rounded-[2.5rem] shadow-none sm:shadow-[0_20px_80px_-15px_rgba(0,0,0,0.08)] overflow-hidden flex h-auto lg:h-[760px] lg:max-h-[95vh] relative z-10 border-none sm:border border-neutral-base-100/80">
+            <div className="w-full max-w-[1100px] bg-white rounded-none sm:rounded-[2.5rem] shadow-none sm:shadow-[0_20px_80px_-15px_rgba(0,0,0,0.08)] overflow-hidden flex h-auto lg:min-h-[580px] lg:h-auto lg:max-h-[90vh] relative z-10 border-none sm:border border-neutral-base-100/80">
                 <AnimatePresence>
                     {isSuccess && (
                         <motion.div
@@ -182,16 +182,20 @@ function LoginContent() {
 
                 {/* Right Side - Form Section */}
                 {/* Right Side - Form Section */}
-                <div className="w-full lg:w-[55%] flex items-center justify-center p-6 sm:p-8 md:p-10 bg-white relative overflow-visible">
+                <div className="w-full lg:w-[55%] flex flex-col items-center justify-center p-6 sm:p-10 md:p-12 bg-white relative lg:max-h-full overflow-hidden">
+                    <style jsx shadow-block="true">{`
+                        .no-scrollbar::-webkit-scrollbar { display: none; }
+                        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                    `}</style>
                     {/* Subtle Geometric Polish */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl -mr-32 -mt-32" />
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl -ml-32 -mb-32" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl -ml-32 -mb-32 pointer-events-none" />
 
                     <motion.div
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
-                        className="w-full max-w-[440px] space-y-10 relative z-10 text-center lg:text-left"
+                        className="w-full max-w-[440px] space-y-6 sm:space-y-10 relative z-10 text-center lg:text-left py-4 overflow-y-auto overflow-x-hidden max-h-full no-scrollbar"
                     >
                         <motion.div variants={itemVariants} className="space-y-2">
                             {/* <Link href="/" className="inline-block mb-8">
@@ -205,7 +209,7 @@ function LoginContent() {
                             </p>
                         </motion.div>
 
-                        <motion.div variants={itemVariants} className="space-y-8">
+                        <motion.div variants={itemVariants} className="space-y-6 sm:space-y-8">
                             <motion.button
                                 whileHover={{ scale: 1.01, backgroundColor: "#f9f9f9" }}
                                 whileTap={{ scale: 0.99 }}

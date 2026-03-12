@@ -6,6 +6,7 @@ import { OrderService } from "@/lib/services/order-service";
 import { CustomerService } from "@/lib/services/customer-service";
 import { CartService } from "@/lib/services/cart-service";
 import { ConfigService } from "@/lib/services/config-service";
+import { ShippingService } from "@/lib/services/shipping-service";
 import { db } from "@/lib/db";
 import { rekeningPembayaran } from "@/lib/db/schema";
 import { eq, like, or } from "drizzle-orm";
@@ -68,8 +69,29 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         // 3. Generate Order ID
         const orderId = await OrderService.generateOrderId();
 
-        // 4. Calculate Meta & Logic Restoration
-        const shippingCost = shippingPrice || 0;
+        // 4. Validate Shipping Price (Double Validation)
+        const destination = shipping.districtId || shipping.kecamatan;
+        const shippingValidation = await ShippingService.validateShipping({
+            destination: destination,
+            weight: stockResult.totalWeight || 0,
+            courier: shipping.courier,
+            service: shipping.service,
+            claimedPrice: shippingPrice || 0
+        });
+
+        if (!shippingValidation.valid) {
+            if ((shippingValidation as any).error) {
+                return NextResponse.json({ message: "error", desc: (shippingValidation as any).error }, { status: 400 });
+            }
+            // If just price mismatch, we could either error out or auto-adjust. 
+            // Better to error out to inform the user about price change.
+            return NextResponse.json({
+                message: "error",
+                desc: "Harga ongkos kirim telah berubah. Silakan muat ulang halaman checkout untuk mendapatkan harga terbaru."
+            }, { status: 400 });
+        }
+
+        const shippingCost = shippingValidation.actualPrice;
         // Try biaya_packing first, then packing_fee as fallback
         let packingFee = await ConfigService.getInt("biaya_packing", -1);
         if (packingFee === -1) {
