@@ -204,7 +204,7 @@ export const GET = withAuth(async (
             voucherInfo,
             uniqueCode,
             expiredTime: paymentRow?.expiredTime,
-            whatsappAdmin: await ConfigService.get("whatsapp_nomor", "628997179308"),
+            whatsappAdmin: await ConfigService.get("whatsapp_nomor", "628997279308"),
             paymentVerificationTimeout: await ConfigService.getInt("PAYMENT_VERIFICATION_TIMEOUT_MINS", 15),
         });
 

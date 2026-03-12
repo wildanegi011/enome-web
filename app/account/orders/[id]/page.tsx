@@ -172,7 +172,10 @@ export default function OrderDetailPage() {
 
                         <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
                             <div className="xl:col-span-7 space-y-10">
-                                <OrderItemsCard items={items} />
+                                <OrderItemsCard
+                                    items={items}
+                                    orderNotes={order.keterangan}
+                                />
 
                                 <div className="space-y-10">
                                     <ShippingInfoCard

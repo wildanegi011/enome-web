@@ -158,7 +158,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         // Attach breakdown details for success page
         result.meta = orderData.meta;
         result.subtotal = totalAmount;
-        result.whatsappAdmin = await ConfigService.get("whatsapp_nomor", "628997179308");
+        result.whatsappAdmin = await ConfigService.get("whatsapp_nomor", "628997279308");
 
         console.log("API POST /api/orders response:", result);
         return NextResponse.json(result);

@@ -53,14 +53,17 @@ export async function POST(request: NextRequest) {
     try {
         const contentType = request.headers.get("content-type") || "";
         let credential = "";
+        let stateParam = "";
         let isRedirect = false;
 
         if (contentType.includes("application/json")) {
             const body = await request.json();
             credential = body.credential || body.id_token;
+            stateParam = body.state || "";
         } else if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
             const formData = await request.formData();
             credential = (formData.get("credential") as string) || (formData.get("id_token") as string);
+            stateParam = (formData.get("state") as string) || "";
             isRedirect = true;
         }
 
@@ -282,8 +285,20 @@ export async function POST(request: NextRequest) {
         logger.info("Auth Success: Google login successful", { email: trimmedEmail, userId: currentUser.id });
 
         if (isRedirect) {
-            // Redirect to home page if using Google's Redirect Mode
-            return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_URL!));
+            // Extract callbackUrl from state if available
+            let targetUrl = "/";
+            if (stateParam) {
+                try {
+                    const parsedState = JSON.parse(decodeURIComponent(stateParam));
+                    if (parsedState.callbackUrl) {
+                        targetUrl = parsedState.callbackUrl;
+                    }
+                } catch (e) {
+                    logger.error("Auth Warning: Failed to parse Google state", { error: e, state: stateParam });
+                }
+            }
+
+            return NextResponse.redirect(new URL(targetUrl, process.env.NEXT_PUBLIC_URL!));
         }
 
         return NextResponse.json({ success: true });

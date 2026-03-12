@@ -14,11 +14,12 @@ interface CartReviewProps {
     isLoading: boolean;
     updateQuantity: (id: number, currentQty: number, delta: number, stock: number) => Promise<void>;
     removeItem: (id: number) => Promise<void>;
+    updateNotes?: (id: number, notes: string) => Promise<void>;
     removeAllItems?: () => Promise<void>;
     formatPrice: (price: number) => string;
 }
 
-export default function CartReview({ items, isLoading, updateQuantity, removeItem, removeAllItems, formatPrice }: CartReviewProps) {
+export default function CartReview({ items, isLoading, updateQuantity, removeItem, updateNotes, removeAllItems, formatPrice }: CartReviewProps) {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isFixing, setIsFixing] = useState(false);
 
@@ -135,6 +136,7 @@ export default function CartReview({ items, isLoading, updateQuantity, removeIte
                             }
                         }}
                         onRemove={removeItem}
+                        onUpdateNotes={updateNotes}
                     />
                 </div>
             )}            {removeAllItems && items.length > 0 && (

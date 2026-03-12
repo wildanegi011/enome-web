@@ -112,7 +112,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
     /** Toggle wishlist — redirect ke login jika belum authenticated */
     const handleWishlist = () => {
         if (!isAuthenticated) {
-            router.push('/login');
+            router.push(`/login?callbackUrl=${encodeURIComponent(window.location.href)}`);
             return;
         }
         if (product.id) {
@@ -146,7 +146,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
     /** Handler utama add-to-cart — validasi semua pilihan sebelum submit */
     const handleAddToCart = () => {
         if (!isAuthenticated) {
-            router.push('/login');
+            router.push(`/login?callbackUrl=${encodeURIComponent(window.location.href)}`);
             return;
         }
         if (!selectedVariant && product.types && product.types.length > 0) {
@@ -563,9 +563,6 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                 <span className="text-[13px] text-neutral-base-900 font-medium">
                                     {product.isFuring ? "Full Furing" : "Tanpa Furing"}
                                 </span>
-                                {product.isFuring ? (
-                                    <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[9px] font-bold rounded-sm border border-emerald-100 uppercase tracking-tighter">Premium</span>
-                                ) : null}
                             </div>
                         </div>
                         <div className="flex flex-col gap-1.5">

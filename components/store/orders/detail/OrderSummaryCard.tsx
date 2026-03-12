@@ -34,7 +34,7 @@ export default function OrderSummaryCard({
     viaWallet,
     uniqueCodeValue,
     voucherInfo,
-    whatsappAdmin = "628997179308",
+    whatsappAdmin,
     onSuccess,
 }: OrderSummaryCardProps) {
     const {
@@ -283,7 +283,7 @@ export default function OrderSummaryCard({
                             ) : null}
 
                             <button
-                                onClick={() => handleWhatsAppConfirm(orderId, totalTagihan, metodebayar, whatsappAdmin)}
+                                onClick={() => handleWhatsAppConfirm(orderId, totalTagihan, metodebayar, whatsappAdmin || "")}
                                 className={cn(
                                     "flex items-center justify-center gap-2.5 h-12 rounded-xl border transition-all active:scale-[0.98] text-[11px] font-bold uppercase tracking-wider",
                                     isTimeout

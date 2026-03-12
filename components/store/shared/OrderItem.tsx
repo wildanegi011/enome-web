@@ -5,7 +5,7 @@ import FallbackImage from "@/components/store/shared/FallbackImage";
 import { Minus, Plus, Trash2, Zap, MessageSquare } from "lucide-react";
 import { ASSET_URL } from "@/config/config";
 import { cn, formatCurrency } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { motion } from "framer-motion";
 
 export interface OrderItemType {
     id: number;
@@ -63,7 +63,7 @@ export default function OrderItem({
 
     // Cart-specific logic
     const showCheckbox = variant === "cart" && onToggleSelect;
-    const showNotes = variant === "cart" && onUpdateNotes && !isOffline;
+    const showNotes = onUpdateNotes && !isOffline;
 
     // Checkout-specific logic
     const isCheckout = variant === "checkout";
@@ -246,21 +246,33 @@ export default function OrderItem({
                     </div>
                 </div>
 
-                {/* Note Section (Cart Only) */}
+                {/* Note Section */}
                 {showNotes && (
-                    <div className="mt-4 pt-3 border-t border-dashed border-neutral-base-100 flex items-center gap-2.5">
-                        <div className="shrink-0 p-1.5 bg-neutral-base-50 rounded-lg">
-                            <MessageSquare className="w-3 h-3 text-neutral-base-400" />
+                    <motion.div
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-4 pt-4 border-t border-dashed border-neutral-base-100 flex flex-col gap-2"
+                    >
+                        <div className="flex items-center gap-2 px-1">
+                            <div className="shrink-0 p-1 bg-amber-50 rounded-md">
+                                <MessageSquare className="w-2.5 h-2.5 text-amber-600" />
+                            </div>
+                            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-neutral-base-400">
+                                Catatan Item
+                            </span>
                         </div>
-                        <input
-                            type="text"
-                            value={localNotes}
-                            onChange={(e) => setLocalNotes(e.target.value)}
-                            onBlur={handleNotesBlur}
-                            placeholder="Tambahkan catatan untuk penjual..."
-                            className="flex-1 bg-transparent text-[11px] md:text-[13px] font-medium outline-none placeholder:text-neutral-base-200 min-w-0"
-                        />
-                    </div>
+                        <div className="relative group/note">
+                            <input
+                                type="text"
+                                value={localNotes}
+                                onChange={(e) => setLocalNotes(e.target.value)}
+                                onBlur={handleNotesBlur}
+                                placeholder="Tambahkan catatan (ukuran, warna, dll)..."
+                                className="w-full bg-neutral-base-50/50 hover:bg-neutral-base-50 focus:bg-white border border-transparent focus:border-neutral-base-200 rounded-xl px-3 py-2 text-[11px] md:text-[13px] font-medium outline-none placeholder:text-neutral-base-200 transition-all"
+                            />
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-amber-500 group-focus-within/note:w-full transition-all duration-300 rounded-full" />
+                        </div>
+                    </motion.div>
                 )}
             </div>
         </div>

@@ -73,7 +73,9 @@ function LoginContent() {
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_KEY_ID;
         const redirectUri = `${process.env.NEXT_PUBLIC_URL}/api/auth/google`;
         const nonce = Math.random().toString(36).substring(2);
-        const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=id_token&scope=email%20profile&response_mode=form_post&nonce=${nonce}`;
+        const callbackUrl = searchParams.get("callbackUrl");
+        const state = callbackUrl ? encodeURIComponent(JSON.stringify({ callbackUrl })) : "";
+        const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=id_token&scope=email%20profile&response_mode=form_post&nonce=${nonce}${state ? `&state=${state}` : ""}`;
         window.location.href = url;
     };
 
@@ -85,8 +87,10 @@ function LoginContent() {
             setIsSuccess(true);
             toast.success("Selamat datang kembali!");
 
+            const callbackUrl = searchParams.get("callbackUrl");
+
             setTimeout(() => {
-                router.push("/");
+                router.push(callbackUrl || "/");
             }, 1200);
         } catch (error: any) {
             setError("Email atau password yang Anda masukkan salah. Silakan coba lagi.");

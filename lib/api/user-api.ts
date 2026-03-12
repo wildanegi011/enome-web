@@ -76,6 +76,7 @@ export interface OrderDetail {
         gambar: string | null;
         ukuran?: string;
         warna?: string;
+        catatan?: string | null;
     }[];
     paymentInfo?: {
         namaBank: string;

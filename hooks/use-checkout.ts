@@ -103,6 +103,7 @@ export function useCheckout() {
         courierName?: string,
         courierService?: string,
         expiredTime?: string | number | null,
+        whatsappAdmin?: string,
     } | null>(null);
     const [lastOrderedItems, setLastOrderedItems] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,7 +123,7 @@ export function useCheckout() {
     // Subtotal and weight calculation is handled in the effect below fetchCartQuery definition
 
     const [packingFee, setPackingFee] = useState(CONFIG.PACKING_FEE);
-    const [whatsappAdmin, setWhatsappAdmin] = useState("628997179308");
+    const [whatsappAdmin, setWhatsappAdmin] = useState("");
 
     // Fetch Config on mount
     useEffect(() => {
@@ -423,6 +424,16 @@ export function useCheckout() {
         }
     };
 
+    const updateNotes = async (id: number, notes: string) => {
+        try {
+            await cartApi.updateNotes(id, notes);
+            await fetchCartQuery.refetch();
+            refreshCart();
+        } catch (error) {
+            toast.error("Gagal memperbarui catatan");
+        }
+    };
+
     const removeAllItems = async () => {
         try {
             const response = await fetch("/api/cart", { method: "DELETE" });
@@ -550,6 +561,7 @@ export function useCheckout() {
                     courierName: shippingForm.courierName || shippingForm.courier,
                     courierService: shippingForm.service,
                     expiredTime: data.expiredTime,
+                    whatsappAdmin: data.whatsappAdmin || whatsappAdmin,
                 });
                 setLastOrderedItems([...cartItems]);
 
@@ -599,6 +611,6 @@ export function useCheckout() {
         couriers, isLoadingCouriers, shippingOptions, setShippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         errors, validateCheckout, setErrors,
         packingFee, grandTotal, remainingBill,
-        handleSelectAddress, updateQuantity, removeItem, removeAllItems, applyVoucher, submitOrder, setVoucherData
+        handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, submitOrder, setVoucherData
     };
 }

@@ -24,7 +24,7 @@ export default async function Page() {
  */
 async function ContactInformasi() {
     // Fetch Configuration
-    const whatsapp = await ConfigService.get("whatsapp_nomor", "628997179308");
+    const whatsapp = await ConfigService.get("whatsapp_nomor");
     const email = await ConfigService.get("admin_email", "hijabsylla@gmail.com");
     const dailyOpen = await ConfigService.get("daily_open", "Monday – Friday : 09.00 – 17.00 WIB");
     const weekendOpen = await ConfigService.get("weekend_open", "Saturday : 09.00 – 14.00 WIB");

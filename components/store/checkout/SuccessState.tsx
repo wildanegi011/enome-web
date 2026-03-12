@@ -30,8 +30,9 @@ interface SuccessStateProps {
         fullAddress?: string,
         courierName?: string,
         courierService?: string,
-        bankLogo?: string
+        bankLogo?: string,
         expiredTime?: string | number | null,
+        whatsappAdmin?: string,
     };
     lastOrderedItems: any[];
     formatPrice: (price: number) => string;
@@ -374,7 +375,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                         orderResult.orderId,
                                         orderResult.total,
                                         orderResult.paymentMethod || "Transfer",
-                                        (orderResult as any).whatsappAdmin
+                                        orderResult.whatsappAdmin || ""
                                     )}
                                     className={cn(
                                         "flex items-center justify-center gap-2.5 h-12 md:h-14 rounded-xl md:rounded-2xl border transition-all active:scale-[0.98] text-[12px] md:text-[13px] font-bold uppercase tracking-wider",

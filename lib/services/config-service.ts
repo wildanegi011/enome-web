@@ -10,7 +10,7 @@ interface CacheEntry {
 
 export class ConfigService {
     private static cache = new Map<string, CacheEntry>();
-    private static readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
+    private static readonly DEFAULT_TTL = 30 * 1000; // 30 seconds
 
     /**
      * Get a configuration value by key.

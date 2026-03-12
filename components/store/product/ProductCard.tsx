@@ -67,7 +67,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         e.preventDefault();
         e.stopPropagation();
         if (!isAuthenticated) {
-            router.push('/login');
+            router.push(`/login?callbackUrl=${encodeURIComponent(window.location.href)}`);
             return;
         }
         if (product.id) {

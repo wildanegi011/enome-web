@@ -15,13 +15,15 @@ interface OrderItem {
     ukuran?: string;
     warna?: string;
     variant?: string;
+    catatan?: string | null;
 }
 
 interface OrderItemsCardProps {
     items: OrderItem[];
+    orderNotes?: string | null;
 }
 
-export default function OrderItemsCard({ items }: OrderItemsCardProps) {
+export default function OrderItemsCard({ items, orderNotes }: OrderItemsCardProps) {
     return (
         <div className="bg-white border border-neutral-base-100 rounded-[28px] md:rounded-[32px] overflow-hidden shadow-sm">
             <div className="px-6 md:px-8 py-5 md:py-6 border-b border-neutral-base-50 flex items-center justify-between">
@@ -80,6 +82,14 @@ export default function OrderItemsCard({ items }: OrderItemsCardProps) {
                                     Qty: <b className="text-neutral-base-900">{item.qty}</b>
                                 </span>
                             </div>
+                            {item.catatan && (
+                                <div className="mt-2.5 p-3 bg-neutral-base-50 rounded-xl border border-neutral-base-100">
+                                    <p className="text-[10px] md:text-[11px] font-medium text-neutral-base-500 flex flex-col items-start gap-2">
+                                        <span className="w-1 h-1 rounded-full bg-neutral-base-400" />
+                                        Catatan: <span className="text-neutral-base-800 not-italic">{item.catatan}</span>
+                                    </p>
+                                </div>
+                            )}
                             <p className="text-[14px] md:text-[16px] font-bold text-neutral-base-900 mt-2 md:mt-4">
                                 {formatCurrency(item.harga)}
                             </p>

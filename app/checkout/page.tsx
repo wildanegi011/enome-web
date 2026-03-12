@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, Check, ShoppingBag, MapPin, Truck, CreditCard } from "lucide-react";
+import { Loader2, Check, ShoppingBag, MapPin, Truck, CreditCard, MessageSquare, Zap } from "lucide-react";
 import clsx from "clsx";
 import Navbar from "@/components/store/layout/Navbar";
 import Breadcrumb from "@/components/store/shared/Breadcrumb";
@@ -31,7 +31,7 @@ function CheckoutContent() {
         orderResult, lastOrderedItems, isSubmitting,
         couriers, isLoadingCouriers, shippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         packingFee, grandTotal, remainingBill,
-        handleSelectAddress, updateQuantity, removeItem, removeAllItems, applyVoucher, submitOrder,
+        handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, submitOrder,
         setShippingOptions, setVoucherData,
         errors, setErrors
     } = useCheckout();
@@ -142,6 +142,7 @@ function CheckoutContent() {
                                     isLoading={isLoading}
                                     updateQuantity={updateQuantity}
                                     removeItem={removeItem}
+                                    updateNotes={updateNotes}
                                     removeAllItems={removeAllItems}
                                     formatPrice={formatCurrency}
                                 />
@@ -194,17 +195,8 @@ function CheckoutContent() {
                                     setDropshipperForm={setDropshipperForm}
                                 /> */}
 
-                                {/* <div className="h-px bg-neutral-base-50/50 my-1 md:my-2" />
+                                <div className="h-px bg-neutral-base-50/50 my-1 md:my-2" />
 
-                                <div className="flex flex-col gap-4">
-                                    <label className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-neutral-base-400 px-1">Catatan untuk Penjual (Opsional)</label>
-                                    <textarea
-                                        value={specialNotes}
-                                        onChange={(e) => setSpecialNotes(e.target.value)}
-                                        placeholder="Pesan untuk penjual..."
-                                        className="w-full min-h-[80px] bg-white border border-neutral-base-100 rounded-2xl p-5 font-bold text-[13px] outline-none focus:border-neutral-base-900 focus:ring-4 focus:ring-neutral-base-900/5 transition-all placeholder:text-neutral-base-200 resize-none shadow-sm shadow-neutral-base-900/5"
-                                    />
-                                </div> */}
                             </motion.div>
 
                             {/* 4. Payment Method */}
