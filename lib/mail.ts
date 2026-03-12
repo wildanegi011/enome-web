@@ -355,3 +355,100 @@ export async function sendOrderConfirmationEmail(to: string, orderData: any) {
         return { success: false, error: error.message };
     }
 }
+
+export async function sendOrderStatusUpdateEmail(to: string, orderData: any) {
+    try {
+        const { orderId, customerName, status, noResi, ekspedisi, items } = orderData;
+        let title = "Update Status Pesanan";
+        let message = `Pesanan Anda #${orderId} telah berubah status menjadi ${status}.`;
+        let buttonText = "Lihat Detail Pesanan";
+        let footerNote = "Terima kasih telah berbelanja di Énome.";
+
+        const frontendUrl = await ConfigService.get("main_url", "http://localhost:3000");
+        let link = `${frontendUrl}/account/orders/${encodeURIComponent(orderId)}`;
+
+        // Customize based on status
+        const upperStatus = status.toUpperCase();
+        if (upperStatus.includes("BAYAR") || upperStatus.includes("PAID")) {
+            title = "Pembayaran Diterima";
+            message = `Terima kasih! Pembayaran untuk pesanan #${orderId} telah kami terima. Pesanan Anda akan segera kami proses untuk pengemasan.`;
+        } else if (upperStatus.includes("PROSES")) {
+            title = "Pesanan Sedang Diproses";
+            message = `Pesanan #${orderId} saat ini sedang dalam tahap pengemasan. Kami akan mengabari Anda kembali saat pesanan siap dikirim.`;
+        } else if (upperStatus.includes("KIRIM")) {
+            title = "Pesanan Telah Dikirim";
+            message = `Kabar gembira! Pesanan #${orderId} telah dikirim melalui kurir ${ekspedisi || "ekspedisi pilihan"}. Anda dapat melacaknya dengan nomor resi: <strong>${noResi || "-"}</strong>`;
+            buttonText = "Lacak Pesanan";
+        } else if (upperStatus.includes("CLOSE") || upperStatus.includes("SELESAI")) {
+            title = "Pesanan Selesai";
+            message = `Pesanan #${orderId} telah dinyatakan selesai. Kami harap Anda puas dengan produk Énome. Jangan lupa untuk memberikan ulasan terbaik Anda!`;
+        } else if (upperStatus.includes("BATAL") || upperStatus.includes("CANCEL")) {
+            title = "Pesanan Dibatalkan";
+            message = `Pesanan #${orderId} telah dibatalkan. Jika Anda merasa hal ini adalah kesalahan, silakan hubungi Customer Service kami.`;
+            buttonText = "Hubungi Kami";
+            footerNote = "Terima kasih dan kami mohon maaf atas ketidaknyamanan ini.";
+
+            // Redirect to WhatsApp for cancelled orders
+            const whatsappNumber = await ConfigService.get("whatsapp_nomor", "628997279308");
+            const whatsappMessage = encodeURIComponent(`Halo Admin, saya ingin menanyakan perihal pembatalan pesanan saya dengan nomor #${orderId}.`);
+            link = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+        }
+
+        let orderItemsHtml = "";
+        if (items && items.length > 0) {
+            const itemsList = items.map((item: any) => `
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                        <div style="font-weight: 600; color: #171717;">${item.namaProduk}</div>
+                        <div style="font-size: 11px; color: #737373;">
+                            Size: ${item.size || item.ukuran} | Warna: ${item.warna} | Motif: ${item.variant || "-"}
+                        </div>
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">Rp ${Math.round(item.harga).toLocaleString('id-ID')}</td>
+                </tr>
+            `).join('');
+
+            orderItemsHtml = `
+                <div style="text-align: left; background-color: #f9f9f9; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                    <p style="margin-bottom: 10px; font-size: 14px; font-weight: bold; color: #171717;">Rincian Pesanan:</p>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <th style="text-align: left; padding: 10px; font-size: 11px; color: #737373; text-transform: uppercase;">Produk</th>
+                                <th style="text-align: center; padding: 10px; font-size: 11px; color: #737373; text-transform: uppercase;">Qty</th>
+                                <th style="text-align: right; padding: 10px; font-size: 11px; color: #737373; text-transform: uppercase;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsList}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        const mailOptions = {
+            from: process.env.SMTP_FROM || '"Énome" <noreply@enome.test>',
+            to,
+            subject: `Update Pesanan ${orderId}: ${title}`,
+            html: getPremiumEmailTemplate(title, message, buttonText, link, footerNote)
+                .replace('<p style="margin: 0 0 30px 0; font-size: 16px; line-height: 1.6; color: #525252;">',
+                    `<p style="margin: 0 0 30px 0; font-size: 16px; line-height: 1.6; color: #525252;">${orderItemsHtml}`),
+            attachments: [
+                {
+                    filename: 'logo-enome-white.png',
+                    path: path.join(process.cwd(), 'public', 'logo-enome-white.png'),
+                    cid: 'logo'
+                }
+            ]
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        logger.info("Order status update email sent: %s", info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error: any) {
+        logger.error("Error sending order status update email: ", error);
+        return { success: false, error: error.message };
+    }
+}

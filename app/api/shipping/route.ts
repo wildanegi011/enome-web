@@ -145,38 +145,9 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // 5. Add manual/pickup options - ALWAYS include these even if RajaOngkir fails
-        const returnedCodes = new Set(rajaOngkirResults.map((r: any) => r.code.toLowerCase()));
-
-        const manualResults = activeCouriers
-            .filter(c => {
-                const code = c.code?.toLowerCase();
-                const dbIsManual = (c as any).isManual === 1;
-                // Return ONLY if it's explicitly marked as manual/pickup in DB
-                return code && dbIsManual;
-            })
-            .map(c => {
-                const dbIsManual = (c as any).isManual === 1;
-                return {
-                    code: (c.code || "CARGO").toUpperCase(),
-                    name: c.name || c.code || "Cargo",
-                    costs: [{
-                        service: (c.name || c.code || "Cargo").toUpperCase(),
-                        description: dbIsManual ? `Ambil sendiri di lokasi: ${c.name}` : `Pengiriman via ${c.name || c.code}`,
-                        // Use 'manual' type string exclusively for Ambil Sendiri tab in Frontend
-                        type: dbIsManual ? 'manual' : 'automated',
-                        cost: [{
-                            value: 0,
-                            etd: dbIsManual ? "0 Hari" : "",
-                            note: dbIsManual ? "Silakan ambil pesanan Anda" : "Biaya akan dihitung manual atau gratis"
-                        }]
-                    }]
-                };
-            });
-
         return NextResponse.json({
             rajaongkir: {
-                results: [...rajaOngkirResults, ...manualResults]
+                results: rajaOngkirResults
             }
         });
 
