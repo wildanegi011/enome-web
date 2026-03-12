@@ -115,7 +115,7 @@ export default function OrderDetailPage() {
     const router = useRouter();
 
     const orderIdParam = Array.isArray(params.id) ? params.id[0] : (params.id || "");
-    const { data, isLoading, isError } = useOrderDetail(orderIdParam);
+    const { data, isLoading, isError, refetch } = useOrderDetail(orderIdParam);
 
     useEffect(() => {
         if (!isLoading && isError) {
@@ -203,6 +203,7 @@ export default function OrderDetailPage() {
                                     uniqueCodeValue={uniqueCodeValue}
                                     voucherInfo={voucherInfo}
                                     whatsappAdmin={whatsappAdmin}
+                                    onSuccess={() => refetch()}
                                 />
                             </div>
                         </div>

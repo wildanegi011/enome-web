@@ -89,6 +89,7 @@ export interface OrderDetail {
     uniqueCode?: number;
     expiredTime?: string | number | null;
     whatsappAdmin?: string;
+    paymentVerificationTimeout?: number;
 }
 
 export interface ProfileData {

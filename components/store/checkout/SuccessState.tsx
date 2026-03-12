@@ -1,11 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { usePaymentVerification } from "@/hooks/use-payment-verification";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, ChevronRight, ShoppingBag, Copy, ShieldCheck, Clock, Truck } from "lucide-react";
+import { CheckCircle2, ChevronLeft, Copy, ShieldCheck, Clock, Truck, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { ASSET_URL } from "@/config/config";
 import { toast } from "sonner";
 import { cn, handleWhatsAppConfirm } from "@/lib/utils";
+import { CONFIG } from "@/lib/config";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 
 interface SuccessStateProps {
@@ -35,20 +38,42 @@ interface SuccessStateProps {
 }
 
 export default function SuccessState({ orderResult, lastOrderedItems, formatPrice }: SuccessStateProps) {
+    const router = useRouter();
 
     console.log("orderResultxxx", orderResult);
 
     const isTransfer = !!orderResult.bankAccount;
-    const [timeLeft, setTimeLeft] = useState(600);
     const [isCopied, setIsCopied] = useState<{ [key: string]: boolean }>({});
 
-    useEffect(() => {
-        if (!isTransfer) return;
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
-        return () => clearInterval(timer);
-    }, [isTransfer]);
+    const {
+        timeLeft,
+        isVerifying,
+        isTimeout,
+        isSuccess,
+        startVerification,
+        statusOrder: currentStatusOrder,
+        statusTagihan: currentStatusTagihan
+    } = usePaymentVerification(
+        orderResult.orderId,
+        orderResult.bankAccount ? "BELUM BAYAR" : "PAID",
+        useCallback(() => {
+            setTimeout(() => {
+                router.push(`/account/orders/${encodeURIComponent(orderResult.orderId)}`);
+            }, 5000); // 5 seconds instead of 3 to allow seeing the "Processed" stage
+        }, [router, orderResult.orderId])
+    );
+
+    const handleStartVerification = () => {
+        startVerification();
+    };
+
+    // Granular status logic for real-time feel
+    const sTagihan = currentStatusTagihan || (orderResult.bankAccount ? "BELUM BAYAR" : "PAID");
+    const sOrder = currentStatusOrder || "OPEN";
+
+    const isPaymentDiterima = sTagihan !== "BELUM BAYAR" && sTagihan !== "UNPAID";
+    const isDataMatched = sTagihan === "BAYAR" || sTagihan === "SUDAH BAYAR";
+    const isOrderProcessed = sOrder !== "OPEN";
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -62,8 +87,6 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
         toast.success("Berhasil disalin ke clipboard");
         setTimeout(() => setIsCopied({ ...isCopied, [id]: false }), 2000);
     };
-
-
 
     return (
         <div className="max-w-5xl mx-auto py-6 md:py-16 px-4 md:px-8">
@@ -183,14 +206,131 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                         </div>
                                     </div>
 
-                                    {/* Auto verification notice */}
-                                    <div className="p-3.5 md:p-4 bg-emerald-50/60 border border-emerald-100 rounded-xl md:rounded-2xl flex items-start gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 mt-0.5">
-                                            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                                    {/* Auto verification info & status */}
+                                    <div className={cn(
+                                        "overflow-hidden border rounded-2xl transition-all duration-500",
+                                        isSuccess
+                                            ? "bg-emerald-50 border-emerald-200 shadow-md scale-[1.02]"
+                                            : isVerifying
+                                                ? (isTimeout ? "bg-rose-50 border-rose-200" : "bg-amber-50/50 border-amber-200 shadow-sm")
+                                                : "bg-emerald-50/60 border-emerald-100"
+                                    )}>
+                                        {/* Header Info */}
+                                        <div className={cn(
+                                            "p-4 md:p-5 flex items-start gap-3.5",
+                                            (isVerifying || isSuccess) && (
+                                                isSuccess
+                                                    ? "border-b border-emerald-200/50"
+                                                    : isTimeout ? "border-b border-rose-200/50" : "border-b border-amber-200/50"
+                                            )
+                                        )}>
+                                            <div className={cn(
+                                                "w-9 h-9 rounded-full flex items-center justify-center shadow-sm shrink-0 mt-0.5",
+                                                isSuccess
+                                                    ? "bg-emerald-100"
+                                                    : isVerifying
+                                                        ? (isTimeout ? "bg-rose-100" : "bg-amber-100")
+                                                        : "bg-emerald-100"
+                                            )}>
+                                                {isSuccess ? (
+                                                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                                                ) : isVerifying ? (
+                                                    isTimeout ? (
+                                                        <AlertCircle className="w-4.5 h-4.5 text-rose-600" />
+                                                    ) : (
+                                                        <Clock className="w-4.5 h-4.5 text-amber-600 animate-pulse" />
+                                                    )
+                                                ) : (
+                                                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className={cn(
+                                                    "text-[12px] md:text-[13px] font-bold mb-1",
+                                                    isSuccess
+                                                        ? "text-emerald-900"
+                                                        : isVerifying
+                                                            ? (isTimeout ? "text-rose-900" : "text-amber-900")
+                                                            : "text-emerald-900"
+                                                )}>
+                                                    {isSuccess
+                                                        ? "Pembayaran Berhasil Terdeteksi!"
+                                                        : isVerifying
+                                                            ? (isTimeout ? "Verifikasi Melewati Batas Waktu" : "Verifikasi Sedang Berjalan")
+                                                            : "Verifikasi Otomatis Tersedia"}
+                                                </p>
+                                                <div className={cn(
+                                                    "text-[11px] md:text-[12px] font-medium leading-relaxed",
+                                                    isSuccess
+                                                        ? "text-emerald-800/80"
+                                                        : isVerifying
+                                                            ? (isTimeout ? "text-rose-800/80" : "text-amber-800/80")
+                                                            : "text-emerald-800/80"
+                                                )}>
+                                                    {isSuccess ? (
+                                                        "Pembayaran Anda berhasil diverifikasi! Menyiapkan detail pesanan..."
+                                                    ) : isVerifying ? (
+                                                        isTimeout ? (
+                                                            <>Sistem belum dapat mendeteksi pembayaran Anda. Mohon <span className="font-bold underline">Konfirmasi Manual via WhatsApp</span> di bawah.</>
+                                                        ) : (
+                                                            <>Estimasi selesai dalam <span className="font-black text-amber-900">{formatTime(timeLeft || 0)}</span>. Jangan khawatir, pesanan akan otomatis terproses.</>
+                                                        )
+                                                    ) : (
+                                                        <>Sistem kami akan mencocokkan mutasi bank secara otomatis berdasarkan <span className="font-bold underline">nominal transfer & kode unik</span> Anda.</>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <p className="text-[11px] md:text-[12px] font-medium text-emerald-800 leading-relaxed">
-                                            Pembayaran akan <span className="font-bold">diverifikasi otomatis</span> setelah transfer diterima. Proses membutuhkan waktu {formatTime(timeLeft)} menit.
-                                        </p>
+
+                                        {/* Verification Steps - Shown when verifying OR Success */}
+                                        {(isVerifying || isSuccess) && !isTimeout && (
+                                            <div className="px-5 py-4 bg-white/50 space-y-3.5">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={cn(
+                                                        "w-5 h-5 rounded-full flex items-center justify-center shrink-0",
+                                                        isPaymentDiterima ? "bg-emerald-500" : "bg-amber-500 animate-pulse"
+                                                    )}>
+                                                        {isPaymentDiterima ? <CheckCircle2 className="w-3 h-3 text-white" /> : <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                    </div>
+                                                    <span className={cn(
+                                                        "text-[11px] font-bold",
+                                                        isPaymentDiterima ? "text-neutral-base-700" : "text-neutral-base-900"
+                                                    )}>Menunggu Pembayaran</span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className={cn(
+                                                        "w-5 h-5 rounded-full flex items-center justify-center shrink-0",
+                                                        isDataMatched ? "bg-emerald-500" : (isPaymentDiterima ? "bg-amber-500 animate-pulse" : "bg-neutral-base-200 opacity-40")
+                                                    )}>
+                                                        {isDataMatched ? <CheckCircle2 className="w-3 h-3 text-white" /> : <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                    </div>
+                                                    <span className={cn(
+                                                        "text-[11px] font-bold",
+                                                        isDataMatched ? "text-neutral-base-700" : (isPaymentDiterima ? "text-neutral-base-900" : "text-neutral-base-600 opacity-40")
+                                                    )}>Data Transaksi Cocok</span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className={cn(
+                                                        "w-5 h-5 rounded-full flex items-center justify-center shrink-0",
+                                                        isOrderProcessed ? "bg-emerald-500" : (isDataMatched ? "bg-amber-500 animate-pulse" : "bg-neutral-base-200 opacity-40")
+                                                    )}>
+                                                        {isOrderProcessed ? <CheckCircle2 className="w-3 h-3 text-white" /> : <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                    </div>
+                                                    <span className={cn(
+                                                        "text-[11px] font-bold",
+                                                        isOrderProcessed ? "text-neutral-base-700" : (isDataMatched ? "text-neutral-base-900" : "text-neutral-base-600 opacity-40")
+                                                    )}>Pesanan Diproses</span>
+                                                </div>
+
+                                                {!isSuccess && (
+                                                    <div className="pt-2 border-t border-amber-100/50 mt-1">
+                                                        <p className="text-[10px] text-amber-700/70 italic leading-relaxed">
+                                                            *Jika dalam {CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS} menit belum terverifikasi, silakan hubungi WhatsApp Admin.
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -207,24 +347,55 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                         )}
 
                         {/* Action Buttons */}
-                        <div className="flex flex-col md:flex-row gap-4">
-                            <button
-                                onClick={() => handleWhatsAppConfirm(
-                                    orderResult.orderId,
-                                    orderResult.total,
-                                    orderResult.paymentMethod || "Transfer",
-                                    (orderResult as any).whatsappAdmin
-                                )}
-                                className="flex-1 md:flex-[1.5] py-5 md:py-6 rounded-2xl bg-neutral-base-900 flex items-center justify-center gap-2.5 text-[13px] md:text-[14px] font-black uppercase tracking-[0.12em] text-white hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-[0.98]"
-                            >
-                                Konfirmasi Pembayaran
-                                <ChevronRight className="w-4 h-4" />
-                            </button>
+                        <div className="flex flex-col gap-3 md:gap-4 mt-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                                {isVerifying && !isTimeout && !isSuccess ? (
+                                    <div className="flex items-center justify-center gap-2.5 h-12 md:h-14 rounded-xl md:rounded-2xl bg-amber-50 border border-amber-200 text-[12px] md:text-[13px] font-bold uppercase tracking-wider text-amber-700">
+                                        <Clock className="w-4 h-4 animate-spin-slow" />
+                                        Mengecek Status...
+                                    </div>
+                                ) : !isTimeout && !isSuccess ? (
+                                    <button
+                                        onClick={handleStartVerification}
+                                        className="flex items-center justify-center gap-2.5 h-12 md:h-14 rounded-xl md:rounded-2xl bg-neutral-base-900 text-white hover:bg-neutral-base-800 transition-all shadow-md hover:shadow-lg active:scale-[0.98] text-[12px] md:text-[13px] font-bold uppercase tracking-wider"
+                                    >
+                                        <ShieldCheck className="w-4 h-4" />
+                                        Saya Sudah Bayar
+                                    </button>
+                                ) : isSuccess ? (
+                                    <div className="flex items-center justify-center gap-2.5 h-12 md:h-14 rounded-xl md:rounded-2xl bg-emerald-600 text-white text-[12px] md:text-[13px] font-bold uppercase tracking-wider shadow-lg animate-bounce">
+                                        <CheckCircle2 className="w-4 h-4" />
+                                        Pembayaran Sukses!
+                                    </div>
+                                ) : null}
+
+                                <button
+                                    onClick={() => handleWhatsAppConfirm(
+                                        orderResult.orderId,
+                                        orderResult.total,
+                                        orderResult.paymentMethod || "Transfer",
+                                        (orderResult as any).whatsappAdmin
+                                    )}
+                                    className={cn(
+                                        "flex items-center justify-center gap-2.5 h-12 md:h-14 rounded-xl md:rounded-2xl border transition-all active:scale-[0.98] text-[12px] md:text-[13px] font-bold uppercase tracking-wider",
+                                        isTimeout
+                                            ? "bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700 shadow-lg col-span-full"
+                                            : "border-emerald-500 text-emerald-600 bg-white hover:bg-emerald-50"
+                                    )}
+                                >
+                                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4.5 h-4.5">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                                    </svg>
+                                    WA Konfirmasi {isTimeout && "Manual"}
+                                </button>
+                            </div>
+
                             <Link
                                 href={`/account/orders/${encodeURIComponent(orderResult.orderId)}`}
-                                className="flex-1 py-5 md:py-6 rounded-2xl border-2 border-neutral-base-200 flex items-center justify-center gap-2.5 text-[13px] md:text-[14px] font-black uppercase tracking-[0.12em] text-neutral-base-900 bg-white hover:bg-neutral-base-50 transition-all active:scale-[0.98]"
+                                className="flex items-center justify-center gap-2 w-full h-11 md:h-12 rounded-xl border border-neutral-base-200 text-[11px] md:text-[12px] font-bold uppercase tracking-widest text-neutral-base-500 bg-neutral-base-50/50 hover:bg-neutral-base-50 transition-all active:scale-[0.99]"
                             >
-                                Detail Order
+                                <ChevronLeft className="w-3.5 h-3.5" />
+                                Lihat Detail Pesanan
                             </Link>
                         </div>
                     </div>

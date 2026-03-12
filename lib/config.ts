@@ -16,6 +16,9 @@ export const CONFIG = {
     PACKING_FEE: 2000, // Fallback value, now dynamic via central_config
     TRACKABLE_COURIERS: ["jne", "pos", "jnt", "sicepat", "tiki", "wahana", "ninja", "lion", "anteraja", "idexpress"],
 
+    // Payment Configurations (Fallback for Central Config)
+    PAYMENT_VERIFICATION_TIMEOUT_MINS: 1,
+
     // Pagination Defaults
     PAGINATION: {
         DEFAULT_PAGE: 1,

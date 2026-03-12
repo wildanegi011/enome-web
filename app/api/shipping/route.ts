@@ -152,9 +152,8 @@ export async function POST(request: NextRequest) {
             .filter(c => {
                 const code = c.code?.toLowerCase();
                 const dbIsManual = (c as any).isManual === 1;
-                // Return if it's explicitly marked as manual/pickup in DB
-                // OR if it's a fallback for automated codes that RajaOngkir didn't return
-                return code && (dbIsManual || (!automatedCodes.includes(code) || !returnedCodes.has(code)));
+                // Return ONLY if it's explicitly marked as manual/pickup in DB
+                return code && dbIsManual;
             })
             .map(c => {
                 const dbIsManual = (c as any).isManual === 1;

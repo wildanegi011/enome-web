@@ -47,7 +47,6 @@ async function ShippingInformasi() {
                             alt={post.judul || "Informasi Pengiriman"}
                             fill
                             className="object-cover opacity-50"
-                            priority
                         />
                         <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-white" />
                     </>
