@@ -9,7 +9,6 @@ export class SlideService {
             .from(slide)
             .where(and(
                 eq(slide.kategori, "main_image"),
-                eq(slide.isMobile, 0),
                 eq(slide.publish, 1),
                 eq(slide.isDeleted, 0)
             ))
@@ -31,6 +30,7 @@ export class SlideService {
                 url: `${ASSET_URL}/img/slide/${s.image}`,
                 link: s.link,
                 title: s.text,
+                isMobile: s.isMobile === 1,
                 aspect: "1/1"
             });
         });
