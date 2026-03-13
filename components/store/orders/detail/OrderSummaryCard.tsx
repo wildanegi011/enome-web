@@ -4,6 +4,7 @@ import { Tag, Receipt, Clock, ShieldCheck, AlertCircle, CheckCircle2 } from "luc
 import { formatCurrency, handleWhatsAppConfirm, cn } from "@/lib/utils";
 import { useCallback } from "react";
 import { usePaymentVerification } from "@/hooks/use-payment-verification";
+import CONFIG from "@/lib/config";
 
 interface OrderSummaryCardProps {
     orderId: string;
@@ -244,7 +245,7 @@ export default function OrderSummaryCard({
                                     </div>
                                     {!isSuccess && (
                                         <p className="text-[9px] text-amber-700/70 italic leading-tight pt-1 border-t border-amber-100/50">
-                                            *Jika dalam 15 menit belum terverifikasi, silakan hubungi WhatsApp Admin.
+                                            *Jika dalam {CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS} menit belum terverifikasi, silakan hubungi WhatsApp Admin.
                                         </p>
                                     )}
                                 </div>
