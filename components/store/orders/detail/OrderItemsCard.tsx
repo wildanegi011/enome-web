@@ -59,7 +59,7 @@ export default function OrderItemsCard({ items, orderNotes }: OrderItemsCardProp
                             />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900 mb-1 md:mb-2 truncate">
+                            <h3 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900 mb-1 md:mb-2 line-clamp-1">
                                 {item.namaProduk}
                             </h3>
                             <div className="flex flex-wrap items-center gap-2 md:gap-4 text-[11px] md:text-[13px] font-medium text-neutral-base-400">
