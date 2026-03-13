@@ -33,6 +33,7 @@ interface Collection {
     images: {
         url: string;
         aspect: string;
+        isMobile: boolean;
     }[];
 }
 

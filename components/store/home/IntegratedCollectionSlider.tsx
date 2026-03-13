@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { Compass } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // Sub-components
@@ -22,6 +23,7 @@ interface Collection {
         link: string | null;
         title?: string;
         aspect: string;
+        isMobile: boolean;
     }[];
 }
 
@@ -53,9 +55,15 @@ export default function IntegratedCollectionSlider() {
         fetchSlides();
     }, []);
 
+    // Filtered collections based on device
+    const filteredCollections = collections.map(col => ({
+        ...col,
+        images: col.images.filter(img => img.isMobile === isMobile)
+    })).filter(col => col.images.length > 0);
+
     const paginate = (newDirection: number) => {
         const newIndex = currentIndex + newDirection;
-        if (newIndex >= 0 && newIndex < collections.length) {
+        if (newIndex >= 0 && newIndex < filteredCollections.length) {
             setDirection(newDirection);
             setCurrentIndex(newIndex);
             setVerticalIndex(0); // Reset vertical scroll on collection change
@@ -64,7 +72,8 @@ export default function IntegratedCollectionSlider() {
 
     const scrollVertical = (newDirection: number) => {
         const newIndex = verticalIndex + newDirection;
-        const maxIndex = collections[currentIndex].images.length - 1;
+        const currentImages = filteredCollections[currentIndex]?.images || [];
+        const maxIndex = currentImages.length - 1;
         if (newIndex >= 0 && newIndex <= maxIndex) {
             setVerticalIndex(newIndex);
             const container = scrollContainerRef.current;
@@ -93,6 +102,22 @@ export default function IntegratedCollectionSlider() {
         return () => container.removeEventListener("scroll", handleScroll);
     }, [verticalIndex, collections, currentIndex]);
 
+    // Clamp indices when device mode changes or collection change
+    useEffect(() => {
+        if (filteredCollections.length > 0) {
+            // Clamp currentIndex
+            if (currentIndex >= filteredCollections.length) {
+                setCurrentIndex(Math.max(0, filteredCollections.length - 1));
+            }
+
+            // Clamp verticalIndex for the current collection
+            const currentImages = filteredCollections[currentIndex]?.images || [];
+            if (verticalIndex >= currentImages.length && currentImages.length > 0) {
+                setVerticalIndex(Math.max(0, currentImages.length - 1));
+            }
+        }
+    }, [isMobile, currentIndex, filteredCollections.length, collections, verticalIndex]);
+
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -103,6 +128,28 @@ export default function IntegratedCollectionSlider() {
         document.addEventListener("keydown", down);
         return () => document.removeEventListener("keydown", down);
     }, []);
+
+    const handleSlideClick = (link: string | null | undefined) => {
+        if (!link || link.trim() === "") return;
+        const target = link.trim();
+        if (target.includes('category=')) {
+            const cat = target.split('category=')[1]?.split('&')[0];
+            if (cat) {
+                router.push(`/products?category=${cat}`);
+                return;
+            }
+        }
+        try {
+            const u = new URL(target);
+            if (u.origin === window.location.origin) {
+                router.push(u.pathname + u.search);
+            } else {
+                window.location.href = target;
+            }
+        } catch (err) {
+            router.push(target);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -164,31 +211,30 @@ export default function IntegratedCollectionSlider() {
             <SearchModal
                 isOpen={isSearchOpen}
                 onOpenChange={setIsSearchOpen}
-                isMobile={isMobile}
                 setDirection={setDirection}
                 setCurrentIndex={setCurrentIndex}
                 currentIndex={currentIndex}
                 router={router}
-                collections={collections}
+                collections={filteredCollections}
             />
 
             {/* Pagination Controls */}
             <SliderControls
                 currentIndex={currentIndex}
-                totalCollections={collections.length}
+                totalCollections={filteredCollections.length}
                 paginate={paginate}
             />
 
             {/* Vertical Scroll Indicators */}
             <ScrollIndicators
                 verticalIndex={verticalIndex}
-                totalImages={collections[currentIndex].images.length}
+                totalImages={filteredCollections[currentIndex]?.images.length || 0}
                 scrollVertical={scrollVertical}
             />
 
             <AnimatePresence initial={false} custom={direction} mode="wait">
                 <motion.div
-                    key={currentIndex}
+                    key={`${currentIndex}-${isMobile}`} // Re-mount when device changes to reset ScrollArea
                     custom={direction}
                     variants={variants}
                     initial="enter"
@@ -206,23 +252,24 @@ export default function IntegratedCollectionSlider() {
                         viewportClassName="snap-y snap-mandatory no-scrollbar scroll-smooth"
                         scrollBarClassName="hidden"
                     >
-                        {collections[currentIndex].images.map((img, i) => (
-                            <div key={i} className="relative w-full h-screen snap-start shrink-0 overflow-hidden bg-zinc-950">
-                                {/* True Fullscreen Layer - CSS Background Image (Cover mode) */}
-                                <motion.div
-                                    initial={{ scale: 1.05, opacity: 0 }}
-                                    whileInView={{ scale: 1, opacity: 1 }}
-                                    transition={{ duration: 1.2, ease: "easeOut" }}
-                                    viewport={{ once: false }}
-                                    className="absolute inset-0 bg-cover bg-top bg-no-repeat"
-                                    style={{ backgroundImage: `url(${img.url})` }}
-                                />
+                        {filteredCollections[currentIndex]?.images ? (
+                            filteredCollections[currentIndex].images.map((img, i) => (
+                                <div key={i} className="relative w-full h-screen snap-start shrink-0 overflow-hidden bg-zinc-950">
+                                    {/* True Fullscreen Layer - CSS Background Image (Cover mode) */}
+                                    <motion.div
+                                        initial={{ scale: 1.05, opacity: 0 }}
+                                        whileInView={{ scale: 1, opacity: 1 }}
+                                        transition={{ duration: 1.2, ease: "easeOut" }}
+                                        viewport={{ once: false }}
+                                        className="absolute inset-0 bg-cover bg-top bg-no-repeat"
+                                        style={{ backgroundImage: `url(${img.url})` }}
+                                    />
 
-                                {/* Subtle Overlay for Brand Consistency */}
-                                <div className="absolute inset-0 bg-black/5 pointer-events-none" />
+                                    {/* Subtle Overlay for Brand Consistency */}
+                                    <div className="absolute inset-0 bg-black/5 pointer-events-none" />
 
-                                {/* Vertical Side Logo - Left Center */}
-                                {/* <motion.div
+                                    {/* Vertical Side Logo - Left Center */}
+                                    {/* <motion.div
                                     initial={{ opacity: 0, x: -30 }}
                                     whileInView={{ opacity: 1, x: 0 }}
                                     transition={{ duration: 1, delay: 0.3 }}
@@ -240,57 +287,47 @@ export default function IntegratedCollectionSlider() {
                                     </div>
                                 </motion.div> */}
 
-                                {/* Collection Title - Centered on Mobile, Left on Desktop */}
-                                <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
-                                    <div className="flex flex-col items-center md:items-start px-6 md:px-12 pb-24 md:pb-16">
-                                        <motion.p
-                                            initial={{ opacity: 0, y: 10 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.8, delay: 0.3 }}
-                                            viewport={{ once: false }}
-                                            className="font-montserrat text-[15px] md:text-[18px] text-center md:text-left text-white/70 tracking-[0.25em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
-                                        >
-                                            {img.title || collections[currentIndex].title}
-                                        </motion.p>
+                                    {/* Collection Title - Centered on Mobile, Left on Desktop */}
+                                    <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
+                                        <div className="flex flex-col items-center md:items-start px-6 md:px-12 pb-24 md:pb-16">
+                                            <motion.p
+                                                initial={{ opacity: 0, y: 10 }}
+                                                whileInView={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.8, delay: 0.3 }}
+                                                viewport={{ once: false }}
+                                                className="font-montserrat text-[15px] md:text-[18px] text-center md:text-left text-white/70 tracking-[0.25em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+                                            >
+                                                {img.title || filteredCollections[currentIndex]?.title}
+                                            </motion.p>
+                                        </div>
                                     </div>
+
+                                    {/* Ambient Shadow Gradient */}
+                                    <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-black/40 to-transparent pointer-events-none" />
+
+                                    {/* Interactive Click Overlay - FINAL STABLE POSITION */}
+                                    {img.link && img.link.trim() !== "" && (
+                                        <div
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleSlideClick(img.link);
+                                            }}
+                                            className="absolute inset-0 z-20 cursor-pointer pointer-events-auto"
+                                        />
+                                    )}
                                 </div>
-
-                                {/* Ambient Shadow Gradient */}
-                                <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-black/40 to-transparent pointer-events-none" />
-
-                                {/* Interactive Click Overlay - FINAL STABLE POSITION */}
-                                {img.link && img.link.trim() !== "" && (
-                                    <div
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            console.log("🚀 EXPLOSIVE CLICK:", img.link);
-
-                                            const target = img.link!.trim();
-                                            if (target.includes('category=')) {
-                                                const cat = target.split('category=')[1]?.split('&')[0];
-                                                if (cat) {
-                                                    router.push(`/products?category=${cat}`);
-                                                    return;
-                                                }
-                                            }
-
-                                            try {
-                                                const u = new URL(target);
-                                                if (u.origin === window.location.origin) {
-                                                    router.push(u.pathname + u.search);
-                                                } else {
-                                                    window.location.href = target;
-                                                }
-                                            } catch (err) {
-                                                router.push(target);
-                                            }
-                                        }}
-                                        className="absolute inset-0 z-20 cursor-pointer pointer-events-auto"
-                                    />
-                                )}
+                            ))
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-zinc-950">
+                                <div className="text-center space-y-4">
+                                    <div className="size-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
+                                        <Compass className="size-8 text-white/20 animate-pulse" />
+                                    </div>
+                                    <p className="text-white/40 font-black uppercase tracking-[0.3em] text-[10px]">Memuat Koleksi...</p>
+                                </div>
                             </div>
-                        ))}
+                        )}
                     </ScrollArea>
                 </motion.div>
             </AnimatePresence>
