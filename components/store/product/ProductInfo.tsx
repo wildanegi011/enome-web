@@ -63,9 +63,10 @@ interface ProductInfoProps {
     setSelectedVariant: (variant: string) => void;
     selectedColor: string;
     setSelectedColor: (color: string) => void;
+    activeImage?: string;
 }
 
-export default function ProductInfo({ product, selectedVariant, setSelectedVariant, selectedColor, setSelectedColor }: ProductInfoProps) {
+export default function ProductInfo({ product, selectedVariant, setSelectedVariant, selectedColor, setSelectedColor, activeImage }: ProductInfoProps) {
     // -- Local State --
     const [selectedSize, setSelectedSize] = useState("");
     const [quantity, setQuantity] = useState(1);
@@ -185,7 +186,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             is_flash_sale: product.isOnFlashSale,
             metadata: {
                 name: product.name,
-                image: fullImageUrl || undefined
+                image: activeImage || undefined
             }
         });
     };

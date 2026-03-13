@@ -165,6 +165,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
                                     setSelectedVariant={setSelectedVariant}
                                     selectedColor={selectedColor}
                                     setSelectedColor={setSelectedColor}
+                                    activeImage={mainGalleryImages[0]}
                                 />
 
                             </div>
@@ -347,7 +348,8 @@ function ProductDetailContent({ productData }: { productData: any }) {
                 </AnimatePresence>
 
                 {/* Mobile Floating Action Bar */}
-                <AnimatePresence>
+                {/* TODO: uncomment if needed */}
+                {/* <AnimatePresence>
                     {showSticky && (
                         <motion.div
                             initial={{ y: 100, opacity: 0 }}
@@ -374,7 +376,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
                             </div>
                         </motion.div>
                     )}
-                </AnimatePresence>
+                </AnimatePresence> */}
             </main>
         </TooltipProvider>
     );

@@ -22,6 +22,7 @@ export function usePaymentVerification(
 ): UsePaymentVerificationReturn {
     const storageKey = `verify_start_${orderId}`;
     const timeoutKey = `verify_timeout_${orderId}`;
+    const syncEventName = `payment_verify_sync_${orderId}`;
 
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [isVerifying, setIsVerifying] = useState(false);
@@ -31,6 +32,13 @@ export function usePaymentVerification(
     const [statusTagihan, setStatusTagihan] = useState<string | null>(null);
 
     const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Helper to broadcast state changes to other components in the same tab
+    const broadcastSync = useCallback((type: "start" | "success" | "timeout") => {
+        if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent(syncEventName, { detail: { type } }));
+        }
+    }, [syncEventName]);
 
     const checkStatus = useCallback(async () => {
         if (document.visibilityState !== "visible") return;
@@ -54,7 +62,7 @@ export function usePaymentVerification(
                     const elapsed = Math.floor((Date.now() - startTime) / 1000);
                     const remaining = (timeoutMins * 60) - elapsed;
                     setTimeLeft(remaining > 0 ? remaining : 0);
-                } else {
+                } else if (isVerifying) {
                     setTimeLeft(timeoutMins * 60);
                 }
             }
@@ -65,6 +73,7 @@ export function usePaymentVerification(
                     setIsVerifying(false);
                     localStorage.removeItem(storageKey);
                     localStorage.removeItem(timeoutKey);
+                    broadcastSync("success");
                     toast.success("Pembayaran terdeteksi! Pesanan Anda sedang diproses.");
                     if (onSuccess) onSuccess();
                 }
@@ -74,7 +83,7 @@ export function usePaymentVerification(
             console.error("Polling error:", error);
         }
         return false;
-    }, [orderId, storageKey, timeoutKey, onSuccess, isSuccess]);
+    }, [orderId, storageKey, timeoutKey, onSuccess, isSuccess, timeLeft, isTimeout, isVerifying, broadcastSync]);
 
     const handleTimeout = useCallback(async () => {
         // Final Check at 0 seconds
@@ -82,10 +91,13 @@ export function usePaymentVerification(
         if (!found) {
             setIsTimeout(true);
             setIsVerifying(true); // Keep UI in "verifying" style but show timeout message
-            localStorage.setItem(timeoutKey, "true");
+
+            // Per user request: clear storage when countdown is finished
             localStorage.removeItem(storageKey);
+            localStorage.removeItem(timeoutKey);
+            broadcastSync("timeout");
         }
-    }, [checkStatus, storageKey, timeoutKey]);
+    }, [checkStatus, storageKey, timeoutKey, broadcastSync]);
 
     const startVerification = useCallback(() => {
         localStorage.setItem(storageKey, Date.now().toString());
@@ -93,10 +105,72 @@ export function usePaymentVerification(
         setIsVerifying(true);
         setIsTimeout(false);
         setIsSuccess(false);
+        broadcastSync("start");
         toast.info("Memulai verifikasi otomatis. Mohon tunggu...");
         // Initial check immediately
         checkStatus();
-    }, [storageKey, checkStatus]);
+    }, [storageKey, checkStatus, broadcastSync]);
+
+    // Listen for storage events (cross-tab sync)
+    useEffect(() => {
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === storageKey) {
+                if (e.newValue) {
+                    // Verification started in another tab
+                    const startTime = parseInt(e.newValue, 10);
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    const remaining = (CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS * 60) - elapsed;
+
+                    if (remaining > 0) {
+                        setRemainingTime(remaining);
+                    }
+                } else {
+                    // Storage cleared in another tab (success or manually)
+                    // We'll let the custom event or polling handle the state change if needed,
+                    // but usually clearing means success or reset.
+                }
+            }
+        };
+
+        const setRemainingTime = (time: number) => {
+            setTimeLeft(time);
+            setIsVerifying(true);
+            setIsTimeout(false);
+            setIsSuccess(false);
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, [storageKey]);
+
+    // Listen for custom sync events (same-tab multi-component sync)
+    useEffect(() => {
+        const handleSync = (e: any) => {
+            const { type } = e.detail;
+            if (type === "start") {
+                const storedStart = localStorage.getItem(storageKey);
+                if (storedStart) {
+                    const startTime = parseInt(storedStart, 10);
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    const remaining = (CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS * 60) - elapsed;
+                    setTimeLeft(remaining > 0 ? remaining : 0);
+                    setIsVerifying(true);
+                    setIsTimeout(false);
+                    setIsSuccess(false);
+                }
+            } else if (type === "success") {
+                setIsSuccess(true);
+                setIsVerifying(false);
+                setIsTimeout(false);
+            } else if (type === "timeout") {
+                setIsTimeout(true);
+                setIsVerifying(true);
+            }
+        };
+
+        window.addEventListener(syncEventName, handleSync);
+        return () => window.removeEventListener(syncEventName, handleSync);
+    }, [syncEventName, storageKey]);
 
     // Initial state setup from localStorage
     useEffect(() => {
