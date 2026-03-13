@@ -36,7 +36,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         // 1. Schema Validation with Zod
         const result = changePasswordSchema.safeParse(body);
         if (!result.success) {
-            const errorMessage = result.error.errors[0].message;
+            const errorMessage = result.error.issues[0].message;
             return NextResponse.json({ error: errorMessage }, { status: 400 });
         }
 
