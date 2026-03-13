@@ -26,3 +26,15 @@ export function useUpdateProfile() {
         },
     });
 }
+
+export function useChangePassword() {
+    return useMutation({
+        mutationFn: (data: any) => userApi.changePassword(data),
+        onSuccess: (data: any) => {
+            toast.success(data.message || "Password berhasil diubah");
+        },
+        onError: (error: any) => {
+            toast.error(error.message || "Gagal mengubah password");
+        },
+    });
+}

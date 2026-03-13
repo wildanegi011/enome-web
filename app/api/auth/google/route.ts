@@ -114,7 +114,6 @@ export async function POST(request: NextRequest) {
             const authKey = randomBytes(16).toString("hex");
             const tempPassword = randomBytes(16).toString("hex");
 
-            const verificationToken = randomBytes(32).toString("hex");
 
             // Hash temp password via PHP for parity
             const b64Password = Buffer.from(tempPassword).toString('base64');
@@ -162,8 +161,8 @@ export async function POST(request: NextRequest) {
                     nama: name || "Google User",
                     role: 2, // Customer
                     status: 10, // Active
-                    isDeleted: 2, // Pending verification
-                    verificationToken: verificationToken,
+                    isDeleted: 0, // Activated immediately for Google Users
+                    verificationToken: null,
                     createdAt: now,
                     updatedAt: now,
                     alamat: "",
@@ -223,25 +222,11 @@ export async function POST(request: NextRequest) {
                 }
             });
 
-            // Re-fetch the newly created user to get the full record (especially the ID)
+            // Re-fetch the newly created user to get the full record
             const newUserRes = await db.select().from(user).where(eq(user.email, trimmedEmail)).limit(1);
             currentUser = newUserRes[0];
 
-            const activationLink = `${process.env.NEXT_PUBLIC_URL}/verify-email?token=${verificationToken}`;
-            after(async () => {
-                logger.info("Background job: Sending activation email for Google Registration", { email: trimmedEmail });
-                await sendActivationEmail(trimmedEmail, activationLink);
-            });
-
-            if (isRedirect) {
-                return NextResponse.redirect(new URL("/login?registered=true", process.env.NEXT_PUBLIC_URL!));
-            }
-
-            return NextResponse.json({
-                success: true,
-                requiresVerification: true,
-                message: "Registrasi berhasil. Silakan cek email Anda untuk aktivasi akun."
-            });
+            logger.info("Auth Success: New user created and activated via Google", { email: trimmedEmail, userId: currentUser.id });
 
         } else {
             currentUser = userData[0];
@@ -255,18 +240,8 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: "Akun Anda telah dihapus" }, { status: 401 });
             }
 
-            // 2. Check if user is unactivated (is_deleted = 2)
-            if (currentUser.isDeleted === 2) {
-                logger.warn("Auth Warning: Google login attempt with unactivated account", { email: trimmedEmail, userId: currentUser.id });
-                if (isRedirect) {
-                    return NextResponse.redirect(new URL("/login?error=unactivated", process.env.NEXT_PUBLIC_URL!));
-                }
-                return NextResponse.json({
-                    success: false,
-                    error: "Akun Anda belum aktif. Silakan cek email Anda untuk aktivasi.",
-                    requiresVerification: true
-                }, { status: 401 });
-            }
+            // Google users are automatically trusted/activated
+            // No need to check for isDeleted === 2
         }
 
         // Register login activity

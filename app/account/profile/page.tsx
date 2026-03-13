@@ -20,6 +20,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
+import ChangePasswordForm from "@/components/store/auth/ChangePasswordForm";
 
 export default function ProfilePage() {
     const [formData, setFormData] = useState({
@@ -262,6 +263,11 @@ export default function ProfilePage() {
                                 </div>
                             </form >
                         </div >
+
+                        {/* Change Password Section */}
+                        <div className="pt-8 md:pt-12 border-t border-neutral-base-100/50">
+                            <ChangePasswordForm />
+                        </div>
                     </div >
                 </div >
             </main >

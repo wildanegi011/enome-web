@@ -220,5 +220,11 @@ export const userApi = {
             method: "POST",
             body: JSON.stringify({ awb, courier, phone }),
         });
+    },
+    changePassword: async (data: any) => {
+        return await apiClient<{ message: string }>("/api/user/change-password", {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
     }
 };
