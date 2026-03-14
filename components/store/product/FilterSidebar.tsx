@@ -22,6 +22,11 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import { GiClothes } from "react-icons/gi";
+import { FaTshirt } from "react-icons/fa";
+import { MdOutlineCheckroom } from "react-icons/md";
+import { CategoryIcon } from "./CategoryIcon";
+
 /** Type untuk item kategori/koleksi */
 export type FilterCollectionItem = {
     name: string;
@@ -232,11 +237,11 @@ export default function FilterSidebar({
                                                                 : "text-neutral-base-600 hover:bg-neutral-base-100 hover:text-neutral-base-900"
                                                         )}
                                                     >
-                                                        {catItem.icon ? (
-                                                            <i className={cn(catItem.icon, "w-4 h-4 flex items-center justify-center transition-colors", isActive ? "text-neutral-base-900" : "text-neutral-base-400 group-hover:text-neutral-base-900")}></i>
-                                                        ) : (
-                                                            <Box className={cn("w-4 h-4 transition-colors", isActive ? "text-neutral-base-900" : "text-neutral-base-400 group-hover:text-neutral-base-900")} strokeWidth={isActive ? 2.5 : 2} />
-                                                        )}
+                                                        <CategoryIcon
+                                                            iconName={catItem.icon}
+                                                            className={cn("transition-colors", isActive ? "text-neutral-base-900" : "text-neutral-base-400 group-hover:text-neutral-base-900")}
+                                                            strokeWidth={isActive ? 2.5 : 2}
+                                                        />
                                                         {cat}
                                                     </button>
                                                 );

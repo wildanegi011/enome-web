@@ -4,6 +4,7 @@ export interface Category {
     kategoriId: number;
     kategori: string;
     gambarKategori?: string | null;
+    icon?: string | null;
 }
 
 export interface Color {

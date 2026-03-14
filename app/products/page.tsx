@@ -66,7 +66,7 @@ function ProductsContent() {
 
     const dynamicCollections = useMemo(() => categoriesData.map((c: Category) => ({
         name: c.kategori,
-        icon: c.gambarKategori || null
+        icon: c.icon || c.gambarKategori || null
     })), [categoriesData]);
 
     const dynamicColors = useMemo(() => colorsData.map((c: Color) => ({
