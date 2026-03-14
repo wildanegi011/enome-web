@@ -273,7 +273,11 @@ export async function POST(request: NextRequest) {
                 }
             }
 
-            return NextResponse.redirect(new URL(targetUrl, process.env.NEXT_PUBLIC_URL!));
+            // Pastikan karakter '#' di-encode ulang jika ter-decode
+            const safeTargetUrl = targetUrl.replace(/#/g, "%23");
+            const redirectUrl = new URL(safeTargetUrl, process.env.NEXT_PUBLIC_URL!);
+            // Pastikan hash atau karakter spesial tidak ter-decode paksa
+            return NextResponse.redirect(redirectUrl.toString());
         }
 
         return NextResponse.json({ success: true });

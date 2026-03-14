@@ -236,13 +236,18 @@ export default function FilterSidebar({
                                                                 ? "bg-neutral-base-100 text-neutral-base-900 scale-[1.02]"
                                                                 : "text-neutral-base-600 hover:bg-neutral-base-100 hover:text-neutral-base-900"
                                                         )}
+                                                        title={cat}
                                                     >
-                                                        <CategoryIcon
-                                                            iconName={catItem.icon}
-                                                            className={cn("transition-colors", isActive ? "text-neutral-base-900" : "text-neutral-base-400 group-hover:text-neutral-base-900")}
-                                                            strokeWidth={isActive ? 2.5 : 2}
-                                                        />
-                                                        {cat}
+                                                        <div className="shrink-0">
+                                                            <CategoryIcon
+                                                                iconName={catItem.icon}
+                                                                className={cn("transition-colors", isActive ? "text-neutral-base-900" : "text-neutral-base-400 group-hover:text-neutral-base-900")}
+                                                                strokeWidth={isActive ? 2.5 : 2}
+                                                            />
+                                                        </div>
+                                                        <span className="flex-1 text-left truncate">
+                                                            {cat}
+                                                        </span>
                                                     </button>
                                                 );
                                             })}

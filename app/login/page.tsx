@@ -90,7 +90,15 @@ function LoginContent() {
             const callbackUrl = searchParams.get("callbackUrl");
 
             setTimeout(() => {
-                router.push(callbackUrl || "/");
+                // Gunakan window.location.href agar karakter ter-encode (%23) 
+                // tidak ter-decode paksa oleh router internal Next.js
+                if (callbackUrl) {
+                    // CRITICAL: Jika ada karakter '#' yang ter-decode, encode kembali
+                    const safeUrl = callbackUrl.includes("#") ? callbackUrl.replace(/#/g, "%23") : callbackUrl;
+                    window.location.href = safeUrl;
+                } else {
+                    router.push("/");
+                }
             }, 1200);
         } catch (error: any) {
             setError("Email atau password yang Anda masukkan salah. Silakan coba lagi.");

@@ -2,12 +2,13 @@
 
 import React from "react";
 import * as FaIcons from "react-icons/fa";
+import * as Fa6Icons from "react-icons/fa6";
 import * as GiIcons from "react-icons/gi";
 import * as MdIcons from "react-icons/md";
 import * as PiIcons from "react-icons/pi";
 import * as LiaIcons from "react-icons/lia";
 import * as LuIcons from "react-icons/lu";
-import { Box, LucideProps } from "lucide-react";
+import { Box } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CategoryIconProps {
@@ -20,7 +21,7 @@ interface CategoryIconProps {
  * CategoryIcon Component
  * 
  * Dinamis merender React Icons berdasarkan nama string dari database.
- * Mendukung set: Fa (FontAwesome), Gi (Game Icons), Md (Material Design), Pi (Phosphor), Lia (Icons8).
+ * Mendukung set: Fa (FontAwesome), Fa6 (FontAwesome 6), Gi (Game Icons), Md (Material Design), Pi (Phosphor), Lia (Icons8).
  * Fallback ke Lucide Box icon jika tidak ditemukan.
  */
 export const CategoryIcon = ({ iconName, className, strokeWidth = 2 }: CategoryIconProps) => {
@@ -30,6 +31,7 @@ export const CategoryIcon = ({ iconName, className, strokeWidth = 2 }: CategoryI
 
     // Helper to find icon in various sets
     const getIcon = (name: string) => {
+        if (name.startsWith("Fa6")) return (Fa6Icons as any)[name];
         if (name.startsWith("Fa")) return (FaIcons as any)[name];
         if (name.startsWith("Gi")) return (GiIcons as any)[name];
         if (name.startsWith("Md")) return (MdIcons as any)[name];
@@ -38,7 +40,8 @@ export const CategoryIcon = ({ iconName, className, strokeWidth = 2 }: CategoryI
         if (name.startsWith("Lu")) return (LuIcons as any)[name];
 
         // Fallback search in all sets if prefix doesn't match standard
-        return (FaIcons as any)[name] ||
+        return (Fa6Icons as any)[name] ||
+            (FaIcons as any)[name] ||
             (MdIcons as any)[name] ||
             (GiIcons as any)[name] ||
             (PiIcons as any)[name] ||

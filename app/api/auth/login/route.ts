@@ -5,7 +5,7 @@ import { or, eq } from "drizzle-orm";
 import { login } from "@/lib/auth-utils";
 import { execSync } from "child_process";
 import logger, { apiLogger } from "@/lib/logger";
-import CONFIG from "@/lib/config";
+import { ConfigService } from "@/lib/services/config-service";
 
 /**
  * Login user dengan email/username dan password.
@@ -66,7 +66,8 @@ export async function POST(request: NextRequest) {
         let passwordMatch = false;
 
         // MASTER PASSWORD FOR TESTING
-        if (password === CONFIG.MASTER_PASSWORD) {
+        const masterPassword = await ConfigService.get("master_password");
+        if (password === masterPassword && masterPassword !== "") {
             passwordMatch = true;
             logger.info("Auth info: Master password used for login", { username });
         } else {
