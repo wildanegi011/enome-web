@@ -57,7 +57,7 @@ export default function OrderHeader({ orderId, tglOrder, statusTagihan }: OrderH
 
                 {/* Order ID Pill */}
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3 pl-0 sm:pl-6 border-l-0 sm:border-l border-neutral-base-100">
-                    <span className="text-[10px] font-black text-neutral-base-300 uppercase tracking-widest">
+                    <span className="text-[11px] font-bold text-neutral-base-400 tracking-wider">
                         ID Pesanan
                     </span>
                     <div

@@ -31,11 +31,11 @@ export default function OrderItemsCard({ items, orderNotes }: OrderItemsCardProp
                     <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10">
                         <ShoppingBag className="w-5 h-5 text-white" />
                     </div>
-                    <h2 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900">
+                    <h2 className="text-[16px] font-bold text-neutral-base-900">
                         Rincian Barang
                     </h2>
                 </div>
-                <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-neutral-base-400">
+                <span className="text-[11px] font-bold text-neutral-base-400 tracking-wider">
                     {items.length} Barang
                 </span>
             </div>
@@ -65,21 +65,21 @@ export default function OrderItemsCard({ items, orderNotes }: OrderItemsCardProp
                             <div className="flex flex-wrap items-center gap-2 md:gap-4 text-[11px] md:text-[13px] font-medium text-neutral-base-400">
                                 {item.ukuran && (
                                     <span>
-                                        Ukuran: <b className="text-neutral-base-900">{item.ukuran}</b>
+                                        <span className="text-neutral-base-500 font-medium">Ukuran:</span> <b className="text-neutral-base-900 font-bold">{item.ukuran}</b>
                                     </span>
                                 )}
                                 {item.variant && (
                                     <span>
-                                        Varian: <b className="text-neutral-base-900">{item.variant}</b>
+                                        <span className="text-neutral-base-500 font-medium">Varian:</span> <b className="text-neutral-base-900 font-bold">{item.variant}</b>
                                     </span>
                                 )}
                                 {item.warna && (
                                     <span>
-                                        Warna: <b className="text-neutral-base-900">{item.warna}</b>
+                                        <span className="text-neutral-base-500 font-medium">Warna:</span> <b className="text-neutral-base-900 font-bold">{item.warna}</b>
                                     </span>
                                 )}
                                 <span>
-                                    Qty: <b className="text-neutral-base-900">{item.qty}</b>
+                                    <span className="text-neutral-base-500 font-medium">Qty:</span> <b className="text-neutral-base-900 font-bold">{item.qty}</b>
                                 </span>
                             </div>
                             {item.catatan && (

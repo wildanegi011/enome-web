@@ -78,20 +78,20 @@ export default function OrderSummaryCard({
                 <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10">
                     <Receipt className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-[18px] font-bold text-neutral-base-900">
+                <h2 className="text-[16px] md:text-[18px] font-bold text-neutral-base-900">
                     Ringkasan Pembayaran
                 </h2>
             </div>
 
             <div className="space-y-4 md:space-y-5 pb-6 md:pb-8 border-b border-neutral-base-50">
                 <div className="flex items-center justify-between text-[14px]">
-                    <span className="text-neutral-base-400 font-bold">Subtotal</span>
+                    <span className="text-neutral-base-500 font-bold">Subtotal</span>
                     <span className="text-neutral-base-900 font-bold">
                         {formatCurrency(totalHarga)}
                     </span>
                 </div>
                 <div className="flex items-center justify-between text-[14px]">
-                    <span className="text-neutral-base-400 font-bold">Biaya Pengiriman</span>
+                    <span className="text-neutral-base-500 font-bold">Biaya pengiriman</span>
                     <span className="text-neutral-base-900 font-bold">{formatCurrency(ongkir)}</span>
                 </div>
                 {biayalain > 0 && (
@@ -134,11 +134,11 @@ export default function OrderSummaryCard({
                 )} */}
             </div>
 
-            <div className="py-6 md:py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <span className="text-[12px] font-bold uppercase tracking-widest text-neutral-base-400">
-                    Total Tagihan
+            <div className="py-6 md:py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[14px]">
+                <span className="font-bold text-neutral-base-500">
+                    Total tagihan
                 </span>
-                <span className="text-[20px] md:text-[24px] font-medium text-neutral-base-900 tracking-tight">
+                <span className="text-[20px] md:text-[24px] font-bold text-neutral-base-900 tracking-tight">
                     {formatCurrency(totalTagihan)}
                 </span>
             </div>
