@@ -7,6 +7,7 @@ import { userApi } from "@/lib/api/user-api";
 import { queryKeys } from "@/lib/query-keys";
 import { startOfDay, endOfDay, subDays, subMonths } from "date-fns";
 import { CONFIG } from "@/lib/config";
+import { getJakartaDate } from "@/lib/date-utils";
 
 export interface OrderFilters {
     search: string;
@@ -16,10 +17,10 @@ export interface OrderFilters {
 
 export function useOrders(initialLimit: number = 10) {
     const datePresets = [
-        { id: "today", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[0].label, getRange: () => ({ from: startOfDay(new Date()), to: endOfDay(new Date()) }) },
-        { id: "yesterday", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[1].label, getRange: () => ({ from: startOfDay(subDays(new Date(), 1)), to: endOfDay(subDays(new Date(), 1)) }) },
-        { id: "7days", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[2].label, getRange: () => ({ from: subDays(new Date(), 7), to: new Date() }) },
-        { id: "3months", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[3].label, getRange: () => ({ from: subMonths(new Date(), 3), to: new Date() }) },
+        { id: "today", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[0].label, getRange: () => ({ from: startOfDay(getJakartaDate()), to: endOfDay(getJakartaDate()) }) },
+        { id: "yesterday", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[1].label, getRange: () => ({ from: startOfDay(subDays(getJakartaDate(), 1)), to: endOfDay(subDays(getJakartaDate(), 1)) }) },
+        { id: "7days", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[2].label, getRange: () => ({ from: subDays(getJakartaDate(), 7), to: getJakartaDate() }) },
+        { id: "3months", label: CONFIG.ORDER_HISTORY.DATE_PRESETS[3].label, getRange: () => ({ from: subMonths(getJakartaDate(), 3), to: getJakartaDate() }) },
     ];
 
     const [page, setPage] = useState(1);

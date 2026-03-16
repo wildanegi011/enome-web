@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse, after } from "next/server";
 import { db } from "@/lib/db";
 import { user, customer, customerKategori, customerAlamat } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { ActivityService } from "@/lib/services/activity-service";
@@ -87,6 +87,15 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         const noHandphone = formData.get("noHandphone") as string;
         const photo = formData.get("photo") as File | null;
 
+        // New fields
+        const namaToko = formData.get("namaToko") as string;
+        const alamat = formData.get("alamat") as string;
+        const alamatLengkap = formData.get("alamatLengkap") as string;
+        const kecamatan = formData.get("kecamatan") as string;
+        const kota = formData.get("kota") as string;
+        const provinsi = formData.get("provinsi") as string;
+        const kodepos = formData.get("kodepos") as string;
+
         // Convert brithdate string to Date object or null
         const brithdate = brithdateStr ? new Date(brithdateStr) : null;
 
@@ -100,16 +109,43 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
             })
             .where(eq(user.id, userId));
 
-        // 2. Update Phone Number in Customer Alamat
+        // 2. Update Customer Table
+        await db.update(customer)
+            .set({
+                namaCustomer: nama,
+                namaToko: namaToko || undefined,
+                telp: noHandphone || undefined,
+                alamat: alamat || undefined,
+                alamatLengkap: alamatLengkap || undefined,
+                kecamatan: kecamatan || undefined,
+                kota: kota || undefined,
+                provinsi: provinsi || undefined,
+                kodepos: kodepos || undefined,
+            })
+            .where(eq(customer.userId, userId));
+
+        // 3. Update Phone Number and Shop Name in Primary Customer Alamat
         const customerData = await db.select({ custId: customer.custId })
             .from(customer)
             .where(eq(customer.userId, userId))
             .limit(1);
 
         if (customerData.length > 0) {
+            // Update Primary Address
             await db.update(customerAlamat)
-                .set({ noHandphone })
-                .where(eq(customerAlamat.custId, customerData[0].custId));
+                .set({
+                    noHandphone: noHandphone || undefined,
+                    namaToko: namaToko || undefined,
+                    alamatLengkap: alamatLengkap || undefined,
+                    kecamatan: kecamatan || undefined,
+                    kota: kota || undefined,
+                    provinsi: provinsi || undefined,
+                    kodePos: kodepos || undefined,
+                })
+                .where(and(
+                    eq(customerAlamat.custId, customerData[0].custId),
+                    eq(customerAlamat.isPrimary, 1)
+                ));
         }
 
         let photoUpdated = false;

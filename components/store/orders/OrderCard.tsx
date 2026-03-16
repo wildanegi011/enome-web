@@ -5,9 +5,8 @@ import FallbackImage from "@/components/store/shared/FallbackImage";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ShoppingBag, ChevronRight, MapPin, Truck } from "lucide-react";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
 import { cn, formatCurrency } from "@/lib/utils";
+import FormattedDate from "@/components/store/shared/FormattedDate";
 import { ASSET_URL } from "@/config/config";
 import { CONFIG } from "@/lib/config";
 import { Button } from "@/components/ui/button";
@@ -69,7 +68,9 @@ export default function OrderCard({ order }: OrderCardProps) {
                             )}
                         </div>
                         <p className="text-[11px] text-neutral-base-400 font-medium mt-0.5 md:mt-1">
-                            {order.updatedAt ? format(new Date(order.updatedAt.replace(" ", "T").replace("Z", "")), "dd MMM yyyy • HH:mm", { locale: id }) : order.tglOrder} WIB
+                            {order.updatedAt ? (
+                                <FormattedDate date={order.updatedAt} showWib />
+                            ) : order.tglOrder}
                         </p>
                     </div>
                 </div>

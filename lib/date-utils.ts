@@ -1,8 +1,6 @@
-/**
- * Utility for handling dates in Asia/Jakarta timezone
- */
+import { CONFIG } from './config';
 
-const JAKARTA_TZ = 'Asia/Jakarta';
+const JAKARTA_TZ = CONFIG.TIMEZONE;
 
 export function getJakartaDate(): Date {
     const now = new Date();
@@ -116,4 +114,59 @@ export function formatJakartaUI(date: Date): string {
         minute: "2-digit",
         hour12: false
     }).format(date).replace(',', ' •') + " WIB";
+}
+/**
+ * Returns an ISO-like string with +07:00 offset (e.g. 2026-03-16T17:11:30+07:00)
+ * Note: This project uses "Jakarta-naive" Date objects where UTC components hold 
+ * Jakarta local time. This function preserves those components and adds the offset.
+ */
+export function formatJakartaISO(date: Date): string {
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hour = String(date.getUTCHours()).padStart(2, '0');
+    const min = String(date.getUTCMinutes()).padStart(2, '0');
+    const sec = String(date.getUTCSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hour}:${min}:${sec}+07:00`;
+}
+
+/**
+ * Returns current timestamp in Jakarta as milliseconds
+ */
+export function getJakartaTimestamp(): number {
+    return getJakartaDate().getTime();
+}
+/**
+ * Generic date formatter that defaults to Jakarta timezone.
+ * Use this to avoid manual 'Asia/Jakarta' strings in components.
+ */
+export function formatDate(date: Date | string | number, options: Intl.DateTimeFormatOptions = {}): string {
+    const d = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
+    return new Intl.DateTimeFormat('id-ID', {
+        timeZone: JAKARTA_TZ,
+        ...options
+    }).format(d);
+}
+
+/**
+ * Parses a date string into a Date object, ensuring it's interpreted as Jakarta (+07:00).
+ * Handles formats like "YYYY-MM-DD HH:mm:ss" or ISO strings.
+ */
+export function parseJakarta(dateVal: string | Date | number | null | undefined): Date {
+    if (!dateVal) return new Date();
+
+    if (dateVal instanceof Date) return dateVal;
+
+    if (typeof dateVal === 'number') return new Date(dateVal);
+
+    const dateStr = String(dateVal);
+
+    // If it already has an offset or is Z, let standard Date handle it
+    if (dateStr.includes('+') || (dateStr.includes('-') && dateStr.length > 20) || dateStr.endsWith('Z')) {
+        return new Date(dateStr);
+    }
+
+    // Normalize: Replace space with T and append +07:00
+    const normalized = dateStr.replace(' ', 'T') + (dateStr.includes('T') ? '' : '') + '+07:00';
+    return new Date(normalized);
 }

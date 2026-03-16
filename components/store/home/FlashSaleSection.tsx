@@ -7,6 +7,7 @@ import Link from "next/link";
 import ProductCard from "@/components/store/product/ProductCard";
 import { ASSET_URL } from "@/config/config";
 import { formatCurrency } from "@/lib/utils";
+import { parseJakarta } from "@/lib/date-utils";
 
 interface FlashSaleEvent {
     id: number;
@@ -41,12 +42,7 @@ export default function FlashSaleSection() {
     useEffect(() => {
         if (!event?.waktuSelesai) return;
 
-        // Date is usually returned as an ISO string from Next.js API
-        const endTimeStr = event.waktuSelesai.endsWith('Z')
-            ? event.waktuSelesai
-            : event.waktuSelesai.replace(' ', 'T') + (event.waktuSelesai.includes('T') ? '' : '+07:00');
-
-        const endTime = new Date(endTimeStr).getTime();
+        const endTime = parseJakarta(event.waktuSelesai).getTime();
 
         const calculateTimeLeft = () => {
             const now = new Date().getTime();

@@ -110,6 +110,20 @@ export const POST = withAuth(async (req: NextRequest, context: any, session: any
             createdAt: getJakartaDate(),
         });
 
+        // Sync to Customer table if primary
+        if (isPrimary === 1) {
+            await db.update(customer).set({
+                namaToko: namaToko || undefined,
+                telp: noHandphone || undefined,
+                alamat: alamatLengkap || undefined,
+                alamatLengkap: (alamatLengkap || "").substring(0, 50),
+                kecamatan: kec || undefined,
+                kota: kab || undefined,
+                provinsi: prov || undefined,
+                kodepos: kodePos || undefined,
+            }).where(eq(customer.custId, customerData.custId));
+        }
+
         logger.info("API Response: 200 /api/user/addresses (POST)", { addressId: result.insertId });
         return NextResponse.json({
             success: true,
@@ -188,6 +202,18 @@ export const PATCH = withAuth(async (req: NextRequest, context: any, session: an
             await db.update(customerAlamat)
                 .set({ isPrimary: 1, labelAlamat: "Alamat Utama" })
                 .where(eq(customerAlamat.id, id));
+
+            // Sync to Customer table
+            await db.update(customer).set({
+                namaToko: addr[0].namaToko || undefined,
+                telp: addr[0].noHandphone || undefined,
+                alamat: addr[0].alamatLengkap || undefined,
+                alamatLengkap: (addr[0].alamatLengkap || "").substring(0, 50),
+                kecamatan: addr[0].kecamatan || undefined,
+                kota: addr[0].kota || undefined,
+                provinsi: addr[0].provinsi || undefined,
+                kodepos: addr[0].kodePos || undefined,
+            }).where(eq(customer.custId, custId as string));
         }
 
         // Jika ada perubahan data lainnya (selain status Primary)
@@ -211,6 +237,20 @@ export const PATCH = withAuth(async (req: NextRequest, context: any, session: an
                 await db.update(customerAlamat)
                     .set(mappedUpdates)
                     .where(eq(customerAlamat.id, id));
+
+                // Sync to Customer table if this is the primary address
+                if (addr[0].isPrimary === 1) {
+                    await db.update(customer).set({
+                        namaToko: mappedUpdates.namaToko || undefined,
+                        telp: mappedUpdates.noHandphone || undefined,
+                        alamat: mappedUpdates.alamatLengkap || undefined,
+                        alamatLengkap: (mappedUpdates.alamatLengkap || "").substring(0, 50),
+                        kecamatan: mappedUpdates.kecamatan || undefined,
+                        kota: mappedUpdates.kota || undefined,
+                        provinsi: mappedUpdates.provinsi || undefined,
+                        kodepos: mappedUpdates.kodePos || undefined,
+                    }).where(eq(customer.custId, addr[0].custId as string));
+                }
             }
         }
 

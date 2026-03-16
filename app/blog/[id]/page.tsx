@@ -2,6 +2,7 @@ import { BlogService } from "@/lib/services/blog-service";
 import Navbar from "@/components/store/layout/Navbar";
 import Footer from "@/components/store/layout/Footer";
 import { notFound } from "next/navigation";
+import FormattedDate from "@/components/store/shared/FormattedDate";
 
 export default async function BlogDetailPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
@@ -34,11 +35,10 @@ async function BlogContent({ blogId }: { blogId: number }) {
                     </h1>
                     {post.createdAt && (
                         <div className="text-sm text-neutral-base-400 uppercase tracking-widest font-medium">
-                            {new Date(post.createdAt).toLocaleDateString('id-ID', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric'
-                            })}
+                            <FormattedDate
+                                date={post.createdAt}
+                                options={{ day: 'numeric', month: 'long', year: 'numeric' }}
+                            />
                         </div>
                     )}
                 </header>

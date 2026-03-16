@@ -13,6 +13,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { parseJakarta } from "@/lib/date-utils";
 
 /** Struktur waktu sisa untuk countdown */
 export interface FlashSaleTimeLeft {
@@ -31,13 +32,7 @@ export function useFlashSaleTimer(
     useEffect(() => {
         if (!isOnFlashSale || !flashSaleEndTime) return;
 
-        // Normalisasi format waktu — tambah timezone WIB jika belum ada
-        const endTimeStr = flashSaleEndTime.endsWith("Z")
-            ? flashSaleEndTime
-            : flashSaleEndTime.replace(" ", "T") +
-            (flashSaleEndTime.includes("T") ? "" : "+07:00");
-
-        const endTime = new Date(endTimeStr).getTime();
+        const endTime = parseJakarta(flashSaleEndTime).getTime();
 
         /** Kalkulasi selisih waktu dari sekarang ke endTime */
         const calculateTimeLeft = (): FlashSaleTimeLeft => {

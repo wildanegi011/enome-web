@@ -58,8 +58,22 @@ export async function POST(request: NextRequest) {
         const {
             name,
             email,
-            password
+            password,
+            nama_toko,
+            telp,
+            no_hp,
+            alamat,
+            alamat_lengkap,
+            kecamatan,
+            kota,
+            provinsi,
+            kodepos,
+            kode_pos
         } = body;
+
+        const effectiveTelp = telp || no_hp || "";
+        const effectiveKodepos = kodepos || kode_pos || "";
+        const effectiveAlamat = alamat || alamat_lengkap || "";
 
         const username = Math.random().toString(36).substring(2, 10);
         const trimmedEmail = email?.trim().toLowerCase();
@@ -164,36 +178,38 @@ export async function POST(request: NextRequest) {
                     namaCustomer: name,
                     userId: insertedUserId,
                     email: trimmedEmail,
-                    telp: "",
-                    alamat: "",
-                    alamatLengkap: "",
-                    namaToko: "",
-                    kecamatan: "",
-                    kota: "",
-                    provinsi: "",
-                    kodepos: "",
+                    telp: effectiveTelp,
+                    alamat: effectiveAlamat,
+                    alamatLengkap: alamat_lengkap || "",
+                    namaToko: nama_toko || "",
+                    kecamatan: kecamatan || "",
+                    kota: kota || "",
+                    provinsi: provinsi || "",
+                    kodepos: effectiveKodepos,
                     kategoriCustomerId: 4, // Default to Pelanggan
                     completedDepositTime: getJakartaDate(),
                     isDeleted: 0,
                 });
-                logger.info("Auth Success: Created new customer record", { custId, userId: insertedUserId });
+
+                // 3. Simpan ke tabel customer_alamat (Alamat Utama)
+                await tx.insert(customerAlamat).values({
+                    custId: custId,
+                    labelAlamat: "Utama",
+                    namaPenerima: name,
+                    alamatLengkap: alamat_lengkap || effectiveAlamat || "",
+                    noHandphone: effectiveTelp,
+                    kecamatan: kecamatan || "",
+                    kota: kota || "",
+                    provinsi: provinsi || "",
+                    kodePos: effectiveKodepos,
+                    namaToko: nama_toko || "",
+                    isPrimary: 1,
+                    createdAt: getJakartaDate(),
+                    createdBy: insertedUserId,
+                });
+                logger.info("Auth Success: Created new customer record with address", { custId, userId: insertedUserId });
             }
 
-            // // 3. Simpan ke tabel customer_alamat (Alamat Utama)
-            // await tx.insert(customerAlamat).values({
-            //     custId: custId,
-            //     labelAlamat: "Utama",
-            //     namaPenerima: trimmedNama,
-            //     alamatLengkap: alamat_lengkap,
-            //     noHandphone: no_hp,
-            //     kecamatan: kecamatan || "",
-            //     kota: kota || "",
-            //     provinsi: provinsi || "",
-            //     kodePos: kode_pos || "",
-            //     isPrimary: 1,
-            //     createdAt: sql`CURRENT_TIMESTAMP`,
-            //     createdBy: insertedUserId,
-            // });
         });
 
         // Kirim email aktivasi dalam background menggunakan after()

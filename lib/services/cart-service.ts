@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { keranjang, produk, warna, produkDetail, variant as variantTable, customer, flashSale } from "@/lib/db/schema";
 import { eq, and, sql, or } from "drizzle-orm";
-import { nowJakartaFull } from "@/lib/date-utils";
+import { nowJakartaFull, parseJakarta } from "@/lib/date-utils";
 import { CONFIG } from "@/lib/config";
 
 export class CartService {
@@ -10,7 +10,7 @@ export class CartService {
      */
     static async getCartItems(userId: number | string, itemIds?: number[]) {
         const dhms = nowJakartaFull();
-        const now = new Date(dhms.replace(" ", "T") + ".000Z");
+        const now = parseJakarta(dhms);
 
         // 1. Get customer category for dynamic pricing
         const [customerData]: any = await db.select({ kategoriCustomerId: customer.kategoriCustomerId })
@@ -85,9 +85,9 @@ export class CartService {
             let isExpired = false;
 
             if (isFlashSalePrice) {
-                const cartExpired = item.flashsaleExpired ? new Date(item.flashsaleExpired) < now : false;
+                const cartExpired = item.flashsaleExpired ? parseJakarta(String(item.flashsaleExpired)) < now : false;
                 const eventInactive = item.flashsaleId ? (item.fsIsAktif === 0) : false;
-                const eventExpired = item.fsWaktuSelesai ? new Date(item.fsWaktuSelesai) < now : false;
+                const eventExpired = item.fsWaktuSelesai ? parseJakarta(String(item.fsWaktuSelesai)) < now : false;
 
                 isExpired = cartExpired || eventInactive || eventExpired;
             }

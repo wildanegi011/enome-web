@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { cn, handleWhatsAppConfirm } from "@/lib/utils";
 import { CONFIG } from "@/lib/config";
 import FallbackImage from "@/components/store/shared/FallbackImage";
+import FormattedDate from "@/components/store/shared/FormattedDate";
 
 interface SuccessStateProps {
     orderResult: {
@@ -134,13 +135,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                         <div className="flex flex-col items-start sm:items-end md:items-end">
                                             <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none mb-1.5 md:mb-1">Batas Waktu Pembayaran</p>
                                             <p className="text-[11px] font-bold text-white leading-none">
-                                                {new Date(orderResult.expiredTime).toLocaleString("id-ID", {
-                                                    day: "numeric",
-                                                    month: "short",
-                                                    year: "numeric",
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
+                                                <FormattedDate date={orderResult.expiredTime} />
                                             </p>
                                         </div>
                                     )}

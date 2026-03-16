@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, Calendar, Copy, Check } from "lucide-react";
+import FormattedDate from "@/components/store/shared/FormattedDate";
 
 interface OrderHeaderProps {
     orderId: string;
@@ -47,11 +48,10 @@ export default function OrderHeader({ orderId, tglOrder, statusTagihan }: OrderH
                 <div className="flex items-center gap-3 text-neutral-base-400">
                     <Calendar className="w-4 h-4 opacity-50" />
                     <span className="text-[13px] md:text-[14px] font-bold text-neutral-base-500">
-                        {new Date(tglOrder).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                        })}
+                        <FormattedDate
+                            date={tglOrder}
+                            options={{ day: "numeric", month: "long", year: "numeric" }}
+                        />
                     </span>
                 </div>
 

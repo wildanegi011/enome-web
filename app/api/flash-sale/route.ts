@@ -145,7 +145,7 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
             event: {
                 id: validEvent.id,
                 namaEvent: validEvent.namaEvent,
-                waktuSelesai: validEvent.waktuSelesai,
+                waktuSelesai: validEvent.waktuSelesai ? validEvent.waktuSelesai.replace(' ', 'T') + '+07:00' : null,
             },
             products: processData
         });

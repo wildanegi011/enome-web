@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { AlertCircle, Copy, Check, CreditCard } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import FormattedDate from "@/components/store/shared/FormattedDate";
 
 interface PaymentInstructionProps {
     statusTagihan: string;
@@ -46,13 +47,7 @@ export default function PaymentInstruction({
                     <div className="flex flex-col items-start sm:items-end pl-11 sm:pl-0">
                         <p className="text-[9px] font-black text-amber-800/60 uppercase tracking-widest leading-none mb-1.5">Batas Waktu Pembayaran</p>
                         <p className="text-[11px] font-bold text-amber-900 leading-none">
-                            {new Date(expiredTime).toLocaleString("id-ID", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
+                            <FormattedDate date={expiredTime} />
                         </p>
                     </div>
                 )}

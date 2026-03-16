@@ -19,6 +19,7 @@ import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CustomerService } from "@/lib/services/customer-service";
 import { ConfigService } from "@/lib/services/config-service";
+import { formatJakartaISO } from "@/lib/date-utils";
 
 /**
  * Mengambil detail lengkap satu pesanan berdasarkan Order ID.
@@ -197,13 +198,22 @@ export const GET = withAuth(async (
         }
 
         logger.info("Order Detail: Fetch success", { userId, orderId });
+        const response = {
+            ...order,
+            updatedAt: order.updatedAt ? formatJakartaISO(new Date(order.updatedAt)) : null,
+            vouchers: []
+        };
+
         return NextResponse.json({
-            order,
+            order: {
+                ...order,
+                updatedAt: order.updatedAt ? formatJakartaISO(new Date(order.updatedAt)) : null
+            },
             items,
             paymentInfo,
             voucherInfo,
             uniqueCode,
-            expiredTime: paymentRow?.expiredTime,
+            expiredTime: paymentRow?.expiredTime ? formatJakartaISO(new Date(paymentRow.expiredTime)) : null,
             whatsappAdmin: await ConfigService.get("whatsapp_nomor", "628997279308"),
             paymentVerificationTimeout: await ConfigService.getInt("PAYMENT_VERIFICATION_TIMEOUT_MINS", 15),
         });

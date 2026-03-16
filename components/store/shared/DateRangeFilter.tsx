@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/date-utils";
 import { DateRange } from "react-day-picker";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -46,8 +46,8 @@ const DateRangeFilter = ({ dateRange, onSelect, presets, placeholder = "Pilih Ta
                             });
                             if (preset) return preset.label;
                             return dateRange.to
-                                ? `${format(dateRange.from, "dd MMM")} - ${format(dateRange.to, "dd MMM yyyy")}`
-                                : format(dateRange.from, "dd MMM yyyy");
+                                ? `${formatDate(dateRange.from, { day: "2-digit", month: "short" })} - ${formatDate(dateRange.to, { day: "2-digit", month: "short", year: "numeric" })}`
+                                : formatDate(dateRange.from, { day: "2-digit", month: "short", year: "numeric" });
                         })()}
                     </span>
                 </Button>

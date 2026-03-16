@@ -6,6 +6,7 @@ import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
 import { CustomerService } from "@/lib/services/customer-service";
+import { formatJakartaISO } from "@/lib/date-utils";
 
 /**
  * Mengambil daftar pesanan (order history) milik user.
@@ -139,7 +140,10 @@ export const GET = withAuth(async (request: NextRequest, context: any, session: 
         ];
 
         return NextResponse.json({
-            orders: userOrders,
+            orders: userOrders.map(o => ({
+                ...o,
+                updatedAt: o.updatedAt ? formatJakartaISO(new Date(o.updatedAt)) : null
+            })),
             total: totalCount?.count || 0,
             page,
             limit,

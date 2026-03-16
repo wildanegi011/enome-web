@@ -6,6 +6,7 @@
 export const CONFIG = {
     // API & Service Identifiers
     SERVICE_NAME: "enome-api",
+    TIMEZONE: "Asia/Jakarta",
 
     // Database & Business Logic Defaults (Note: some are now dynamic via ConfigService)
     DEFAULT_KATEGORI_CUSTOMER_ID: 4, // Retail / Harga Jual

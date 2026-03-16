@@ -4,9 +4,8 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Clock, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
 import { WalletTransaction } from "@/lib/api/user-api";
+import FormattedDate from "@/components/store/shared/FormattedDate";
 
 interface WalletTransactionItemProps {
     tx: WalletTransaction;
@@ -36,9 +35,18 @@ const WalletTransactionItem = ({ tx }: WalletTransactionItemProps) => {
                     <div className="flex items-center gap-1.5 text-neutral-base-400">
                         <Clock className="w-3 md:w-3.5 h-3 md:h-3.5" />
                         <p className="text-[11px] md:text-[12px] font-medium">
-                            {tx.createdAt && !isNaN(new Date(tx.createdAt).getTime())
-                                ? format(new Date(tx.createdAt), "dd MMM yyyy, HH:mm", { locale: id })
-                                : "-"}
+                            {tx.createdAt ? (
+                                <FormattedDate
+                                    date={tx.createdAt}
+                                    options={{
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    }}
+                                />
+                            ) : "-"}
                         </p>
                     </div>
                 </div>

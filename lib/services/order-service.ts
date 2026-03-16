@@ -7,7 +7,7 @@ import {
 import { eq, and, sql, desc, like, or } from "drizzle-orm";
 import { CONFIG } from "@/lib/config";
 import logger from "@/lib/logger";
-import { nowJakartaYYMMDD, nowJakartaDate, nowJakartaFull, getJakartaDate } from "@/lib/date-utils";
+import { nowJakartaYYMMDD, nowJakartaDate, nowJakartaFull, getJakartaDate, parseJakarta } from "@/lib/date-utils";
 import { ConfigService } from "./config-service";
 import { sendNewOrderAdminNotification, sendOrderConfirmationEmail } from "@/lib/mail";
 import pusher from "@/lib/pusher";
@@ -142,8 +142,8 @@ export class OrderService {
                     }
 
                     const dhms = nowJakartaFull();
-                    const now = new Date(dhms.replace(" ", "T") + ".000Z").getTime();
-                    const expiredDate = new Date(fsData.waktuSelesai || item.flashsaleExpired).getTime();
+                    const now = parseJakarta(dhms).getTime();
+                    const expiredDate = parseJakarta(fsData.waktuSelesai || item.flashsaleExpired).getTime();
 
                     if (now > expiredDate) {
                         return {
@@ -154,8 +154,8 @@ export class OrderService {
                 } else if (item.flashsaleExpired) {
                     // Fallback for older cart items without flashsaleId
                     const dhms = nowJakartaFull();
-                    const now = new Date(dhms.replace(" ", "T") + ".000Z").getTime();
-                    const expiredDate = new Date(item.flashsaleExpired).getTime();
+                    const now = parseJakarta(dhms).getTime();
+                    const expiredDate = parseJakarta(item.flashsaleExpired).getTime();
 
                     if (now > expiredDate) {
                         return {
@@ -425,7 +425,8 @@ export class OrderService {
                 } else {
                     now.setDate(now.getDate() + 1); // Fallback 1 day
                 }
-                expiredTimeValue = now.toISOString();
+                const { formatJakarta } = await import("@/lib/date-utils");
+                expiredTimeValue = formatJakarta(now, 'full').replace(' ', 'T') + '+07:00';
             }
 
             const paymentValues: any = {

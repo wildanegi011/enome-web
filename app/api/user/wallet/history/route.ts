@@ -3,6 +3,7 @@ import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 import { CustomerService } from "@/lib/services/customer-service";
 import { UserService } from "@/lib/services/user-service";
+import { formatJakartaISO } from "@/lib/date-utils";
 
 /**
  * Mengambil histori transaksi wallet milik user.
@@ -32,8 +33,14 @@ export const GET = withAuth(async (request: NextRequest, context: any, session: 
         const { history, total } = await UserService.getWalletHistory(custId, limit, offset);
         const totalPages = Math.ceil(total / limit);
 
+        const formattedHistory = history.map((tx: any) => ({
+            ...tx,
+            createdAt: tx.createdAt ? formatJakartaISO(new Date(tx.createdAt)) : null,
+            updatedAt: tx.updatedAt ? formatJakartaISO(new Date(tx.updatedAt)) : null,
+        }));
+
         return NextResponse.json({
-            history,
+            history: formattedHistory,
             metadata: {
                 total,
                 totalPages,

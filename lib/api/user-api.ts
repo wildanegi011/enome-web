@@ -1,6 +1,6 @@
 import { apiClient } from "./api-client";
 import { Order } from "@/components/store/orders/OrderCard";
-import { format } from "date-fns";
+import { formatJakarta } from "@/lib/date-utils";
 import { DateRange } from "react-day-picker";
 
 export interface Address {
@@ -187,8 +187,8 @@ export const userApi = {
             search: params.search || "",
         });
 
-        if (params.dateRange?.from) queryParams.append("startDate", format(params.dateRange.from, "yyyy-MM-dd"));
-        if (params.dateRange?.to) queryParams.append("endDate", format(params.dateRange.to, "yyyy-MM-dd"));
+        if (params.dateRange?.from) queryParams.append("startDate", formatJakarta(params.dateRange.from, "date"));
+        if (params.dateRange?.to) queryParams.append("endDate", formatJakarta(params.dateRange.to, "date"));
         if (params.statusOrder && params.statusOrder !== "ALL") queryParams.append("statusOrder", params.statusOrder);
 
         return await apiClient<OrdersResponse>(`/api/user/orders?${queryParams.toString()}`);
