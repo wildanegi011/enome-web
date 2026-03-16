@@ -1,5 +1,11 @@
 import { apiClient } from "./api-client";
 
+export interface VerifyResetTokenResponse {
+    valid: boolean;
+    type?: "invalid" | "expired";
+    error?: string;
+}
+
 export const authApi = {
     login: (data: any) => apiClient("/api/auth/login", {
         method: "POST",
@@ -16,5 +22,8 @@ export const authApi = {
     resetPassword: (data: { token: string; password: string }) => apiClient("/api/auth/reset-password", {
         method: "POST",
         body: JSON.stringify(data),
+    }),
+    verifyResetToken: (token: string) => apiClient<VerifyResetTokenResponse>(`/api/auth/reset-password/verify?token=${token}`, {
+        method: "GET",
     }),
 };

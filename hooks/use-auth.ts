@@ -78,5 +78,6 @@ export function useAuth() {
         isForgottingPassword: forgotPasswordMutation.isPending,
         resetPassword: resetPasswordMutation.mutateAsync,
         isResettingPassword: resetPasswordMutation.isPending,
+        verifyResetToken: authApi.verifyResetToken,
     };
 }

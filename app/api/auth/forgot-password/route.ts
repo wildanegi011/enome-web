@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse, after } from "next/server";
 import { db } from "@/lib/db";
 import { user } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { randomBytes } from "crypto";
 import { sendResetPasswordEmail } from "@/lib/mail";
 import logger, { apiLogger } from "@/lib/logger";
@@ -35,9 +35,13 @@ export async function POST(request: NextRequest) {
         }
 
         const resetToken = randomBytes(32).toString("hex");
-        // Update user with reset token
+
+        // Update user with reset token and creation time using SQL NOW()
         await db.update(user)
-            .set({ passwordResetToken: resetToken })
+            .set({ 
+                passwordResetToken: resetToken,
+                passwordResetTokenCreatedAt: sql`NOW()` 
+            })
             .where(eq(user.email, trimmedEmail));
 
         const resetLink = `${process.env.NEXT_PUBLIC_URL}/reset-password?token=${resetToken}`;

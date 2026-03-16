@@ -15,6 +15,7 @@ import AddressCard from "@/components/store/address/AddressCard";
 import AddAddressModal from "@/components/store/address/AddAddressModal";
 import SearchInput from "@/components/store/shared/SearchInput";
 import EmptyState from "@/components/store/shared/EmptyState";
+import ConfirmDialog from "@/components/store/shared/ConfirmDialog";
 import { MapPin } from "lucide-react";
 
 export default function AddressesPage() {
@@ -22,6 +23,8 @@ export default function AddressesPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [addressToDelete, setAddressToDelete] = useState<number | null>(null);
 
     const handleEdit = (address: Address) => {
         setSelectedAddress(address);
@@ -31,6 +34,18 @@ export default function AddressesPage() {
     const handleAdd = () => {
         setSelectedAddress(null);
         setIsAddModalOpen(true);
+    };
+
+    const handleDeleteRequest = (id: number) => {
+        setAddressToDelete(id);
+        setDeleteConfirmOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (addressToDelete !== null) {
+            await deleteAddress(addressToDelete);
+            setAddressToDelete(null);
+        }
     };
 
     const filteredAddresses = addresses.filter(addr =>
@@ -99,7 +114,7 @@ export default function AddressesPage() {
                                             <AddressCard
                                                 address={address}
                                                 onEdit={handleEdit}
-                                                onDelete={deleteAddress}
+                                                onDelete={handleDeleteRequest}
                                                 onSetPrimary={setPrimary}
                                             />
                                         </motion.div>
@@ -139,6 +154,17 @@ export default function AddressesPage() {
                 open={isAddModalOpen}
                 onOpenChange={setIsAddModalOpen}
                 initialData={selectedAddress}
+            />
+
+            <ConfirmDialog
+                open={deleteConfirmOpen}
+                onOpenChange={setDeleteConfirmOpen}
+                title="Hapus Alamat?"
+                description="Alamat ini akan dihapus secara permanen dan tidak bisa dikembalikan. Apakah kamu yakin ingin menghapusnya?"
+                onConfirm={handleDeleteConfirm}
+                confirmText="Hapus"
+                cancelText="Batal"
+                variant="destructive"
             />
 
             {/* Floating Action Button for Add Address */}
