@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { user } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { execSync } from "child_process";
 import logger, { apiLogger } from "@/lib/logger";
 
@@ -29,13 +29,24 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
         }
 
-        const userData = await db.select().from(user).where(eq(user.passwordResetToken, token)).limit(1);
+        // Ambil user dan cek validitas token serta kedaluwarsa via SQL
+        const userData = await db.select({
+            id: user.id,
+            isExpired: sql<number>`(TIMESTAMPDIFF(SECOND, passwordResetTokenCreatedAt, NOW()) > 3600)`
+        })
+        .from(user)
+        .where(eq(user.passwordResetToken, token))
+        .limit(1);
 
         if (userData.length === 0) {
-            return NextResponse.json({ error: "Token tidak valid atau sudah kedaluwarsa" }, { status: 400 });
+            return NextResponse.json({ error: "Token tidak valid atau sudah digunakan" }, { status: 400 });
         }
 
         const currentUser = userData[0];
+
+        if (currentUser.isExpired) {
+            return NextResponse.json({ error: "Tautan telah kedaluwarsa, silakan minta tautan baru" }, { status: 400 });
+        }
 
         // Hash password menggunakan PHP untuk kompatibilitas dengan Yii2
         const b64Password = Buffer.from(password).toString('base64');

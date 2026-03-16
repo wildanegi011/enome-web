@@ -129,6 +129,7 @@ export const user = mysqlTable("user", {
     authKey: varchar("auth_key", { length: 32 }).notNull(),
     passwordHash: varchar("password_hash", { length: 255 }).notNull(),
     passwordResetToken: varchar("password_reset_token", { length: 255 }).unique(),
+    passwordResetTokenCreatedAt: timestamp("passwordResetTokenCreatedAt"),
     email: varchar("email", { length: 255 }).notNull().unique(),
     status: smallint("status").notNull().default(10),
     role: smallint("role").notNull(),

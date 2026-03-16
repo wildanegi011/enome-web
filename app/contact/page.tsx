@@ -89,7 +89,9 @@ async function ContactInformasi() {
 
                         {/* Email Card */}
                         <a
-                            href={`mailto:${email}`}
+                            href={`https://mail.google.com/mail/?view=cm&fs=1&to=${email}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="group bg-white p-10 rounded-[40px] border border-neutral-base-100 shadow-xl shadow-neutral-base-900/5 hover:border-neutral-base-900 transition-all duration-500 flex flex-col items-center text-center"
                         >
                             <div className="size-16 rounded-3xl bg-blue-50 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-blue-600 transition-all duration-500">
