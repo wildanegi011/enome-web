@@ -60,6 +60,16 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 return { error: "not_available", detail: "Produk sudah tidak tersedia atau offline." };
             }
 
+            // Normalisasi color_sylla: selalu resolve ke warna_id
+            // Ini penting agar data yang tersimpan di keranjang.warna selalu konsisten (warna_id, bukan nama warna)
+            // sehingga query cek existing cart bisa match dengan benar dan tidak menyebabkan duplikasi
+            const [warnaRows]: any = await tx.execute(sql`
+                SELECT warna_id, warna FROM warna 
+                WHERE warna_id = ${color_sylla} OR warna = ${color_sylla}
+                LIMIT 1
+            `);
+            const normalizedColor = warnaRows[0]?.warna_id || color_sylla;
+
             // RE-CHECK: Ambil detail spesifik varian (warna & size & variant) dari transaksi (LOCK)
             const [freshDetailRows]: any = await tx.execute(sql`
                 SELECT 
@@ -74,7 +84,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                     pd.gambar
                 FROM produkdetail pd
                 WHERE pd.produk_id = ${id_produk} 
-                AND pd.warna = ${color_sylla} 
+                AND (pd.warna = ${normalizedColor} OR pd.warna = ${color_sylla})
                 AND pd.size = ${size_sylla} 
                 AND (pd.variant = ${variant} OR (pd.variant IS NULL AND ${variant || ""} = ""))
                 FOR UPDATE
@@ -129,6 +139,8 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 finalPrice = retailPrice - (retailPrice * (discount / 100));
             }
 
+            // Cek existing cart menggunakan normalizedColor (warna_id konsisten)
+            // Juga tangani data lama yang mungkin tersimpan sebagai nama warna via JOIN warna
             const [existingCartRows]: any = await tx.execute(sql`
                 SELECT 
                     k.id, 
@@ -137,7 +149,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 LEFT JOIN warna w ON (k.warna = w.warna_id OR k.warna = w.warna)
                 WHERE k.cust_id = ${userId} 
                 AND k.produk_id = ${id_produk} 
-                AND (k.warna = ${color_sylla} OR w.warna_id = ${color_sylla} OR w.warna = ${color_sylla})
+                AND (k.warna = ${normalizedColor} OR w.warna_id = ${normalizedColor})
                 AND k.size = ${size_sylla} 
                 AND (k.variant = ${variant} OR (k.variant IS NULL AND ${variant || ""} = ""))
                 AND k.is_deleted = 0 
@@ -168,7 +180,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 await tx.insert(keranjang).values({
                     custId: userId,
                     produkId: id_produk,
-                    warna: color_sylla,
+                    warna: normalizedColor, // Selalu simpan warna_id untuk konsistensi
                     size: size_sylla,
                     variant: variant || null,
                     qtyProduk: requestedQty,
