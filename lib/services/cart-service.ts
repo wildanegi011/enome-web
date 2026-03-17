@@ -68,19 +68,19 @@ export class CartService {
             .leftJoin(warna, or(eq(keranjang.warna, warna.warnaId), eq(keranjang.warna, warna.warna)))
             .leftJoin(produkDetail, and(
                 eq(keranjang.produkId, produkDetail.produkId),
-                eq(keranjang.size, produkDetail.size),
-                // Match color by either ID or Name
+                sql`TRIM(${keranjang.size}) = TRIM(${produkDetail.size})`,
+                // Match color by either ID or Name with TRIM
                 or(
-                    eq(keranjang.warna, produkDetail.warnaId),
-                    eq(warna.warnaId, produkDetail.warnaId),
-                    eq(warna.warna, produkDetail.warnaId)
+                    sql`TRIM(${keranjang.warna}) = TRIM(${produkDetail.warnaId})`,
+                    sql`TRIM(${warna.warnaId}) = TRIM(${produkDetail.warnaId})`,
+                    sql`TRIM(${warna.warna}) = TRIM(${produkDetail.warnaId})`
                 ),
-                // Match variant, treating empty string and NULL as the same
+                // Match variant robustly, handle NULL and empty strings identically
                 sql`(
-                    ${produkDetail.variant} = ${keranjang.variant} 
-                    OR (${produkDetail.variant} IS NULL AND (${keranjang.variant} IS NULL OR ${keranjang.variant} = ''))
-                    OR (${keranjang.variant} IS NULL AND (${produkDetail.variant} IS NULL OR ${produkDetail.variant} = ''))
-                    OR (${produkDetail.variant} = '' AND ${keranjang.variant} = '')
+                    TRIM(${produkDetail.variant}) = TRIM(${keranjang.variant}) 
+                    OR (TRIM(${produkDetail.variant}) IS NULL AND (TRIM(${keranjang.variant}) IS NULL OR TRIM(${keranjang.variant}) = ''))
+                    OR (TRIM(${keranjang.variant}) IS NULL AND (TRIM(${produkDetail.variant}) IS NULL OR TRIM(${produkDetail.variant}) = ''))
+                    OR (TRIM(${produkDetail.variant}) = '' AND TRIM(${keranjang.variant}) = '')
                 )`
             ))
             .leftJoin(flashSale, eq(keranjang.flashsaleId, sql`CAST(${flashSale.id} AS CHAR)`))
