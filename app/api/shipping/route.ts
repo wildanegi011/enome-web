@@ -11,11 +11,12 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ message: "missing_params" }, { status: 400 });
         }
 
-        const rajaOngkirResults = await ShippingService.calculateShipping(destination, weight);
+        const { results, originName } = await ShippingService.calculateShipping(destination, weight);
 
         return NextResponse.json({
             rajaongkir: {
-                results: rajaOngkirResults
+                results: results,
+                originName: originName
             }
         });
 

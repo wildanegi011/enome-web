@@ -68,7 +68,8 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 WHERE warna_id = ${color_sylla} OR warna = ${color_sylla}
                 LIMIT 1
             `);
-            const normalizedColor = warnaRows[0]?.warna_id || color_sylla;
+            const colorId = warnaRows[0]?.warna_id || color_sylla;
+            const colorName = warnaRows[0]?.warna || color_sylla;
 
             // RE-CHECK: Ambil detail spesifik varian (warna & size & variant) dari transaksi (LOCK)
             const [freshDetailRows]: any = await tx.execute(sql`
@@ -84,7 +85,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                     pd.gambar
                 FROM produkdetail pd
                 WHERE pd.produk_id = ${id_produk} 
-                AND (pd.warna = ${normalizedColor} OR pd.warna = ${color_sylla})
+                AND (pd.warna = ${colorId} OR pd.warna = ${color_sylla})
                 AND pd.size = ${size_sylla} 
                 AND (pd.variant = ${variant} OR (pd.variant IS NULL AND ${variant || ""} = ""))
                 FOR UPDATE
@@ -141,6 +142,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
 
             // Cek existing cart menggunakan normalizedColor (warna_id konsisten)
             // Juga tangani data lama yang mungkin tersimpan sebagai nama warna via JOIN warna
+            // Gunakan TRIM untuk menghindari isu whitespace
             const [existingCartRows]: any = await tx.execute(sql`
                 SELECT 
                     k.id, 
@@ -149,9 +151,18 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 LEFT JOIN warna w ON (k.warna = w.warna_id OR k.warna = w.warna)
                 WHERE k.cust_id = ${userId} 
                 AND k.produk_id = ${id_produk} 
-                AND (k.warna = ${normalizedColor} OR w.warna_id = ${normalizedColor})
-                AND k.size = ${size_sylla} 
-                AND (k.variant = ${variant} OR (k.variant IS NULL AND ${variant || ""} = ""))
+                AND (
+                    TRIM(k.warna) = ${colorName} 
+                    OR TRIM(k.warna) = ${colorId} 
+                    OR TRIM(w.warna) = ${colorName} 
+                    OR TRIM(w.warna_id) = ${colorId}
+                )
+                AND TRIM(k.size) = ${size_sylla} 
+                AND (
+                    TRIM(k.variant) = ${variant} 
+                    OR (TRIM(k.variant) IS NULL AND (${variant || ""} = ""))
+                    OR (TRIM(k.variant) = "" AND (${variant || ""} = ""))
+                )
                 AND k.is_deleted = 0 
                 LIMIT 1
                 FOR UPDATE
@@ -180,7 +191,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 await tx.insert(keranjang).values({
                     custId: userId,
                     produkId: id_produk,
-                    warna: normalizedColor, // Selalu simpan warna_id untuk konsistensi
+                    warna: colorName, // Simpan Nama Warna sesuai kemauan user
                     size: size_sylla,
                     variant: variant || null,
                     qtyProduk: requestedQty,

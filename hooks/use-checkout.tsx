@@ -112,6 +112,7 @@ export function useCheckout() {
     const [totalWeight, setTotalWeight] = useState(0);
     const [shippingOptions, setShippingOptions] = useState<any[]>([]);
     const [isLoadingShipping, setIsLoadingShipping] = useState(false);
+    const [originName, setOriginName] = useState("");
 
     // Dynamic Options State
     const [couriers, setCouriers] = useState<any[]>([]);
@@ -263,6 +264,9 @@ export function useCheckout() {
             });
             if (data.rajaongkir?.results) {
                 const results = data.rajaongkir.results;
+                if (data.rajaongkir.originName) {
+                    setOriginName(data.rajaongkir.originName);
+                }
                 const allCosts = results.flatMap((r: any) =>
                     (r.costs || []).map((c: any) => ({
                         ...c,
@@ -636,7 +640,7 @@ export function useCheckout() {
         orderResult, lastOrderedItems, isSubmitting,
         couriers, isLoadingCouriers, shippingOptions, setShippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         errors, validateCheckout, setErrors,
-        packingFee, grandTotal, remainingBill,
+        packingFee, grandTotal, remainingBill, originName,
         handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, submitOrder, setVoucherData,
         refreshShipping: fetchShippingCost
     };

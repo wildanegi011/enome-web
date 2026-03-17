@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { companyProfile, cargo } from "@/lib/db/schema";
+import { companyProfile, cargo, kecamatan } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import logger from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
@@ -26,16 +26,22 @@ export class ShippingService {
     /**
      * Calculate shipping costs for all active couriers.
      */
-    static async calculateShipping(destination: string | number, weight: number): Promise<any[]> {
+    static async calculateShipping(destination: string | number, weight: number): Promise<{ results: any[], originName: string }> {
         const apiKey = await ConfigService.get(CONFIG.RAJAONGKIR_KEY_VAR);
         if (!apiKey) throw new Error("rajaongkir_key_not_found");
 
-        const [company]: any = await db.select()
+        const companyData: any = await db.select({
+            kecamatan: companyProfile.kecamatan,
+            subdistrictName: kecamatan.subdistrictName
+        })
             .from(companyProfile)
+            .leftJoin(kecamatan, eq(companyProfile.kecamatan, kecamatan.subdistrictId))
             .where(eq(companyProfile.isAktif, 1))
             .limit(1);
 
+        const company = companyData[0];
         const origin = company?.kecamatan || CONFIG.DEFAULT_ORIGIN_CITY;
+        const originName = company?.subdistrictName || company?.kecamatan || "Origin";
 
         // Fetch couriers that are active (1) and automated/non-manual (0)
         const activeCouriers = await db.select()
@@ -49,15 +55,15 @@ export class ShippingService {
 
         if (!courierCodes) {
             logger.warn("ShippingService: No active automated couriers found");
-            return [];
+            return { results: [], originName };
         }
 
         logger.info("ShippingService: Fetching shipping costs for all couriers", { origin, destination, weight, courierCodes });
 
         // Bypass cache to always fetch fresh data
-        const rajaOngkirResults = await this.fetchKomerce(apiKey, origin, destination, weight, courierCodes);
+        const results = await this.fetchKomerce(apiKey, origin, destination, weight, courierCodes);
 
-        return rajaOngkirResults;
+        return { results, originName };
     }
 
     /**
@@ -129,7 +135,7 @@ export class ShippingService {
                 body: new URLSearchParams({
                     origin: origin,
                     destination: destination.toString(),
-                    weight: weight.toString(),
+                    weight: Math.max(1, weight).toString(),
                     courier: courier,
                     price: "lowest"
                 }),

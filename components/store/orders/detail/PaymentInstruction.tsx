@@ -59,7 +59,7 @@ export default function PaymentInstruction({
                         Transfer Ke Rekening {paymentInfo.namaBank}
                     </p>
                     <div className="flex items-center gap-3">
-                        <h4 className="text-[20px] font-black text-neutral-base-900 tracking-tight">
+                        <h4 className="text-[20px] font-bold text-neutral-base-900 tracking-tight">
                             {paymentInfo.noRekening}
                         </h4>
                         <button

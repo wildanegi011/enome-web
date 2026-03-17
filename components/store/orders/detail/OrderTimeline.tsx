@@ -46,7 +46,7 @@ export default function OrderTimeline({ statusOrder }: OrderTimelineProps) {
                             </div>
                             <span
                                 className={cn(
-                                    "text-[12px] font-black mt-3 md:mt-4 tracking-tight text-center uppercase",
+                                    "text-[12px] font-bold mt-3 md:mt-4 tracking-tight text-center uppercase",
                                     isCompleted ? "text-neutral-base-900" : "text-neutral-base-300"
                                 )}
                             >

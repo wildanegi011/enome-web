@@ -140,7 +140,8 @@ export const GET = withAuth(async (
                     eq(warna.warnaId, produkDetail.warnaId)
                 )
             ))
-            .where(eq(orderdetail.orderId, orderId));
+            .where(eq(orderdetail.orderId, orderId))
+            .groupBy(orderdetail.id);
 
         // 3. Fetch Payment Details if applicable (e.g., Bank Transfer info)
         let paymentInfo = null;
