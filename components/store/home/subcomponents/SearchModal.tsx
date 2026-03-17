@@ -248,12 +248,12 @@ export default function SearchModal({
                                             />
                                         </div>
                                         <div className="flex flex-col min-w-0 gap-0.5">
-                                            <span className="font-bold text-[16px] text-neutral-900 truncate leading-tight tracking-tight">{product.namaProduk}</span>
+                                            <span className="font-bold text-[16px] text-neutral-900 truncate leading-tight tracking-tight mb-0.5">{product.namaProduk}</span>
                                             <span className="text-[12px] text-neutral-500 font-bold uppercase tracking-wider font-montserrat">{product.kategori}</span>
+                                            <span className="text-[14px] font-bold text-neutral-950 font-montserrat tracking-tight">
+                                                {product.finalMinPrice ? formatCurrency(Number(product.finalMinPrice)) : "—"}
+                                            </span>
                                         </div>
-                                        <span className="ml-auto text-[16px] font-bold text-neutral-950 shrink-0 font-montserrat tracking-tight">
-                                            {product.finalMinPrice ? formatCurrency(Number(product.finalMinPrice)) : "—"}
-                                        </span>
                                     </CommandItem>
                                 ))}
                             </div>
