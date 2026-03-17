@@ -247,12 +247,14 @@ export default function SearchModal({
                                                 className="object-cover"
                                             />
                                         </div>
-                                        <div className="flex flex-col min-w-0 gap-0.5">
-                                            <span className="font-bold text-[16px] text-neutral-900 truncate leading-tight tracking-tight mb-0.5">{product.namaProduk}</span>
-                                            <span className="text-[12px] text-neutral-500 font-bold uppercase tracking-wider font-montserrat">{product.kategori}</span>
-                                            <span className="text-[14px] font-bold text-neutral-950 font-montserrat tracking-tight">
-                                                {product.finalMinPrice ? formatCurrency(Number(product.finalMinPrice)) : "—"}
-                                            </span>
+                                        <div className="flex flex-col min-w-0 gap-1">
+                                            <span className="font-bold text-[16px] text-neutral-900 truncate leading-tight tracking-tight">{product.namaProduk}</span>
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-widest font-montserrat leading-none">{product.kategori}</span>
+                                                <span className="text-[14px] font-bold text-neutral-900 font-montserrat tracking-tight leading-tight">
+                                                    {product.finalMinPrice ? formatCurrency(Number(product.finalMinPrice)) : "—"}
+                                                </span>
+                                            </div>
                                         </div>
                                     </CommandItem>
                                 ))}
