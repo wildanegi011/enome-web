@@ -41,7 +41,7 @@ export class CartService {
             variant: keranjang.variant,
             qty: keranjang.qtyProduk,
             storedHarga: keranjang.hargaPoduk,
-            normalHarga: (produkDetail as any)[priceColumnName] ?? produkDetail.hargaJual,
+            normalHarga: sql<number>`MAX(COALESCE(${(produkDetail as any)[priceColumnName]}, ${produkDetail.hargaJual}))`.as('normalHarga'),
             gambar: sql<string>`COALESCE(
                 (SELECT CONCAT('produk/', pi2.gambar) 
                  FROM produk_image pi2 
@@ -58,8 +58,8 @@ export class CartService {
             flashsaleExpired: keranjang.flashsaleExpired,
             isPreorder: keranjang.isPreorder,
             isOnline: produk.isOnline,
-            stock: produkDetail.stokNormal,
-            berat: produkDetail.berat,
+            stock: sql<number>`MAX(${produkDetail.stokNormal})`.as('stock'),
+            berat: sql<number>`MAX(${produkDetail.berat})`.as('berat'),
             fsIsAktif: flashSale.isAktif,
             fsWaktuSelesai: flashSale.waktuSelesai,
         })
@@ -85,6 +85,7 @@ export class CartService {
             ))
             .leftJoin(flashSale, eq(keranjang.flashsaleId, sql`CAST(${flashSale.id} AS CHAR)`))
             .where(and(...conditions))
+            .groupBy(keranjang.id)
             .orderBy(sql`${keranjang.createdAt} DESC`);
 
         // 2. Process items: check for expired flash sales and revert price if needed

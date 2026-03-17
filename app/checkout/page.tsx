@@ -30,7 +30,7 @@ function CheckoutContent() {
         paymentMethod, setPaymentMethod, paymentMethods, isLoadingPayments,
         orderResult, lastOrderedItems, isSubmitting,
         couriers, isLoadingCouriers, shippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
-        packingFee, grandTotal, remainingBill,
+        packingFee, grandTotal, remainingBill, originName,
         handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, submitOrder,
         setShippingOptions, setVoucherData,
         errors, setErrors,
@@ -191,6 +191,7 @@ function CheckoutContent() {
                                     hasError={errors?.shipping}
                                     onFieldChange={() => setErrors(prev => ({ ...prev, shipping: false }))}
                                     onRefresh={refreshShipping}
+                                    originName={originName}
                                 />
                             </motion.div>
 

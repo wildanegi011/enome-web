@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Truck, Loader2, Zap, AlertCircle } from "lucide-react";
+import { Clock, Truck, Loader2, Zap, AlertCircle, MapPin, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CourierSectionProps {
@@ -15,6 +15,7 @@ interface CourierSectionProps {
     hasError?: boolean;
     onFieldChange?: () => void;
     onRefresh?: () => void;
+    originName?: string;
 }
 
 export default function CourierSection({
@@ -27,6 +28,7 @@ export default function CourierSection({
     hasError,
     onFieldChange,
     onRefresh,
+    originName,
 }: CourierSectionProps) {
     return (
         <section className={cn(
@@ -45,6 +47,35 @@ export default function CourierSection({
             </div>
 
             <div className="flex flex-col gap-4 px-3 md:px-5">
+                {(originName || totalWeight > 0) && (
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-3.5 md:p-4 bg-neutral-base-50/50 rounded-[24px] border border-neutral-base-100/50 mb-0.5">
+                        <div className="flex items-center gap-3 md:gap-3.5">
+                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-neutral-base-100 shrink-0">
+                                <MapPin className="w-4 h-4 md:w-4.5 md:h-4.5 text-neutral-base-600" />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-[9px] md:text-[10px] font-bold text-neutral-base-400 uppercase tracking-widest mb-0.5">Dikirim Dari</span>
+                                <div className="flex items-center gap-1.5 md:gap-2 overflow-hidden">
+                                    <span className="text-[12px] md:text-[14px] font-bold text-neutral-base-900 truncate">
+                                        {originName || "Pilih Asal"}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 md:gap-3.5 border-t md:border-t-0 md:border-l border-neutral-base-200/50 pt-3 md:pt-0 md:pl-5">
+                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-neutral-base-100 shrink-0">
+                                <ShoppingBag className="w-4 h-4 md:w-4.5 md:h-4.5 text-neutral-base-600" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[9px] md:text-[10px] font-bold text-neutral-base-400 uppercase tracking-widest mb-0.5">Total Berat</span>
+                                <span className="text-[12px] md:text-[14px] font-bold text-neutral-base-900 tabular-nums">
+                                    {totalWeight < 1000 ? `${totalWeight}g` : `${(totalWeight / 1000).toFixed(1)}kg`}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="flex flex-col px-1">
                     <label className="text-[11px] md:text-[12px] font-bold uppercase tracking-widest text-neutral-base-400">
                         Pilih Layanan Ekspedisi
@@ -152,15 +183,6 @@ export default function CourierSection({
                         </button>
                     </div>
                 )}
-                <div className="h-px bg-neutral-base-100/30 my-1" />
-                <div className="flex items-center justify-end px-1">
-                    <div className="flex items-center gap-2 px-3 md:px-4 py-1.5 bg-white border border-neutral-base-100 rounded-full shadow-sm w-fit">
-                        <span className="text-[11px] md:text-[12px] text-neutral-base-400 font-bold uppercase tracking-widest">Estimasi Berat:</span>
-                        <span className="text-[11px] md:text-[12px] font-bold text-neutral-base-900">
-                            {totalWeight < 1000 ? `${totalWeight}g` : `${(totalWeight / 1000).toFixed(1)}kg`}
-                        </span>
-                    </div>
-                </div>
             </div>
         </section>
     );

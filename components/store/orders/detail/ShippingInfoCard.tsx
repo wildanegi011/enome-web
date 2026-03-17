@@ -57,8 +57,8 @@ export default function ShippingInfoCard({
                         <User className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div>
-                        <p className="text-[12px] md:text-[13px] font-semibold tracking-wider text-neutral-base-400 mb-2">Penerima</p>
-                        <p className="text-[16px] font-normal text-neutral-base-600">{namaPenerima}</p>
+                        <p className="text-[15px] font-bold text-neutral-base-600 mb-2">Penerima</p>
+                        <p className="text-[14px] font-normal text-neutral-base-600">{namaPenerima}</p>
                         <div className="flex items-center gap-2 mt-1.5 text-neutral-base-600">
                             <Phone className="w-3.5 h-3.5" />
                             <span className="text-[14px] font-normal">{phone}</span>
@@ -74,7 +74,7 @@ export default function ShippingInfoCard({
                         <MapPin className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[12px] md:text-[13px] font-semibold tracking-wider text-neutral-base-400 mb-2">Alamat tujuan</p>
+                        <p className="text-[15px] font-bold text-neutral-base-600 mb-2">Alamat tujuan</p>
                         <p className="text-[14px] font-normal text-neutral-base-600 leading-relaxed max-w-[500px]">
                             {alamatKirim}
                         </p>
@@ -92,7 +92,7 @@ export default function ShippingInfoCard({
                         <Truck className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div>
-                        <p className="text-[12px] md:text-[13px] font-semibold tracking-wider text-neutral-base-400 mb-2">Ekspedisi & layanan</p>
+                        <p className="text-[15px] font-bold text-neutral-base-600 mb-2">Ekspedisi & layanan</p>
                         <p className="text-[14px] font-normal text-neutral-base-600 flex items-center gap-2">
                             {ekspedisi}
                             <span className="w-1 h-1 rounded-full bg-neutral-base-200" />
