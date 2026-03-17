@@ -47,10 +47,11 @@ export function useSizes() {
     });
 }
 
-export function useProducts(filters?: any) {
+export function useProducts(filters?: any, options?: any) {
     return useQuery<Product[]>({
         queryKey: [...queryKeys.products.all, filters],
         queryFn: () => productApi.getAll(filters),
         placeholderData: keepPreviousData,
+        ...options
     });
 }

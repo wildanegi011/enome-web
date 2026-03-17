@@ -57,11 +57,11 @@ export default function ShippingInfoCard({
                         <User className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div>
-                        <p className="text-[15px] font-bold text-neutral-base-600 mb-2">Penerima</p>
-                        <p className="text-[14px] font-normal text-neutral-base-600">{namaPenerima}</p>
-                        <div className="flex items-center gap-2 mt-1.5 text-neutral-base-600">
+                        <p className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat mb-1.5">Penerima</p>
+                        <p className="text-[14px] font-bold text-neutral-base-900 whitespace-nowrap">{namaPenerima}</p>
+                        <div className="flex items-center gap-2 mt-1.5 text-neutral-base-500">
                             <Phone className="w-3.5 h-3.5" />
-                            <span className="text-[14px] font-normal">{phone}</span>
+                            <span className="text-[14px] font-bold">{phone}</span>
                         </div>
                     </div>
                 </div>
@@ -74,11 +74,11 @@ export default function ShippingInfoCard({
                         <MapPin className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[15px] font-bold text-neutral-base-600 mb-2">Alamat tujuan</p>
-                        <p className="text-[14px] font-normal text-neutral-base-600 leading-relaxed max-w-[500px]">
+                        <p className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat mb-1.5">Alamat tujuan</p>
+                        <p className="text-[14px] font-bold text-neutral-base-900 leading-relaxed max-w-[500px]">
                             {alamatKirim}
                         </p>
-                        <p className="text-[14px] font-normal text-neutral-base-600 mt-2 tracking-tight">
+                        <p className="text-[14px] font-bold text-neutral-base-600 mt-2 tracking-tight">
                             {distrikKirim}, {kotaKirim}, {provinsiKirim}
                         </p>
                     </div>
@@ -92,11 +92,11 @@ export default function ShippingInfoCard({
                         <Truck className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div>
-                        <p className="text-[15px] font-bold text-neutral-base-600 mb-2">Ekspedisi & layanan</p>
-                        <p className="text-[14px] font-normal text-neutral-base-600 flex items-center gap-2">
+                        <p className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat mb-1.5">Ekspedisi & layanan</p>
+                        <p className="text-[14px] font-bold text-neutral-base-900 flex items-center gap-2">
                             {ekspedisi}
                             <span className="w-1 h-1 rounded-full bg-neutral-base-200" />
-                            <span className="font-normal text-neutral-base-600">{service}</span>
+                            <span className="font-bold text-neutral-base-600">{service}</span>
                         </p>
                     </div>
                 </div>
@@ -109,7 +109,7 @@ export default function ShippingInfoCard({
                         <Search className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[12px] md:text-[13px] font-semibold tracking-wider text-neutral-base-400 mb-2">Nomor resi</p>
+                        <p className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat mb-1.5">Nomor resi</p>
                         <div className="flex items-center gap-3">
                             <p className={cn(
                                 "text-[16px] font-bold tracking-tight",

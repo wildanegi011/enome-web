@@ -1,11 +1,12 @@
 import { db } from "@/lib/db";
-import { orders, payment as paymentTable, orderdetail, produkDetail, preOrder, flashSale, produk, keranjang } from "@/lib/db/schema";
+import { orders, payment as paymentTable, orderdetail, produkDetail, preOrder, flashSale, produk, keranjang, customer, user } from "@/lib/db/schema";
 import { eq, and, lt, sql, inArray, lte, or, gte, desc } from "drizzle-orm";
 import { CONFIG } from "@/lib/config";
 import logger from "@/lib/logger";
 import { nowJakartaFull, getJakartaDate, parseJakarta } from "@/lib/date-utils";
 import { UserService } from "@/lib/services/user-service";
 import { ConfigService } from "./config-service";
+import { sendOrderStatusUpdateEmail } from "@/lib/mail";
 
 export class CronService {
     /**
@@ -14,12 +15,11 @@ export class CronService {
      */
     static async cancelExpiredOrders() {
         const dhms = nowJakartaFull();
-        const now = parseJakarta(dhms);
 
         logger.info(`CronService: Starting cancelExpiredOrders process at ${dhms}`);
 
         try {
-            // 1. Find unpaid payments that have expired
+            // 1. Find unpaid payments that have expired using Jakarta string comparison
             const expiredPayments = await db.select({
                 id: paymentTable.id,
                 paymentTransactionId: paymentTable.paymentTransactionId,
@@ -30,22 +30,22 @@ export class CronService {
                     and(
                         eq(paymentTable.isPaid, 0),
                         eq(paymentTable.isDeleted, 0),
-                        lt(paymentTable.expiredTime, now)
+                        lt(paymentTable.expiredTime, sql`${dhms}`)
                     )
                 );
 
             if (expiredPayments.length === 0) {
                 logger.info("CronService: No expired payments found");
-                return { success: true, cancelledCount: 0 };
+                return { success: true, cancelledPaymentsCount: 0, cancelledOrdersCount: 0 };
             }
 
             logger.info(`CronService: Found ${expiredPayments.length} potentially expired payments`);
 
-            let cancelledCount = 0;
+            let cancelledPaymentsCount = 0;
+            let cancelledOrdersCount = 0;
+            const notifications: { email: string, name: string, orderId: string, items: any[] }[] = [];
 
             for (const pymnt of expiredPayments) {
-                // Extract orderId from format "orderId;"
-                // Extract orderIds from format "orderId;orderId2;..."
                 const orderIds = pymnt.paymentTransactionId?.split(';').filter(id => id.trim() !== "") || [];
                 if (orderIds.length === 0) {
                     logger.warn(`CronService: Could not extract any orderId from payment ID ${pymnt.id}`, { transactionId: pymnt.paymentTransactionId });
@@ -53,7 +53,6 @@ export class CronService {
                 }
 
                 await db.transaction(async (tx) => {
-                    // PHP matches: status_order in ('OPEN','BATAL','CLOSE') and status_tagihan = 'BELUM BAYAR'
                     const relatedOrders = await tx.select({
                         orderId: orders.orderId,
                         statusOrder: orders.statusOrder,
@@ -69,7 +68,6 @@ export class CronService {
                         ));
 
                     if (relatedOrders.length === 0) {
-                        // Mark payment as deleted/processed even if no matching orders found (cleanup)
                         await tx.update(paymentTable)
                             .set({ isDeleted: 1 } as any)
                             .where(eq(paymentTable.id, pymnt.id));
@@ -89,13 +87,24 @@ export class CronService {
                             } as any)
                             .where(eq(orders.orderId, order.orderId));
 
-                        // B. Revert Stock ONLY if not PRE-ORDER AND status was OPEN
-                        // We check status was OPEN to avoid double-reverting if already manually BATAL'd
-                        if (order.orderTipe !== "PRE-ORDER" && order.statusOrder === "OPEN") {
-                            const items = await tx.select()
-                                .from(orderdetail)
-                                .where(eq(orderdetail.orderId, order.orderId));
+                        cancelledOrdersCount++;
 
+                        // B. Fetch Order Items for Stock Revert AND Email Notification
+                        const items = await tx.select({
+                            namaProduk: produk.namaProduk,
+                            qty: orderdetail.qty,
+                            harga: orderdetail.harga,
+                            warna: orderdetail.warna,
+                            ukuran: orderdetail.ukuran,
+                            variant: orderdetail.variant,
+                            produkId: orderdetail.produkId
+                        })
+                            .from(orderdetail)
+                            .leftJoin(produk, eq(orderdetail.produkId, produk.produkId))
+                            .where(eq(orderdetail.orderId, order.orderId));
+
+                        // C. Revert Stock ONLY if not PRE-ORDER AND status was OPEN
+                        if (order.orderTipe !== "PRE-ORDER" && order.statusOrder === "OPEN") {
                             for (const item of items) {
                                 await tx.update(produkDetail)
                                     .set({ stokNormal: sql`${produkDetail.stokNormal} + ${item.qty}` })
@@ -109,13 +118,33 @@ export class CronService {
                                 logger.debug(`CronService: Reverted stock for ${item.produkId} (Qty: ${item.qty})`);
                             }
                         }
+
+                        // D. Prepare Email Notification Data (To be sent outside transaction)
+                        try {
+                            const [customerData]: any = await tx.select({
+                                email: sql<string>`COALESCE(${user.email}, ${customer.email})`,
+                                nama: sql<string>`COALESCE(${customer.namaCustomer}, ${user.nama}, ${user.username})`
+                            })
+                                .from(customer)
+                                .leftJoin(user, eq(customer.userId, user.id))
+                                .where(eq(customer.custId, order.customer!))
+                                .limit(1);
+
+                            if (customerData?.email) {
+                                notifications.push({
+                                    email: customerData.email,
+                                    name: customerData.nama,
+                                    orderId: order.orderId,
+                                    items: items
+                                });
+                            }
+                        } catch (emailErr) {
+                            logger.error(`CronService: Error preparing notification for order ${order.orderId}`, emailErr);
+                        }
                     }
 
-                    // C. Refund wallet balance if any
-                    // Note: PHP does this per payment record if grouped.
+                    // E. Refund wallet balance if any
                     if (pymnt.ammountTotalWallet && pymnt.ammountTotalWallet > 0) {
-                        // In merged orders, PHP uses the 'customer' of the first order in the loop.
-                        // We do the same.
                         const primaryCustomer = relatedOrders[0].customer;
                         if (primaryCustomer) {
                             await UserService.addWalletBalance(
@@ -123,21 +152,35 @@ export class CronService {
                                 pymnt.ammountTotalWallet,
                                 `Pengembalian saldo dari transaksi ${orderIds.join(', ')}`
                             );
-                            logger.info(`CronService: Refunded ${pymnt.ammountTotalWallet} to customer ${primaryCustomer} for payment ${pymnt.id}`);
                         }
                     }
 
-                    // D. Mark payment as processed/deleted
+                    // F. Mark payment as processed/deleted
                     await tx.update(paymentTable)
                         .set({ isDeleted: 1 } as any)
                         .where(eq(paymentTable.id, pymnt.id));
 
-                    cancelledCount++;
+                    cancelledPaymentsCount++;
                 });
             }
 
-            logger.info(`CronService: Successfully cancelled ${cancelledCount} orders`);
-            return { success: true, cancelledCount };
+            // 3. Send Email Notifications sequentially outside transaction
+            for (const note of notifications) {
+                try {
+                    logger.info(`CronService: Background processing email for order ${note.orderId} to ${note.email}`);
+                    await sendOrderStatusUpdateEmail(note.email, {
+                        orderId: note.orderId,
+                        customerName: note.name,
+                        status: "KADALUARSA (Expired)",
+                        items: note.items
+                    });
+                } catch (sendErr) {
+                    logger.error(`CronService: Failed to send background email for order ${note.orderId}`, sendErr);
+                }
+            }
+
+            logger.info(`CronService: Successfully cancelled ${cancelledPaymentsCount} payments affecting ${cancelledOrdersCount} orders`);
+            return { success: true, cancelledPaymentsCount, cancelledOrdersCount };
 
         } catch (error) {
             logger.error("CronService: Error in cancelExpiredOrders", error);
@@ -150,23 +193,25 @@ export class CronService {
      */
     static async closeExpiredEvents() {
         const dhms = nowJakartaFull();
-        const now = parseJakarta(dhms);
 
         logger.info(`CronService: Starting closeExpiredEvents process at ${dhms}`);
 
         try {
             // 1. Close Pre-Orders
-            const closedPreOrder = await db.update(preOrder)
+            const [closedPreOrder]: any = await db.update(preOrder)
                 .set({ isAktif: 0 })
-                .where(and(lte(preOrder.waktuSelesai, now), eq(preOrder.isAktif, 1)));
+                .where(and(lte(preOrder.waktuSelesai, sql`${dhms}`), eq(preOrder.isAktif, 1)));
 
             // 2. Close Flash Sales
-            const closedFlashSale = await db.update(flashSale)
+            const [closedFlashSale]: any = await db.update(flashSale)
                 .set({ isAktif: 0 })
-                .where(and(lte(flashSale.waktuSelesai, now), eq(flashSale.isAktif, 1)));
+                .where(and(lte(flashSale.waktuSelesai, sql`${dhms}`), eq(flashSale.isAktif, 1)));
 
-            logger.info(`CronService: Closed expired events.`);
-            return { success: true };
+            const poCount = closedPreOrder?.affectedRows || 0;
+            const fsCount = closedFlashSale?.affectedRows || 0;
+
+            logger.info(`CronService: Closed ${poCount} expired pre-orders and ${fsCount} flash sales.`);
+            return { success: true, poCount, fsCount };
         } catch (error) {
             logger.error("CronService: Error in closeExpiredEvents", error);
             return { success: false, error };
@@ -209,17 +254,16 @@ export class CronService {
      */
     static async cleanupExpiredFlashSaleCart() {
         const dhms = nowJakartaFull();
-        const now = parseJakarta(dhms);
 
         logger.info(`CronService: Starting cleanupExpiredFlashSaleCart process at ${dhms}`);
 
         try {
             // 1. Mark items as deleted if cart expiration passed
-            await db.update(keranjang)
+            const [deletedByExpiry]: any = await db.update(keranjang)
                 .set({ isDeleted: 1 })
                 .where(and(
                     eq(keranjang.isFlashsale, 1),
-                    lte(keranjang.flashsaleExpired, now),
+                    lte(keranjang.flashsaleExpired, sql`${dhms}`),
                     eq(keranjang.isDeleted, 0)
                 ));
 
@@ -229,7 +273,7 @@ export class CronService {
                 .from(flashSale)
                 .where(or(
                     eq(flashSale.isAktif, 0),
-                    lte(flashSale.waktuSelesai, now)
+                    lte(flashSale.waktuSelesai, sql`${dhms}`)
                 ));
 
             if (inactiveFlashSales.length > 0) {
@@ -256,25 +300,24 @@ export class CronService {
      */
     static async setOnline() {
         const dhms = nowJakartaFull();
-        const now = parseJakarta(dhms);
 
         logger.info(`CronService: Starting setOnline process at ${dhms}`);
 
         try {
             // 1. Set Flash Sales Online
-            const onlineFlashSale = await db.update(flashSale)
+            const [onlineFlashSale]: any = await db.update(flashSale)
                 .set({ isAktif: 1 })
                 .where(and(
-                    lte(flashSale.waktuMulai, now),
-                    gte(flashSale.waktuSelesai, now),
+                    lte(flashSale.waktuMulai, sql`${dhms}`),
+                    gte(flashSale.waktuSelesai, sql`${dhms}`),
                     eq(flashSale.isAktif, 0)
                 ));
 
             // 2. Set Products Online
-            const onlineProduk = await db.update(produk)
+            const [onlineProduk]: any = await db.update(produk)
                 .set({ isOnline: 1, tglOnline: null })
                 .where(and(
-                    lte(produk.tglOnline, now),
+                    lte(produk.tglOnline, sql`${dhms}`),
                     eq(produk.isOnline, 0),
                     eq(produk.produkPreorder, 0)
                 ));

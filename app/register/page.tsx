@@ -21,7 +21,7 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { User as UserIcon, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { User as UserIcon, Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 const registerSchema = z.object({
@@ -189,10 +189,7 @@ export default function RegisterPage() {
                         className="w-full max-w-[440px] space-y-10 relative z-10"
                     >
                         <motion.div variants={itemVariants} className="space-y-4">
-                            {/* <Link href="/" className="inline-block mb-4">
-                            <span className="text-2xl font-bold tracking-tighter text-neutral-base-900 uppercase">Énome</span>
-                        </Link> */}
-                            <h2 className="text-3xl sm:text-4xl font-bold text-neutral-base-900 tracking-tight">
+                            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-base-900 tracking-tight">
                                 Buat Akun
                             </h2>
                             <p className="text-neutral-base-500 text-base sm:text-lg leading-relaxed">

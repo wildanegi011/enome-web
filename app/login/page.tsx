@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -205,11 +205,18 @@ function LoginContent() {
                         animate="visible"
                         className="w-full max-w-[440px] space-y-6 sm:space-y-10 relative z-10 text-center lg:text-left py-4 overflow-y-auto overflow-x-hidden max-h-full no-scrollbar"
                     >
+                        <motion.div variants={itemVariants} className="mb-2 lg:mb-4 text-left">
+                            <Link 
+                                href="/" 
+                                className="inline-flex items-center gap-2 text-[10px] font-bold text-neutral-base-400 hover:text-neutral-base-900 transition-colors uppercase tracking-[0.2em] group"
+                            >
+                                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform duration-300" />
+                                Kembali ke Beranda
+                            </Link>
+                        </motion.div>
+
                         <motion.div variants={itemVariants} className="space-y-2">
-                            {/* <Link href="/" className="inline-block mb-8">
-                            <span className="text-2xl font-bold tracking-tighter text-neutral-base-900 uppercase">Énome</span>
-                        </Link> */}
-                            <h2 className="text-3xl sm:text-4xl font-bold text-neutral-base-900 tracking-tight">
+                            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-base-900 tracking-tight">
                                 Selamat Datang Kembali
                             </h2>
                             <p className="text-neutral-base-500 text-base sm:text-lg leading-relaxed">

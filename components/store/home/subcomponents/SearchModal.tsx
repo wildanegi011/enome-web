@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronRight, Clock, Search, ShoppingCart, TrendingUp, X, Compass, Heart } from "lucide-react";
 import {
@@ -57,12 +57,28 @@ export default function SearchModal({
     const [searchValue, setSearchValue] = useState("");
     const debouncedSearch = useDebounce(searchValue, 300);
 
+    const isSearching = debouncedSearch.length >= 3;
     const { data: highlights = [] } = useHighlights();
-    const { data: searchResults = [] } = useProducts({ search: debouncedSearch });
+    const { data: searchResults = [] } = useProducts(
+        { search: debouncedSearch },
+        { enabled: isSearching }
+    );
     const { data: categories = [] } = useCategories(8);
     const { searches: recentSearches, addSearch, removeSearch, clearAll } = useRecentSearches();
 
-    const displayedProducts = debouncedSearch ? searchResults : highlights;
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isOpen) {
+            // Use a small timeout to ensure the modal/drawer is rendered and ready
+            const timer = setTimeout(() => {
+                inputRef.current?.focus();
+            }, 50);
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen]);
+
+    const displayedProducts = isSearching ? searchResults : highlights;
 
     const handleSearchSubmit = (value?: string) => {
         const query = value || searchValue;
@@ -73,33 +89,45 @@ export default function SearchModal({
         }
     };
 
-    const SearchContent = () => (
-        <Command className="bg-transparent flex flex-col h-full border-none outline-hidden" shouldFilter={false}>
+    const renderSearchContent = () => (
+        <div className="flex flex-col min-h-0 overflow-hidden flex-1">
             {/* Search Input Area */}
             <div className="px-4 pt-6 pb-3 sm:pt-4 sm:pb-3 sm:bg-zinc-50/50 [&_svg]:text-zinc-400 [&_svg]:opacity-100 [&_svg]:shrink-0 shrink-0">
-                <CommandInput
-                    placeholder="Cari produk..."
-                    value={searchValue}
-                    onValueChange={setSearchValue}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            handleSearchSubmit();
-                        }
-                    }}
-                    className="h-12 sm:h-11 text-base sm:text-sm border-none focus:ring-0 placeholder:text-zinc-400 text-zinc-900 font-bold bg-zinc-50 sm:bg-white focus:bg-zinc-100 sm:focus:bg-zinc-50 rounded-xl px-4 w-full transition-all font-montserrat tracking-tight shadow-sm sm:shadow-none outline-hidden"
-                />
+                <div className="relative flex items-center">
+                    <Search className="absolute left-4 size-4 text-zinc-400" />
+                    <input
+                        ref={inputRef}
+                        placeholder="Cari produk..."
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                        // onKeyDown={(e) => {
+                        //     if (e.key === "Enter") {
+                        //         handleSearchSubmit();
+                        //     }
+                        // }}
+                        className="h-12 sm:h-11 text-base sm:text-sm border-none focus:ring-0 placeholder:text-zinc-400 text-zinc-900 font-bold bg-zinc-50 sm:bg-white focus:bg-zinc-100 sm:focus:bg-zinc-50 rounded-xl pl-11 pr-11 w-full transition-all font-montserrat tracking-tight shadow-sm sm:shadow-none outline-hidden"
+                    />
+                    {searchValue && (
+                        <button
+                            onClick={() => setSearchValue("")}
+                            className="absolute right-4 size-6 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors text-zinc-400 hover:text-zinc-600"
+                        >
+                            <X className="size-4" />
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Divider */}
             <div className="h-px bg-zinc-100 shrink-0" />
 
             {/* Results Area */}
-            <ScrollArea className="flex-1 no-scrollbar">
+            <ScrollArea className="flex-1 no-scrollbar overflow-hidden" viewportClassName="h-full sm:max-h-[65vh]">
                 <style jsx global>{`
                     .no-scrollbar::-webkit-scrollbar { display: none; }
                     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                 `}</style>
-                <CommandList className="max-h-none pb-6">
+                <CommandList className="max-h-none h-full pb-6">
                     {/* Empty State */}
                     <CommandEmpty className="py-16 flex flex-col items-center justify-center gap-4 text-zinc-400">
                         <div className="size-14 rounded-2xl bg-zinc-100 flex items-center justify-center border border-zinc-200/50">
@@ -186,13 +214,16 @@ export default function SearchModal({
                     )}
 
                     {/* Products (search results only) */}
-                    {debouncedSearch && (
+                    {debouncedSearch && displayedProducts.length > 0 && (
                         <CommandGroup
                             heading={
                                 <div className="flex items-center gap-2 px-4 pt-1 pb-2">
                                     <ShoppingCart className="size-3 text-zinc-500" />
                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 font-montserrat">
                                         Hasil
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded-full bg-zinc-100 text-[10px] font-bold text-zinc-400 font-montserrat tracking-tight">
+                                        {displayedProducts.length} Produk
                                     </span>
                                 </div>
                             }
@@ -217,10 +248,10 @@ export default function SearchModal({
                                             />
                                         </div>
                                         <div className="flex flex-col min-w-0 gap-0.5">
-                                            <span className="font-black text-[16px] text-zinc-900 truncate font-montserrat leading-tight tracking-tight">{product.namaProduk}</span>
-                                            <span className="text-[12px] text-zinc-500 font-bold uppercase tracking-wider font-montserrat">{product.kategori}</span>
+                                            <span className="font-bold text-[16px] text-neutral-900 truncate leading-tight tracking-tight">{product.namaProduk}</span>
+                                            <span className="text-[12px] text-neutral-500 font-bold uppercase tracking-wider font-montserrat">{product.kategori}</span>
                                         </div>
-                                        <span className="ml-auto text-[16px] font-bold text-zinc-950 shrink-0 font-montserrat tracking-tight">
+                                        <span className="ml-auto text-[16px] font-bold text-neutral-950 shrink-0 font-montserrat tracking-tight">
                                             {product.finalMinPrice ? formatCurrency(Number(product.finalMinPrice)) : "—"}
                                         </span>
                                     </CommandItem>
@@ -267,7 +298,7 @@ export default function SearchModal({
                     )}
                 </CommandList>
             </ScrollArea>
-        </Command>
+        </div>
     );
 
     if (isMobile) {
@@ -281,20 +312,26 @@ export default function SearchModal({
                     onOpenChange(open);
                 }}
             >
-                <DrawerContent className="h-[90dvh] flex flex-col p-0 border-none bg-white rounded-t-[32px] outline-hidden">
+                <DrawerContent className="h-full flex flex-col p-0 border-none bg-white rounded-none outline-hidden">
                     <DrawerHeader className="sr-only">
                         <DrawerTitle>Pencarian Produk</DrawerTitle>
                         <DrawerDescription>Cari koleksi batik premium kami</DrawerDescription>
                     </DrawerHeader>
-                    <SearchContent />
-                    <div className="p-4 bg-white border-t border-zinc-50 shrink-0">
-                        <button
+                    
+                    {/* Mobile Header Close Button */}
+                    <div className="flex items-center justify-between px-4 pt-4 shrink-0 sm:hidden">
+                        <span className="text-xs font-black uppercase tracking-widest text-zinc-400 font-montserrat">Pencarian</span>
+                        <button 
                             onClick={() => onOpenChange(false)}
-                            className="w-full h-14 rounded-2xl bg-zinc-900 text-white font-black text-[14px] uppercase tracking-[0.2em] font-montserrat active:scale-95 transition-transform"
+                            className="p-2 -mr-2 text-zinc-400 hover:text-zinc-900 transition-colors"
                         >
-                            Tutup
+                            <X className="size-5" />
                         </button>
                     </div>
+
+                    <Command className="bg-transparent flex flex-col items-stretch h-full border-none outline-hidden" shouldFilter={false}>
+                        {renderSearchContent()}
+                    </Command>
                 </DrawerContent>
             </Drawer>
         );
@@ -309,12 +346,12 @@ export default function SearchModal({
                 }
                 onOpenChange(open);
             }}
-            className="w-full sm:max-w-lg p-0 bg-stone-50/95 backdrop-blur-2xl border border-stone-200/50 text-zinc-900 rounded-2xl overflow-hidden shadow-[0_25px_60px_-12px_rgba(0,0,0,0.15)] flex flex-col outline-hidden"
+            className="w-full sm:max-w-lg p-0 bg-stone-50/95 backdrop-blur-2xl border border-stone-200/50 text-zinc-900 rounded-2xl overflow-hidden shadow-[0_25px_60px_-12px_rgba(0,0,0,0.15)] flex flex-col outline-hidden h-auto transition-all duration-300"
             commandClassName="bg-transparent flex flex-col h-full"
             showCloseButton={false}
             shouldFilter={false}
         >
-            <SearchContent />
+            {renderSearchContent()}
 
             {/* Desktop Footer */}
             <div className="flex px-4 py-2.5 border-t border-zinc-100 bg-zinc-50/30 items-center justify-between shrink-0">

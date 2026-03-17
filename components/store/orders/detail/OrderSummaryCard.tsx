@@ -73,25 +73,25 @@ export default function OrderSummaryCard({
                 <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10">
                     <Receipt className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-[16px] md:text-[18px] font-bold text-neutral-base-900">
+                <h2 className="text-[18px] font-bold text-neutral-base-900 tracking-tight">
                     Ringkasan Pembayaran
                 </h2>
             </div>
 
             <div className="space-y-4 md:space-y-5 pb-6 md:pb-8 border-b border-neutral-base-50">
-                <div className="flex items-center justify-between text-[14px]">
-                    <span className="text-neutral-base-500 font-bold">Subtotal</span>
+                <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat">Subtotal</span>
                     <span className="text-neutral-base-900 font-bold">
                         {formatCurrency(totalHarga)}
                     </span>
                 </div>
-                <div className="flex items-center justify-between text-[14px]">
-                    <span className="text-neutral-base-500 font-bold">Biaya pengiriman</span>
+                <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat">Biaya pengiriman</span>
                     <span className="text-neutral-base-900 font-bold">{formatCurrency(ongkir)}</span>
                 </div>
                 {biayalain > 0 && (
-                    <div className="flex items-center justify-between text-[13px]">
-                        <span className="text-neutral-base-400 font-medium">Biaya Kemasan</span>
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat">Biaya Kemasan</span>
                         <span className="text-neutral-base-900 font-medium">
                             {formatCurrency(biayalain)}
                         </span>
@@ -99,8 +99,8 @@ export default function OrderSummaryCard({
                 )}
 
                 {voucherInfo && voucherInfo.nominal > 0 && (
-                    <div className="flex items-center justify-between text-[14px]">
-                        <span className="text-emerald-600 flex items-center gap-2 line-clamp-1 font-bold">
+                    <div className="flex items-center justify-between">
+                        <span className="text-emerald-600 flex items-center gap-2 line-clamp-1 text-[11px] font-black uppercase tracking-widest font-montserrat">
                             <Tag className="w-3.5 h-3.5 shrink-0" />
                             Voucher ({voucherInfo.kode})
                         </span>
@@ -111,8 +111,8 @@ export default function OrderSummaryCard({
                 )}
 
                 {viaWallet > 0 && (
-                    <div className="flex items-center justify-between text-[14px]">
-                        <span className="text-emerald-600 font-bold">Wallet Deduction</span>
+                    <div className="flex items-center justify-between">
+                        <span className="text-emerald-600 text-[11px] font-black uppercase tracking-widest font-montserrat">Wallet Deduction</span>
                         <span className="text-emerald-600 font-bold">
                             -{formatCurrency(viaWallet)}
                         </span>
@@ -130,7 +130,7 @@ export default function OrderSummaryCard({
             </div>
 
             <div className="py-6 md:py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[14px]">
-                <span className="font-bold text-neutral-base-500">
+                <span className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat">
                     Total tagihan
                 </span>
                 <span className="text-[20px] md:text-[24px] font-bold text-neutral-base-900 tracking-tight">

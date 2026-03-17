@@ -138,7 +138,7 @@ export default function ForgotPasswordPage() {
                             {/* <Link href="/" className="inline-block mb-4">
                             <span className="text-2xl font-bold tracking-tighter text-neutral-base-900 uppercase">Énome</span>
                         </Link> */}
-                            <h2 className="text-3xl sm:text-4xl font-bold text-neutral-base-900 tracking-tight">
+                            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-base-900 tracking-tight">
                                 Atur Ulang Kata Sandi
                             </h2>
                             <p className="text-neutral-base-500 text-base sm:text-lg leading-relaxed">
