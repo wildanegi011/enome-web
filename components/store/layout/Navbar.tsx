@@ -239,13 +239,13 @@ export default function Navbar() {
                         <Link href="/account/wishlist" className="p-1 hover:text-neutral-base-900 transition-colors relative">
                             <Heart className="w-5 h-5" strokeWidth={1.5} />
                             {wishlistCount > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-neutral-base-900 text-white text-[10px] font-black min-w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-white shadow-sm px-1">
+                                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-black min-w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-white shadow-sm px-1">
                                     {wishlistCount}
                                 </span>
                             )}
                         </Link>
                         <Link href="/cart" className="p-1 hover:text-neutral-base-900 transition-colors relative">
-                            <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
+                            <ShoppingCart className="w-5 h-5" strokeWidth={1.5} />
                             {cartCount > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-black min-w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-white shadow-sm px-1">
                                     {cartCount}
