@@ -12,9 +12,12 @@ import type { Metadata } from "next";
 
 import { SlideService } from "@/lib/services/slide-service";
 
+export const revalidate = 0;
+
 export async function generateMetadata(): Promise<Metadata> {
-  const logoUrl = await SlideService.getFrontendLogo();
-  const faviconUrl = logoUrl || "/favicon.ico"; // Fallback if no logo
+  // const logoUrl = await SlideService.getFrontendLogo();
+  // const timestamp = new Date().getTime();
+  const faviconUrl = "/favicon.ico";
 
   return {
     title: "ÉNOMÉ - Fashion & Batik Collection 2026",

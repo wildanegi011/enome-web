@@ -68,31 +68,31 @@ export default function OrderSummaryCard({
 
 
     return (
-        <div className="bg-white border border-neutral-base-100 rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-xl shadow-neutral-base-900/5 xl:sticky xl:top-24">
-            <div className="flex items-center gap-4 mb-8 md:mb-10">
-                <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10">
-                    <Receipt className="w-5 h-5 text-white" />
+        <div className="bg-white border border-neutral-base-100 rounded-[32px] md:rounded-[40px] p-5 md:p-10 shadow-xl shadow-neutral-base-900/5 xl:sticky xl:top-24">
+            <div className="flex items-center gap-4 md:gap-5 mb-10">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-[14px] md:rounded-[18px] bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10 shrink-0">
+                    <Receipt className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
-                <h2 className="text-[18px] font-bold text-neutral-base-900 tracking-tight">
-                    Ringkasan Pembayaran
+                <h2 className="text-[16px] md:text-[18px] font-bold text-neutral-base-900 tracking-tight font-montserrat">
+                    Ringkasan
                 </h2>
             </div>
 
             <div className="space-y-4 md:space-y-5 pb-6 md:pb-8 border-b border-neutral-base-50">
                 <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat">Subtotal</span>
-                    <span className="text-neutral-base-900 font-bold">
+                    <span className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat">Subtotal</span>
+                    <span className="text-[13px] md:text-[14px] font-bold text-neutral-base-900 font-montserrat">
                         {formatCurrency(totalHarga)}
                     </span>
                 </div>
                 <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat">Biaya pengiriman</span>
-                    <span className="text-neutral-base-900 font-bold">{formatCurrency(ongkir)}</span>
+                    <span className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat">Biaya pengiriman</span>
+                    <span className="text-[13px] md:text-[14px] font-bold text-neutral-base-900 font-montserrat">{formatCurrency(ongkir)}</span>
                 </div>
                 {biayalain > 0 && (
                     <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat">Biaya Kemasan</span>
-                        <span className="text-neutral-base-900 font-medium">
+                        <span className="text-[10px] md:text-[11px] font-black text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat">Biaya Kemasan</span>
+                        <span className="text-[13px] md:text-[14px] font-bold text-neutral-base-900 font-montserrat">
                             {formatCurrency(biayalain)}
                         </span>
                     </div>
@@ -100,11 +100,11 @@ export default function OrderSummaryCard({
 
                 {voucherInfo && voucherInfo.nominal > 0 && (
                     <div className="flex items-center justify-between">
-                        <span className="text-emerald-600 flex items-center gap-2 line-clamp-1 text-[11px] font-black uppercase tracking-widest font-montserrat">
+                        <span className="text-emerald-600 flex items-center gap-2 line-clamp-1 text-[10px] md:text-[11px] font-black uppercase tracking-[0.12em] font-montserrat">
                             <Tag className="w-3.5 h-3.5 shrink-0" />
                             Voucher ({voucherInfo.kode})
                         </span>
-                        <span className="text-emerald-600 font-bold">
+                        <span className="text-[13px] md:text-[14px] font-bold text-emerald-600 font-montserrat">
                             -{formatCurrency(voucherInfo.nominal)}
                         </span>
                     </div>
@@ -112,8 +112,8 @@ export default function OrderSummaryCard({
 
                 {viaWallet > 0 && (
                     <div className="flex items-center justify-between">
-                        <span className="text-emerald-600 text-[11px] font-black uppercase tracking-widest font-montserrat">Wallet Deduction</span>
-                        <span className="text-emerald-600 font-bold">
+                        <span className="text-emerald-600 text-[10px] md:text-[11px] font-black uppercase tracking-[0.12em] font-montserrat">Wallet Deduction</span>
+                        <span className="text-emerald-600 text-[13px] md:text-[14px] font-bold font-montserrat">
                             -{formatCurrency(viaWallet)}
                         </span>
                     </div>
@@ -129,11 +129,11 @@ export default function OrderSummaryCard({
                 )} */}
             </div>
 
-            <div className="py-6 md:py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[14px]">
-                <span className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat">
+            <div className="py-6 md:py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <span className="text-[11px] md:text-[12px] font-black text-neutral-base-400 uppercase tracking-[0.15em] font-montserrat">
                     Total tagihan
                 </span>
-                <span className="text-[20px] md:text-[24px] font-bold text-neutral-base-900 tracking-tight">
+                <span className="text-[18px] md:text-[22px] font-bold text-neutral-base-900 tracking-tight font-montserrat">
                     {formatCurrency(totalTagihan)}
                 </span>
             </div>

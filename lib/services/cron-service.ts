@@ -80,7 +80,7 @@ export class CronService {
                         // A. Update Order Status to CLOSE / KADALUARSA
                         await tx.update(orders)
                             .set({
-                                statusOrder: "CLOSE",
+                                statusOrder: "BATAL",
                                 statusTagihan: "KADALUARSA",
                                 updatedAt: sql`${dhms}`,
                                 updatedBy: 0 // System/Cron

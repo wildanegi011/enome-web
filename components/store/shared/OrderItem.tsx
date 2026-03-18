@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import FallbackImage from "@/components/store/shared/FallbackImage";
-import { Minus, Plus, Trash2, Zap, MessageSquare } from "lucide-react";
+import { Minus, Plus, Trash2, Zap, MessageSquare, ChevronRight } from "lucide-react";
 import { ASSET_URL } from "@/config/config";
 import { cn, formatCurrency } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export interface OrderItemType {
     id: number;
@@ -48,6 +48,7 @@ export default function OrderItem({
     const isStockInsufficient = (item.stock || 0) < item.qty && item.stock !== 0;
 
     const [localNotes, setLocalNotes] = useState(item.keterangan || "");
+    const [isVariationsExpanded, setIsVariationsExpanded] = useState(false);
 
     // Sync local state with item data (e.g., when refetching)
     useEffect(() => {
@@ -72,208 +73,321 @@ export default function OrderItem({
         <div
             key={item.id}
             className={cn(
-                "flex items-start gap-3 md:gap-5 group relative transition-all duration-500 rounded-[20px] md:rounded-[30px]",
-                isCheckout ? "p-3 md:p-4" : "p-3.5 md:p-6 bg-white border border-neutral-base-100 hover:border-neutral-base-900 shadow-sm hover:shadow-xl hover:shadow-neutral-base-900/5",
+                "group relative transition-all duration-500 rounded-[20px] md:rounded-[32px] overflow-hidden",
+                isCheckout ? "p-3 md:p-6" : "p-5 md:p-7 bg-white border border-neutral-base-100 hover:border-neutral-base-900 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-xl hover:shadow-neutral-base-900/5",
                 (isOffline || isStockInsufficient) && "border-red-100 bg-red-50/10 ring-1 ring-red-100/50"
             )}
         >
-            {/* 1. Checkbox (Cart Only) */}
-            {showCheckbox && (
-                <button
-                    onClick={() => onToggleSelect && onToggleSelect(item.id)}
-                    disabled={isOffline}
-                    className={cn(
-                        "mt-8 md:mt-10 shrink-0",
-                        isOffline && "cursor-not-allowed opacity-30"
-                    )}
-                >
-                    <div className={cn(
-                        "w-4.5 h-4.5 md:w-6 md:h-6 rounded border flex items-center justify-center transition-colors",
-                        isSelected
-                            ? "bg-amber-800 border-amber-800 text-white"
-                            : "bg-white border-neutral-base-200 text-transparent"
-                    )}>
-                        <svg className="w-3 md:w-4 h-3 md:h-4 fill-none stroke-current stroke-3" viewBox="0 0 24 24">
-                            <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                    </div>
-                </button>
-            )}
-
-            {/* 2. Product Image */}
-            <div className={cn(
-                "bg-neutral-base-50 overflow-hidden relative shrink-0 border border-neutral-base-100 shadow-sm rounded-lg md:rounded-2xl transition-all",
-                isCheckout ? "w-14 h-18 md:w-20 md:h-24" : "w-16 h-16 md:w-32 md:h-32",
-                isOffline && "opacity-40 grayscale-[0.5]"
-            )}>
-                <FallbackImage
-                    src={item.gambar ? `${ASSET_URL}/img/${item.gambar}` : "/placeholder-product.jpg"}
-                    alt={item.namaProduk}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 768px) 64px, 150px"
-                />
-            </div>
-
-            {/* 3. Info Section */}
-            <div className={cn(
-                "flex-1 min-w-0 flex flex-col self-stretch",
-                isOffline && "opacity-60"
-            )}>
-                {/* TOP ROW: Title & Trash */}
-                <div className="flex items-start justify-between gap-2 md:gap-3">
-                    <div className="min-w-0 flex-1">
-                        <h3 className={cn(
-                            "font-bold text-neutral-base-900 tracking-tight leading-tight wrap-break-word",
-                            isCheckout ? "text-[12px] md:text-[15px] line-clamp-1" : "text-[13px] md:text-[18px] line-clamp-2",
-                            isOffline && "line-through text-neutral-base-400 font-medium"
-                        )}>
-                            {item.namaProduk}
-                        </h3>
-
-                        {/* Flash Sale Badge */}
-                        {item.isFlashsale === 1 && (
-                            <div className={cn(
-                                "mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 border rounded transition-colors",
-                                item.isFlashsaleExpired === 1
-                                    ? "bg-neutral-base-50 border-neutral-base-100 text-neutral-base-400"
-                                    : "bg-red-50 border-red-100 text-red-600"
-                            )}>
-                                <Zap className={cn(
-                                    "w-2 md:w-2.5 h-2 md:h-2.5",
-                                    item.isFlashsaleExpired === 1 ? "fill-neutral-base-400" : "fill-red-600"
-                                )} />
-                                <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-widest leading-none">
-                                    {item.isFlashsaleExpired === 1 ? "Promo Berakhir" : "Flash Sale"}
-                                </span>
-                            </div>
+            {/* Top Layout Part: Image & Info */}
+            <div className="flex items-start gap-4 md:gap-8">
+                {/* 1. Checkbox (Cart Only) */}
+                {showCheckbox && (
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => onToggleSelect && onToggleSelect(item.id)}
+                        disabled={isOffline}
+                        className={cn(
+                            "mt-9 md:mt-12 shrink-0",
+                            isOffline && "cursor-not-allowed opacity-30"
                         )}
-                    </div>
+                    >
+                        <div className={cn(
+                            "w-4 h-4 md:w-6 md:h-6 rounded-sm border flex items-center justify-center transition-all shadow-sm",
+                            isSelected
+                                ? "bg-amber-800 border-amber-800 text-white shadow-amber-800/20"
+                                : "bg-white border-neutral-base-200 text-transparent"
+                        )}>
+                            <svg className="w-3.5 md:w-4 h-3.5 md:h-4 fill-none stroke-current stroke-4" viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                        </div>
+                    </motion.button>
+                )}
 
-                    {!isCheckout && (
-                        <button
-                            onClick={() => onRemove(item.id)}
-                            className="p-1 text-neutral-base-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        >
-                            <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
-                        </button>
-                    )}
-                    {isCheckout && (
-                        <button
-                            onClick={() => onRemove(item.id)}
-                            className="p-2 md:p-2.5 text-neutral-base-300 hover:text-red-500 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100 transition-all shrink-0 -mt-1 -mr-1"
-                        >
-                            <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
-                        </button>
-                    )}
+                {/* 2. Product Image */}
+                <div className={cn(
+                    "bg-neutral-base-50 overflow-hidden relative shrink-0 border border-neutral-base-100 shadow-md rounded-2xl transition-all",
+                    isCheckout ? "w-16 h-18 md:w-24 md:h-32" : "w-24 h-24 md:w-32 md:h-32",
+                    isOffline && "opacity-40 grayscale-[0.5]"
+                )}>
+                    <FallbackImage
+                        src={item.gambar ? `${ASSET_URL}/img/${item.gambar}` : "/placeholder-product.jpg"}
+                        alt={item.namaProduk}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 768px) 96px, 150px"
+                    />
                 </div>
 
-                {/* MIDDLE ROW: Attributes & Status */}
-                <div className="flex flex-col gap-0.5 mt-1 md:mt-1.5">
-                    <p className="text-[11px] md:text-[13px] font-medium text-neutral-base-400 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-                        {item.variant && (
-                            <>
-                                <span className="truncate">Motif: <span className="text-neutral-base-900 font-bold">{item.variant}</span></span>
-                                <span className="hidden md:inline w-px h-2.5 bg-neutral-base-100" />
-                            </>
-                        )}
-                        <span className="truncate">Ukuran: <span className="text-neutral-base-900 font-bold">{item.size}</span></span>
-                        <span className="hidden md:inline w-px h-2.5 bg-neutral-base-100" />
-                        <span className="truncate">Warna: <span className="text-neutral-base-900 font-bold">{item.warnaName || item.warna}</span></span>
-                    </p>
+                {/* 3. Info Section */}
+                <div className={cn(
+                    "flex-1 min-w-0 flex flex-col self-stretch",
+                    isOffline && "opacity-60"
+                )}>
+                    {/* --- DESKTOP VIEW (md+) --- */}
+                    <div className="hidden md:flex flex-col flex-1">
+                        {/* TOP ROW: Title & Trash */}
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                                <h3 className={cn(
+                                    "font-bold text-neutral-base-900 tracking-tight leading-[1.2] wrap-break-word font-montserrat",
+                                    isCheckout ? "text-[15px]" : "text-[18px] line-clamp-2",
+                                    isOffline && "line-through text-neutral-base-400 font-medium"
+                                )}>
+                                    {item.namaProduk}
+                                </h3>
 
-                    {/* Status Badges (Stock / Offline) */}
-                    {(isOffline || isStockInsufficient) && (
-                        <div className="flex flex-wrap gap-1 items-center mt-1.5">
-                            {isOffline ? (
-                                <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[9px] md:text-[10px] font-bold uppercase tracking-widest rounded border border-red-100">
-                                    {item.isOnline === 0 ? "Tidak Tersedia" : "Stok Habis"}
-                                </span>
-                            ) : isStockInsufficient && (
-                                <div className="flex items-center gap-1.5">
-                                    <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[9px] md:text-[10px] font-bold uppercase tracking-widest rounded border border-red-100">
-                                        Stok: {item.stock}
-                                    </span>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); onUpdateQuantity(item.id, item.stock ?? 1, item.stock ?? 1); }}
-                                        className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest bg-white text-neutral-base-900 px-2 py-1 rounded border border-neutral-base-200 hover:bg-neutral-base-900 hover:text-white transition-all shadow-sm"
-                                    >
-                                        Sesuaikan
-                                    </button>
+                                {/* Flash Sale Badge */}
+                                {item.isFlashsale === 1 && (
+                                    <div className={cn(
+                                        "mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 border rounded transition-colors",
+                                        item.isFlashsaleExpired === 1
+                                            ? "bg-neutral-base-50 border-neutral-base-100 text-neutral-base-400"
+                                            : "bg-red-50 border-red-100 text-red-600"
+                                    )}>
+                                        <Zap className={cn(
+                                            "w-2.5 h-2.5",
+                                            item.isFlashsaleExpired === 1 ? "fill-neutral-base-400" : "fill-red-600"
+                                        )} />
+                                        <span className="text-[9px] font-bold uppercase tracking-widest leading-none">
+                                            {item.isFlashsaleExpired === 1 ? "Promo Berakhir" : "Flash Sale"}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {!isCheckout && (
+                                <button
+                                    onClick={() => onRemove(item.id)}
+                                    className="p-2 text-neutral-base-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all active:scale-90"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* MIDDLE ROW: Attributes */}
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2">
+                            {item.variant && (
+                                <div className="flex items-center gap-1 font-montserrat">
+                                    <span className="text-[12px] font-bold text-neutral-base-400">Motif:</span>
+                                    <span className="text-[12px] font-bold text-neutral-base-900">{item.variant}</span>
+                                </div>
+                            )}
+                            <div className="flex items-center gap-1 font-montserrat">
+                                <span className="text-[12px] font-bold text-neutral-base-400">Ukuran:</span>
+                                <span className="text-[12px] font-bold text-neutral-base-900">{item.size}</span>
+                            </div>
+                            {(item.warnaName || item.warna) && (
+                                <div className="flex items-center gap-1 font-montserrat">
+                                    <span className="text-[12px] font-bold text-neutral-base-400">Warna:</span>
+                                    <span className="text-[12px] font-bold text-neutral-base-900">{item.warnaName || item.warna}</span>
                                 </div>
                             )}
                         </div>
-                    )}
-                </div>
 
-                {/* BOTTOM ROW: Qty & Price */}
-                <div className="mt-auto pt-3 flex items-end justify-between gap-2">
-                    {/* Qty Controls */}
-                    <div className="flex items-center bg-white border border-neutral-base-200 shadow-sm rounded-xl p-0.5 gap-1 shrink-0">
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onUpdateQuantity(item.id, Number(item.qty) - 1, item.stock ?? 99); }}
-                            disabled={Number(item.qty) <= 1 || isOffline}
-                            className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center hover:bg-neutral-base-50 rounded-lg transition-all disabled:opacity-30 active:scale-90"
-                        >
-                            <Minus className="w-3 h-3 md:w-4 md:h-4 text-neutral-base-600" />
-                        </button>
-                        <input
-                            type="number"
-                            value={item.qty}
-                            readOnly
-                            className="w-6 md:w-8 bg-transparent text-center font-bold text-neutral-base-900 tabular-nums text-[12px] md:text-[14px] outline-none"
-                        />
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onUpdateQuantity(item.id, Number(item.qty) + 1, item.stock ?? 99); }}
-                            disabled={Number(item.qty) >= (item.stock || 99) || isOffline}
-                            className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center hover:bg-neutral-base-50 rounded-lg transition-all disabled:opacity-30 active:scale-90"
-                        >
-                            <Plus className="w-3 h-3 md:w-4 md:h-4 text-neutral-base-600" />
-                        </button>
+                        {/* BOTTOM ROW: Price & Qty */}
+                        <div className="mt-auto pt-4 flex items-center justify-between gap-3">
+                            <span className={cn(
+                                "font-bold text-neutral-base-900 font-montserrat tracking-tight tabular-nums leading-none",
+                                isCheckout ? "text-[20px]" : "text-[24px]",
+                                isOffline && "text-neutral-base-300 line-through font-medium"
+                            )}>
+                                {formatCurrency(Number(item.harga || 0) * Number(item.qty || 0))}
+                            </span>
+
+                            <div className="flex items-center bg-white border border-neutral-base-100 shadow-sm rounded-xl p-1 gap-1">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onUpdateQuantity(item.id, Number(item.qty) - 1, item.stock ?? 99); }}
+                                    disabled={Number(item.qty) <= 1 || isOffline}
+                                    className="w-8 h-8 flex items-center justify-center hover:bg-neutral-base-50 rounded-lg transition-all disabled:opacity-30 active:scale-90"
+                                >
+                                    <Minus className="w-4 h-4 text-neutral-base-600" />
+                                </button>
+                                <input
+                                    type="number"
+                                    value={item.qty}
+                                    readOnly
+                                    className="w-8 bg-transparent text-center font-bold text-neutral-base-900 tabular-nums text-[14px] outline-none"
+                                />
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onUpdateQuantity(item.id, Number(item.qty) + 1, item.stock ?? 99); }}
+                                    disabled={Number(item.qty) >= (item.stock || 99) || isOffline}
+                                    className="w-8 h-8 flex items-center justify-center hover:bg-neutral-base-50 rounded-lg transition-all disabled:opacity-30 active:scale-90"
+                                >
+                                    <Plus className="w-4 h-4 text-neutral-base-600" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* DESKTOP NOTE */}
+                        {showNotes && (
+                            <div className="mt-4 pt-4 border-t border-dashed border-neutral-base-100 flex flex-col gap-2">
+                                <div className="flex items-center gap-2 px-1">
+                                    <MessageSquare className="w-3.5 h-3.5 text-amber-600" />
+                                    <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.12em] text-neutral-base-400 font-montserrat">
+                                        Catatan
+                                    </span>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={localNotes}
+                                    onChange={(e) => setLocalNotes(e.target.value)}
+                                    onBlur={handleNotesBlur}
+                                    placeholder="Tambahkan catatan..."
+                                    className="w-full bg-neutral-base-50/50 hover:bg-neutral-base-50 focus:bg-white border border-transparent focus:border-neutral-base-200 rounded-xl px-4 py-3 text-[13px] font-medium outline-none transition-all placeholder:text-neutral-300"
+                                />
+                            </div>
+                        )}
                     </div>
 
-                    {/* Price */}
-                    <div className="flex flex-col items-end shrink-0">
-                        <span className={cn(
-                            "font-bold text-neutral-base-900 tracking-tighter tabular-nums leading-none",
-                            isCheckout ? "text-[16px] md:text-[20px]" : "text-[18px] md:text-[24px]",
-                            isOffline && "text-neutral-base-300 line-through font-medium"
-                        )}>
-                            {formatCurrency(Number(item.harga || 0) * Number(item.qty || 0))}
+                    {/* --- MOBILE VIEW (Top Info Area) --- */}
+                    <div className="flex md:hidden flex-col flex-1">
+                        {/* Top Row: Info & Trash */}
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                                <h3 className={cn(
+                                    "font-bold text-neutral-base-900 tracking-tight leading-[1.3] line-clamp-2 text-[15px] font-montserrat",
+                                    isOffline && "line-through text-neutral-base-400 font-medium"
+                                )}>
+                                    {item.namaProduk}
+                                </h3>
+
+                                {/* Attributes List (Mobile Collapsible - Shopee Style) */}
+                                <div className="mt-2 text-neutral-base-900">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setIsVariationsExpanded(!isVariationsExpanded);
+                                        }}
+                                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-base-50/80 border border-neutral-base-100 rounded-lg hover:bg-neutral-base-100 transition-all group active:scale-[0.98]"
+                                    >
+                                        <div className="flex items-center gap-1.5 min-w-0">
+                                            <span className="text-[9px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] whitespace-nowrap font-montserrat">Variasi:</span>
+                                            <div className="flex items-center gap-1 min-w-0">
+                                                <span className="text-[9px] font-bold text-neutral-base-900 truncate font-montserrat uppercase tracking-[0.05em]">
+                                                    {[item.variant, item.size, item.warnaName || item.warna].filter(Boolean)[0]}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <ChevronRight className={cn(
+                                            "w-3 h-3 text-neutral-base-400 transition-transform duration-300 shrink-0",
+                                            isVariationsExpanded ? "rotate-90" : "rotate-0"
+                                        )} />
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {isVariationsExpanded && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: "auto", opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3, ease: "circOut" }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="pt-2.5 flex flex-wrap gap-1.5">
+                                                    {item.variant && (
+                                                        <div className="inline-flex items-center px-2 py-0.5 bg-white border border-neutral-base-100 rounded-lg shadow-sm">
+                                                            <span className="text-[9px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] mr-1 font-montserrat">Motif:</span>
+                                                            <span className="text-[9px] font-bold text-neutral-base-900 uppercase tracking-[0.12em] font-montserrat">{item.variant}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="inline-flex items-center px-2 py-0.5 bg-white border border-neutral-base-100 rounded-lg shadow-sm">
+                                                        <span className="text-[9px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] mr-1 font-montserrat">Ukuran:</span>
+                                                        <span className="text-[9px] font-bold text-neutral-base-900 uppercase tracking-[0.12em] font-montserrat">{item.size}</span>
+                                                    </div>
+                                                    {(item.warnaName || item.warna) && (
+                                                        <div className="inline-flex items-center px-2 py-0.5 bg-white border border-neutral-base-100 rounded-lg shadow-sm">
+                                                            <span className="text-[9px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] mr-1 font-montserrat">Warna:</span>
+                                                            <span className="text-[9px] font-bold text-neutral-base-900 uppercase tracking-[0.12em] font-montserrat">{item.warnaName || item.warna}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Mobile Price: Below Attributes */}
+                                <div className="mt-3">
+                                    <span className={cn(
+                                        "font-bold text-neutral-base-900 font-montserrat tracking-tight tabular-nums leading-none text-[18px]",
+                                        isOffline && "text-neutral-base-300 line-through font-medium"
+                                    )}>
+                                        {formatCurrency(Number(item.harga || 0) * Number(item.qty || 0))}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {!isCheckout && (
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => onRemove(item.id)}
+                                    className="p-2 -mr-2 text-neutral-base-300 hover:text-rose-500 transition-colors"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </motion.button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* --- MOBILE VIEW: Bottom Interaction Bar (Full Width) --- */}
+            <div className="flex md:hidden flex-col mt-5 pt-4 border-t border-dashed border-neutral-base-100">
+                {/* Note Label (Separate Row) */}
+                {showNotes && (
+                    <div className="flex items-center gap-1.5 px-1 mb-2.5">
+                        <MessageSquare className="w-3 h-3 text-amber-600 shrink-0" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-neutral-base-400 font-montserrat">
+                            Catatan
                         </span>
                     </div>
-                </div>
-
-                {/* Note Section */}
-                {showNotes && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-3.5 pt-3.5 border-t border-dashed border-neutral-base-100 flex flex-col gap-2"
-                    >
-                        <div className="flex items-center gap-2 px-1">
-                            <div className="shrink-0 p-1 bg-amber-50 rounded-md">
-                                <MessageSquare className="w-2.5 h-2.5 text-amber-600" />
-                            </div>
-                            <span className="text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-neutral-base-400">
-                                Catatan Item
-                            </span>
-                        </div>
-                        <div className="relative group/note">
-                            <input
-                                type="text"
-                                value={localNotes}
-                                onChange={(e) => setLocalNotes(e.target.value)}
-                                onBlur={handleNotesBlur}
-                                placeholder="Tambahkan catatan..."
-                                className="w-full bg-neutral-base-50/50 hover:bg-neutral-base-50 focus:bg-white border border-transparent focus:border-neutral-base-200 rounded-xl px-3 py-2.5 text-[11px] md:text-[13px] font-medium outline-none placeholder:text-neutral-base-200 transition-all"
-                            />
-                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-amber-500 group-focus-within/note:w-full transition-all duration-300 rounded-full" />
-                        </div>
-                    </motion.div>
                 )}
+
+                <div className="flex items-center justify-between gap-3">
+                    {/* Note Input */}
+                    {showNotes && (
+                        <input
+                            type="text"
+                            value={localNotes}
+                            onChange={(e) => setLocalNotes(e.target.value)}
+                            onBlur={handleNotesBlur}
+                            placeholder="Tulis catatan..."
+                            className="flex-1 bg-neutral-base-50/50 focus:bg-white border border-transparent focus:border-neutral-base-200 rounded-xl px-3 h-9 text-[12px] font-medium outline-none transition-all placeholder:text-neutral-300 min-w-0"
+                        />
+                    )}
+
+                    <div className="flex items-center gap-2 shrink-0">
+                        {/* Qty Controls */}
+                        <div className="flex items-center bg-white border border-neutral-base-100 shadow-sm rounded-xl p-0.5 gap-0.5 h-9">
+                            <motion.button
+                                whileTap={{ scale: 0.9 }}
+                                onClick={(e) => { e.stopPropagation(); onUpdateQuantity(item.id, Number(item.qty) - 1, item.stock ?? 99); }}
+                                disabled={Number(item.qty) <= 1 || isOffline}
+                                className="w-7 h-7 flex items-center justify-center hover:bg-neutral-base-50 rounded-lg transition-all disabled:opacity-30"
+                            >
+                                <Minus className="w-3.5 h-3.5 text-neutral-base-600" />
+                            </motion.button>
+                            <input
+                                type="number"
+                                value={item.qty}
+                                readOnly
+                                className="w-6 bg-transparent text-center font-bold text-neutral-base-900 tabular-nums text-[13px] outline-none"
+                            />
+                            <motion.button
+                                whileTap={{ scale: 0.9 }}
+                                onClick={(e) => { e.stopPropagation(); onUpdateQuantity(item.id, Number(item.qty) + 1, item.stock ?? 99); }}
+                                disabled={Number(item.qty) >= (item.stock || 99) || isOffline}
+                                className="w-7 h-7 flex items-center justify-center hover:bg-neutral-base-50 rounded-lg transition-all disabled:opacity-30"
+                            >
+                                <Plus className="w-3.5 h-3.5 text-neutral-base-600" />
+                            </motion.button>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
     );
 }
-

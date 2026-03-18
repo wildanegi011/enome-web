@@ -170,14 +170,14 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     href={`/products/${product.id || 'batik-elegance-123'}`}
                     className="flex justify-between items-start gap-4 px-1 hover:no-underline"
                 >
-                    <div className="flex-1 min-w-0 space-y-1.5">
-                        <p className="text-[12px] text-neutral-base-400 font-bold uppercase tracking-widest font-montserrat">
+                    <div className="flex-1 min-w-0 space-y-1 sm:space-y-1.5">
+                        <p className="text-[10px] sm:text-[12px] text-neutral-base-400 font-bold uppercase tracking-widest font-montserrat truncate">
                             {product.category || "Kemeja"}
                         </p>
                         <Tooltip delayDuration={0}>
                             <TooltipTrigger asChild>
                                 <h3 className={cn(
-                                    "text-[18px] font-bold leading-tight transition-colors duration-200 truncate font-montserrat tracking-tight",
+                                    "text-[15px] sm:text-[18px] font-bold leading-tight transition-colors duration-200 truncate font-montserrat tracking-tight",
                                     isCardHovered ? "text-amber-900" : "text-neutral-base-900"
                                 )}>
                                     {product.name}
@@ -190,17 +190,17 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                         <div className="pt-0.5">
                             {product.originalPrice && product.isOnFlashSale && (
                                 <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className="text-[12px] text-neutral-base-400 line-through font-montserrat">
+                                    <span className="text-[10px] sm:text-[12px] text-neutral-base-400 line-through font-montserrat">
                                         {product.originalPrice}
                                     </span>
                                     {!!product.discountPercentage && product.discountPercentage > 0 && (
-                                        <span className="text-[9px] font-bold text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded">
+                                        <span className="text-[8px] sm:text-[9px] font-bold text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded">
                                             -{product.discountPercentage}%
                                         </span>
                                     )}
                                 </div>
                             )}
-                            <p className="text-[16px] font-medium text-neutral-base-900 tracking-tight font-montserrat">
+                            <p className="text-[14px] sm:text-[16px] font-medium text-neutral-base-900 tracking-tight font-montserrat">
                                 {product.price}
                             </p>
                         </div>

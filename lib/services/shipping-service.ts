@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { companyProfile, cargo, kecamatan } from "@/lib/db/schema";
+import { companyProfile, cargo, kecamatan, kota } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import logger from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
@@ -32,16 +32,22 @@ export class ShippingService {
 
         const companyData: any = await db.select({
             kecamatan: companyProfile.kecamatan,
-            subdistrictName: kecamatan.subdistrictName
+            kota: companyProfile.kota,
+            subdistrictName: kecamatan.subdistrictName,
+            cityName: kota.cityName
         })
             .from(companyProfile)
             .leftJoin(kecamatan, eq(companyProfile.kecamatan, kecamatan.subdistrictId))
+            .leftJoin(kota, eq(companyProfile.kota, kota.cityId))
             .where(eq(companyProfile.isAktif, 1))
             .limit(1);
 
         const company = companyData[0];
-        const origin = company?.kecamatan || CONFIG.DEFAULT_ORIGIN_CITY;
-        const originName = company?.subdistrictName || company?.kecamatan || "Origin";
+        // Priority for calculation origin: kecamatan ID -> kota ID -> default
+        const origin = company?.kecamatan || company?.kota || CONFIG.DEFAULT_ORIGIN_CITY;
+        
+        // Priority for display name: cityName from company profile's city ID
+        const originName = company?.cityName || company?.subdistrictName || company?.kota || company?.kecamatan || "Origin";
 
         // Fetch couriers that are active (1) and automated/non-manual (0)
         const activeCouriers = await db.select()
@@ -94,12 +100,15 @@ export class ShippingService {
         const apiKey = await ConfigService.get(CONFIG.RAJAONGKIR_KEY_VAR);
         if (!apiKey) throw new Error("rajaongkir_key_not_found");
 
-        const [company]: any = await db.select()
+        const [company]: any = await db.select({
+            kecamatan: companyProfile.kecamatan,
+            kota: companyProfile.kota
+        })
             .from(companyProfile)
             .where(eq(companyProfile.isAktif, 1))
             .limit(1);
 
-        const origin = company?.kecamatan || CONFIG.DEFAULT_ORIGIN_CITY;
+        const origin = company?.kecamatan || company?.kota || CONFIG.DEFAULT_ORIGIN_CITY;
         const cacheKey = `val-${origin}-${destination}-${weight}-${courier}`;
 
         // Bypass cache to always fetch fresh data for validation

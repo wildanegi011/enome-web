@@ -58,46 +58,44 @@ export default function OrderSummary({
     return (
         <aside className="w-full lg:w-[400px] lg:sticky lg:top-40 shrink-0">
             <div className="bg-white border border-neutral-base-100/50 rounded-[32px] p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)]">
-                <div className="flex items-center gap-3 mb-6 md:mb-8">
+                <div className="flex items-center gap-3 mb-5 md:mb-8">
                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-amber-50 flex items-center justify-center">
                         <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-amber-800" />
                     </div>
-                    <h3 className="font-heading text-[22px] md:text-[26px] font-bold text-neutral-base-900 tracking-tight">Ringkasan</h3>
+                    <h3 className="font-heading text-[20px] md:text-[26px] font-bold text-neutral-base-900 tracking-tight">Ringkasan</h3>
                 </div>
 
-                <div className="flex flex-col gap-4 md:gap-5 mb-5 md:mb-8">
-                    <div className="flex justify-between items-center text-[12px] md:text-[13px] font-medium text-neutral-base-600 uppercase tracking-widest">
+                <div className="flex flex-col gap-3.5 md:gap-5 mb-5 md:mb-8">
+                    <div className="flex justify-between items-center text-[11px] md:text-[13px] font-bold text-neutral-base-600 uppercase tracking-widest leading-none">
                         <span>Subtotal</span>
-                        <span className="text-neutral-base-900 font-medium text-[14px] md:text-[15px] tabular-nums">{formatPrice(totalAmount)}</span>
+                        <span className="text-neutral-base-900 font-bold text-[13px] md:text-[15px] tabular-nums leading-none">{formatPrice(totalAmount)}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[12px] md:text-[13px] font-medium text-neutral-base-600 uppercase tracking-widest">
+                    <div className="flex justify-between items-center text-[11px] md:text-[13px] font-bold text-neutral-base-600 uppercase tracking-widest leading-none">
                         <span className="truncate mr-4 text-left">
-                            Pengiriman ({shippingForm.courierName || shippingForm.courier ? (
-                                (shippingForm.courierName || shippingForm.courier).toUpperCase()
-                            ) : "---"})
+                            Pengiriman
                         </span>
-                        <span className={`text-[13px] md:text-[15px] font-medium flex items-center gap-2 shrink-0 text-neutral-base-900`}>
+                        <span className={`text-[12px] md:text-[15px] font-bold flex items-center gap-2 shrink-0 text-neutral-base-900 leading-none`}>
                             {isLoadingShipping ? (
                                 <Loader2 className="w-3 h-3 animate-spin text-sky-600" />
                             ) : !shippingForm.courier ? (
-                                <span className="text-[10px] md:text-[11px] text-amber-800 font-medium italic">Belum dipilih</span>
+                                <span className="text-[10px] md:text-[11px] text-amber-800 font-bold italic">Belum dipilih</span>
                             ) : shippingForm.shippingType === 'manual' ? (
-                                <span className="text-[13px] md:text-[15px] text-neutral-base-900 font-medium">Rp. 0</span>
+                                <span className="text-[12px] md:text-[15px] text-neutral-base-900 font-bold">Rp. 0</span>
                             ) : formatPrice(shippingPrice)}
                         </span>
                     </div>
                     {isVoucherApplied && (
-                        <div className="flex justify-between items-center text-[12px] md:text-[13px] font-medium uppercase tracking-wider">
+                        <div className="flex justify-between items-center text-[11px] md:text-[13px] font-bold uppercase tracking-wider leading-none">
                             <span className="text-neutral-base-400">Potongan Voucher</span>
                             <span className="text-rose-600">-{formatPrice(voucherDiscount)}</span>
                         </div>
                     )}
-                    <div className="flex justify-between items-center text-[12px] md:text-[13px] font-medium text-neutral-base-600 uppercase tracking-widest">
+                    <div className="flex justify-between items-center text-[11px] md:text-[13px] font-bold text-neutral-base-600 uppercase tracking-widest leading-none">
                         <span>Biaya Packing</span>
-                        <span className="text-neutral-base-900 tabular-nums font-medium text-[14px] md:text-[15px]">{formatPrice(packingFee)}</span>
+                        <span className="text-neutral-base-900 tabular-nums font-bold text-[13px] md:text-[15px] leading-none">{formatPrice(packingFee)}</span>
                     </div>
 
-                    <div className="h-px bg-neutral-base-50 my-1 md:my-2" />
+                    <div className="h-px bg-neutral-base-50 my-0.5 md:my-2" />
 
                     {/* Voucher Section */}
                     {isVoucherApplied ? (
@@ -153,12 +151,11 @@ export default function OrderSummary({
 
                     <div className="h-px bg-neutral-base-50 my-1 md:my-2" />
 
-                    <div className="flex justify-between items-center py-2 md:py-2">
+                    <div className="flex justify-between items-center py-2">
                         <div className="flex flex-col gap-0.5">
-                            <span className="text-[13px] md:text-[14px] font-medium uppercase tracking-wider text-neutral-base-400 leading-none">Total Tagihan</span>
-                            <span className="text-[11px] md:text-[12px] font-bold text-neutral-base-900 uppercase tracking-wider">Grand Total</span>
+                            <span className="text-[12px] md:text-[14px] font-bold uppercase tracking-widest text-neutral-base-400 leading-none">Total Tagihan</span>
                         </div>
-                        <span className="text-[24px] md:text-[28px] font-bold text-neutral-base-900 tracking-tighter tabular-nums">
+                        <span className="text-[22px] md:text-[28px] font-bold text-neutral-base-900 tracking-tighter tabular-nums leading-none">
                             {formatPrice(totalAmount + shippingPrice + packingFee - voucherDiscount)}
                         </span>
                     </div>
@@ -184,7 +181,7 @@ export default function OrderSummary({
                 <button
                     disabled={isSubmitting || cartItemsCount === 0 || hasStockProblems}
                     onClick={submitOrder}
-                    className={`w-full h-14 md:h-16 rounded-[24px] md:rounded-3xl text-[14px] md:text-[16px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 md:gap-4 transition-all shadow-2xl group mb-6 md:mb-8 overflow-hidden relative bg-neutral-base-900 text-white hover:bg-neutral-base-800 shadow-neutral-base-900/10 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className={`hidden md:flex w-full h-14 md:h-16 rounded-[24px] md:rounded-3xl text-[14px] font-bold uppercase tracking-[0.2em] items-center justify-center gap-3 md:gap-4 transition-all shadow-2xl group mb-6 md:mb-8 overflow-hidden relative bg-neutral-base-900 text-white hover:bg-neutral-base-800 shadow-neutral-base-900/10 disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                     {isSubmitting ? (
                         <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />

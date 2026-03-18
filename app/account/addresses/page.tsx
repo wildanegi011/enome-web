@@ -168,7 +168,7 @@ export default function AddressesPage() {
             />
 
             {/* Floating Action Button for Add Address */}
-            <motion.button
+            {/* <motion.button
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 whileHover={{ scale: 1.05 }}
@@ -178,7 +178,7 @@ export default function AddressesPage() {
             >
                 <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
                 <span className="sr-only">Tambah Alamat</span>
-            </motion.button>
+            </motion.button> */}
         </div>
     );
 }

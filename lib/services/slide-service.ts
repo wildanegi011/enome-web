@@ -40,7 +40,7 @@ export class SlideService {
     }
 
     static async getFrontendLogo() {
-        const slides = await db.select()
+        let slides = await db.select()
             .from(slide)
             .where(and(
                 eq(slide.kategori, "logo_frontend"),

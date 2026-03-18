@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, Check, ShoppingBag, MapPin, Truck, CreditCard, MessageSquare, Zap } from "lucide-react";
+import { Loader2, Check, ShoppingBag, MapPin, Truck, CreditCard, MessageSquare, Zap, ChevronRight } from "lucide-react";
 import clsx from "clsx";
 import Navbar from "@/components/store/layout/Navbar";
 import Breadcrumb from "@/components/store/shared/Breadcrumb";
@@ -248,6 +248,44 @@ function CheckoutContent() {
                     </div>
                 </AnimatePresence>
             </main>
+            
+            {/* Mobile Sticky Footer */}
+            <AnimatePresence>
+                {cartItems.length > 0 && (
+                    <motion.div
+                        initial={{ y: 100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 100, opacity: 0 }}
+                        className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-base-100 p-4 md:hidden z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur-md"
+                    >
+                        <div className="flex items-center justify-between gap-4 max-w-lg mx-auto">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-neutral-base-400 uppercase tracking-widest leading-none mb-1">Total Tagihan</span>
+                                <span className="text-[20px] font-bold text-neutral-base-900 tracking-tight tabular-nums">
+                                    {formatCurrency(grandTotal)}
+                                </span>
+                            </div>
+                            <button
+                                disabled={isSubmitting || cartItems.length === 0 || cartItems.some(item =>
+                                    item.isOnline === 0 ||
+                                    (item.stock !== undefined && (item.stock <= 0 || Number(item.qty) > item.stock))
+                                )}
+                                onClick={submitOrder}
+                                className="h-12 px-6 bg-neutral-base-900 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-neutral-base-900/10 active:scale-95 transition-all disabled:opacity-50"
+                            >
+                                {isSubmitting ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <>
+                                        Bayar
+                                        <ChevronRight className="w-4 h-4" />
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

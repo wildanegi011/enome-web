@@ -66,7 +66,7 @@ export default function TrackingManifest({ awb, courier, phone, showTitle = fals
                         <Package className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1">
-                        <h2 className="text-[15px] md:text-[16px] font-bold text-neutral-base-900 uppercase tracking-tight">Riwayat Pengiriman</h2>
+                        <h2 className="text-[16px] md:text-[18px] font-bold text-neutral-base-900 tracking-tight font-montserrat">Riwayat Pengiriman</h2>
                     </div>
                 </div>
             )}
@@ -102,30 +102,30 @@ export default function TrackingManifest({ awb, courier, phone, showTitle = fals
 
                                     {/* Content */}
                                     <div className={cn(
-                                        "space-y-1.5 transition-all p-4 rounded-2xl border",
-                                        isLatest ? "bg-neutral-base-900/5 border-neutral-base-900/10" : "border-transparent"
+                                        "space-y-2 transition-all p-5 rounded-2xl border",
+                                        isLatest ? "bg-neutral-base-900/5 border-neutral-base-900/10 shadow-sm" : "border-transparent"
                                     )}>
                                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                                             <p className={cn(
-                                                "text-[13px] font-bold leading-tight",
+                                                "text-[13px] md:text-[14px] font-bold leading-relaxed font-montserrat tracking-tight",
                                                 isLatest ? "text-neutral-base-900" : "text-neutral-base-600"
                                             )}>
                                                 {step.manifest_description}
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <span className="text-[12px] font-black uppercase tracking-widest text-neutral-base-400">
+                                            <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.12em] text-neutral-base-400 font-montserrat">
                                                 {step.manifest_date}
                                             </span>
-                                            <span className="w-1 h-1 rounded-full bg-neutral-base-100" />
-                                            <span className="text-[12px] font-black uppercase tracking-widest text-neutral-base-400">
+                                            <span className="w-1 h-1 rounded-full bg-neutral-base-200" />
+                                            <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.12em] text-neutral-base-400 font-montserrat">
                                                 {step.manifest_time}
                                             </span>
                                         </div>
                                         {step.city_name && (
-                                            <div className="flex items-center gap-1.5 pt-0.5">
-                                                <MapPin className="w-3 h-3 text-neutral-base-300" />
-                                                <span className="text-[12px] font-medium text-neutral-base-400">{step.city_name}</span>
+                                            <div className="flex items-center gap-1.5 pt-1">
+                                                <MapPin className="w-3.5 h-3.5 text-neutral-base-300" />
+                                                <span className="text-[12px] md:text-[13px] font-bold text-neutral-base-400 font-montserrat">{step.city_name}</span>
                                             </div>
                                         )}
                                     </div>

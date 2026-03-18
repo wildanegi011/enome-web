@@ -140,11 +140,11 @@ export default function FilterSidebar({
                 className="flex items-center justify-between w-full py-2 group"
             >
                 <div className="flex items-center gap-2">
-                    <h3 className="text-[12px] font-semibold tracking-[0.08em] uppercase text-neutral-base-900 transition-colors group-hover:text-neutral-base-700 font-montserrat">
+                    <h3 className="text-[11px] sm:text-[12px] font-semibold tracking-[0.08em] uppercase text-neutral-base-900 transition-colors group-hover:text-neutral-base-700 font-montserrat">
                         {title}
                     </h3>
                     {count > 0 && (
-                        <span className="flex items-center justify-center min-w-[16px] h-[16px] px-1 rounded-full bg-neutral-base-900 text-white text-[9px] font-bold">
+                        <span className="flex items-center justify-center min-w-[14px] sm:min-w-[16px] h-[14px] sm:h-[16px] px-1 rounded-full bg-neutral-base-900 text-white text-[8px] sm:text-[9px] font-bold">
                             {count}
                         </span>
                     )}
@@ -167,10 +167,10 @@ export default function FilterSidebar({
         return (
             <button
                 onClick={() => toggleExpanded(section)}
-                className="flex items-center gap-2 text-[13px] font-medium text-neutral-500 hover:text-neutral-base-900 transition-colors font-montserrat tracking-tight mt-3 pl-3"
+                className="flex items-center gap-2 text-[12px] sm:text-[13px] font-medium text-neutral-500 hover:text-neutral-base-900 transition-colors font-montserrat tracking-tight mt-2 sm:mt-3 pl-2 sm:pl-3"
             >
                 {isExpanded ? "Sembunyikan" : `Lihat Semua (${remaining} lainnya)`}
-                <ChevronRight className={cn("w-3 h-3 transition-transform duration-200", isExpanded && "rotate-90")} />
+                <ChevronRight className={cn("w-2.5 h-2.5 sm:w-3 sm:h-3 transition-transform duration-200", isExpanded && "rotate-90")} />
             </button>
         );
     };
@@ -196,15 +196,15 @@ export default function FilterSidebar({
     return (
         <aside className={cn("w-full shrink-0 font-montserrat", className)}>
             {/* Header Sidebar */}
-            <div className="flex items-center justify-between mb-8 pr-6">
-                <h2 className="text-[24px] font-bold text-neutral-base-900 font-montserrat tracking-tight">Filter</h2>
+            <div className="flex items-center justify-between mb-6 sm:mb-8 pr-6">
+                <h2 className="text-[20px] sm:text-[24px] font-bold text-neutral-base-900 font-montserrat tracking-tight">Filter</h2>
                 {hasActiveFilters && (
                     <button
                         onClick={clearAllFilters}
-                        className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-neutral-base-400 hover:text-neutral-base-900 transition-all group"
+                        className="flex items-center gap-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-neutral-base-400 hover:text-neutral-base-900 transition-all group"
                     >
-                        <div className="w-5 h-5 rounded-full bg-neutral-base-50 flex items-center justify-center group-hover:bg-neutral-base-100 transition-colors">
-                            <X className="w-3 h-3" />
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-neutral-base-50 flex items-center justify-center group-hover:bg-neutral-base-100 transition-colors">
+                            <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         </div>
                         Hapus Filter
                     </button>
@@ -212,7 +212,7 @@ export default function FilterSidebar({
             </div>
 
             <ScrollArea className="h-[calc(100vh-220px)]">
-                <div className="space-y-8 pb-12 pr-4">
+                <div className="space-y-6 sm:space-y-8 pb-12 pr-4">
 
                     {/* --- Kategori (Collection) --- */}
                     {allCategories.length > 0 && (
@@ -231,7 +231,7 @@ export default function FilterSidebar({
                                                         key={cat}
                                                         onClick={() => onFilterChange("collection", cat)}
                                                         className={cn(
-                                                            "flex items-center gap-3 w-full px-3 py-2 rounded-lg transition-all duration-200 text-[14px] font-medium leading-5 group font-montserrat tracking-tight active:scale-[0.98]",
+                                                            "flex items-center gap-3 w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg transition-all duration-200 text-[13px] sm:text-[14px] font-medium leading-5 group font-montserrat tracking-tight active:scale-[0.98]",
                                                             isActive
                                                                 ? "bg-neutral-base-100 text-neutral-base-900 scale-[1.02]"
                                                                 : "text-neutral-base-600 hover:bg-neutral-base-100 hover:text-neutral-base-900"
@@ -274,7 +274,7 @@ export default function FilterSidebar({
                                                     key={range}
                                                     onClick={() => onFilterChange("price", range)}
                                                     className={cn(
-                                                        "flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-left text-[14px] font-normal transition-all duration-200 group font-montserrat tracking-tight active:scale-[0.98]",
+                                                        "flex items-center gap-2 w-full px-2 py-2 sm:px-3 sm:py-2.5 rounded-lg text-left text-[13px] sm:text-[14px] font-normal transition-all duration-200 group font-montserrat tracking-tight active:scale-[0.98]",
                                                         isActive
                                                             ? "bg-neutral-base-100 text-neutral-base-900 scale-[1.01]"
                                                             : "text-neutral-base-600 hover:bg-neutral-base-50 hover:text-neutral-base-900"
@@ -357,7 +357,7 @@ export default function FilterSidebar({
                                                     key={s}
                                                     onClick={() => onFilterChange("size", s)}
                                                     className={cn(
-                                                        "h-9 rounded-lg border text-[14px] font-normal transition-all duration-200 font-montserrat active:scale-[0.95]",
+                                                        "h-8 sm:h-9 rounded-lg border text-[13px] sm:text-[14px] font-normal transition-all duration-200 font-montserrat active:scale-[0.95]",
                                                         isActive
                                                             ? "bg-neutral-base-100 border-neutral-base-200 text-neutral-base-900 scale-[1.05]"
                                                             : "bg-white border-neutral-base-200 text-neutral-base-600 hover:border-neutral-base-900 hover:text-neutral-base-900 hover:shadow-sm"

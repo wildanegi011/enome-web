@@ -2,8 +2,8 @@
 
 import Image, { ImageProps } from "next/image";
 import { useState, useEffect } from "react";
-import { ImageOff } from "lucide-react";
-import { motion } from "framer-motion";
+import { ImageOff, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 
 interface FallbackImageProps extends ImageProps {
@@ -18,12 +18,15 @@ export default function FallbackImage({
     ...props
 }: FallbackImageProps) {
     const [error, setError] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         setError(false);
+        setIsLoading(true);
     }, [src]);
 
     if (error || !src) {
+        // ... (existing error state logic remains the same)
         const style: React.CSSProperties = {};
         if (!fill) {
             if (props.width && props.height && typeof props.width === 'number' && typeof props.height === 'number') {
@@ -56,23 +59,57 @@ export default function FallbackImage({
     }
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className={`w-full h-full ${fill ? "absolute inset-0" : ""}`}
-        >
-            <Image
-                {...props}
-                src={src}
-                alt={alt}
-                fill={fill}
-                className={className}
-                onError={() => {
-                    setError(true);
-                }}
-            />
-        </motion.div>
-    );
+        <div className={`relative w-full h-full overflow-hidden ${fill ? "absolute inset-0" : ""}`}>
+            {/* Shimmer / Skeleton Loader */}
+            <AnimatePresence>
+                {isLoading && (
+                    <motion.div
+                        initial={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                        className="absolute inset-0 z-10 bg-neutral-base-50 overflow-hidden"
+                    >
+                        <motion.div
+                            animate={{
+                                x: ["-100%", "100%"],
+                            }}
+                            transition={{
+                                repeat: Infinity,
+                                duration: 1.5,
+                                ease: "linear",
+                            }}
+                            className="absolute inset-0 bg-linear-to-r from-transparent via-white/40 to-transparent w-full h-full"
+                        />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                             <Loader2 className="w-6 h-6 text-neutral-base-300 animate-spin" strokeWidth={1.5} />
+                             <span className="text-[10px] font-black tracking-[0.4em] uppercase text-neutral-base-900 opacity-20 font-montserrat">Loading</span>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
+            <motion.div
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ 
+                    opacity: isLoading ? 0 : 1,
+                    scale: isLoading ? 1.05 : 1
+                }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="w-full h-full"
+            >
+                <Image
+                    {...props}
+                    src={src}
+                    alt={alt}
+                    fill={fill}
+                    className={className}
+                    onLoad={() => setIsLoading(false)}
+                    onError={() => {
+                        setError(true);
+                        setIsLoading(false);
+                    }}
+                />
+            </motion.div>
+        </div>
+    );
 }
