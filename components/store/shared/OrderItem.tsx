@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { Minus, Plus, Trash2, Zap, MessageSquare, ChevronRight } from "lucide-react";
 import { ASSET_URL } from "@/config/config";
+import Link from "next/link";
 import { cn, formatCurrency } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -105,11 +106,14 @@ export default function OrderItem({
                 )}
 
                 {/* 2. Product Image */}
-                <div className={cn(
-                    "bg-neutral-base-50 overflow-hidden relative shrink-0 border border-neutral-base-100 shadow-md rounded-2xl transition-all",
-                    isCheckout ? "w-16 h-18 md:w-24 md:h-32" : "w-24 h-24 md:w-32 md:h-32",
-                    isOffline && "opacity-40 grayscale-[0.5]"
-                )}>
+                <Link
+                    href={`/products/${item.produkId}`}
+                    className={cn(
+                        "bg-neutral-base-50 overflow-hidden relative shrink-0 border border-neutral-base-100 shadow-md rounded-2xl transition-all",
+                        isCheckout ? "w-16 h-18 md:w-24 md:h-32" : "w-24 h-24 md:w-32 md:h-32",
+                        isOffline ? "opacity-40 grayscale-[0.5] pointer-events-none" : "hover:border-amber-800/20"
+                    )}
+                >
                     <FallbackImage
                         src={item.gambar ? `${ASSET_URL}/img/${item.gambar}` : "/placeholder-product.jpg"}
                         alt={item.namaProduk}
@@ -117,7 +121,7 @@ export default function OrderItem({
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                         sizes="(max-width: 768px) 96px, 150px"
                     />
-                </div>
+                </Link>
 
                 {/* 3. Info Section */}
                 <div className={cn(
@@ -129,13 +133,21 @@ export default function OrderItem({
                         {/* TOP ROW: Title & Trash */}
                         <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0 flex-1">
-                                <h3 className={cn(
-                                    "font-bold text-neutral-base-900 tracking-tight leading-[1.2] wrap-break-word font-montserrat",
-                                    isCheckout ? "text-[15px]" : "text-[18px] line-clamp-2",
-                                    isOffline && "line-through text-neutral-base-400 font-medium"
-                                )}>
-                                    {item.namaProduk}
-                                </h3>
+                                <Link
+                                    href={`/products/${item.produkId}`}
+                                    className={cn(
+                                        "block group/title",
+                                        isOffline && "pointer-events-none"
+                                    )}
+                                >
+                                    <h3 className={cn(
+                                        "font-bold text-neutral-base-900 tracking-tight leading-[1.2] wrap-break-word font-montserrat transition-colors duration-200",
+                                        isCheckout ? "text-[15px]" : "text-[18px] line-clamp-2",
+                                        isOffline ? "line-through text-neutral-base-400 font-medium" : "group-hover/title:text-amber-900"
+                                    )}>
+                                        {item.namaProduk}
+                                    </h3>
+                                </Link>
 
                                 {/* Flash Sale Badge */}
                                 {item.isFlashsale === 1 && (
@@ -246,12 +258,20 @@ export default function OrderItem({
                         {/* Top Row: Info & Trash */}
                         <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0 flex-1">
-                                <h3 className={cn(
-                                    "font-bold text-neutral-base-900 tracking-tight leading-[1.3] line-clamp-2 text-[15px] font-montserrat",
-                                    isOffline && "line-through text-neutral-base-400 font-medium"
-                                )}>
-                                    {item.namaProduk}
-                                </h3>
+                                <Link
+                                    href={`/products/${item.produkId}`}
+                                    className={cn(
+                                        "block group/title",
+                                        isOffline && "pointer-events-none"
+                                    )}
+                                >
+                                    <h3 className={cn(
+                                        "font-bold text-neutral-base-900 tracking-tight leading-[1.3] line-clamp-2 text-[15px] font-montserrat transition-colors duration-200",
+                                        isOffline ? "line-through text-neutral-base-400 font-medium" : "group-hover/title:text-amber-900"
+                                    )}>
+                                        {item.namaProduk}
+                                    </h3>
+                                </Link>
 
                                 {/* Attributes List (Mobile Collapsible - Shopee Style) */}
                                 <div className="mt-2 text-neutral-base-900">
@@ -311,7 +331,7 @@ export default function OrderItem({
                                 {/* Mobile Price: Below Attributes */}
                                 <div className="mt-3">
                                     <span className={cn(
-                                        "font-bold text-neutral-base-900 font-montserrat tracking-tight tabular-nums leading-none text-[18px]",
+                                        "font-bold text-neutral-base-900 font-montserrat tracking-tight tabular-nums leading-none text-[15px]",
                                         isOffline && "text-neutral-base-300 line-through font-medium"
                                     )}>
                                         {formatCurrency(Number(item.harga || 0) * Number(item.qty || 0))}

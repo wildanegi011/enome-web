@@ -162,7 +162,7 @@ export default function CartPage() {
                         <div className="max-w-2xl mx-auto">
                             <EmptyState
                                 icon={ShoppingCart}
-                                title="Mulai Cerita Baru"
+                                title="Tambah Produk Baru"
                                 description="Temukan koleksi terbaik kami dan mulailah mengisi keranjang Anda dengan gaya yang mendefinisikan jati diri."
                                 actionLabel="Jelajahi Produk"
                                 actionHref="/products"

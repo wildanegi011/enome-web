@@ -92,15 +92,16 @@ export function usePaymentVerification(
             setIsTimeout(true);
             setIsVerifying(true); // Keep UI in "verifying" style but show timeout message
 
-            // Per user request: clear storage when countdown is finished
+            // Persist timeout state so it remains after refresh
+            localStorage.setItem(timeoutKey, "true");
             localStorage.removeItem(storageKey);
-            localStorage.removeItem(timeoutKey);
             broadcastSync("timeout");
         }
     }, [checkStatus, storageKey, timeoutKey, broadcastSync]);
 
     const startVerification = useCallback(() => {
         localStorage.setItem(storageKey, Date.now().toString());
+        localStorage.removeItem(timeoutKey); // Clear previous timeout if any
         setTimeLeft(CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS * 60);
         setIsVerifying(true);
         setIsTimeout(false);
@@ -109,7 +110,7 @@ export function usePaymentVerification(
         toast.info("Memulai verifikasi otomatis. Mohon tunggu...");
         // Initial check immediately
         checkStatus();
-    }, [storageKey, checkStatus, broadcastSync]);
+    }, [storageKey, timeoutKey, checkStatus, broadcastSync]);
 
     // Listen for storage events (cross-tab sync)
     useEffect(() => {

@@ -7,7 +7,8 @@ import FallbackImage from "@/components/store/shared/FallbackImage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CartItem as CartItemType } from "@/lib/api/cart-api";
 import { ASSET_URL } from "@/config/config";
-import { formatCurrency } from "@/lib/utils";
+import Link from "next/link";
+import { formatCurrency, cn } from "@/lib/utils";
 
 interface CartItemProps {
     item: CartItemType;
@@ -64,7 +65,10 @@ export default function CartItem({
                 </button>
 
                 {/* Image */}
-                <div className={`w-20 h-20 xs:w-24 xs:h-24 md:w-32 md:h-32 bg-neutral-base-50 rounded-xl md:rounded-3xl overflow-hidden relative shrink-0 border border-neutral-base-100 shadow-sm group-hover:shadow-md transition-all ${isOffline ? "opacity-40 grayscale-[0.5]" : ""}`}>
+                <Link
+                    href={`/products/${item.produkId}`}
+                    className={`w-20 h-20 xs:w-24 xs:h-24 md:w-32 md:h-32 bg-neutral-base-50 rounded-xl md:rounded-3xl overflow-hidden relative shrink-0 border border-neutral-base-100 shadow-sm group-hover:shadow-md transition-all ${isOffline ? "opacity-40 grayscale-[0.5] pointer-events-none" : "hover:border-amber-800/20"}`}
+                >
                     <FallbackImage
                         src={item.gambar ? `${ASSET_URL}/img/${item.gambar}` : "/placeholder-product.jpg"}
                         alt={item.namaProduk}
@@ -72,9 +76,7 @@ export default function CartItem({
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                         sizes="(max-width: 768px) 80px, 150px"
                     />
-
-
-                </div>
+                </Link>
 
                 {/* Info */}
                 <div className={`flex-1 min-w-0 flex flex-col pt-0.5 ${isOffline ? "opacity-60" : ""}`}>
@@ -90,9 +92,17 @@ export default function CartItem({
                     {/* Top row: name */}
                     <div className="flex items-start justify-between gap-2 md:gap-4 mb-1.5">
                         <div className="flex flex-col gap-1 md:gap-1.5 min-w-0">
-                            <h3 className="text-[14px] md:text-[18px] font-bold text-neutral-base-900 tracking-tight leading-snug wrap-break-word line-clamp-2 pr-6 md:pr-8">
-                                {item.namaProduk}
-                            </h3>
+                            <Link
+                                href={`/products/${item.produkId}`}
+                                className={cn(
+                                    "block group/title",
+                                    isOffline && "pointer-events-none"
+                                )}
+                            >
+                                <h3 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900 tracking-tight leading-snug wrap-break-word line-clamp-2 pr-6 md:pr-8 group-hover/title:text-amber-900 transition-colors">
+                                    {item.namaProduk}
+                                </h3>
+                            </Link>
 
                             <div className="flex items-center gap-1.5 md:gap-2 flex-wrap mt-0.5">
                                 {item.isFlashsale === 1 && (
