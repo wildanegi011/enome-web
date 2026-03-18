@@ -95,8 +95,8 @@ export default function OrderCard({ order }: OrderCardProps) {
                         />
                     </div>
                     <div className="flex-1 min-w-0 pr-4">
-                        <h4 className="text-[16px] font-bold text-neutral-base-900 line-clamp-1">{order.firstItemName}</h4>
-                        <p className="text-[14px] text-neutral-base-400 font-medium mt-1">
+                        <h4 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900 line-clamp-1">{order.firstItemName}</h4>
+                        <p className="text-[12px] md:text-[14px] text-neutral-base-400 font-medium mt-1">
                             {order.firstItemSize && `Ukuran: ${order.firstItemSize} • `}
                             {order.itemCount && order.itemCount > 1 ? `${order.totalOrder} barang` : "1 barang"}
                         </p>

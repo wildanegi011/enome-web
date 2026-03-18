@@ -132,16 +132,13 @@ export const GET = withAuth(async (
                 eq(orderdetail.warna, warna.warnaId),
                 eq(orderdetail.warna, warna.warna)
             ))
-            .leftJoin(produkDetail, and(
-                eq(orderdetail.produkId, produkDetail.produkId),
-                eq(orderdetail.ukuran, produkDetail.size),
-                or(
-                    eq(orderdetail.warna, produkDetail.warnaId),
-                    eq(warna.warnaId, produkDetail.warnaId)
-                )
-            ))
             .where(eq(orderdetail.orderId, orderId))
-            .groupBy(orderdetail.id);
+            .groupBy(
+                orderdetail.id,
+                produk.namaProduk,
+                produk.gambar,
+                warna.warna
+            );
 
         // 3. Fetch Payment Details if applicable (e.g., Bank Transfer info)
         let paymentInfo = null;

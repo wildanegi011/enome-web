@@ -59,7 +59,7 @@ export default function AccordionItem({
                     {Icon && (
                         <Icon className="w-4 h-4 text-neutral-base-400 group-hover:text-neutral-base-900 transition-colors" />
                     )}
-                    <span className="text-[12px] md:text-[13px] font-bold uppercase tracking-widest text-neutral-base-900 group-hover:text-amber-800 transition-colors">
+                    <span className="text-[11px] md:text-[13px] font-bold uppercase tracking-widest text-neutral-base-900 group-hover:text-amber-800 transition-colors">
                         {title}
                     </span>
                 </div>

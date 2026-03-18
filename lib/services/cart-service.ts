@@ -85,7 +85,14 @@ export class CartService {
             ))
             .leftJoin(flashSale, eq(keranjang.flashsaleId, sql`CAST(${flashSale.id} AS CHAR)`))
             .where(and(...conditions))
-            .groupBy(keranjang.id)
+            .groupBy(
+                keranjang.id,
+                produk.namaProduk,
+                warna.warna,
+                produk.gambar,
+                flashSale.isAktif,
+                flashSale.waktuSelesai
+            )
             .orderBy(sql`${keranjang.createdAt} DESC`);
 
         // 2. Process items: check for expired flash sales and revert price if needed

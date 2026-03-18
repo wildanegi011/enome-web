@@ -28,25 +28,25 @@ export default function OrderTimeline({ statusOrder }: OrderTimelineProps) {
                     return (
                         <div
                             key={step.label}
-                            className="flex flex-col items-center relative z-10 min-w-[80px] md:flex-1"
+                            className="flex flex-col items-center relative z-10 min-w-[70px] md:flex-1"
                         >
                             <div
                                 className={cn(
-                                    "w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all duration-500",
+                                    "w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all duration-500",
                                     isCompleted
                                         ? "bg-neutral-base-900 text-white shadow-xl shadow-neutral-base-900/20"
                                         : "bg-neutral-base-50 text-neutral-base-200"
                                 )}
                             >
                                 {isCompleted ? (
-                                    <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6" />
+                                    <CheckCircle2 className="w-4 h-4 md:w-6 md:h-6" />
                                 ) : (
-                                    <Package className="w-5 h-5 md:w-6 md:h-6" />
+                                    <Package className="w-4 h-4 md:w-6 md:h-6" />
                                 )}
                             </div>
                             <span
                                 className={cn(
-                                    "text-[12px] font-bold mt-3 md:mt-4 tracking-tight text-center uppercase",
+                                    "text-[10px] md:text-[11px] font-black mt-2.5 md:mt-4 tracking-[0.12em] text-center uppercase font-montserrat",
                                     isCompleted ? "text-neutral-base-900" : "text-neutral-base-300"
                                 )}
                             >

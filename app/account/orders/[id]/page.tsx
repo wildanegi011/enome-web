@@ -135,8 +135,8 @@ export default function OrderDetailPage() {
         <div className="min-h-screen bg-[#F9FAFB] font-montserrat text-neutral-base-900">
             <Navbar />
 
-            <main className="max-w-[1340px] mx-auto px-3 sm:px-4 md:px-8 py-6 md:py-10">
-                <div className="flex flex-col lg:flex-row gap-12">
+            <main className="max-w-[1340px] mx-auto px-4 md:px-8 py-6 md:py-10">
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
                     <div className="hidden lg:block">
                         <UserSidebar />
                     </div>
@@ -148,7 +148,10 @@ export default function OrderDetailPage() {
                             statusTagihan={order.statusTagihan}
                         />
 
-                        <OrderTimeline statusOrder={order.statusOrder} />
+                        {order.statusTagihan !== "KADALUARSA" && (
+                            <OrderTimeline statusOrder={order.statusOrder} />
+                        )}
+
 
                         {order.statusOrder === "CLOSE" && order.statusTagihan !== "KADALUARSA" && CONFIG.TRACKABLE_COURIERS.includes(order.ekspedisi?.toLowerCase()) && (
                             <div className="bg-white border border-neutral-base-100 rounded-[28px] md:rounded-[32px] p-6 md:p-10 mb-8 shadow-sm overflow-hidden">
@@ -170,14 +173,14 @@ export default function OrderDetailPage() {
                             expiredTime={expiredTime}
                         />
 
-                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
-                            <div className="xl:col-span-7 space-y-10">
+                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-10">
+                            <div className="xl:col-span-7 space-y-8 md:space-y-10">
                                 <OrderItemsCard
                                     items={items}
                                     orderNotes={order.keterangan}
                                 />
 
-                                <div className="space-y-10">
+                                <div className="space-y-8 md:space-y-10">
                                     <ShippingInfoCard
                                         ekspedisi={order.ekspedisi}
                                         service={order.service}
@@ -193,7 +196,7 @@ export default function OrderDetailPage() {
                                 </div>
                             </div>
 
-                            <div className="xl:col-span-5 space-y-10">
+                            <div className="xl:col-span-5 space-y-8 md:space-y-10">
                                 <OrderSummaryCard
                                     orderId={order.orderId}
                                     totalHarga={order.totalHarga}

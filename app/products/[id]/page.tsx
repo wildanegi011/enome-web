@@ -132,7 +132,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
 
                 {/* Sticky Breadcrumbs Section */}
                 <div className="sticky top-[70px] md:top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-neutral-base-100">
-                    <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-4 overflow-x-auto scrollbar-hide">
+                    <div className="w-full max-w-[1400px] mx-auto px-6 md:px-8 lg:px-12 py-3 md:py-3.5 overflow-x-auto scrollbar-hide">
                         <Breadcrumb
                             items={[
                                 { label: "Beranda", href: "/" },
@@ -143,9 +143,9 @@ function ProductDetailContent({ productData }: { productData: any }) {
                     </div>
                 </div>
 
-                <section className="py-8 md:py-16">
-                    <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-16 lg:gap-24 items-start">
+                <section className="py-6 md:py-12 lg:py-16">
+                    <div className="w-full max-w-[1400px] mx-auto px-6 md:px-8 lg:px-12">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-12 lg:gap-16 items-start">
 
                             {/* Left Side - Image Gallery (Top Image) */}
                             <div className="lg:col-span-6 min-w-0">
@@ -173,7 +173,7 @@ function ProductDetailContent({ productData }: { productData: any }) {
                         </div>
 
                         {/* Remaining Images Section - Dynamic Masonry Grid (from produk_image table) */}
-                        <div className="mt-12 md:mt-24">
+                        <div className="mt-8 md:mt-16 lg:mt-20">
                             <motion.div
                                 layout
                                 initial="hidden"
@@ -239,11 +239,11 @@ function ProductDetailContent({ productData }: { productData: any }) {
 
                 {/* Related Products Section */}
                 {relatedProducts.length > 0 && (
-                    <section className="py-10 md:py-20 border-t border-neutral-base-100">
-                        <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
-                            <div className="mb-6 md:mb-12 font-montserrat">
-                                <h2 className="text-[22px] md:text-[32px] text-neutral-base-900 font-bold tracking-tight">Rekomendasi Untuk Anda</h2>
-                                <p className="text-neutral-base-500 mt-1 md:mt-2 text-[13px] md:text-base leading-relaxed">Koleksi lainnya dari kategori {product.kategori}.</p>
+                    <section className="py-8 md:py-20 border-t border-neutral-base-100">
+                        <div className="w-full max-w-[1400px] mx-auto px-6 md:px-8 lg:px-12">
+                            <div className="mb-6 md:mb-12 font-montserrat text-center md:text-left">
+                                <h2 className="text-[20px] md:text-[32px] text-neutral-base-900 font-bold tracking-tight">Rekomendasi Untuk Anda</h2>
+                                <p className="text-neutral-base-500 mt-1 md:mt-2 text-[12px] md:text-base leading-relaxed">Koleksi lainnya dari kategori {product.kategori}.</p>
                             </div>
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
                                 {relatedProducts.map((p: any, idx: number) => {
@@ -346,22 +346,22 @@ function ProductDetailContent({ productData }: { productData: any }) {
                             initial={{ y: 100, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: 100, opacity: 0 }}
-                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                            className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-4 pb-6 pt-4 bg-linear-to-t from-white via-white to-transparent"
+                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-4 pb-8 pt-4 bg-linear-to-t from-white via-white/90 to-transparent backdrop-blur-xs"
                         >
-                            <div className="bg-neutral-base-900 text-white rounded-2xl shadow-2xl p-4 flex items-center justify-between">
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] text-white/60 font-medium uppercase tracking-wider">Harga Sekarang</span>
-                                    <span className="text-[16px] font-bold">{infoProduct.price}</span>
+                            <div className="bg-neutral-base-900 text-white rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.15)] p-4 flex items-center justify-between border border-white/10">
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-[9px] text-white/50 font-bold uppercase tracking-widest">Harga Terbaik</span>
+                                    <span className="text-[18px] font-bold tracking-tight">{infoProduct.price}</span>
                                 </div>
                                 <button
                                     onClick={() => {
                                         const el = document.getElementById("add-to-cart-button");
                                         el?.click();
                                     }}
-                                    className="bg-white text-neutral-base-900 px-6 py-3 rounded-xl text-[12px] font-bold uppercase tracking-wider flex items-center gap-2 shadow-inner active:scale-95 transition-transform"
+                                    className="bg-white text-neutral-base-900 px-6 py-3.5 rounded-xl text-[12px] font-black uppercase tracking-widest flex items-center gap-2.5 shadow-xl active:scale-95 transition-all hover:bg-neutral-base-50"
                                 >
-                                    <ShoppingBag className="w-3.5 h-3.5" />
+                                    <ShoppingBag className="w-4 h-4" />
                                     Beli Sekarang
                                 </button>
                             </div>

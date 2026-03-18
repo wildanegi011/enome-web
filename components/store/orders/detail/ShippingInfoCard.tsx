@@ -42,85 +42,82 @@ export default function ShippingInfoCard({
     const showTrackingButton = isTrackable && statusOrder === "KIRIM";
 
     return (
-        <div className="bg-white border border-neutral-base-100 rounded-[32px] md:rounded-[40px] p-5 md:p-6 shadow-sm overflow-hidden">
-            <div className="flex items-center gap-4 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10">
-                    <Truck className="w-5 h-5 text-white" />
+        <div className="bg-white border border-neutral-base-100 rounded-[32px] md:rounded-[40px] p-5 md:p-10 shadow-sm overflow-hidden">
+            <div className="flex items-center gap-4 md:gap-5 mb-10">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-[14px] md:rounded-[18px] bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10 shrink-0">
+                    <Truck className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
-                <h2 className="text-[18px] font-bold text-neutral-base-900 tracking-tight">Informasi Pengiriman</h2>
+                <h2 className="text-[16px] md:text-[18px] font-bold text-neutral-base-900 tracking-tight font-montserrat">Informasi Pengiriman</h2>
             </div>
 
             <div className="space-y-5">
                 {/* 1. Penerima */}
-                <div className="flex items-start gap-5">
+                <div className="flex items-start gap-4 md:gap-5">
                     <div className="w-10 h-10 rounded-xl bg-neutral-base-50 flex items-center justify-center shrink-0">
                         <User className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div>
-                        <p className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat mb-1.5">Penerima</p>
-                        <p className="text-[14px] font-bold text-neutral-base-900 whitespace-nowrap">{namaPenerima}</p>
-                        <div className="flex items-center gap-2 mt-1.5 text-neutral-base-500">
+                        <p className="text-[11px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-1.5">Penerima</p>
+                        <p className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 font-montserrat tracking-tight">{namaPenerima}</p>
+                        <div className="flex items-center gap-2 mt-2 text-neutral-base-800">
                             <Phone className="w-3.5 h-3.5" />
-                            <span className="text-[14px] font-bold">{phone}</span>
+                            <span className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 font-montserrat tracking-tight">{phone}</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="h-px bg-neutral-base-50 ml-14" />
+                <div className="h-px bg-neutral-base-100 ml-12.5 md:ml-14" />
 
                 {/* 2. Alamat Tujuan */}
-                <div className="flex items-start gap-5">
+                <div className="flex items-start gap-4 md:gap-5">
                     <div className="w-10 h-10 rounded-xl bg-neutral-base-50 flex items-center justify-center shrink-0">
                         <MapPin className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat mb-1.5">Alamat tujuan</p>
-                        <p className="text-[14px] font-bold text-neutral-base-900 leading-relaxed max-w-[500px]">
-                            {alamatKirim}
-                        </p>
-                        <p className="text-[14px] font-bold text-neutral-base-600 mt-2 tracking-tight">
-                            {distrikKirim}, {kotaKirim}, {provinsiKirim}
+                        <p className="text-[11px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-1.5">Alamat tujuan</p>
+                        <p className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 leading-relaxed font-montserrat tracking-tight max-w-[500px]">
+                            {alamatKirim}, {distrikKirim}, {kotaKirim}, {provinsiKirim}
                         </p>
                     </div>
                 </div>
 
-                <div className="h-px bg-neutral-base-50 ml-14" />
+                <div className="h-px bg-neutral-base-100 ml-12.5 md:ml-14" />
 
                 {/* 3. Ekspedisi & Layanan */}
-                <div className="flex items-start gap-5">
+                <div className="flex items-start gap-4 md:gap-5">
                     <div className="w-10 h-10 rounded-xl bg-neutral-base-50 flex items-center justify-center shrink-0">
                         <Truck className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div>
-                        <p className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat mb-1.5">Ekspedisi & layanan</p>
-                        <p className="text-[14px] font-bold text-neutral-base-900 flex items-center gap-2">
+                        <p className="text-[10px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-1.5">Ekspedisi & layanan</p>
+                        <p className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 flex items-center gap-2 font-montserrat tracking-tight">
                             {ekspedisi}
                             <span className="w-1 h-1 rounded-full bg-neutral-base-200" />
-                            <span className="font-bold text-neutral-base-600">{service}</span>
+                            <span className="font-semibold text-neutral-base-800">{service}</span>
                         </p>
                     </div>
                 </div>
 
-                <div className="h-px bg-neutral-base-50 ml-14" />
+                <div className="h-px bg-neutral-base-100 ml-12.5 md:ml-14" />
 
                 {/* 4. Nomor Resi & Tombol Lacak */}
-                <div className="flex items-start gap-5">
+                <div className="flex items-start gap-4 md:gap-5">
                     <div className="w-10 h-10 rounded-xl bg-neutral-base-50 flex items-center justify-center shrink-0">
                         <Search className="w-5 h-5 text-neutral-base-400" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-[11px] font-black text-neutral-base-400 uppercase tracking-widest font-montserrat mb-1.5">Nomor resi</p>
+                        <p className="text-[10px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-2">Nomor resi</p>
                         <div className="flex items-center gap-3">
                             <p className={cn(
-                                "text-[16px] font-bold tracking-tight",
-                                noResi ? "text-neutral-base-900" : "text-neutral-base-300 italic"
+                                "text-[13px] md:text-[14px] font-black tracking-widest font-mono",
+                                noResi ? "text-neutral-base-800" : "text-neutral-base-300 font-montserrat font-bold tracking-tight"
                             )}>
                                 {noResi || "menunggu update"}
                             </p>
                             {noResi && (
                                 <button
                                     onClick={() => handleCopy(noResi)}
-                                    className="p-2 rounded-xl bg-white border border-neutral-base-100 shadow-sm hover:bg-neutral-base-900 hover:text-white transition-all active:scale-95"
+                                    className="p-1.5 rounded-xl bg-white border border-neutral-base-100 shadow-sm hover:bg-neutral-base-900 hover:text-white transition-all active:scale-95"
                                     title="Salin Resi"
                                 >
                                     {copiedResi ? (

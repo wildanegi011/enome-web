@@ -133,11 +133,11 @@ function ProductsContent() {
                         </div>
                     </div>
 
-                    <section className="py-12">
+                    <section className="py-8 sm:py-12">
                         <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                             {/* Mobile Filter Trigger */}
                             <div className="flex lg:hidden justify-between items-center mb-6">
-                                <h2 className="font-montserrat text-[32px] font-bold text-neutral-base-900 tracking-tight">Produk</h2>
+                                <h2 className="font-montserrat text-[20px] sm:text-[25px] font-bold text-neutral-base-900 tracking-tight">Produk</h2>
                                 <Sheet>
                                     <SheetTrigger asChild>
                                         <button className="flex items-center gap-2 border border-neutral-base-200 px-4 py-2 text-[13px] font-bold shadow-sm hover:bg-neutral-base-50 transition-colors uppercase tracking-widest font-montserrat">

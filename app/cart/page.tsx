@@ -18,6 +18,7 @@ import { useCartItems } from "@/hooks/use-cart-items";
 import CartList from "@/components/store/cart/CartList";
 import CartSummary from "@/components/store/cart/CartSummary";
 import EmptyState from "@/components/store/shared/EmptyState";
+import { cn } from "@/lib/utils";
 
 export default function CartPage() {
     const {
@@ -79,10 +80,10 @@ export default function CartPage() {
             <Navbar />
 
             {/* Sticky Header with Breadcrumb and Actions */}
-            <div className="sticky top-[70px] md:top-[80px] z-30 bg-white/90 backdrop-blur-md border-b border-neutral-base-50">
-                <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-3 md:py-6 flex items-center justify-between gap-2 md:gap-4">
+            <div className="sticky top-[70px] md:top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-neutral-base-100">
+                <div className="max-w-[1400px] mx-auto px-6 md:px-8 lg:px-12 py-3 md:py-4 flex items-center justify-between gap-4">
                     <Breadcrumb
-                        className="truncate min-w-0 flex-1"
+                        className="truncate min-w-0 flex-1 py-1"
                         items={[
                             { label: "Beranda", href: "/" },
                             { label: "Keranjang" }
@@ -90,56 +91,44 @@ export default function CartPage() {
                     />
 
                     {!isLoading && cartItems.length > 0 && (
-                        <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <button
-                                        onClick={toggleSelectAll}
-                                        className="flex items-center gap-2 bg-white px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg border border-neutral-base-100 shadow-sm hover:border-neutral-base-300 transition-all group active:scale-95"
-                                    >
-                                        {(() => {
-                                            const selectableItems = cartItems.filter(i => i.isOnline !== 0 && (i.stock || 0) > 0);
-                                            const isAllSelected = selectableItems.length > 0 && selectedIds.length === selectableItems.length;
-                                            return isAllSelected ? (
-                                                <CheckSquare className="w-3.5 h-3.5 md:w-4 md:h-4 text-neutral-base-900" />
-                                            ) : (
-                                                <Square className="w-3.5 h-3.5 md:w-4 md:h-4 text-neutral-base-300 group-hover:text-neutral-base-900" />
-                                            );
-                                        })()}
-                                        <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest text-neutral-base-900">
-                                            {(() => {
-                                                const selectableItems = cartItems.filter(i => i.isOnline !== 0 && (i.stock || 0) > 0);
-                                                return selectableItems.length > 0 && selectedIds.length === selectableItems.length ? "Batalkan Pilihan" : "Pilih Semua";
-                                            })()}
-                                        </span>
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom">
-                                    <p>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <button
+                                onClick={toggleSelectAll}
+                                className="flex items-center justify-center bg-white px-3 md:px-5 h-9 md:h-11 rounded-xl border border-neutral-base-100 shadow-sm hover:border-neutral-base-900 transition-all group active:scale-95"
+                            >
+                                {(() => {
+                                    const selectableItems = cartItems.filter(i => i.isOnline !== 0 && (i.stock || 0) > 0);
+                                    const isAllSelected = selectableItems.length > 0 && selectedIds.length === selectableItems.length;
+                                    return isAllSelected ? (
+                                        <CheckSquare className="w-3.5 h-3.5 md:w-4 md:h-4 text-neutral-base-900" />
+                                    ) : (
+                                        <Square className="w-3.5 h-3.5 md:w-4 md:h-4 text-neutral-base-300 group-hover:text-neutral-base-900" />
+                                    );
+                                })()}
+                                <span className={cn(
+                                    "ml-1.5 md:ml-2.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest transition-colors",
+                                    selectedIds.length > 0 ? "text-neutral-base-900" : "text-neutral-base-400 group-hover:text-neutral-base-900"
+                                )}>
+                                    <span className="md:hidden">Semua</span>
+                                    <span className="hidden md:inline">
                                         {(() => {
                                             const selectableItems = cartItems.filter(i => i.isOnline !== 0 && (i.stock || 0) > 0);
                                             return selectableItems.length > 0 && selectedIds.length === selectableItems.length ? "Batalkan Pilihan" : "Pilih Semua";
                                         })()}
-                                    </p>
-                                </TooltipContent>
-                            </Tooltip>
+                                    </span>
+                                </span>
+                            </button>
 
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <button
-                                        onClick={() => setIsConfirmDeleteAllOpen(true)}
-                                        className="flex items-center gap-2 bg-white px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg border border-red-100 shadow-sm hover:bg-red-50 hover:border-red-200 transition-all group active:scale-95"
-                                    >
-                                        <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
-                                        <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest text-red-600">
-                                            Hapus Semua
-                                        </span>
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom">
-                                    <p>Hapus Semua</p>
-                                </TooltipContent>
-                            </Tooltip>
+                            <button
+                                onClick={() => setIsConfirmDeleteAllOpen(true)}
+                                className="flex items-center justify-center bg-white px-3 md:px-5 h-9 md:h-11 rounded-xl border border-red-50 hover:bg-red-50 hover:border-red-100 transition-all group active:scale-95 shadow-sm"
+                            >
+                                <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
+                                <span className="ml-1.5 md:ml-2.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-red-600">
+                                    <span className="md:hidden">Hapus</span>
+                                    <span className="hidden md:inline">Hapus Semua</span>
+                                </span>
+                            </button>
                         </div>
                     )}
                 </div>
@@ -156,7 +145,7 @@ export default function CartPage() {
                 onConfirm={removeAll}
             />
 
-            <main className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16 pb-28 md:pb-16">
+            <main className="max-w-[1400px] mx-auto px-6 md:px-8 lg:px-12 py-8 md:py-16 pb-28 md:pb-16 min-h-[60vh]">
                 <AnimatePresence mode="wait">
                     {isLoading ? (
                         <motion.div
@@ -203,27 +192,28 @@ export default function CartPage() {
                                 </div>
                             </div>
 
-                            <Link
+                            {/* <Link
                                 href="/products"
                                 className="mt-6 flex items-center justify-center gap-2 text-neutral-base-400 hover:text-neutral-base-900 transition-all"
                             >
                                 <ArrowLeft className="w-3 h-3" />
                                 <span className="text-[10px] font-black uppercase tracking-widest">Lanjut Belanja</span>
-                            </Link>
+                            </Link> */}
                         </div>
                     )}
                 </AnimatePresence>
             </main>
 
             {/* Mobile Sticky Footer */}
+            {/* TODO: uncomment if needed */}
             {/* <AnimatePresence>
                 {!isLoading && cartItems.length > 0 && !isSummaryInView && (
                     <motion.div
                         initial={{ y: 100, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 100, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-neutral-base-100 p-4 pb-safe-offset-4 lg:hidden"
+                        transition={{ duration: 0.4, ease: "circOut" }}
+                        className="lg:hidden"
                     >
                         <CartSummary
                             selectedCount={selectedIds.length}

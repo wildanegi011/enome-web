@@ -198,14 +198,14 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                 <span className="inline-block px-2.5 py-0.5 bg-neutral-base-100 text-[10px] font-bold tracking-[0.15em] uppercase text-neutral-base-500 mb-2 md:mb-3 font-montserrat">
                     {product.collection}
                 </span>
-                <h1 className="font-montserrat text-[24px] md:text-[32px] lg:text-[36px] font-bold text-neutral-base-900 leading-[1.15] mb-3 md:mb-6 tracking-tight">
+                <h1 className="font-montserrat text-[22px] md:text-[32px] lg:text-[36px] font-bold text-neutral-base-900 leading-[1.15] mb-3 md:mb-6 tracking-tight">
                     {product.name}
                 </h1>
 
                 <div className="flex flex-col gap-2">
                     {product.originalPrice && (
                         <div className="flex items-center gap-2">
-                            <p className="text-[13px] md:text-[15px] text-neutral-base-400 line-through font-medium">
+                            <p className="text-[12px] md:text-[15px] text-neutral-base-400 line-through font-medium">
                                 {product.originalPrice}
                             </p>
                             {!!product.discountPercentage && product.discountPercentage > 0 && (
@@ -216,7 +216,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                         </div>
                     )}
                     <div className="flex flex-col md:flex-row md:items-baseline gap-3 md:gap-5">
-                        <p className={`text-[22px] md:text-[26px] lg:text-[30px] font-semibold tracking-tight leading-none ${product.originalPrice ? 'text-red-600' : 'text-neutral-base-900'}`}>
+                        <p className={`text-[20px] md:text-[26px] lg:text-[30px] font-semibold tracking-tight leading-none ${product.originalPrice ? 'text-red-600' : 'text-neutral-base-900'}`}>
                             {selectedPrice}
                         </p>
                     </div>
@@ -232,7 +232,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                 <span className="text-white/90 text-[10px] md:text-[11px] uppercase tracking-widest font-bold mb-0.5 flex items-center gap-1.5">
                                     Penawaran Terbatas
                                 </span>
-                                <span className="text-white text-[12px] md:text-[14px] font-medium leading-tight">Flash Sale Sedang Berlangsung</span>
+                                <span className="text-white text-[11px] md:text-[14px] font-medium leading-tight">Flash Sale Sedang Berlangsung</span>
                             </div>
 
                             <div className="flex flex-col items-end">
@@ -242,7 +242,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                         <>
                                             <div className="bg-white/10 backdrop-blur-md border border-white/20 px-1.5 py-0.5 md:py-1 rounded text-center min-w-[28px] shadow-inner">
                                                 {timeLeft.days}
-                                                <span className="text-[9px] ml-0.5 font-montserrat uppercase">Hr</span>
+                                                <span className="text-[8px] ml-0.5 font-montserrat uppercase">Hr</span>
                                             </div>
                                             <span className="text-white/60">:</span>
                                         </>
@@ -251,7 +251,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                     <span className="text-white/60">:</span>
                                     <div className="bg-white/10 backdrop-blur-md border border-white/20 w-8 md:w-9 py-0.5 md:py-1 rounded text-center shadow-inner">{formatTime(timeLeft.minutes)}</div>
                                     <span className="text-white/60">:</span>
-                                    <div className="bg-red-600 backdrop-blur-md border border-red-500 w-8 md:w-9 py-0.5 md:py-1 rounded relative overflow-hidden h-[24px] md:h-[28px] flex items-center justify-center shadow-md">
+                                    <div className="bg-red-600 backdrop-blur-md border border-red-500 w-7 md:w-9 py-0.5 md:py-1 rounded relative overflow-hidden h-[22px] md:h-[28px] flex items-center justify-center shadow-md">
                                         <AnimatePresence mode="popLayout">
                                             <motion.span
                                                 key={timeLeft.seconds}
@@ -273,7 +273,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             </div>
 
             {/* Description */}
-            <div className="mb-8 md:mb-10 min-w-0">
+            <div className="mb-6 md:mb-8 min-w-0">
                 <div
                     dangerouslySetInnerHTML={{ __html: product.description }}
                     className="text-[14px] md:text-[15px] leading-[1.75] text-neutral-base-500 prose prose-sm max-w-none line-clamp-4 overflow-hidden wrap-break-word font-montserrat"
@@ -282,9 +282,9 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
 
             {/* Variant Selection */}
             {product.types && product.types.length > 0 && (
-                <div id="motif-selection" className="mb-8 md:mb-10">
+                <div id="motif-selection" className="mb-6 md:mb-8">
                     <div className="flex items-center justify-between mb-3 md:mb-4">
-                        <span className={`text-[12px] font-bold uppercase tracking-[0.12em] transition-colors ${hintType === 'motif' ? 'text-red-500' : 'text-neutral-base-900'}`}>
+                        <span className={`text-[11px] font-bold uppercase tracking-[0.12em] transition-colors ${hintType === 'motif' ? 'text-red-500' : 'text-neutral-base-900'}`}>
                             Motif: <span className="font-medium text-neutral-base-500 ml-1 normal-case tracking-normal">{selectedVariant || "Pilih motif"}</span>
                         </span>
                     </div>
@@ -317,7 +317,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                         setSelectedSize("");
                                         setQuantity(1);
                                     }}
-                                    className={`px-5 py-2.5 md:px-5 md:py-2.5 text-[12px] md:text-[13px] font-bold rounded-lg transition-all ${isSelected
+                                    className={`px-4 py-2 md:px-5 md:py-2.5 text-[11px] md:text-[13px] font-bold rounded-lg transition-all ${isSelected
                                         ? "bg-neutral-base-900 text-white shadow-lg"
                                         : "border border-neutral-base-200 text-neutral-base-600 hover:border-neutral-base-900 bg-white"
                                         }`}
@@ -332,9 +332,9 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             )}
 
             {/* Color Selection */}
-            <div id="color-selection" className="mb-8 md:mb-10">
+            <div id="color-selection" className="mb-6 md:mb-8">
                 <div className="flex items-center justify-between mb-3 md:mb-4">
-                    <span className={`text-[12px] font-bold uppercase tracking-[0.12em] transition-colors ${hintType === 'color' ? 'text-red-500' : 'text-neutral-base-900'}`}>
+                    <span className={`text-[11px] font-bold uppercase tracking-[0.12em] transition-colors ${hintType === 'color' ? 'text-red-500' : 'text-neutral-base-900'}`}>
                         Warna: <span className="font-medium text-neutral-base-500 ml-1 normal-case tracking-normal">{product.colors.find(c => c.id === selectedColor)?.name || "Pilih warna"}</span>
                     </span>
                 </div>
@@ -375,7 +375,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                 aria-label={`Select ${color.name} ${isOutOfStock ? "(Sold Out)" : ""}`}
                             >
                                 <span
-                                    className={`w-8 h-8 rounded-full border border-neutral-base-200 transition-all flex items-center justify-center ${selectedColor === color.id ? "ring-2 ring-offset-2 ring-neutral-base-900 scale-110 shadow-md" : "hover:scale-110 shadow-sm"
+                                    className={`w-7 h-7 md:w-8 md:h-8 rounded-full border border-neutral-base-200 transition-all flex items-center justify-center ${selectedColor === color.id ? "ring-2 ring-offset-2 ring-neutral-base-900 scale-110 shadow-md" : "hover:scale-110 shadow-sm"
                                         }`}
                                     style={{ backgroundColor: color.value }}
                                 >
@@ -392,9 +392,9 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             </div>
 
             {/* Size Selection with Inline Stock */}
-            <div id="size-selection" className="mb-8 md:mb-10">
+            <div id="size-selection" className="mb-6 md:mb-8">
                 <div className="flex items-center justify-between mb-3 md:mb-4">
-                    <span className={`text-[12px] font-bold uppercase tracking-[0.12em] transition-colors ${hintType === 'size' ? 'text-red-500' : 'text-neutral-base-900'}`}>
+                    <span className={`text-[11px] font-bold uppercase tracking-[0.12em] transition-colors ${hintType === 'size' ? 'text-red-500' : 'text-neutral-base-900'}`}>
                         Ukuran: <span className="font-medium text-neutral-base-500 ml-1 normal-case tracking-normal">{selectedSize || "Pilih ukuran"}</span>
                     </span>
                     <button className="text-[11px] font-bold text-neutral-base-400 hover:text-neutral-base-900 underline flex items-center gap-1 transition-colors">
@@ -429,7 +429,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                     setQuantity(1);
                                     setHintType(null);
                                 }}
-                                className={`group relative px-4 py-2.5 md:px-5 md:py-2.5 flex items-center justify-center text-[12px] md:text-[13px] font-bold rounded-lg transition-all ${isSelected
+                                className={`group relative px-3 py-2 md:px-5 md:py-2.5 flex items-center justify-center text-[11px] md:text-[13px] font-bold rounded-lg transition-all ${isSelected
                                     ? "bg-neutral-base-900 text-white shadow-lg ring-1 ring-neutral-base-900"
                                     : "border border-neutral-base-200 text-neutral-base-600 hover:border-neutral-base-900 hover:text-neutral-base-900 bg-white"
                                     } ${(!isAvailable && !!selectedColor) ? "opacity-30 line-through cursor-not-allowed" : "opacity-100"}`}
@@ -449,23 +449,29 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                     {selectedSize && (
                         <motion.div
                             key={`${selectedColor}-${selectedSize}`}
-                            initial={{ opacity: 0, y: -8, height: 0 }}
-                            animate={{ opacity: 1, y: 0, height: "auto" }}
-                            exit={{ opacity: 0, y: -8, height: 0 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="overflow-hidden"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 10 }}
+                            className="mt-5"
                         >
-                            <div className={`mt-3 flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-semibold ${currentStock >= 10
-                                ? "bg-emerald-50 text-emerald-700"
+                            <div className={`flex items-start gap-3 pl-3 py-1 border-l-2 transition-colors ${currentStock >= 10
+                                ? "border-emerald-500 bg-emerald-50/30"
                                 : currentStock > 0
-                                    ? "bg-amber-50 text-amber-700"
-                                    : "bg-rose-50 text-rose-600"
+                                    ? "border-amber-500 bg-amber-50/30"
+                                    : "border-rose-500 bg-rose-50/30"
                                 }`}>
-                                <Package className="w-3.5 h-3.5" />
-                                {currentStock >= 10 && "Stok tersedia"}
-                                {currentStock > 0 && currentStock < 10 && `Sisa ${currentStock} — segera dapatkan!`}
-                                {currentStock === 0 && rawStock > 0 && `Sudah ada ${qtyInCartForVariant} di keranjang (Maksimal)`}
-                                {currentStock === 0 && rawStock === 0 && "Stok habis untuk kombinasi ini"}
+                                <Package className={`w-3.5 h-3.5 mt-0.5 ${currentStock >= 10 ? "text-emerald-600" : currentStock > 0 ? "text-amber-600" : "text-rose-600"}`} />
+                                <div className="flex flex-col gap-0.5">
+                                    <span className={`text-[12px] font-bold uppercase tracking-widest ${currentStock >= 10 ? "text-emerald-700" : currentStock > 0 ? "text-amber-700" : "text-rose-700"}`}>
+                                        {currentStock >= 10 ? "Stok Tersedia" : currentStock > 0 ? "Persediaan Terbatas" : "Stok Habis"}
+                                    </span>
+                                    <span className="text-[11px] text-neutral-base-500 font-medium">
+                                        {/* {currentStock >= 10 && "Barang siap dikirim hari ini"} */}
+                                        {currentStock > 0 && currentStock < 10 && `Tersisa ${currentStock} item — amankan pilihanmu sekarang!`}
+                                        {currentStock === 0 && rawStock > 0 && `Sudah mencapai batas maksimal (Ada ${qtyInCartForVariant} di keranjang)`}
+                                        {currentStock === 0 && rawStock === 0 && "Maaf, produk ini sedang tidak tersedia untuk kombinasi yang dipilih"}
+                                    </span>
+                                </div>
                             </div>
                         </motion.div>
                     )}
@@ -473,16 +479,16 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
             </div >
 
             {/* Quantity and Actions */}
-            <div className="flex flex-row gap-2 md:gap-3 mb-8 md:mb-12">
-                {/* Quantity Selector */}
-                <div className="flex items-center border border-neutral-base-200 h-11 md:h-12 w-[100px] md:w-[120px] shrink-0 justify-between rounded-lg">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-8 md:mb-12">
+                {/* Row 1: Quantity Selector on Mobile / Inline on Desktop */}
+                <div className="flex items-center border border-neutral-base-100 bg-neutral-base-50/50 h-12 md:h-14 w-full md:w-[140px] shrink-0 justify-between rounded-xl px-1">
                     <button
                         onClick={() => handleQuantityChange("decrease")}
-                        className="w-9 md:w-11 h-full flex items-center justify-center text-neutral-base-400 hover:text-neutral-base-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-10 h-10 flex items-center justify-center text-neutral-base-400 hover:text-neutral-base-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         disabled={quantity <= 1}
                         aria-label="Decrease quantity"
                     >
-                        <Minus className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                        <Minus className="w-4 h-4" />
                     </button>
                     <input
                         type="number"
@@ -496,54 +502,68 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                 setQuantity(Math.max(1, val));
                             }
                         }}
-                        className="flex-1 bg-transparent text-center text-[13px] md:text-[14px] font-bold text-neutral-base-900 outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="flex-1 bg-transparent text-center text-[15px] font-bold text-neutral-base-900 outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-montserrat"
                     />
                     <button
                         onClick={() => handleQuantityChange("increase")}
-                        className="w-9 md:w-11 h-full flex items-center justify-center text-neutral-base-400 hover:text-neutral-base-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-10 h-10 flex items-center justify-center text-neutral-base-400 hover:text-neutral-base-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         disabled={quantity >= currentStock}
                         aria-label="Increase quantity"
                     >
-                        <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                        <Plus className="w-4 h-4" />
                     </button>
                 </div>
 
-                {/* Add to Cart Button */}
-                <motion.button
-                    id="add-to-cart-button"
-                    whileHover={canClickAddToCart ? { scale: 1.02 } : {}}
-                    whileTap={canClickAddToCart ? { scale: 0.98 } : {}}
-                    disabled={!canClickAddToCart}
-                    onClick={handleAddToCart}
-                    className={`flex-1 h-11 md:h-12 text-[11px] md:text-[13px] font-bold uppercase tracking-widest md:tracking-[0.15em] shadow-xl flex items-center justify-center gap-2 transition-colors rounded-lg ${!canClickAddToCart
-                        ? "bg-neutral-base-200 text-neutral-base-400 cursor-not-allowed shadow-none"
-                        : "bg-neutral-base-900 text-white hover:bg-neutral-base-800"
-                        }`}
-                >
-                    {isAdding ? (
-                        <Loader2 className="w-3.5 h-3.5 md:w-4 md:h-4 animate-spin" />
-                    ) : (
-                        <ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    )}
-                    {isAdding ? "Menambahkan..." : "Tambah ke Keranjang"}
-                </motion.button>
+                {/* Row 2: Main Actions */}
+                <div className="flex flex-row gap-3 flex-1">
+                    {/* Add to Cart Button */}
+                    <motion.button
+                        id="add-to-cart-button"
+                        whileHover={canClickAddToCart ? { scale: 1.01, translateY: -1 } : {}}
+                        whileTap={canClickAddToCart ? { scale: 0.98 } : {}}
+                        disabled={!canClickAddToCart}
+                        onClick={handleAddToCart}
+                        className={`flex-1 h-12 md:h-14 text-[12px] md:text-[13px] font-bold uppercase tracking-widest md:tracking-[0.15em] shadow-lg hover:shadow-2xl flex items-center justify-center gap-3 transition-all rounded-xl relative overflow-hidden group ${!canClickAddToCart
+                            ? "bg-neutral-base-100 text-neutral-base-400 cursor-not-allowed shadow-none"
+                            : "bg-neutral-base-900 text-white"
+                            }`}
+                    >
+                        {/* Shimmer effect inside button on hover */}
+                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer" />
 
-                {/* Wishlist Button */}
-                <motion.button
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.92 }}
-                    onClick={handleWishlist}
-                    className={`w-11 h-11 md:w-12 md:h-12 shrink-0 flex items-center justify-center rounded-lg border transition-all duration-200 ${isWishlisted
-                        ? "bg-rose-50 border-rose-200 text-rose-500"
-                        : "border-neutral-base-200 text-neutral-base-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50"
-                        }`}
-                    aria-label={isWishlisted ? "Hapus dari Wishlist" : "Tambah ke Wishlist"}
-                >
-                    <Heart
-                        className={`w-4 h-4 md:w-5 md:h-5 transition-all duration-200 ${isWishlisted ? "fill-rose-500" : ""}`}
-                        strokeWidth={2}
-                    />
-                </motion.button>
+                        {isAdding ? (
+                            <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
+                        ) : (
+                            <div className="relative">
+                                <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
+                                <motion.div
+                                    className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 1, duration: 0.5 }}
+                                />
+                            </div>
+                        )}
+                        <span className="relative z-10">{isAdding ? "Menambahkan..." : "Tambah ke Keranjang"}</span>
+                    </motion.button>
+
+                    {/* Wishlist Button */}
+                    <motion.button
+                        whileHover={{ scale: 1.05, backgroundColor: isWishlisted ? "#fff1f2" : "#f8fafc" }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleWishlist}
+                        className={`w-12 h-12 md:w-14 md:h-14 shrink-0 flex items-center justify-center rounded-xl border transition-all duration-300 shadow-sm ${isWishlisted
+                            ? "bg-rose-50 border-rose-100 text-rose-500"
+                            : "bg-white border-neutral-base-100 text-neutral-base-400 hover:text-rose-500 hover:border-rose-100"
+                            }`}
+                        aria-label={isWishlisted ? "Hapus dari Wishlist" : "Tambah ke Wishlist"}
+                    >
+                        <Heart
+                            className={`w-5 h-5 md:w-6 md:h-6 transition-all duration-300 ${isWishlisted ? "fill-rose-500" : ""}`}
+                            strokeWidth={isWishlisted ? 2.5 : 2}
+                        />
+                    </motion.button>
+                </div>
             </div>
 
             {/* Accordions */}

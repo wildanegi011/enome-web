@@ -54,17 +54,17 @@ export default function CartReview({ items, isLoading, updateQuantity, removeIte
     return (
         <section className="flex flex-col gap-3 bg-white/80 backdrop-blur-sm border border-neutral-base-100/50 p-4 md:p-5 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <div className="flex items-center justify-between border-b border-neutral-base-50 pb-2 md:pb-3">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 md:gap-3">
                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-amber-50 flex items-center justify-center text-amber-800">
                         <ShoppingBag className="w-4 h-4 md:w-5 md:h-5" />
                     </div>
-                    <h2 className="text-[14px] md:text-[15px] font-bold uppercase tracking-widest md:tracking-[0.15em] text-neutral-base-900">
-                        Review Keranjang
+                    <h2 className="text-[13px] md:text-[15px] font-bold uppercase tracking-widest md:tracking-[0.15em] text-neutral-base-900 leading-none">
+                        Review Barang
                     </h2>
                 </div>
                 <div className="px-1">
-                    <span className="text-[10px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest bg-neutral-base-50 px-3 py-1.5 rounded-full border border-neutral-base-100">
-                        {items.length} Barang
+                    <span className="text-[9px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest bg-neutral-base-50 px-2.5 py-1.5 rounded-full border border-neutral-base-100 leading-none">
+                        {items.length} Item
                     </span>
                 </div>
             </div>
@@ -82,13 +82,13 @@ export default function CartReview({ items, isLoading, updateQuantity, removeIte
                         >
                         <div className="bg-red-50/50 p-4 md:p-6 rounded-[24px] md:rounded-[30px] border border-red-100/50 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
                             <div className="flex items-start gap-3 md:gap-4">
-                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-red-100 flex items-center justify-center shrink-0 shadow-sm shadow-red-500/10">
-                                    <AlertCircle className="w-5 h-5 md:w-6 md:h-6 text-red-600" />
+                                <div className="w-9 h-9 md:w-12 md:h-12 rounded-xl bg-red-100 flex items-center justify-center shrink-0 shadow-sm shadow-red-500/10">
+                                    <AlertCircle className="w-4.5 h-4.5 md:w-6 md:h-6 text-red-600" />
                                 </div>
                                 <div className="flex-1">
-                                    <h4 className="text-[14px] md:text-[16px] font-bold text-red-900 border-b border-red-200/50 pb-1 mb-1.5 inline-block">Beberapa barang bermasalah</h4>
-                                    <p className="text-[11px] md:text-[12px] font-bold text-red-600/80 leading-relaxed max-w-md">
-                                        Ada {unavailableItems.length + insufficientStockItems.length} produk yang stoknya habis atau offline. Bereskan dulu ya sebelum bayar.
+                                    <h4 className="text-[13px] md:text-[16px] font-bold text-red-900 border-b border-red-200/50 pb-0.5 mb-1 inline-block">Masalah Stok</h4>
+                                    <p className="text-[10px] md:text-[12px] font-bold text-red-600/80 leading-snug max-w-md">
+                                        Ada {unavailableItems.length + insufficientStockItems.length} produk bermasalah. Bereskan dulu sebelum bayar.
                                     </p>
                                 </div>
                             </div>

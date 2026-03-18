@@ -1,7 +1,8 @@
 "use client";
 
 import { formatCurrency } from "@/lib/utils";
-import { ShoppingBag, ChevronRight, ShieldCheck, Truck } from "lucide-react";
+import { ShoppingBag, ChevronRight, ShieldCheck, Truck, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 interface CartSummaryProps {
     selectedCount: number;
@@ -18,18 +19,18 @@ export default function CartSummary({
 }: CartSummaryProps) {
     if (isMobileFooter) {
         return (
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-neutral-base-100 p-4 pb-safe-offset-4 lg:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-t border-neutral-base-100 p-4 pb-safe-offset-4 lg:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.05)] animate-in slide-in-from-bottom duration-500">
                 <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4">
                     <div className="flex flex-col">
                         <span className="text-[10px] font-bold text-neutral-base-400 uppercase tracking-widest leading-none mb-1">Total {selectedCount} Item</span>
-                        <span className="text-[20px] font-bold text-neutral-base-900 tracking-tighter leading-none tabular-nums">
+                        <span className="text-[20px] font-bold text-neutral-base-900 tracking-tight leading-none tabular-nums">
                             {formatCurrency(totalAmount)}
                         </span>
                     </div>
                     <button
                         onClick={onCheckout}
                         disabled={selectedCount === 0}
-                        className="bg-neutral-base-900 text-white px-8 h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2 hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group whitespace-nowrap"
+                        className="bg-neutral-base-900 text-white px-6 h-12 rounded-xl text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-neutral-base-800 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group whitespace-nowrap min-w-[130px]"
                     >
                         Checkout
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -38,6 +39,7 @@ export default function CartSummary({
             </div>
         );
     }
+
 
     return (
         <aside className="w-full lg:w-[380px] lg:sticky lg:top-28 shrink-0">
@@ -77,8 +79,15 @@ export default function CartSummary({
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
 
-                <div className="mt-8 pt-6 border-t border-neutral-base-50 flex items-center justify-around">
-                    <div className="flex flex-col items-center gap-2">
+                <div className="pt-6 border-t border-neutral-base-50 flex items-center justify-around">
+                    <Link
+                        href="/products"
+                        className="mt-6 flex items-center justify-center gap-2 text-neutral-base-400 hover:text-neutral-base-900 transition-all"
+                    >
+                        <ArrowLeft className="w-3 h-3" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Lanjut Belanja</span>
+                    </Link>
+                    {/* <div className="flex flex-col items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
                             <ShieldCheck className="w-4 h-4 text-emerald-600" />
                         </div>
@@ -89,7 +98,7 @@ export default function CartSummary({
                             <Truck className="w-4 h-4 text-amber-600" />
                         </div>
                         <span className="text-[8px] font-black uppercase tracking-[0.2em] text-neutral-base-400">Fast</span>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </aside>
