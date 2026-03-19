@@ -237,7 +237,7 @@ export default function PaymentVerificationStatus({
                         </button>
                     ) : null}
 
-                    {onClickWA && (
+                    {onClickWA && !isSuccess && (
                         <button
                             onClick={onClickWA}
                             className={cn(

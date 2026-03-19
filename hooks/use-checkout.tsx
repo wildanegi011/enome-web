@@ -105,6 +105,7 @@ export function useCheckout() {
         expiredTime?: string | number | null,
         roundingAmount?: number,
         whatsappAdmin?: string,
+        statusOrder?: string,
     } | null>(null);
     const [lastOrderedItems, setLastOrderedItems] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -571,6 +572,7 @@ export function useCheckout() {
                     expiredTime: data.expiredTime,
                     roundingAmount: data.roundingAmount,
                     whatsappAdmin: data.whatsappAdmin || whatsappAdmin,
+                    statusOrder: data.statusOrder || "OPEN",
                 });
                 setLastOrderedItems([...cartItems]);
 

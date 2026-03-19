@@ -23,6 +23,7 @@ interface OrderSummaryCardProps {
     } | null;
     whatsappAdmin?: string;
     onSuccess?: () => void;
+    statusOrder?: string;
 }
 
 export default function OrderSummaryCard({
@@ -38,6 +39,7 @@ export default function OrderSummaryCard({
     voucherInfo,
     whatsappAdmin,
     onSuccess,
+    statusOrder,
 }: OrderSummaryCardProps) {
     const {
         timeLeft,
@@ -50,7 +52,8 @@ export default function OrderSummaryCard({
     } = usePaymentVerification(
         orderId,
         statusTagihan,
-        onSuccess
+        onSuccess,
+        { initialStatusOrder: statusOrder }
     );
 
     const handleStartVerification = () => {
@@ -73,9 +76,11 @@ export default function OrderSummaryCard({
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-[14px] md:rounded-[18px] bg-neutral-base-900 flex items-center justify-center shadow-lg shadow-neutral-base-900/10 shrink-0">
                     <Receipt className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
-                <h2 className="text-[16px] md:text-[18px] font-bold text-neutral-base-900 tracking-tight font-montserrat">
-                    Ringkasan
-                </h2>
+                <div className="flex-1 min-w-0">
+                    <h2 className="text-[16px] md:text-[18px] font-bold text-neutral-base-900 tracking-tight font-montserrat truncate mb-0.5">
+                        Ringkasan
+                    </h2>
+                </div>
             </div>
 
             <div className="space-y-4 md:space-y-5 pb-6 md:pb-8 border-b border-neutral-base-50">
@@ -139,7 +144,7 @@ export default function OrderSummaryCard({
             </div>
 
             <div className="space-y-4 pt-6">
-                {statusTagihan === "BELUM BAYAR" && (
+                {!isSuccess && sOrder === "OPEN" && (
                     <>
                         {/* Verification Info & Status Banner */}
                         <PaymentVerificationStatus

@@ -64,7 +64,10 @@ function CheckoutContent() {
             <div className="min-h-screen bg-neutral-base-50">
                 <Navbar />
                 <SuccessState
-                    orderResult={orderResult}
+                    orderResult={{
+                        ...orderResult,
+                        statusOrder: orderResult.statusOrder || "OPEN"
+                    }}
                     lastOrderedItems={lastOrderedItems}
                     formatPrice={formatCurrency}
                 />

@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Pusher from "pusher-js";
 
 export const usePusher = (channelName: string, eventName: string, onEvent: (data: any) => void) => {
     const [pusher, setPusher] = useState<Pusher | null>(null);
+    const onEventRef = useRef(onEvent);
+
+    // Keep ref updated
+    useEffect(() => {
+        onEventRef.current = onEvent;
+    }, [onEvent]);
 
     useEffect(() => {
         if (!process.env.NEXT_PUBLIC_PUSHER_KEY || !process.env.NEXT_PUBLIC_PUSHER_CLUSTER) {
@@ -18,7 +24,7 @@ export const usePusher = (channelName: string, eventName: string, onEvent: (data
 
         const channel = pusherInstance.subscribe(channelName);
         channel.bind(eventName, (data: any) => {
-            onEvent(data);
+            onEventRef.current(data);
         });
 
         setPusher(pusherInstance);
@@ -28,7 +34,7 @@ export const usePusher = (channelName: string, eventName: string, onEvent: (data
             pusherInstance.unsubscribe(channelName);
             pusherInstance.disconnect();
         };
-    }, [channelName, eventName, onEvent]);
+    }, [channelName, eventName]); // onEvent removed from dependencies
 
     return pusher;
 };

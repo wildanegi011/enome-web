@@ -14,6 +14,7 @@ import OrderItemsCard from "@/components/store/orders/detail/OrderItemsCard";
 import ShippingInfoCard from "@/components/store/orders/detail/ShippingInfoCard";
 import OrderSummaryCard from "@/components/store/orders/detail/OrderSummaryCard";
 import TrackingManifest from "@/components/store/orders/detail/TrackingManifest";
+import { usePaymentVerification } from "@/hooks/use-payment-verification";
 import { CONFIG } from "@/lib/config";
 
 const OrderDetailSkeleton = () => (
@@ -117,6 +118,16 @@ export default function OrderDetailPage() {
     const orderIdParam = Array.isArray(params.id) ? params.id[0] : (params.id || "");
     const { data, isLoading, isError, refetch } = useOrderDetail(orderIdParam);
 
+    const { isSuccess, statusOrder: currentStatusOrder } = usePaymentVerification(
+        data?.order?.orderId || "",
+        data?.order?.statusTagihan || "",
+        () => refetch(),
+        { 
+            silent: true,
+            initialStatusOrder: data?.order?.statusOrder || "OPEN"
+        }
+    );
+
     useEffect(() => {
         if (!isLoading && isError) {
             router.push("/account/orders");
@@ -130,6 +141,8 @@ export default function OrderDetailPage() {
     if (!data) return null;
 
     const { order, items, paymentInfo, voucherInfo, uniqueCode: uniqueCodeValue = 0, expiredTime, whatsappAdmin } = data;
+
+    const sOrder = currentStatusOrder || order.statusOrder || "OPEN";
 
     return (
         <div className="min-h-screen bg-[#F9FAFB] font-montserrat text-neutral-base-900">
@@ -165,13 +178,15 @@ export default function OrderDetailPage() {
                             </div>
                         )}
 
-                        <PaymentInstruction
-                            statusTagihan={order.statusTagihan}
-                            totalTagihan={order.totalTagihan}
-                            paymentInfo={paymentInfo}
-                            uniqueCodeValue={uniqueCodeValue}
-                            expiredTime={expiredTime}
-                        />
+                        {!isSuccess && sOrder === "OPEN" && (
+                            <PaymentInstruction
+                                statusTagihan={order.statusTagihan}
+                                totalTagihan={order.totalTagihan}
+                                paymentInfo={paymentInfo}
+                                uniqueCodeValue={uniqueCodeValue}
+                                expiredTime={expiredTime}
+                            />
+                        )}
 
                         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-10">
                             <div className="xl:col-span-7 space-y-8 md:space-y-10">
@@ -210,6 +225,7 @@ export default function OrderDetailPage() {
                                     voucherInfo={voucherInfo}
                                     whatsappAdmin={whatsappAdmin}
                                     onSuccess={() => refetch()}
+                                    statusOrder={order.statusOrder}
                                 />
                             </div>
                         </div>

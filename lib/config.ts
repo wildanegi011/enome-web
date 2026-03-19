@@ -17,7 +17,7 @@ export const CONFIG = {
     TRACKABLE_COURIERS: ["jne", "pos", "jnt", "sicepat", "tiki", "wahana", "ninja", "lion", "anteraja", "idexpress"],
 
     // Payment Configurations (Fallback for Central Config)
-    PAYMENT_VERIFICATION_TIMEOUT_MINS: 15,
+    PAYMENT_VERIFICATION_TIMEOUT_MINS: 1,
 
     // Pagination Defaults
     PAGINATION: {

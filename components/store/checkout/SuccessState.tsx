@@ -36,6 +36,7 @@ interface SuccessStateProps {
         expiredTime?: string | number | null,
         roundingAmount?: number,
         whatsappAdmin?: string,
+        statusOrder?: string,
     };
     lastOrderedItems: any[];
     formatPrice: (price: number) => string;
@@ -60,11 +61,10 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
     } = usePaymentVerification(
         orderResult.orderId,
         orderResult.bankAccount ? "BELUM BAYAR" : "PAID",
-        useCallback(() => {
-            setTimeout(() => {
-                router.push(`/account/orders/${encodeURIComponent(orderResult.orderId)}`);
-            }, 5000); // 5 seconds instead of 3 to allow seeing the "Processed" stage
-        }, [router, orderResult.orderId])
+        () => {
+            // onSuccess - do nothing, keep user on page per request
+        },
+        { initialStatusOrder: orderResult.statusOrder }
     );
 
     const handleStartVerification = () => {
@@ -111,7 +111,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                         <CheckCircle2 className="w-7 h-7 md:w-10 md:h-10" />
                     </motion.div>
                     <h1 className="text-[22px] md:text-[36px] font-bold text-neutral-base-900 tracking-tight leading-snug">
-                        {isTransfer ? "Instruksi Pembayaran" : "Pesanan Berhasil!"}
+                        {isTransfer && sOrder === "OPEN" ? "Instruksi Pembayaran" : "Pesanan Berhasil!"}
                     </h1>
                     <p className="text-[12px] md:text-[15px] text-neutral-base-400 font-medium mt-1.5 md:mt-2">
                         Order <span className="text-neutral-base-900 font-bold">{orderResult.orderId}</span> — {lastOrderedItems.length} Produk
@@ -124,7 +124,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                     {/* LEFT COLUMN — Payment Instructions */}
                     <div className="flex-1 w-full flex flex-col gap-5 md:gap-6 min-w-0">
 
-                        {isTransfer && (
+                        {isTransfer && sOrder === "OPEN" && (
                             <div className="bg-white border border-neutral-base-100 rounded-2xl md:rounded-[32px] overflow-hidden shadow-lg shadow-neutral-base-900/5">
                                 {/* Transfer header bar */}
                                 <div className="bg-neutral-base-900 px-5 md:px-8 py-4 md:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
@@ -205,28 +205,31 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                     </div>
 
                                     {/* Auto verification info & status */}
-                                    <PaymentVerificationStatus
-                                        variant="full"
-                                        timeLeft={timeLeft}
-                                        isVerifying={isVerifying}
-                                        isTimeout={isTimeout}
-                                        isSuccess={isSuccess}
-                                        statusOrder={currentStatusOrder}
-                                        statusTagihan={currentStatusTagihan || (orderResult.bankAccount ? "BELUM BAYAR" : "PAID")}
-                                        onStartVerification={handleStartVerification}
-                                        showAction={true}
-                                        onClickWA={() => handleWhatsAppConfirm(
-                                            orderResult.orderId,
-                                            orderResult.total,
-                                            orderResult.paymentMethod || "Transfer",
-                                            orderResult.whatsappAdmin || ""
-                                        )}
-                                    />
+                                    {/* Auto verification info & status */}
+                                    {!isSuccess && sOrder === "OPEN" && (
+                                        <PaymentVerificationStatus
+                                            variant="full"
+                                            timeLeft={timeLeft}
+                                            isVerifying={isVerifying}
+                                            isTimeout={isTimeout}
+                                            isSuccess={isSuccess}
+                                            statusOrder={currentStatusOrder}
+                                            statusTagihan={currentStatusTagihan || (orderResult.bankAccount ? "BELUM BAYAR" : "PAID")}
+                                            onStartVerification={handleStartVerification}
+                                            showAction={!isSuccess}
+                                            onClickWA={() => handleWhatsAppConfirm(
+                                                orderResult.orderId,
+                                                orderResult.total,
+                                                orderResult.paymentMethod || "Transfer",
+                                                orderResult.whatsappAdmin || ""
+                                            )}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         )}
 
-                        {!isTransfer && (
+                        {(!isTransfer || (isTransfer && sOrder !== "OPEN")) && (
                             <div className="bg-white border border-neutral-base-100 rounded-2xl md:rounded-[32px] p-8 md:p-12 shadow-lg shadow-neutral-base-900/5 text-center">
                                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-emerald-50 flex items-center justify-center mx-auto mb-5 md:mb-6">
                                     <ShieldCheck className="w-8 h-8 md:w-10 md:h-10 text-emerald-600" />

@@ -3,7 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { userApi } from "@/lib/api/user-api";
 import { CONFIG } from "@/lib/config";
+import { usePusher } from "@/hooks/use-pusher";
 import { toast } from "sonner";
+import { PaymentSuccessToast } from "@/components/store/shared/PaymentSuccessToast";
 
 interface UsePaymentVerificationReturn {
     timeLeft: number | null;
@@ -18,8 +20,13 @@ interface UsePaymentVerificationReturn {
 export function usePaymentVerification(
     orderId: string,
     initialStatus: string,
-    onSuccess?: () => void
+    onSuccess?: () => void,
+    options: { 
+        silent?: boolean,
+        initialStatusOrder?: string | null
+    } = {}
 ): UsePaymentVerificationReturn {
+    const { silent = false, initialStatusOrder = null } = options;
     const storageKey = `verify_start_${orderId}`;
     const timeoutKey = `verify_timeout_${orderId}`;
     const syncEventName = `payment_verify_sync_${orderId}`;
@@ -28,8 +35,8 @@ export function usePaymentVerification(
     const [isVerifying, setIsVerifying] = useState(false);
     const [isTimeout, setIsTimeout] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [statusOrder, setStatusOrder] = useState<string | null>(null);
-    const [statusTagihan, setStatusTagihan] = useState<string | null>(null);
+    const [statusOrder, setStatusOrder] = useState<string | null>(initialStatusOrder);
+    const [statusTagihan, setStatusTagihan] = useState<string | null>(initialStatus);
 
     const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -39,6 +46,46 @@ export function usePaymentVerification(
             window.dispatchEvent(new CustomEvent(syncEventName, { detail: { type } }));
         }
     }, [syncEventName]);
+
+    // Integrate Pusher for real-time updates
+    const handlePusherEvent = useCallback((data: any) => {
+        // Log for debugging (can be removed later)
+        console.log("Pusher event received in hook:", data);
+        
+        if (String(data.orderId) === String(orderId)) {
+            const sOrder = data.statusOrder?.toUpperCase();
+            const sTagihan = data.statusTagihan?.toUpperCase();
+
+            if (sOrder) setStatusOrder(sOrder);
+            if (sTagihan) setStatusTagihan(sTagihan);
+            
+            if (sTagihan === "BAYAR" || sTagihan === "SUDAH BAYAR" || (sOrder && sOrder !== "OPEN" && sOrder !== "UNPAID")) {
+                if (!isSuccess) {
+                    setIsSuccess(true);
+                    setIsVerifying(false);
+                    setIsTimeout(false);
+                    setTimeLeft(0);
+                    localStorage.removeItem(storageKey);
+                    localStorage.removeItem(timeoutKey);
+                    broadcastSync("success");
+                    
+                    if (!silent && (sTagihan === "BAYAR" || sTagihan === "SUDAH BAYAR")) {
+                        const title = data.title || "Pembayaran Berhasil!";
+                        const message = data.message || "Pesanan Anda sedang diproses.";
+                        toast.custom(() => (
+                            <PaymentSuccessToast title={title} message={message} />
+                        ), {
+                            duration: 5000,
+                        });
+                    }
+                    
+                    if (onSuccess) onSuccess();
+                }
+            }
+        }
+    }, [orderId, isSuccess, storageKey, timeoutKey, broadcastSync, onSuccess]);
+
+    usePusher("my-channel", "my-event", handlePusherEvent);
 
     const checkStatus = useCallback(async () => {
         if (document.visibilityState !== "visible") return;
@@ -67,14 +114,24 @@ export function usePaymentVerification(
                 }
             }
 
-            if (sTagihan === "BAYAR" || sTagihan === "SUDAH BAYAR") {
+            if (sTagihan === "BAYAR" || sTagihan === "SUDAH BAYAR" || (sOrder && sOrder !== "OPEN" && sOrder !== "UNPAID")) {
                 if (!isSuccess) {
                     setIsSuccess(true);
                     setIsVerifying(false);
+                    setTimeLeft(0);
                     localStorage.removeItem(storageKey);
                     localStorage.removeItem(timeoutKey);
                     broadcastSync("success");
-                    toast.success("Pembayaran terdeteksi! Pesanan Anda sedang diproses.");
+                    if (!silent && (sTagihan === "BAYAR" || sTagihan === "SUDAH BAYAR")) {
+                        toast.custom(() => (
+                            <PaymentSuccessToast 
+                                title="Pembayaran Terdeteksi!" 
+                                message="Pesanan Anda sedang diproses." 
+                            />
+                        ), {
+                            duration: 5000,
+                        });
+                    }
                     if (onSuccess) onSuccess();
                 }
                 return true;
@@ -107,7 +164,9 @@ export function usePaymentVerification(
         setIsTimeout(false);
         setIsSuccess(false);
         broadcastSync("start");
-        toast.info("Memulai verifikasi otomatis. Mohon tunggu...");
+        if (!silent) {
+            toast.info("Memulai verifikasi otomatis. Mohon tunggu...");
+        }
         // Initial check immediately
         checkStatus();
     }, [storageKey, timeoutKey, checkStatus, broadcastSync]);
@@ -163,6 +222,7 @@ export function usePaymentVerification(
                 setIsSuccess(true);
                 setIsVerifying(false);
                 setIsTimeout(false);
+                setTimeLeft(0);
             } else if (type === "timeout") {
                 setIsTimeout(true);
                 setIsVerifying(true);
