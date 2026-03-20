@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import {
     keranjang, orders, orderdetail, produk, produkDetail,
-    preOrder, wallet, voucher, voucherHistory, payment as paymentTable, flashSale, centralConfig, rekeningPembayaran
+    preOrder, wallet, voucher, voucherHistory, payment as paymentTable, flashSale, centralConfig, rekeningPembayaran, companyProfile
 } from "@/lib/db/schema";
 
 import { eq, and, sql, desc, like, or } from "drizzle-orm";
@@ -223,6 +223,16 @@ export class OrderService {
         const orderTipe = activePreOrder ? "PRE-ORDER" : "ORDER";
         const statusOrder = finalBankAmount <= 0 ? "PROSES PACKING" : "OPEN";
 
+        // Fetch Company Name from companyprofile table
+        const [company]: any = await db.select({
+            namaPerusahaan: companyProfile.namaPerusahaan
+        })
+            .from(companyProfile)
+            .where(eq(companyProfile.id, CONFIG.DEFAULT_COMPANY_PROFILE_ID))
+            .limit(1);
+
+        const companyName = company?.namaPerusahaan || "SYLLA HIJAB";
+
         const result = await db.transaction(async (tx) => {
             // A. Insert Master Order
             logger.info("OrderService: Step A - Inserting Master Order", { orderId });
@@ -257,7 +267,7 @@ export class OrderService {
                     preorderId: activePreOrder?.preOrderId ? Number(activePreOrder.preOrderId) : null,
                     isReadyStok: activePreOrder ? 0 : 1,
                     catatanKhusus: orderData.specialNotes || null,
-                    namaPengirim: orderData.isDropshipper ? (orderData.dropshipper?.name || "") : "SYLLA HIJAB",
+                    namaPengirim: orderData.isDropshipper ? (orderData.dropshipper?.name || "") : companyName,
                     teleponPengirim: orderData.isDropshipper ? (orderData.dropshipper?.phone || "") : "",
                     alamatPengirim: orderData.isDropshipper ? (orderData.dropshipper?.address || "") : "",
                     timestamp: sql`${dhms}`,
@@ -271,7 +281,7 @@ export class OrderService {
                     distrikKirim: shipping.districtId || shipping.kecamatan || "",
                     service: orderData.service || "",
                     kodeservice: orderData.service || "",
-                    shipper: orderData.isDropshipper ? "PEMESAN" : "SYLLA HIJAB",
+                    shipper: orderData.isDropshipper ? "PEMESAN" : companyName,
                     totcost: totalHpp || 0,
                     totalBerat: totalWeight || 0,
                     updatedAt: sql`${dhms}`,
