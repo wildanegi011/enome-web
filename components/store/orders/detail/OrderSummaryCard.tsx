@@ -24,6 +24,7 @@ interface OrderSummaryCardProps {
     whatsappAdmin?: string;
     onSuccess?: () => void;
     statusOrder?: string;
+    paymentVerificationTimeout?: number;
 }
 
 export default function OrderSummaryCard({
@@ -40,6 +41,7 @@ export default function OrderSummaryCard({
     whatsappAdmin,
     onSuccess,
     statusOrder,
+    paymentVerificationTimeout
 }: OrderSummaryCardProps) {
     const {
         timeLeft,
@@ -53,7 +55,10 @@ export default function OrderSummaryCard({
         orderId,
         statusTagihan,
         onSuccess,
-        { initialStatusOrder: statusOrder }
+        { 
+            initialStatusOrder: statusOrder,
+            timeoutMins: paymentVerificationTimeout
+        }
     );
 
     const handleStartVerification = () => {
@@ -158,6 +163,7 @@ export default function OrderSummaryCard({
                             onStartVerification={handleStartVerification}
                             showAction={true}
                             onClickWA={() => handleWhatsAppConfirm(orderId, totalTagihan, metodebayar, whatsappAdmin || "")}
+                            timeoutMins={paymentVerificationTimeout}
                         />
                     </>
                 )}

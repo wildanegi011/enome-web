@@ -23,10 +23,11 @@ export function usePaymentVerification(
     onSuccess?: () => void,
     options: { 
         silent?: boolean,
-        initialStatusOrder?: string | null
+        initialStatusOrder?: string | null,
+        timeoutMins?: number
     } = {}
 ): UsePaymentVerificationReturn {
-    const { silent = false, initialStatusOrder = null } = options;
+    const { silent = false, initialStatusOrder = null, timeoutMins: propTimeoutMins } = options;
     const storageKey = `verify_start_${orderId}`;
     const timeoutKey = `verify_timeout_${orderId}`;
     const syncEventName = `payment_verify_sync_${orderId}`;
@@ -159,7 +160,9 @@ export function usePaymentVerification(
     const startVerification = useCallback(() => {
         localStorage.setItem(storageKey, Date.now().toString());
         localStorage.removeItem(timeoutKey); // Clear previous timeout if any
-        setTimeLeft(CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS * 60);
+        
+        const finalTimeoutMins = propTimeoutMins || CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS;
+        setTimeLeft(finalTimeoutMins * 60);
         setIsVerifying(true);
         setIsTimeout(false);
         setIsSuccess(false);
@@ -179,7 +182,8 @@ export function usePaymentVerification(
                     // Verification started in another tab
                     const startTime = parseInt(e.newValue, 10);
                     const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                    const remaining = (CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS * 60) - elapsed;
+                    const finalTimeoutMins = propTimeoutMins || CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS;
+                    const remaining = (finalTimeoutMins * 60) - elapsed;
 
                     if (remaining > 0) {
                         setRemainingTime(remaining);
@@ -212,7 +216,8 @@ export function usePaymentVerification(
                 if (storedStart) {
                     const startTime = parseInt(storedStart, 10);
                     const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                    const remaining = (CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS * 60) - elapsed;
+                    const finalTimeoutMins = propTimeoutMins || CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS;
+                    const remaining = (finalTimeoutMins * 60) - elapsed;
                     setTimeLeft(remaining > 0 ? remaining : 0);
                     setIsVerifying(true);
                     setIsTimeout(false);
@@ -248,7 +253,8 @@ export function usePaymentVerification(
         if (storedStart) {
             const startTime = parseInt(storedStart, 10);
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const remaining = (CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS * 60) - elapsed;
+            const finalTimeoutMins = propTimeoutMins || CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS;
+            const remaining = (finalTimeoutMins * 60) - elapsed;
 
             if (remaining > 0) {
                 setTimeLeft(remaining);

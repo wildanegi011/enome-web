@@ -106,6 +106,7 @@ export function useCheckout() {
         roundingAmount?: number,
         whatsappAdmin?: string,
         statusOrder?: string,
+        paymentVerificationTimeout?: number,
     } | null>(null);
     const [lastOrderedItems, setLastOrderedItems] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -573,6 +574,7 @@ export function useCheckout() {
                     roundingAmount: data.roundingAmount,
                     whatsappAdmin: data.whatsappAdmin || whatsappAdmin,
                     statusOrder: data.statusOrder || "OPEN",
+                    paymentVerificationTimeout: data.paymentVerificationTimeout,
                 });
                 setLastOrderedItems([...cartItems]);
 

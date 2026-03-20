@@ -17,6 +17,7 @@ import {
 import { eq, and, or, sql, like } from "drizzle-orm";
 import { withAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
+import { CONFIG } from "@/lib/config";
 import { CustomerService } from "@/lib/services/customer-service";
 import { ConfigService } from "@/lib/services/config-service";
 import { formatJakartaISO } from "@/lib/date-utils";
@@ -213,7 +214,7 @@ export const GET = withAuth(async (
             uniqueCode,
             expiredTime: paymentRow?.expiredTime ? formatJakartaISO(new Date(paymentRow.expiredTime)) : null,
             whatsappAdmin: await ConfigService.get("whatsapp_nomor", "628997279308"),
-            paymentVerificationTimeout: await ConfigService.getInt("PAYMENT_VERIFICATION_TIMEOUT_MINS", 15),
+            paymentVerificationTimeout: await ConfigService.getInt("PAYMENT_VERIFICATION_TIMEOUT_MINS", CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS),
         });
 
     } catch (error: any) {

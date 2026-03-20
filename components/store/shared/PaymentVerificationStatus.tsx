@@ -17,6 +17,7 @@ interface PaymentVerificationStatusProps {
     showAction?: boolean;
     // For WA button
     onClickWA?: () => void;
+    timeoutMins?: number;
 }
 
 export default function PaymentVerificationStatus({
@@ -29,7 +30,8 @@ export default function PaymentVerificationStatus({
     statusTagihan,
     onStartVerification,
     showAction = false,
-    onClickWA
+    onClickWA,
+    timeoutMins
 }: PaymentVerificationStatusProps) {
     const isFull = variant === "full";
     
@@ -185,7 +187,7 @@ export default function PaymentVerificationStatus({
                         {!isSuccess && (
                             <div className={cn("pt-2 border-t border-amber-100/50 mt-1", !isFull && "pt-1")}>
                                 <p className={cn("text-amber-700/70 italic leading-relaxed", isFull ? "text-[11px]" : "text-[11px] leading-tight")}>
-                                    *Jika dalam {CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS} menit belum terverifikasi, silakan hubungi WhatsApp Admin.
+                                    *Jika dalam {timeoutMins || CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS} menit belum terverifikasi, silakan hubungi WhatsApp Admin.
                                 </p>
                             </div>
                         )}

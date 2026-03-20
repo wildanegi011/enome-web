@@ -1,3 +1,4 @@
+import { ASSET_URL } from "@/config/config";
 import { db } from "@/lib/db";
 import {
     keranjang, orders, orderdetail, produk, produkDetail,
@@ -207,7 +208,7 @@ export class OrderService {
         return { success: true, verifiedItems, totalWeight, totalHpp };
     }
 
-    static async createOrder(orderData: any, verifiedItems: any[], walletAdjustment: number, uniqueCode: number = 0) {
+    static async createOrder(orderData: any, verifiedItems: any[], walletAdjustment: number, uniqueCode: number = 0, bankData: any = null) {
         logger.info("OrderService: Creating Order", { orderId: orderData.orderId, userId: orderData.userId, uniqueCode });
         const ymd = nowJakartaDate();
         const dhms = nowJakartaFull();
@@ -488,10 +489,10 @@ export class OrderService {
                 paymentTransactionId: `${orderId};`,
                 createdAt: sql`${dhms}`,
                 createdBy: Number(userId) || 1,
-                tujuanAtasNama: payment === "Transfer Bank BCA" ? "TRY Setyo0603" : "-",
-                tujuanNamaBank: payment === "Transfer Bank BCA" ? "BCA" : (payment || "-"),
-                tujuanLogoBank: "-",
-                tujuanNoRekening: payment === "Transfer Bank BCA" ? "2810377740" : "-",
+                tujuanAtasNama: bankData ? bankData.namaPemilik : (payment === "Transfer Bank BCA" ? "TRY Setyo0603" : "-"),
+                tujuanNamaBank: bankData ? bankData.namaBank : (payment === "Transfer Bank BCA" ? "BCA" : (payment || "-")),
+                tujuanLogoBank: bankData ? `${ASSET_URL}/img/rekening_pembayaran/${bankData.logoBank}` : "-",
+                tujuanNoRekening: bankData ? bankData.noRekening : (payment === "Transfer Bank BCA" ? "2810377740" : "-"),
                 paymentType: finalWalletAmount > 0 && finalBankAmount > 0 ? "SPLIT" : (finalWalletAmount > 0 ? "WALLET" : payment),
                 isDp: 0,
                 voucherKode: orderData.voucherCode || "",

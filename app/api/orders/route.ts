@@ -163,14 +163,8 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
             service: serviceName
         };
 
-        // 6. Create Order — pass targetCode as uniqueCode for display in keterangan
-        const result: any = await OrderService.createOrder(orderData, stockResult.verifiedItems || [], finalWalletAmount, uniqueCode);
-
-        // Add unique code and bank info to result for frontend
+        let bankData: any = null;
         if (isTransferPayment) {
-            result.uniqueCode = uniqueCode;
-
-            // Fetch Bank Details dynamically
             const [bank]: any = await db.select()
                 .from(rekeningPembayaran)
                 .where(or(
@@ -178,13 +172,22 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                     like(rekeningPembayaran.namaBank, `%${payment}%`)
                 ))
                 .limit(1);
+            bankData = bank;
+        }
+ 
+        // 6. Create Order — pass targetCode as uniqueCode for display in keterangan
+        const result: any = await OrderService.createOrder(orderData, stockResult.verifiedItems || [], finalWalletAmount, uniqueCode, bankData);
 
-            if (bank) {
-                result.paymentMethod = bank.namaBank;
-                result.bankAccount = bank.noRekening;
-                result.bankOwner = bank.namaPemilik;
-                result.bankName = `Bank ${bank.namaBank}`;
-                result.bankLogo = bank.logoBank ? `rekening_pembayaran/${bank.logoBank}` : "rekening_pembayaran/bca.png";
+        // Add unique code and bank info to result for frontend
+        if (isTransferPayment) {
+            result.uniqueCode = uniqueCode;
+
+            if (bankData) {
+                result.paymentMethod = bankData.namaBank;
+                result.bankAccount = bankData.noRekening;
+                result.bankOwner = bankData.namaPemilik;
+                result.bankName = `Bank ${bankData.namaBank}`;
+                result.bankLogo = bankData.logoBank ? `rekening_pembayaran/${bankData.logoBank}` : "rekening_pembayaran/bca.png";
             } else {
                 // Fallback if not found in DB
                 result.paymentMethod = payment;
@@ -203,6 +206,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         result.packingFee = packingFee;
         result.voucherDiscount = discountAmount;
         result.whatsappAdmin = await ConfigService.get("whatsapp_nomor", "628997279308");
+        result.paymentVerificationTimeout = await ConfigService.getInt("PAYMENT_VERIFICATION_TIMEOUT_MINS", CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS);
 
         await ActivityService.log("Place Order", `User ${session.user.name} created order ${orderId} with total ${totalTagihan}`, userId);
 

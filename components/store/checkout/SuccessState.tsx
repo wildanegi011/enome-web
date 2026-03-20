@@ -37,6 +37,7 @@ interface SuccessStateProps {
         roundingAmount?: number,
         whatsappAdmin?: string,
         statusOrder?: string,
+        paymentVerificationTimeout?: number,
     };
     lastOrderedItems: any[];
     formatPrice: (price: number) => string;
@@ -64,7 +65,10 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
         () => {
             // onSuccess - do nothing, keep user on page per request
         },
-        { initialStatusOrder: orderResult.statusOrder }
+        { 
+            initialStatusOrder: orderResult.statusOrder,
+            timeoutMins: orderResult.paymentVerificationTimeout
+        }
     );
 
     const handleStartVerification = () => {
@@ -223,6 +227,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                                 orderResult.paymentMethod || "Transfer",
                                                 orderResult.whatsappAdmin || ""
                                             )}
+                                            timeoutMins={orderResult.paymentVerificationTimeout}
                                         />
                                     )}
                                 </div>

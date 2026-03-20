@@ -124,7 +124,8 @@ export default function OrderDetailPage() {
         () => refetch(),
         { 
             silent: true,
-            initialStatusOrder: data?.order?.statusOrder || "OPEN"
+            initialStatusOrder: data?.order?.statusOrder || "OPEN",
+            timeoutMins: data?.paymentVerificationTimeout
         }
     );
 
@@ -140,7 +141,7 @@ export default function OrderDetailPage() {
 
     if (!data) return null;
 
-    const { order, items, paymentInfo, voucherInfo, uniqueCode: uniqueCodeValue = 0, expiredTime, whatsappAdmin } = data;
+    const { order, items, paymentInfo, voucherInfo, uniqueCode: uniqueCodeValue = 0, expiredTime, whatsappAdmin, paymentVerificationTimeout } = data;
 
     const sOrder = currentStatusOrder || order.statusOrder || "OPEN";
 
@@ -226,6 +227,7 @@ export default function OrderDetailPage() {
                                     whatsappAdmin={whatsappAdmin}
                                     onSuccess={() => refetch()}
                                     statusOrder={order.statusOrder}
+                                    paymentVerificationTimeout={paymentVerificationTimeout}
                                 />
                             </div>
                         </div>
