@@ -78,101 +78,132 @@ export default function CartReview({ items, isLoading, updateQuantity, removeIte
                             initial={{ opacity: 0, y: -20, height: 0 }}
                             animate={{ opacity: 1, y: 0, height: "auto" }}
                             exit={{ opacity: 0, y: -20, height: 0 }}
-                            className="overflow-hidden"
+                            className="overflow-hidden mb-4"
                         >
-                        <div className="bg-red-50/50 p-4 md:p-6 rounded-[24px] md:rounded-[30px] border border-red-100/50 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
-                            <div className="flex items-start gap-3 md:gap-4">
-                                <div className="w-9 h-9 md:w-12 md:h-12 rounded-xl bg-red-100 flex items-center justify-center shrink-0 shadow-sm shadow-red-500/10">
-                                    <AlertCircle className="w-4.5 h-4.5 md:w-6 md:h-6 text-red-600" />
-                                </div>
-                                <div className="flex-1">
-                                    <h4 className="text-[13px] md:text-[16px] font-bold text-red-900 border-b border-red-200/50 pb-0.5 mb-1 inline-block">Masalah Stok</h4>
-                                    <p className="text-[10px] md:text-[12px] font-bold text-red-600/80 leading-snug max-w-md">
-                                        Ada {unavailableItems.length + insufficientStockItems.length} produk bermasalah. Bereskan dulu sebelum bayar.
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
-                                {unavailableItems.length > 0 && (
-                                    <button
-                                        disabled={isLoading}
-                                        onClick={handleClearUnavailable}
-                                        className="h-11 md:h-12 bg-red-600 hover:bg-red-700 text-white px-6 rounded-2xl md:rounded-full font-bold text-[11px] md:text-[12px] uppercase tracking-widest transition-all shadow-xl shadow-red-600/20 flex items-center justify-center gap-2 disabled:opacity-50"
-                                    >
-                                        {isFixing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                                        Hapus Item
-                                    </button>
-                                )}
-                                {insufficientStockItems.length > 0 && (
-                                    <button
-                                        disabled={isFixing}
-                                        onClick={handleFixQuantities}
-                                        className="h-11 md:h-12 bg-neutral-base-900 hover:bg-neutral-base-800 text-white px-6 rounded-2xl md:rounded-full font-bold text-[11px] md:text-[12px] uppercase tracking-widest transition-all shadow-xl shadow-neutral-base-900/20 flex items-center justify-center gap-2 disabled:opacity-50"
-                                    >
-                                        {isFixing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                                        Sesuaikan Stok
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                            <div className="relative group/banner">
+                                {/* Glassmorphic Background with Gradient */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-rose-50/80 backdrop-blur-md rounded-[24px] md:rounded-[32px] border border-red-100/60 shadow-[0_20px_50px_-12px_rgba(239,68,68,0.12)] transition-all duration-500 group-hover/banner:shadow-[0_25px_60px_-12px_rgba(239,68,68,0.18)]" />
 
-            {isLoading ? (
-                <div className="py-6 md:py-12 flex items-center justify-center">
-                    <Loader2 className="w-6 h-6 animate-spin text-neutral-base-200" />
-                </div>
-            ) : items.length === 0 ? (
-                <div className="bg-white border border-neutral-base-100 p-6 md:p-8 rounded-xl md:rounded-2xl text-center shadow-sm">
-                    <p className="text-neutral-base-400 text-sm">Keranjang Anda kosong.</p>
-                </div>
-            ) : (
-                <div className="relative">
-                    {isFixing && (
-                        <div className="absolute inset-0 bg-white/20 backdrop-blur-xs z-10 flex items-center justify-center rounded-[30px]" />
+                                <div className="relative p-5 md:p-7 flex flex-col md:flex-row md:items-center justify-between gap-5 md:gap-8">
+                                    <div className="flex items-start gap-4 md:gap-5">
+                                        {/* Animated Icon Container */}
+                                        <div className="relative shrink-0">
+                                            <motion.div
+                                                animate={{
+                                                    scale: [1, 1.1, 1],
+                                                    opacity: [0.5, 0.8, 0.5]
+                                                }}
+                                                transition={{
+                                                    duration: 3,
+                                                    repeat: Infinity,
+                                                    ease: "easeInOut"
+                                                }}
+                                                className="absolute inset-0 bg-red-400 rounded-2xl blur-xl"
+                                            />
+                                            <div className="relative w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center border border-red-50">
+                                                <AlertCircle className="w-5 h-5 md:w-7 md:h-7 text-red-600" />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1 pt-0.5">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h4 className="text-[14px] md:text-[18px] font-black text-red-950 tracking-tight font-montserrat">
+                                                    Kendala Pesanan
+                                                </h4>
+                                                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                                            </div>
+                                            <p className="text-[11px] md:text-[13px] font-bold text-red-800/70 leading-relaxed max-w-[320px] md:max-w-md font-montserrat">
+                                                Ada <span className="text-red-600 underline decoration-red-200 decoration-2 underline-offset-4">{unavailableItems.length + insufficientStockItems.length} produk</span> bermasalah. Segera bereskan sebelum melanjutkan pembayaran.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
+                                        {unavailableItems.length > 0 && (
+                                            <motion.button
+                                                whileHover={{ y: -1, scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                                disabled={isLoading || isFixing}
+                                                onClick={handleClearUnavailable}
+                                                className="h-9 md:h-11 bg-rose-600 hover:bg-rose-700 text-white px-5 md:px-7 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-widest transition-all shadow-lg shadow-rose-200 flex items-center justify-center gap-2 disabled:opacity-50 font-montserrat"
+                                            >
+                                                {isFixing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5 md:w-4 h-4" />}
+                                                <span>hapus</span>
+                                            </motion.button>
+                                        )}
+                                        {insufficientStockItems.length > 0 && (
+                                            <motion.button
+                                                whileHover={{ y: -1, scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                                disabled={isFixing}
+                                                onClick={handleFixQuantities}
+                                                className="h-9 md:h-11 bg-neutral-base-900 hover:bg-black text-white px-5 md:px-7 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-widest transition-all shadow-lg shadow-neutral-base-900/10 flex items-center justify-center gap-2 disabled:opacity-50 font-montserrat"
+                                            >
+                                                {isFixing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 md:w-4 h-4" />}
+                                                <span>sesuaikan</span>
+                                            </motion.button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
                     )}
-                    <OrderList
-                        items={items}
-                        variant="checkout"
-                        onUpdateQuantity={(id, qty, stock) => {
-                            const item = items.find(i => i.id === id);
-                            if (item) {
-                                const delta = qty - item.qty;
-                                updateQuantity(id, item.qty, delta, stock);
-                            }
-                        }}
-                        onRemove={removeItem}
-                        onUpdateNotes={updateNotes}
-                    />
-                </div>
-            )}
-            {removeAllItems && items.length > 0 && (
-                <div className="flex flex-col gap-3">
-                    <div className="h-px bg-neutral-base-100/30 my-1" />
-                    <div className="flex items-center justify-center">
-                        <button
-                            onClick={() => setIsConfirmOpen(true)}
-                            className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-neutral-base-300 hover:text-red-600 transition-colors group"
-                        >
-                            <Trash2 className="w-3 h-3 opacity-50 group-hover:opacity-100" />
-                            Hapus Semua
-                        </button>
+                </AnimatePresence>
+
+                {isLoading ? (
+                    <div className="py-6 md:py-12 flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 animate-spin text-neutral-base-200" />
                     </div>
-                </div>
-            )}
-            {removeAllItems && (
-                <ConfirmDialog
-                    open={isConfirmOpen}
-                    onOpenChange={setIsConfirmOpen}
-                    title="Hapus Semua Pesanan?"
-                    description="Anda akan menghapus seluruh isi keranjang. Tindakan ini tidak dapat dibatalkan."
-                    confirmText="Ya, Hapus Semua"
-                    cancelText="Batal"
-                    variant="destructive"
-                    onConfirm={removeAllItems}
-                />
-            )}
+                ) : items.length === 0 ? (
+                    <div className="bg-white border border-neutral-base-100 p-6 md:p-8 rounded-xl md:rounded-2xl text-center shadow-sm">
+                        <p className="text-neutral-base-400 text-sm">Keranjang Anda kosong.</p>
+                    </div>
+                ) : (
+                    <div className="relative">
+                        {isFixing && (
+                            <div className="absolute inset-0 bg-white/20 backdrop-blur-xs z-10 flex items-center justify-center rounded-[30px]" />
+                        )}
+                        <OrderList
+                            items={items}
+                            variant="checkout"
+                            onUpdateQuantity={(id, qty, stock) => {
+                                const item = items.find(i => i.id === id);
+                                if (item) {
+                                    const delta = qty - item.qty;
+                                    updateQuantity(id, item.qty, delta, stock);
+                                }
+                            }}
+                            onRemove={removeItem}
+                            onUpdateNotes={updateNotes}
+                        />
+                    </div>
+                )}
+                {removeAllItems && items.length > 0 && (
+                    <div className="flex flex-col gap-3">
+                        <div className="h-px bg-neutral-base-100/30 my-1" />
+                        <div className="flex items-center justify-center">
+                            <button
+                                onClick={() => setIsConfirmOpen(true)}
+                                className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-neutral-base-300 hover:text-red-600 transition-colors group"
+                            >
+                                <Trash2 className="w-3 h-3 opacity-50 group-hover:opacity-100" />
+                                Hapus Semua
+                            </button>
+                        </div>
+                    </div>
+                )}
+                {removeAllItems && (
+                    <ConfirmDialog
+                        open={isConfirmOpen}
+                        onOpenChange={setIsConfirmOpen}
+                        title="Hapus Semua Pesanan?"
+                        description="Anda akan menghapus seluruh isi keranjang. Tindakan ini tidak dapat dibatalkan."
+                        confirmText="Ya, Hapus Semua"
+                        cancelText="Batal"
+                        variant="destructive"
+                        onConfirm={removeAllItems}
+                    />
+                )}
             </div>
         </section>
     );

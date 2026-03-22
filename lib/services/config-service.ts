@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { centralConfig } from "@/lib/db/schema";
+import { centralConfig, companyProfile } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import logger from "@/lib/logger";
 
@@ -31,5 +31,21 @@ export class ConfigService {
         const val = await this.get(key, defaultValue.toString(), bypassCache);
         const parsed = parseInt(val, 10);
         return isNaN(parsed) ? defaultValue : parsed;
+    }
+
+    /**
+     * Get the active company's kecamatan ID.
+     */
+    static async getCompanyKecamatan(): Promise<string> {
+        try {
+            const [row]: any = await db.select({ kecamatan: companyProfile.kecamatan })
+                .from(companyProfile)
+                .where(eq(companyProfile.isAktif, 1))
+                .limit(1);
+            return row?.kecamatan ?? "";
+        } catch (error) {
+            logger.error("ConfigService Error: Failed to fetch company kecamatan", error);
+            return "";
+        }
     }
 }

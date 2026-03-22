@@ -115,6 +115,7 @@ export function useCheckout() {
     const [shippingOptions, setShippingOptions] = useState<any[]>([]);
     const [isLoadingShipping, setIsLoadingShipping] = useState(false);
     const [originName, setOriginName] = useState("");
+    const [origin, setOrigin] = useState("");
 
     // Dynamic Options State
     const [couriers, setCouriers] = useState<any[]>([]);
@@ -133,13 +134,14 @@ export function useCheckout() {
     useEffect(() => {
         const fetchConfig = async () => {
             try {
-                const config = await checkoutApi.getConfig(["biaya_packing", "packing_fee", "whatsapp_nomor"]);
+                const config = await checkoutApi.getConfig(["biaya_packing", "packing_fee", "whatsapp_nomor", "kecamatan"]);
                 const pFee = config.biaya_packing || config.packing_fee;
                 if (pFee) {
                     const parsed = parseInt(pFee);
                     setPackingFee(!isNaN(parsed) ? parsed : CONFIG.PACKING_FEE);
                 }
                 if (config.whatsapp_nomor) setWhatsappAdmin(config.whatsapp_nomor);
+                if (config.kecamatan) setOrigin(config.kecamatan);
             } catch (err) {
                 console.error("Failed to fetch dynamic config:", err);
             }
@@ -221,7 +223,7 @@ export function useCheckout() {
     }, [fetchCouriersQuery.data]);
 
     const fetchShippingCost = useCallback(async () => {
-        if (!shippingForm.kecamatan || totalWeight === 0) return;
+        if (!shippingForm.kecamatan || totalWeight === 0 || !origin) return;
 
         // Use districtId for shipping API if available, fallback to kecamatan string
         const destination = (shippingForm as any).districtId || shippingForm.kecamatan;
@@ -260,14 +262,19 @@ export function useCheckout() {
         setIsLoadingShipping(true);
         try {
             const data = await checkoutApi.getShippingCost({
-                destination: destination,
+                origin: Number(origin),
+                destination: Number(destination),
                 weight: totalWeight,
-                courier: "ALL"
+                courier: couriers.map((c: any) => c.code).join(":"),
+                price: "lowest"
             });
             if (data.rajaongkir?.results) {
                 const results = data.rajaongkir.results;
                 if (data.rajaongkir.originName) {
                     setOriginName(data.rajaongkir.originName);
+                }
+                if (data.rajaongkir.origin) {
+                    setOrigin(data.rajaongkir.origin);
                 }
                 const allCosts = results.flatMap((r: any) =>
                     (r.costs || []).map((c: any) => ({
@@ -275,7 +282,7 @@ export function useCheckout() {
                         courierCode: (r.code || r.name || "Kurir").toUpperCase(),
                         courierName: r.name || r.code || "Kurir"
                     }))
-                );
+                ).sort((a: any, b: any) => (a.cost[0]?.value || 0) - (b.cost[0]?.value || 0));
                 handleCosts(allCosts);
             }
         } catch (error) {
@@ -284,7 +291,7 @@ export function useCheckout() {
         } finally {
             setIsLoadingShipping(false);
         }
-    }, [shippingForm.kecamatan, (shippingForm as any).districtId, totalWeight]);
+    }, [shippingForm.kecamatan, (shippingForm as any).districtId, totalWeight, origin]);
 
     useEffect(() => {
         fetchShippingCost();
@@ -601,15 +608,15 @@ export function useCheckout() {
                         </div>,
                         { duration: 5000 }
                     );
-                    
+
                     queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
                     window.scrollTo({ top: 0, behavior: "smooth" });
                 } else {
                     // Fallback for other errors
-                    const isStockError = data.desc?.toLowerCase().includes("stok") || 
-                                       data.desc?.toLowerCase().includes("tersedia") || 
-                                       data.message?.toLowerCase().includes("stok");
-                                       
+                    const isStockError = data.desc?.toLowerCase().includes("stok") ||
+                        data.desc?.toLowerCase().includes("tersedia") ||
+                        data.message?.toLowerCase().includes("stok");
+
                     if (isStockError) {
                         queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
                         window.scrollTo({ top: 0, behavior: "smooth" });

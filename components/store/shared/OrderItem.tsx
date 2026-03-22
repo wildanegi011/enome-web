@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import FallbackImage from "@/components/store/shared/FallbackImage";
-import { Minus, Plus, Trash2, Zap, MessageSquare, ChevronRight } from "lucide-react";
+import { Minus, Plus, Trash2, Zap, MessageSquare, ChevronRight, ShieldCheck } from "lucide-react";
 import { ASSET_URL } from "@/config/config";
 import Link from "next/link";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -74,9 +74,10 @@ export default function OrderItem({
         <div
             key={item.id}
             className={cn(
-                "group relative transition-all duration-500 rounded-[20px] md:rounded-[32px] overflow-hidden",
-                isCheckout ? "p-3 md:p-6" : "p-5 md:p-7 bg-white border border-neutral-base-100 hover:border-neutral-base-900 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-xl hover:shadow-neutral-base-900/5",
-                (isOffline || isStockInsufficient) && "border-red-100 bg-red-50/10 ring-1 ring-red-100/50"
+                "group relative border transition-all duration-500 rounded-[24px] md:rounded-[36px] overflow-hidden",
+                isCheckout ? "p-4 md:p-6 bg-white/40" : "p-5 md:p-7 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-xl hover:shadow-neutral-base-900/5",
+                isSelected ? "ring-1 ring-amber-200 bg-amber-50/10" : "border-neutral-base-100/50",
+                (isOffline || isStockInsufficient) && "border-red-500/10 ring-1 ring-red-500/20 bg-red-50/5 shadow-[0_8px_30px_rgba(239,68,68,0.08)]"
             )}
         >
             {/* Top Layout Part: Image & Info */}
@@ -125,12 +126,11 @@ export default function OrderItem({
 
                 {/* 3. Info Section */}
                 <div className={cn(
-                    "flex-1 min-w-0 flex flex-col self-stretch",
-                    isOffline && "opacity-60"
+                    "flex-1 min-w-0 flex flex-col self-stretch transition-all duration-300",
+                    (isOffline || isStockInsufficient) && "opacity-40 grayscale"
                 )}>
                     {/* --- DESKTOP VIEW (md+) --- */}
                     <div className="hidden md:flex flex-col flex-1">
-                        {/* TOP ROW: Title & Trash */}
                         <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0 flex-1">
                                 <Link
@@ -163,6 +163,24 @@ export default function OrderItem({
                                         )} />
                                         <span className="text-[9px] font-bold uppercase tracking-widest leading-none">
                                             {item.isFlashsaleExpired === 1 ? "Promo Berakhir" : "Flash Sale"}
+                                        </span>
+                                    </div>
+                                )}
+                                
+                                {/* Status Badge (Below Title) */}
+                                {(isOffline || isStockInsufficient) && (
+                                    <div className={cn(
+                                        "mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 border rounded-lg transition-colors",
+                                        isStockInsufficient ? "bg-amber-50 border-amber-100 text-amber-600 shadow-sm shadow-amber-900/5" : "bg-red-50 border-red-100 text-red-600 shadow-sm shadow-red-900/5"
+                                    )}>
+                                        <div className={cn(
+                                            "w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0",
+                                            isStockInsufficient ? "bg-amber-100" : "bg-red-100"
+                                        )}>
+                                            <ShieldCheck className="w-2.5 h-2.5" />
+                                        </div>
+                                        <span className="text-[9px] font-black uppercase tracking-[0.12em] leading-none font-montserrat">
+                                            {item.isOnline === 0 ? "Produk Tidak Tersedia Saat Ini" : item.stock === 0 ? "Stok Habis" : "Stok Tidak Mencukupi"}
                                         </span>
                                     </div>
                                 )}
@@ -203,7 +221,7 @@ export default function OrderItem({
                             <span className={cn(
                                 "font-bold text-neutral-base-900 font-montserrat tracking-tight tabular-nums leading-none",
                                 isCheckout ? "text-[20px]" : "text-[24px]",
-                                isOffline && "text-neutral-base-300 line-through font-medium"
+                                isOffline && "text-neutral-base-400 line-through font-medium"
                             )}>
                                 {formatCurrency(Number(item.harga || 0) * Number(item.qty || 0))}
                             </span>
@@ -246,8 +264,12 @@ export default function OrderItem({
                                     value={localNotes}
                                     onChange={(e) => setLocalNotes(e.target.value)}
                                     onBlur={handleNotesBlur}
-                                    placeholder="Tambahkan catatan..."
-                                    className="w-full bg-neutral-base-50/50 hover:bg-neutral-base-50 focus:bg-white border border-transparent focus:border-neutral-base-200 rounded-xl px-4 py-3 text-[13px] font-medium outline-none transition-all placeholder:text-neutral-300"
+                                    disabled={isOffline}
+                                    placeholder={isOffline ? "Prdouk tidak tersedia" : "Tambahkan catatan..."}
+                                    className={cn(
+                                        "w-full border border-transparent rounded-xl px-4 py-3 text-[13px] font-medium outline-none transition-all placeholder:text-neutral-300",
+                                        isOffline ? "bg-neutral-base-100/50 cursor-not-allowed" : "bg-neutral-base-50/50 hover:bg-neutral-base-50 focus:bg-white focus:border-neutral-base-200"
+                                    )}
                                 />
                             </div>
                         )}
@@ -273,6 +295,19 @@ export default function OrderItem({
                                     </h3>
                                 </Link>
 
+                                {/* Mobile Status Badge */}
+                                {(isOffline || isStockInsufficient) && (
+                                    <div className={cn(
+                                        "mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 border rounded-md transition-colors",
+                                        isStockInsufficient ? "bg-amber-50 border-amber-100 text-amber-600" : "bg-red-50 border-red-100 text-red-600"
+                                    )}>
+                                        <ShieldCheck className="w-2.5 h-2.5 shrink-0" />
+                                        <span className="text-[8px] font-bold uppercase tracking-widest leading-none font-montserrat">
+                                            {item.isOnline === 0 ? "Tidak Tersedia" : item.stock === 0 ? "Stok Habis" : "Stok Limit"}
+                                        </span>
+                                    </div>
+                                )}
+
                                 {/* Attributes List (Mobile Collapsible - Shopee Style) */}
                                 <div className="mt-2 text-neutral-base-900">
                                     <button
@@ -280,7 +315,11 @@ export default function OrderItem({
                                             e.stopPropagation();
                                             setIsVariationsExpanded(!isVariationsExpanded);
                                         }}
-                                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-base-50/80 border border-neutral-base-100 rounded-lg hover:bg-neutral-base-100 transition-all group active:scale-[0.98]"
+                                        disabled={isOffline}
+                                        className={cn(
+                                            "inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-base-50/80 border border-neutral-base-100 rounded-lg transition-all group active:scale-[0.98]",
+                                            isOffline ? "opacity-50 cursor-not-allowed" : "hover:bg-neutral-base-100"
+                                        )}
                                     >
                                         <div className="flex items-center gap-1.5 min-w-0">
                                             <span className="text-[10px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] whitespace-nowrap font-montserrat">Variasi:</span>
@@ -332,7 +371,7 @@ export default function OrderItem({
                                 <div className="mt-3">
                                     <span className={cn(
                                         "font-bold text-neutral-base-900 font-montserrat tracking-tight tabular-nums leading-none text-[16px]",
-                                        isOffline ? "text-neutral-base-300 line-through font-medium" : ""
+                                        isOffline ? "text-neutral-base-400 line-through font-medium" : ""
                                     )}>
                                         {formatCurrency(Number(item.harga || 0) * Number(item.qty || 0))}
                                     </span>
@@ -373,8 +412,12 @@ export default function OrderItem({
                             value={localNotes}
                             onChange={(e) => setLocalNotes(e.target.value)}
                             onBlur={handleNotesBlur}
-                            placeholder="Tulis catatan..."
-                            className="flex-1 bg-neutral-base-50/50 focus:bg-white border border-transparent focus:border-neutral-base-200 rounded-xl px-3 h-9 text-[12px] font-medium outline-none transition-all placeholder:text-neutral-300 min-w-0"
+                            disabled={isOffline}
+                            placeholder={isOffline ? "Produk tidak tersedia" : "Tulis catatan..."}
+                            className={cn(
+                                "flex-1 border border-transparent rounded-xl px-3 h-9 text-[12px] font-medium outline-none transition-all placeholder:text-neutral-300 min-w-0",
+                                isOffline ? "bg-neutral-base-100/50 cursor-not-allowed" : "bg-neutral-base-50/50 focus:bg-white focus:border-neutral-base-200"
+                            )}
                         />
                     )}
 
@@ -407,7 +450,6 @@ export default function OrderItem({
                     </div>
                 </div>
             </div>
-
         </div>
     );
 }
