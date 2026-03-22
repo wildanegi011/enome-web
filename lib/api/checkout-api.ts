@@ -25,7 +25,7 @@ export interface OrderRequest {
 }
 
 export const checkoutApi = {
-    getPaymentMethods: () => apiClient<any[]>("/api/payment-methods"),
+    getPaymentMethods: () => apiClient<{ methods: any[]; lastUsed: string | null }>("/api/payment-methods"),
     getCouriers: () => apiClient<any[]>("/api/couriers"),
     getShippingCost: (data: ShippingRequest) =>
         apiClient<any>("/api/shipping", {

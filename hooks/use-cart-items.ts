@@ -120,6 +120,21 @@ export function useCartItems() {
         updateNotes: (id: number, notes: string) => updateNotesMutation.mutate({ id, notes }),
         removeItem: (id: number) => removeItemMutation.mutate(id),
         removeAll: () => removeAllMutation.mutate(),
+        fixQuantities: async (insufficientItems: CartItem[]) => {
+            for (const item of insufficientItems) {
+                const newQty = item.stock || 0;
+                if (newQty > 0) {
+                    await updateQuantityMutation.mutateAsync({ id: item.id, qty: newQty });
+                } else {
+                    await removeItemMutation.mutateAsync(item.id);
+                }
+            }
+        },
+        clearUnavailable: async (unavailableItems: CartItem[]) => {
+            for (const item of unavailableItems) {
+                await removeItemMutation.mutateAsync(item.id);
+            }
+        },
         refetch,
     };
 }

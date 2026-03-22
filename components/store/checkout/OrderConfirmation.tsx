@@ -1,0 +1,285 @@
+"use client";
+
+import React from "react";
+import { 
+    Dialog, 
+    DialogContent, 
+    DialogHeader, 
+    DialogTitle, 
+    DialogDescription,
+    DialogFooter 
+} from "@/components/ui/dialog";
+import { 
+    Drawer, 
+    DrawerContent, 
+    DrawerHeader, 
+    DrawerTitle, 
+    DrawerDescription,
+    DrawerFooter 
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { toTitleCase, cn } from "@/lib/utils";
+import { 
+    ShoppingBag, 
+    MapPin, 
+    Truck, 
+    CreditCard, 
+    ChevronRight, 
+    Loader2, 
+    ShieldCheck, 
+    Package,
+    AlertCircle,
+    Check
+} from "lucide-react";
+import FallbackImage from "@/components/store/shared/FallbackImage";
+import { ASSET_URL } from "@/config/config";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface OrderConfirmationProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => Promise<void>;
+    isSubmitting: boolean;
+    isSuccess?: boolean;
+    cartItems: any[];
+    shippingForm: any;
+    paymentMethod: string;
+    grandTotal: number;
+    shippingPrice: number;
+    packingFee: number;
+    voucherDiscount: number;
+    appliedWalletAmount: number;
+    remainingBill: number;
+    formatPrice: (price: number) => string;
+}
+
+export default function OrderConfirmation({
+    isOpen,
+    onClose,
+    onConfirm,
+    isSubmitting,
+    isSuccess,
+    cartItems,
+    shippingForm,
+    paymentMethod,
+    grandTotal,
+    shippingPrice,
+    packingFee,
+    voucherDiscount,
+    appliedWalletAmount,
+    remainingBill,
+    formatPrice
+}: OrderConfirmationProps) {
+    const isDesktop = useMediaQuery("(min-width: 768px)");
+
+    const ResumeContent = () => (
+        <div className="flex flex-col gap-6 py-4">
+            {/* Address Summary */}
+            <div className="bg-neutral-base-50/50 rounded-3xl p-4 border border-neutral-base-100/50">
+                <div className="flex items-center gap-2 mb-3">
+                    <MapPin className="w-4 h-4 text-neutral-base-900" />
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-base-400">Alamat Pengiriman</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                    <p className="text-[14px] font-bold text-neutral-base-900">
+                        {toTitleCase(shippingForm.name || "")}
+                    </p>
+                    <p className="text-[12px] text-neutral-base-600 leading-relaxed line-clamp-2">
+                        {toTitleCase(shippingForm.address || "")}, {toTitleCase(shippingForm.kecamatan || "")}, {toTitleCase(shippingForm.kota || "")}, {toTitleCase(shippingForm.provinsi || "")} {shippingForm.kodePos}
+                    </p>
+                </div>
+            </div>
+
+            {/* Courier & Payment Summary Row */}
+            <div className="grid grid-cols-2 gap-3">
+                <div className="bg-neutral-base-50/50 rounded-2xl p-3 border border-neutral-base-100/50">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Truck className="w-3.5 h-3.5 text-neutral-base-900" />
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-neutral-base-400">Pengiriman</span>
+                    </div>
+                    <p className="text-[12px] font-bold text-neutral-base-900 truncate">
+                        {toTitleCase(shippingForm.courier || "Kurir")} {toTitleCase(shippingForm.service || "")}
+                    </p>
+                </div>
+                <div className="bg-neutral-base-50/50 rounded-2xl p-3 border border-neutral-base-100/50">
+                    <div className="flex items-center gap-2 mb-2">
+                        <CreditCard className="w-3.5 h-3.5 text-neutral-base-900" />
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-neutral-base-400">Pembayaran</span>
+                    </div>
+                    <p className="text-[12px] font-bold text-neutral-base-900 truncate">
+                        {paymentMethod === 'wallet' ? 'Enome Wallet' : toTitleCase(paymentMethod || "Metode")}
+                    </p>
+                </div>
+            </div>
+
+            {/* Items Summary */}
+            <div>
+                <div className="flex items-center justify-between mb-3 px-1">
+                    <div className="flex items-center gap-2">
+                        <Package className="w-4 h-4 text-neutral-base-900" />
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-base-400">Rincian Barang</span>
+                    </div>
+                    <span className="text-[11px] font-bold text-neutral-base-900 tracking-tight">{cartItems.length} Item</span>
+                </div>
+                <ScrollArea className="h-40 pr-3">
+                    <div className="flex flex-col gap-3">
+                        {cartItems.map((item) => (
+                            <div key={item.id} className="flex gap-3">
+                                <div className="w-12 h-12 rounded-xl bg-neutral-base-100 overflow-hidden relative border border-neutral-base-100/50 shrink-0">
+                                    <FallbackImage 
+                                        src={item.gambar ? `${ASSET_URL}/img/${item.gambar}` : "/placeholder-product.jpg"}
+                                        alt={item.namaProduk}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                    <h4 className="text-[12px] font-bold text-neutral-base-900 truncate">{toTitleCase(item.namaProduk || "")}</h4>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                        <span className="text-[11px] font-medium text-neutral-base-400">{item.qty}x</span>
+                                        <span className="text-[11px] font-bold text-neutral-base-900">{formatPrice(item.harga)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </ScrollArea>
+            </div>
+
+            {/* Price Summary */}
+            <div className="border-t border-neutral-base-100 pt-4 mt-2">
+                <div className="flex flex-col gap-2.5">
+                    <div className="flex justify-between items-center px-1">
+                        <span className="text-[12px] font-medium text-neutral-base-400">Subtotal</span>
+                        <span className="text-[13px] font-bold text-neutral-base-900">{formatPrice(grandTotal - shippingPrice - packingFee + voucherDiscount)}</span>
+                    </div>
+                    <div className="flex justify-between items-center px-1">
+                        <span className="text-[12px] font-medium text-neutral-base-400">Pengiriman</span>
+                        <span className="text-[13px] font-bold text-neutral-base-900">{formatPrice(shippingPrice)}</span>
+                    </div>
+                    {voucherDiscount > 0 && (
+                        <div className="flex justify-between items-center px-1 text-rose-600 font-bold">
+                            <span className="text-[12px]">Voucher</span>
+                            <span className="text-[13px]">-{formatPrice(voucherDiscount)}</span>
+                        </div>
+                    )}
+                    {appliedWalletAmount > 0 && (
+                        <div className="flex justify-between items-center px-1 text-emerald-600 font-bold">
+                            <span className="text-[12px]">Enome Wallet</span>
+                            <span className="text-[13px]">-{formatPrice(appliedWalletAmount)}</span>
+                        </div>
+                    )}
+                    <div className="flex justify-between items-center px-1 pt-2 border-t border-neutral-base-50">
+                        <span className="text-[14px] font-bold text-neutral-base-900 uppercase tracking-widest">Total Bayar</span>
+                        <span className="text-[20px] font-bold text-neutral-base-900 tracking-tight">{formatPrice(remainingBill)}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Trust Banner */}
+            <div className="bg-emerald-50/50 rounded-2xl p-3 border border-emerald-100/50 flex items-center gap-3">
+                <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                <p className="text-[11px] text-emerald-800 font-medium leading-tight">
+                    Data Anda terenkripsi penuh. Klik konfirmasi untuk menyelesaikan pesanan Anda.
+                </p>
+            </div>
+        </div>
+    );
+
+    const ConfirmButton = () => (
+        <Button 
+            disabled={isSubmitting || isSuccess}
+            onClick={onConfirm}
+            className={cn(
+                "w-full h-14 md:h-16 rounded-2xl md:rounded-3xl font-bold text-[14px] uppercase tracking-widest md:tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl transition-all duration-500",
+                isSuccess 
+                    ? "bg-emerald-600 text-white shadow-emerald-200" 
+                    : "bg-neutral-base-900 text-white shadow-neutral-base-900/10 shadow-xl"
+            )}
+        >
+            {isSuccess ? (
+                <>
+                    <Check className="w-5 h-5" />
+                    Berhasil
+                </>
+            ) : isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+                <>
+                    Konfirmasi & Bayar
+                    <ChevronRight className="w-5 h-5" />
+                </>
+            )}
+        </Button>
+    );
+
+    if (isDesktop) {
+        return (
+            <Dialog open={isOpen} onOpenChange={(open) => !open && !isSubmitting && onClose()}>
+                <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none rounded-[32px]">
+                    <DialogHeader className="p-6 pb-0">
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center">
+                                <ShoppingBag className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <DialogTitle className="text-[20px] font-bold tracking-tight text-neutral-base-900">Konfirmasi Pesanan</DialogTitle>
+                                <DialogDescription className="text-[12px] text-neutral-base-400">Silakan periksa kembali detail pesanan Anda</DialogDescription>
+                            </div>
+                        </div>
+                    </DialogHeader>
+                    <div className="flex-1 overflow-hidden px-6">
+                        <ScrollArea className="max-h-[calc(85vh-200px)] pr-4">
+                            <ResumeContent />
+                        </ScrollArea>
+                    </div>
+                    <DialogFooter className="p-6 pt-0">
+                        <div className="flex flex-col gap-3 w-full">
+                            <ConfirmButton />
+                            <button 
+                                disabled={isSubmitting}
+                                onClick={onClose}
+                                className="w-full h-10 text-[12px] font-bold text-neutral-base-300 hover:text-neutral-base-900 uppercase tracking-widest transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                                Periksa Kembali
+                            </button>
+                        </div>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
+    return (
+        <Drawer open={isOpen} onOpenChange={(open) => !open && !isSubmitting && onClose()} dismissible={!isSubmitting}>
+            <DrawerContent className="rounded-t-[32px] max-h-[96vh] p-0">
+                <div className="mx-auto w-12 h-1.5 bg-neutral-base-100 rounded-full mt-3 mb-2" />
+                <DrawerHeader className="px-6 py-4">
+                    <div className="flex items-center gap-4 text-left">
+                        <div className="w-12 h-12 rounded-2xl bg-neutral-base-900 flex items-center justify-center shrink-0">
+                            <ShoppingBag className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <DrawerTitle className="text-[18px] font-bold tracking-tight text-neutral-base-900">Konfirmasi Pesanan</DrawerTitle>
+                            <DrawerDescription className="text-[12px] text-neutral-base-400">Silakan periksa kembali detail pesanan Anda</DrawerDescription>
+                        </div>
+                    </div>
+                </DrawerHeader>
+                <div className="px-6 overflow-y-auto overscroll-contain pb-6">
+                    <ResumeContent />
+                    <div className="mt-4">
+                        <ConfirmButton />
+                        <button 
+                            disabled={isSubmitting}
+                            onClick={onClose}
+                            className="w-full py-4 text-[13px] font-bold text-neutral-base-300 uppercase tracking-widest mt-2 disabled:opacity-30"
+                        >
+                            Periksa Kembali
+                        </button>
+                    </div>
+                </div>
+            </DrawerContent>
+        </Drawer>
+    );
+}

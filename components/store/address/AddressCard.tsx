@@ -8,7 +8,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import { cn, toTitleCase } from "@/lib/utils";
 import { Address } from "@/hooks/use-addresses";
 
 export type AddressCardVariant = "account" | "selection" | "checkout";
@@ -65,17 +65,17 @@ export default function AddressCard({
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <span className={cn(
-                                "font-bold uppercase tracking-widest text-neutral-base-900",
+                                "font-bold tracking-widest text-neutral-base-900",
                                 isCheckout ? "text-[11px] md:text-[12px]" : "text-[13px] md:text-sm"
-                            )}>{address.label}</span>
+                            )}>{toTitleCase(address.label)}</span>
                             {address.isPrimary === 1 && !isCheckout && (
-                                <span className="bg-amber-50 text-amber-800 text-[9px] md:text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border border-amber-200/50">UTAMA</span>
+                                <span className="bg-amber-50 text-amber-800 text-[9px] md:text-[10px] font-bold tracking-widest px-2 py-0.5 rounded-full border border-amber-200/50">Utama</span>
                             )}
                         </div>
                         <p className={cn(
                             "font-bold text-neutral-base-400",
                             isCheckout ? "text-[10px] md:text-[11px]" : "text-[12px] md:text-[13px]"
-                        )}>{address.shopName || "Alamat Personal"}</p>
+                        )}>{toTitleCase(address.shopName || "Alamat Personal")}</p>
                     </div>
                 </div>
 
@@ -126,20 +126,20 @@ export default function AddressCard({
                 <div>
                     <p className={cn(
                         "font-bold text-neutral-base-900 mb-0.5",
-                        isCheckout ? "text-[12px] md:text-[13px]" : "text-[13px] md:text-sm"
-                    )}>{address.receiverName}</p>
+                        isCheckout ? "text-[13px] md:text-[14px]" : "text-[13px] md:text-[14px]"
+                    )}>{toTitleCase(address.receiverName)}</p>
                     <p className={cn(
                         "font-bold text-neutral-base-400",
-                        isCheckout ? "text-[11px] md:text-[12px]" : "text-[12px] md:text-[13px]"
+                        isCheckout ? "text-[13px] md:text-[14px]" : "text-[13px] md:text-[14px]"
                     )}>{address.phoneNumber}</p>
                 </div>
                 <div className="flex gap-2.5 md:gap-3">
                     <Navigation2 className={cn("text-amber-800 shrink-0 mt-0.5", isCheckout ? "w-3 h-3 md:w-3.5 md:h-3.5" : "w-3.5 h-3.5 md:w-4 md:h-4")} />
                     <p className={cn(
-                        "font-bold text-neutral-base-600 leading-relaxed uppercase tracking-tight",
-                        isCheckout ? "text-[11px] md:text-[12px]" : "text-[13px] md:text-[14px]"
+                        "font-bold text-neutral-base-600 leading-relaxed tracking-tight",
+                        isCheckout ? "text-[13px] md:text-[14px]" : "text-[13px] md:text-[14px]"
                     )}>
-                        {address.fullAddress}, {address.city}, {address.province}, {address.postalCode}
+                        {toTitleCase(`${address.fullAddress}, ${address.city}, ${address.province}, ${address.postalCode}`)}
                     </p>
                 </div>
             </div>
@@ -148,7 +148,7 @@ export default function AddressCard({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-neutral-base-50 mt-auto">
                     <div className="flex items-center gap-2">
                         {address.isPrimary === 1 ? (
-                            <div className="flex items-center gap-2 text-amber-800 font-bold text-[10px] md:text-[11px] uppercase tracking-widest">
+                            <div className="flex items-center gap-2 text-amber-800 font-bold text-[10px] md:text-[11px] tracking-widest">
                                 <CheckCircle2 className="w-4 h-4" /> Alamat Pengiriman Utama
                             </div>
                         ) : onSetPrimary && (
@@ -157,7 +157,7 @@ export default function AddressCard({
                                     e.stopPropagation();
                                     onSetPrimary(address.id);
                                 }}
-                                className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-neutral-base-400 hover:text-amber-800 transition-colors"
+                                className="text-[10px] md:text-[11px] font-bold tracking-widest text-neutral-base-400 hover:text-amber-800 transition-colors"
                             >
                                 Atur Sebagai Utama
                             </button>

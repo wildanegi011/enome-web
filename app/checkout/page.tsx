@@ -15,6 +15,7 @@ import CourierSection from "@/components/store/checkout/CourierSection";
 import DropshipperSection from "@/components/store/checkout/DropshipperSection";
 import PaymentSection from "@/components/store/checkout/PaymentSection";
 import OrderSummary from "@/components/store/checkout/OrderSummary";
+import OrderConfirmation from "@/components/store/checkout/OrderConfirmation";
 import { formatCurrency } from "@/lib/utils";
 
 function CheckoutContent() {
@@ -27,15 +28,16 @@ function CheckoutContent() {
         voucherCode, setVoucherCode, isVoucherApplied, setIsVoucherApplied, voucherDiscount, isVoucherLoading,
         addresses, isLoadingAddresses, isSelectionModalOpen, setIsSelectionModalOpen, isAddAddressModalOpen, setIsAddAddressModalOpen,
         paymentMethod, setPaymentMethod, paymentMethods, isLoadingPayments,
-        isSubmitting,
+        isSubmitting, isSuccess,
         couriers, isLoadingCouriers, shippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         packingFee, grandTotal, remainingBill, originName,
-        handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, submitOrder,
+        handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, 
+        initiateOrder, completeOrder,
         setShippingOptions, setVoucherData,
+        isConfirmOpen, setIsConfirmOpen,
         errors, setErrors,
-        refreshShipping
+        refreshShipping,
     } = useCheckout();
-
     const addressRef = useRef<HTMLDivElement>(null);
     const shippingRef = useRef<HTMLDivElement>(null);
     const paymentRef = useRef<HTMLDivElement>(null);
@@ -229,7 +231,7 @@ function CheckoutContent() {
                                 item.isOnline === 0 ||
                                 (item.stock !== undefined && (item.stock <= 0 || Number(item.qty) > item.stock))
                             )}
-                            submitOrder={submitOrder}
+                            initiateOrder={initiateOrder}
                             formatPrice={formatCurrency}
                         />
                     </div>
@@ -257,7 +259,7 @@ function CheckoutContent() {
                                     item.isOnline === 0 ||
                                     (item.stock !== undefined && (item.stock <= 0 || Number(item.qty) > item.stock))
                                 )}
-                                onClick={submitOrder}
+                                onClick={initiateOrder}
                                 className="h-12 px-6 bg-neutral-base-900 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-neutral-base-900/10 active:scale-95 transition-all disabled:opacity-50"
                             >
                                 {isSubmitting ? (
@@ -273,6 +275,25 @@ function CheckoutContent() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Order Confirmation Modal/Drawer */}
+            <OrderConfirmation 
+                isOpen={isConfirmOpen}
+                onClose={() => setIsConfirmOpen(false)}
+                onConfirm={completeOrder}
+                isSubmitting={isSubmitting}
+                isSuccess={isSuccess}
+                cartItems={cartItems}
+                shippingForm={shippingForm}
+                paymentMethod={paymentMethod}
+                grandTotal={totalAmount + shippingPrice + packingFee}
+                shippingPrice={shippingPrice}
+                packingFee={packingFee}
+                voucherDiscount={voucherDiscount}
+                appliedWalletAmount={appliedWalletAmount}
+                remainingBill={remainingBill}
+                formatPrice={formatCurrency}
+            />
         </div>
     );
 }

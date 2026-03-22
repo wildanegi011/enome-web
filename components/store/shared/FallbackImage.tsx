@@ -94,7 +94,7 @@ export default function FallbackImage({
                     opacity: isLoading ? 0 : 1,
                     scale: isLoading ? 1.05 : 1
                 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
                 className="w-full h-full"
             >
                 <Image

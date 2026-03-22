@@ -5,7 +5,7 @@ import FallbackImage from "@/components/store/shared/FallbackImage";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ShoppingBag, ChevronRight, MapPin, Truck } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, toTitleCase } from "@/lib/utils";
 import FormattedDate from "@/components/store/shared/FormattedDate";
 import { ASSET_URL } from "@/config/config";
 import { CONFIG } from "@/lib/config";
@@ -97,7 +97,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                         />
                     </div>
                     <div className="flex-1 min-w-0 pr-4">
-                        <h4 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900 line-clamp-1">{order.firstItemName}</h4>
+                        <h4 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900 line-clamp-1">{toTitleCase(order.firstItemName || "")}</h4>
                         <p className="text-[12px] md:text-[14px] text-neutral-base-400 font-medium mt-1">
                             {order.sizeCount && order.sizeCount > 1 ? (
                                 `Ukuran: ${order.uniqueSizes} • `

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { AlertCircle, Copy, Check, CreditCard } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, toTitleCase } from "@/lib/utils";
 import FormattedDate from "@/components/store/shared/FormattedDate";
 
 interface PaymentInstructionProps {
@@ -56,7 +56,7 @@ export default function PaymentInstruction({
             <div className="space-y-6">
                 <div>
                     <p className="text-[10px] md:text-[11px] font-black text-amber-800/60 uppercase tracking-[0.12em] font-montserrat mb-3">
-                        Transfer Ke Rekening {paymentInfo.namaBank}
+                        Transfer Ke Rekening {toTitleCase(paymentInfo.namaBank || "")}
                     </p>
                     <div className="flex items-center gap-3">
                         <h4 className="text-[18px] md:text-[20px] font-black text-neutral-base-900 tracking-widest font-mono">
@@ -74,7 +74,7 @@ export default function PaymentInstruction({
                         </button>
                     </div>
                     <p className="text-[13px] md:text-[14px] font-bold text-neutral-base-500 mt-2 font-montserrat tracking-tight">
-                        a.n {paymentInfo.namaPemilik}
+                        a.n {toTitleCase(paymentInfo.namaPemilik || "")}
                     </p>
                 </div>
 

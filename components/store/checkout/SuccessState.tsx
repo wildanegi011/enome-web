@@ -7,7 +7,7 @@ import { CheckCircle2, ChevronLeft, Copy, ShieldCheck, Clock, Truck, AlertCircle
 import { motion } from "framer-motion";
 import { ASSET_URL } from "@/config/config";
 import { toast } from "sonner";
-import { cn, handleWhatsAppConfirm } from "@/lib/utils";
+import { cn, toTitleCase, handleWhatsAppConfirm } from "@/lib/utils";
 import { CONFIG } from "@/lib/config";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import FormattedDate from "@/components/store/shared/FormattedDate";
@@ -181,18 +181,19 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                     {/* Bank Account */}
                                     <div>
                                         <p className="text-[10px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest mb-3">Rekening Tujuan</p>
-                                        <div className="bg-neutral-base-50 rounded-xl md:rounded-2xl p-4 md:p-5 flex items-center justify-between gap-3">
+                                        <div className="bg-neutral-base-50 rounded-xl md:rounded-2xl p-4 md:p-5 flex items-center justify-between gap-3 flex-wrap md:flex-nowrap">
                                             <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                                                <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-white flex items-center justify-center p-2 md:p-2.5 shrink-0 border border-neutral-base-100 shadow-sm">
-                                                    <Image
-                                                        src={orderResult.bankLogo ? `${ASSET_URL}/img/${orderResult.bankLogo}` : `${ASSET_URL}/img/rekening_pembayaran/bca.png`}
-                                                        alt={orderResult.bankName || "Bank"}
-                                                        width={48}
-                                                        height={16}
-                                                        className="object-contain"
-                                                    />
-
-                                                </div>
+                                                {orderResult.bankLogo && (
+                                                    <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-white flex items-center justify-center p-2 md:p-2.5 shrink-0 border border-neutral-base-100 shadow-sm relative overflow-hidden">
+                                                        <Image
+                                                            src={orderResult.bankLogo}
+                                                            alt={orderResult.bankName || "Bank"}
+                                                            fill
+                                                            className="object-contain p-1.5"
+                                                            sizes="48px"
+                                                        />
+                                                    </div>
+                                                )}
                                                 <div className="min-w-0">
                                                     <p className="text-[15px] md:text-[20px] font-bold text-neutral-base-900 tracking-tight leading-none mb-1 md:mb-1.5">{orderResult.bankAccount}</p>
                                                     <p className="text-[9px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest leading-none truncate">a/n {orderResult.bankOwner}</p>
@@ -295,7 +296,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                 <div className="space-y-2">
                                     <p className="text-[10px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest">Penerima</p>
                                     <div className="text-[12px] md:text-[13px] text-neutral-base-900 font-bold leading-tight">
-                                        {orderResult.customerName}
+                                        {toTitleCase(orderResult.customerName || "")}
                                         <p className="text-[11px] md:text-[12px] text-neutral-base-500 font-medium mt-0.5">{orderResult.customerPhone}</p>
                                     </div>
                                 </div>
@@ -304,7 +305,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                 <div className="space-y-2">
                                     <p className="text-[10px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest">Alamat Pengiriman</p>
                                     <p className="text-[11px] md:text-[12px] text-neutral-base-600 font-medium leading-relaxed italic">
-                                        {orderResult.fullAddress}
+                                        {toTitleCase(orderResult.fullAddress || "")}
                                     </p>
                                 </div>
 
@@ -313,8 +314,8 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                     <p className="text-[10px] md:text-[11px] font-bold text-neutral-base-400 uppercase tracking-widest">Ekspedisi</p>
                                     <div className="flex items-center gap-2">
                                         <Truck className="w-3.5 h-3.5 text-neutral-base-400" />
-                                        <span className="text-[11px] md:text-[12px] text-neutral-base-900 font-bold uppercase">{orderResult.courierName}</span>
-                                        <span className="text-[10px] md:text-[11px] text-neutral-base-400 font-medium">— {orderResult.courierService}</span>
+                                        <span className="text-[11px] md:text-[12px] text-neutral-base-900 font-bold uppercase">{toTitleCase(orderResult.courierName || "")}</span>
+                                        <span className="text-[10px] md:text-[11px] text-neutral-base-400 font-medium">— {toTitleCase(orderResult.courierService || "")}</span>
                                     </div>
                                 </div>
 
