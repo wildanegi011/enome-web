@@ -1,9 +1,11 @@
 import { apiClient } from "./api-client";
 
 export interface ShippingRequest {
-    destination: string;
+    origin: number;
+    destination: number;
     weight: number;
     courier: string;
+    price?: string;
 }
 
 export interface OrderRequest {

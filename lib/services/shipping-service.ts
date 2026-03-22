@@ -26,7 +26,7 @@ export class ShippingService {
     /**
      * Calculate shipping costs for all active couriers.
      */
-    static async calculateShipping(destination: string | number, weight: number): Promise<{ results: any[], originName: string }> {
+    static async calculateShipping(destination: string | number, weight: number, originOverride?: string, price?: string | number): Promise<{ results: any[], originName: string, originId: string }> {
         const apiKey = await ConfigService.get(CONFIG.RAJAONGKIR_KEY_VAR);
         if (!apiKey) throw new Error("rajaongkir_key_not_found");
 
@@ -43,9 +43,9 @@ export class ShippingService {
             .limit(1);
 
         const company = companyData[0];
-        // Priority for calculation origin: kecamatan ID -> kota ID -> default
-        const origin = company?.kecamatan || company?.kota || CONFIG.DEFAULT_ORIGIN_CITY;
-        
+        // Strictly use kecamatan from company profile as origin
+        const origin = company?.kecamatan || CONFIG.DEFAULT_ORIGIN_CITY;
+
         // Priority for display name: cityName from company profile's city ID
         const originName = company?.cityName || company?.subdistrictName || company?.kota || company?.kecamatan || "Origin";
 
@@ -61,15 +61,22 @@ export class ShippingService {
 
         if (!courierCodes) {
             logger.warn("ShippingService: No active automated couriers found");
-            return { results: [], originName };
+            return { results: [], originName, originId: origin };
         }
 
         logger.info("ShippingService: Fetching shipping costs for all couriers", { origin, destination, weight, courierCodes });
 
-        // Bypass cache to always fetch fresh data
-        const results = await this.fetchKomerce(apiKey, origin, destination, weight, courierCodes);
+        // Fetch each courier individually for better reliability
+        const allResults = await Promise.all(
+            activeCouriers.map(c =>
+                this.fetchKomerce(apiKey, origin, destination, weight, c.code?.toLowerCase() || "", price)
+            )
+        );
 
-        return { results, originName };
+        // Flatten the results
+        const results = allResults.flat();
+
+        return { results, originName, originId: origin };
     }
 
     /**
@@ -112,7 +119,7 @@ export class ShippingService {
         const cacheKey = `val-${origin}-${destination}-${weight}-${courier}`;
 
         // Bypass cache to always fetch fresh data for validation
-        let results = await this.fetchKomerce(apiKey, origin, destination, weight, courier.toLowerCase());
+        let results = await this.fetchKomerce(apiKey, origin, destination, weight, courier.toLowerCase(), claimedPrice);
 
         // Find the specific service
         const matchedCourier = results.find(r => r.code.toUpperCase() === courier.toUpperCase());
@@ -133,7 +140,7 @@ export class ShippingService {
         return { valid, actualPrice };
     }
 
-    private static async fetchKomerce(apiKey: string, origin: string, destination: string | number, weight: number, courier: string): Promise<any[]> {
+    private static async fetchKomerce(apiKey: string, origin: string | number, destination: string | number, weight: number, courier: string, price: string | number = ""): Promise<any[]> {
         try {
             const response = await fetch("https://rajaongkir.komerce.id/api/v1/calculate/district/domestic-cost", {
                 method: "POST",
@@ -142,11 +149,11 @@ export class ShippingService {
                     "key": apiKey
                 },
                 body: new URLSearchParams({
-                    origin: origin,
-                    destination: destination.toString(),
-                    weight: Math.max(1, weight).toString(),
+                    origin: String(origin),
+                    destination: String(destination),
+                    weight: String(Math.max(1, weight)),
                     courier: courier,
-                    price: "lowest"
+                    price: price ? String(price) : "lowest"
                 }),
                 cache: "no-store",
                 signal: AbortSignal.timeout(10000)

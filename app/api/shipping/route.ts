@@ -5,18 +5,19 @@ import { ShippingService } from "@/lib/services/shipping-service";
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { destination, weight } = body;
+        const { origin, destination, weight, price } = body;
 
         if (!destination || !weight) {
             return NextResponse.json({ message: "missing_params" }, { status: 400 });
         }
 
-        const { results, originName } = await ShippingService.calculateShipping(destination, weight);
+        const { results, originName, originId } = await ShippingService.calculateShipping(destination, weight, origin, price);
 
         return NextResponse.json({
             rajaongkir: {
                 results: results,
-                originName: originName
+                originName: originName,
+                origin: originId
             }
         });
 
