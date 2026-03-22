@@ -166,7 +166,7 @@ export default function OrderItem({
                                         </span>
                                     </div>
                                 )}
-                                
+
                                 {/* Status Badge (Below Title) */}
                                 {(isOffline || isStockInsufficient) && (
                                     <div className={cn(
@@ -288,7 +288,7 @@ export default function OrderItem({
                                     )}
                                 >
                                     <h3 className={cn(
-                                        "font-bold text-neutral-base-900 tracking-tight leading-[1.3] line-clamp-2 text-[15px] font-montserrat transition-colors duration-200",
+                                        "font-bold text-neutral-base-900 tracking-tight leading-[1.3] line-clamp-2 text-[13px] font-montserrat transition-colors duration-200",
                                         isOffline ? "line-through text-neutral-base-400 font-medium" : "group-hover/title:text-amber-900"
                                     )}>
                                         {item.namaProduk}
@@ -370,7 +370,7 @@ export default function OrderItem({
                                 {/* Mobile Price: Below Attributes */}
                                 <div className="mt-3">
                                     <span className={cn(
-                                        "font-bold text-neutral-base-900 font-montserrat tracking-tight tabular-nums leading-none text-[16px]",
+                                        "font-bold text-neutral-base-900 font-montserrat tracking-tight tabular-nums leading-none text-[13px]",
                                         isOffline ? "text-neutral-base-400 line-through font-medium" : ""
                                     )}>
                                         {formatCurrency(Number(item.harga || 0) * Number(item.qty || 0))}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Package, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { ASSET_URL } from "@/config/config";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, toTitleCase } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -73,8 +73,8 @@ export default function OrderItemsCard({ items, orderNotes }: OrderItemsCardProp
 
                             {/* Product Info */}
                             <div className="flex-1 min-w-0 pt-2">
-                                <h3 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900 mb-3 md:mb-4 uppercase leading-tight font-montserrat tracking-tight">
-                                    {item.namaProduk}
+                                <h3 className="text-[14px] md:text-[16px] font-bold text-neutral-base-900 mb-3 md:mb-4 leading-tight font-montserrat tracking-tight">
+                                    {toTitleCase(item.namaProduk || "")}
                                 </h3>
 
                                 {/* Attributes Row 1: Variant & Warna */}
@@ -85,7 +85,7 @@ export default function OrderItemsCard({ items, orderNotes }: OrderItemsCardProp
                                                 <>
                                                     <div className="flex items-center gap-1.5">
                                                         <span className="text-[11px] md:text-[12px] font-medium text-neutral-base-400 font-montserrat">Motif:</span>
-                                                        <span className="text-[11px] md:text-[12px] font-bold text-neutral-base-900 font-montserrat">{item.variant}</span>
+                                                        <span className="text-[11px] md:text-[12px] font-bold text-neutral-base-900 font-montserrat">{toTitleCase(item.variant || "")}</span>
                                                     </div>
                                                 </>
                                             )}
@@ -95,7 +95,7 @@ export default function OrderItemsCard({ items, orderNotes }: OrderItemsCardProp
                                             {item.warna && (
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="text-[11px] md:text-[12px] font-medium text-neutral-base-400 font-montserrat">Warna:</span>
-                                                    <span className="text-[11px] md:text-[12px] font-bold text-neutral-base-900 font-montserrat">{item.warna}</span>
+                                                    <span className="text-[11px] md:text-[12px] font-bold text-neutral-base-900 font-montserrat">{toTitleCase(item.warna || "")}</span>
                                                 </div>
                                             )}
                                         </div>

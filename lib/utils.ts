@@ -20,3 +20,8 @@ export function handleWhatsAppConfirm(orderId: string, totalAmount: number, paym
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
   window.open(whatsappUrl, "_blank");
 }
+
+export function toTitleCase(str: string) {
+    if (!str) return "";
+    return str.toLowerCase().replace(/(?:^|\s)\w/g, (match) => match.toUpperCase());
+}

@@ -18,6 +18,7 @@ import { useCartItems } from "@/hooks/use-cart-items";
 import CartList from "@/components/store/cart/CartList";
 import CartSummary from "@/components/store/cart/CartSummary";
 import EmptyState from "@/components/store/shared/EmptyState";
+import CartStockAlert from "@/components/store/shared/CartStockAlert";
 import { cn } from "@/lib/utils";
 
 export default function CartPage() {
@@ -33,6 +34,8 @@ export default function CartPage() {
         removeItem,
         removeAll,
         selectedItems,
+        fixQuantities,
+        clearUnavailable
     } = useCartItems();
 
     const [isConfirmDeleteAllOpen, setIsConfirmDeleteAllOpen] = useState(false);
@@ -171,6 +174,12 @@ export default function CartPage() {
                         </div>
                     ) : (
                         <div className="flex flex-col gap-6 md:gap-10">
+                            <CartStockAlert
+                                items={cartItems}
+                                onFixQuantities={fixQuantities}
+                                onClearUnavailable={clearUnavailable}
+                                isLoading={isLoading}
+                            />
                             <div className="flex flex-col lg:flex-row gap-6 md:gap-10 items-start">
                                 <CartList
                                     items={cartItems}

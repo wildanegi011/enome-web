@@ -82,8 +82,11 @@ export function useCheckout() {
     const [paymentMethod, setPaymentMethod] = useState("");
     const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
     const [isLoadingPayments, setIsLoadingPayments] = useState(false);
+    const [hasSetDefaultPayment, setHasSetDefaultPayment] = useState(false);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isVoucherLoading, setIsVoucherLoading] = useState(false);
     const [totalWeight, setTotalWeight] = useState(0);
     const [shippingOptions, setShippingOptions] = useState<any[]>([]);
@@ -186,7 +189,26 @@ export function useCheckout() {
 
     useEffect(() => {
         if (fetchPaymentMethodsQuery.data) {
-            setPaymentMethods(fetchPaymentMethodsQuery.data);
+            const methods = fetchPaymentMethodsQuery.data.methods || [];
+            setPaymentMethods(methods);
+            
+            // Auto-select last used payment method if available and no method is currently selected
+            // Use fuzzy matching to handle variations like "BCA" vs "Transfer Bank BCA"
+            if (fetchPaymentMethodsQuery.data.lastUsed && !paymentMethod && !hasSetDefaultPayment) {
+                const lastUsed = fetchPaymentMethodsQuery.data.lastUsed;
+                const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+                const normalizedLastUsed = normalize(lastUsed);
+
+                const found = methods.find((m: any) => {
+                    const normalizedMethod = normalize(m.namaBank || "");
+                    return normalizedMethod.includes(normalizedLastUsed) || normalizedLastUsed.includes(normalizedMethod);
+                });
+
+                if (found) {
+                    setPaymentMethod(found.namaBank);
+                    setHasSetDefaultPayment(true);
+                }
+            }
         }
     }, [fetchPaymentMethodsQuery.data]);
 
@@ -502,7 +524,7 @@ export function useCheckout() {
         return Object.keys(newErrors).length === 0;
     }, [shippingForm, shippingPrice, paymentMethod]);
 
-    const submitOrder = async () => {
+    const initiateOrder = () => {
         const isValid = validateCheckout();
 
         if (!isValid) {
@@ -510,6 +532,10 @@ export function useCheckout() {
             return;
         }
 
+        setIsConfirmOpen(true);
+    };
+
+    const completeOrder = async () => {
         setIsSubmitting(true);
         try {
             const response = await fetch("/api/orders", {
@@ -539,7 +565,11 @@ export function useCheckout() {
                 window.dispatchEvent(new CustomEvent("cart-updated", { detail: { count: 0 } }));
 
                 refreshCart();
+                setIsSuccess(true);
                 toast.success("Pesanan berhasil dibuat!");
+
+                // Add a small delay for "smooth" transition
+                await new Promise(resolve => setTimeout(resolve, 1200));
 
                 // Redirect to success page
                 router.push(`/checkout/success?orderId=${encodeURIComponent(data.orderId)}`);
@@ -598,11 +628,12 @@ export function useCheckout() {
         voucherCode, setVoucherCode, isVoucherApplied, setIsVoucherApplied, voucherDiscount, isVoucherLoading,
         addresses, isLoadingAddresses, isSelectionModalOpen, setIsSelectionModalOpen, isAddAddressModalOpen, setIsAddAddressModalOpen,
         paymentMethod, setPaymentMethod, paymentMethods, isLoadingPayments,
-        isSubmitting,
+        isSubmitting, isSuccess, isConfirmOpen, setIsConfirmOpen,
         couriers, isLoadingCouriers, shippingOptions, setShippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         errors, setErrors,
         packingFee, grandTotal, remainingBill, originName,
-        handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, submitOrder,
+        handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, 
+        initiateOrder, completeOrder,
         setVoucherData,
         refreshShipping: fetchShippingCost
     };

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Truck, Copy, Check, Search, MapPin, Phone, User } from "lucide-react";
 import TrackingModal from "./TrackingModal";
 import { CONFIG } from "@/lib/config";
-import { cn } from "@/lib/utils";
+import { cn, toTitleCase } from "@/lib/utils";
 
 interface ShippingInfoCardProps {
     ekspedisi: string;
@@ -58,7 +58,7 @@ export default function ShippingInfoCard({
                     </div>
                     <div>
                         <p className="text-[11px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-1.5">Penerima</p>
-                        <p className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 font-montserrat tracking-tight">{namaPenerima}</p>
+                        <p className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 font-montserrat tracking-tight">{toTitleCase(namaPenerima || "")}</p>
                         <div className="flex items-center gap-2 mt-2 text-neutral-base-800">
                             <Phone className="w-3.5 h-3.5" />
                             <span className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 font-montserrat tracking-tight">{phone}</span>
@@ -76,7 +76,7 @@ export default function ShippingInfoCard({
                     <div className="flex-1">
                         <p className="text-[11px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-1.5">Alamat tujuan</p>
                         <p className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 leading-relaxed font-montserrat tracking-tight max-w-[500px]">
-                            {alamatKirim}, {distrikKirim}, {kotaKirim}, {provinsiKirim}
+                            {toTitleCase(alamatKirim || "")}, {toTitleCase(distrikKirim || "")}, {toTitleCase(kotaKirim || "")}, {toTitleCase(provinsiKirim || "")}
                         </p>
                     </div>
                 </div>
@@ -91,9 +91,9 @@ export default function ShippingInfoCard({
                     <div>
                         <p className="text-[10px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-1.5">Ekspedisi & layanan</p>
                         <p className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 flex items-center gap-2 font-montserrat tracking-tight">
-                            {ekspedisi}
+                            {toTitleCase(ekspedisi || "")}
                             <span className="w-1 h-1 rounded-full bg-neutral-base-200" />
-                            <span className="font-semibold text-neutral-base-800">{service}</span>
+                            <span className="font-semibold text-neutral-base-800">{toTitleCase(service || "")}</span>
                         </p>
                     </div>
                 </div>
