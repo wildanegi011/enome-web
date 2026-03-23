@@ -31,7 +31,7 @@ function CheckoutContent() {
         isSubmitting, isSuccess,
         couriers, isLoadingCouriers, shippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         packingFee, grandTotal, remainingBill, originName,
-        handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, 
+        handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher,
         initiateOrder, completeOrder,
         setShippingOptions, setVoucherData,
         isConfirmOpen, setIsConfirmOpen,
@@ -90,7 +90,7 @@ function CheckoutContent() {
                             return (
                                 <div key={s.id} className="flex flex-col items-center relative z-10 flex-1">
                                     <div className={clsx(
-                                        "w-9 h-9 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm border-2",
+                                        "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm border-2",
                                         isActive ? "bg-neutral-base-900 border-neutral-base-900 text-white" : "bg-white border-neutral-base-100 text-neutral-base-300"
                                     )}>
                                         {isActive ? <Check className="w-4 h-4 md:w-6 md:h-6" /> : <s.icon className="w-4 h-4 md:w-6 md:h-6" />}
@@ -237,7 +237,7 @@ function CheckoutContent() {
                     </div>
                 </AnimatePresence>
             </main>
-            
+
             {/* Mobile Sticky Footer */}
             <AnimatePresence>
                 {cartItems.length > 0 && (
@@ -277,7 +277,7 @@ function CheckoutContent() {
             </AnimatePresence>
 
             {/* Order Confirmation Modal/Drawer */}
-            <OrderConfirmation 
+            <OrderConfirmation
                 isOpen={isConfirmOpen}
                 onClose={() => setIsConfirmOpen(false)}
                 onConfirm={completeOrder}

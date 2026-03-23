@@ -76,12 +76,14 @@ export interface OrderDetail {
         gambar: string | null;
         ukuran?: string;
         warna?: string;
+        variant?: string;
         catatan?: string | null;
     }[];
     paymentInfo?: {
         namaBank: string;
         noRekening: string;
         namaPemilik: string;
+        logoBank?: string;
     };
     voucherInfo?: {
         kode: string;

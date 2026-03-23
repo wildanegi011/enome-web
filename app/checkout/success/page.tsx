@@ -167,7 +167,7 @@ function SuccessContent() {
         bankAccount: detail.paymentInfo?.noRekening,
         bankOwner: detail.paymentInfo?.namaPemilik,
         bankName: detail.paymentInfo?.namaBank,
-        bankLogo: detail.paymentInfo ? `${ASSET_URL}/img/rekening_pembayaran/${detail.paymentInfo.namaBank.toLowerCase().split(' ')[0]}.png` : undefined,
+        bankLogo: detail.paymentInfo ? (detail.paymentInfo.logoBank ? `${ASSET_URL}/img/rekening_pembayaran/${detail.paymentInfo.logoBank}` : `${ASSET_URL}/img/rekening_pembayaran/${detail.paymentInfo.namaBank.toLowerCase().split(' ')[0]}.png`) : undefined,
         subtotal: detail.order.totalHarga,
         shippingPrice: detail.order.ongkir,
         packingFee: detail.order.biayalain,

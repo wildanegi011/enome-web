@@ -1,33 +1,33 @@
 "use client";
 
 import React from "react";
-import { 
-    Dialog, 
-    DialogContent, 
-    DialogHeader, 
-    DialogTitle, 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
     DialogDescription,
-    DialogFooter 
+    DialogFooter
 } from "@/components/ui/dialog";
-import { 
-    Drawer, 
-    DrawerContent, 
-    DrawerHeader, 
-    DrawerTitle, 
+import {
+    Drawer,
+    DrawerContent,
+    DrawerHeader,
+    DrawerTitle,
     DrawerDescription,
-    DrawerFooter 
+    DrawerFooter
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { toTitleCase, cn } from "@/lib/utils";
-import { 
-    ShoppingBag, 
-    MapPin, 
-    Truck, 
-    CreditCard, 
-    ChevronRight, 
-    Loader2, 
-    ShieldCheck, 
+import {
+    ShoppingBag,
+    MapPin,
+    Truck,
+    CreditCard,
+    ChevronRight,
+    Loader2,
+    ShieldCheck,
     Package,
     AlertCircle,
     Check
@@ -127,7 +127,7 @@ export default function OrderConfirmation({
                         {cartItems.map((item) => (
                             <div key={item.id} className="flex gap-3">
                                 <div className="w-12 h-12 rounded-xl bg-neutral-base-100 overflow-hidden relative border border-neutral-base-100/50 shrink-0">
-                                    <FallbackImage 
+                                    <FallbackImage
                                         src={item.gambar ? `${ASSET_URL}/img/${item.gambar}` : "/placeholder-product.jpg"}
                                         alt={item.namaProduk}
                                         fill
@@ -135,11 +135,28 @@ export default function OrderConfirmation({
                                     />
                                 </div>
                                 <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                    <h4 className="text-[12px] font-bold text-neutral-base-900 truncate">{toTitleCase(item.namaProduk || "")}</h4>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                        <span className="text-[11px] font-medium text-neutral-base-400">{item.qty}x</span>
-                                        <span className="text-[11px] font-bold text-neutral-base-900">{formatPrice(item.harga)}</span>
+                                    <h4 className="text-[12px] font-bold text-neutral-base-900 truncate mb-1">{toTitleCase(item.namaProduk || "")}</h4>
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                        <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-100 text-neutral-base-700 text-[9px] font-bold">
+                                            {item.qty}x
+                                        </span>
+                                        {item.size && (
+                                            <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[9px] font-bold uppercase">
+                                                {item.size}
+                                            </span>
+                                        )}
+                                        {(item.warnaName || item.warna) && (
+                                            <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[9px] font-bold uppercase">
+                                                {toTitleCase(item.warnaName || item.warna || "")}
+                                            </span>
+                                        )}
+                                        {item.variant && (
+                                            <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[9px] font-bold uppercase">
+                                                {item.variant}
+                                            </span>
+                                        )}
                                     </div>
+                                    <p className="text-[11px] font-bold text-neutral-base-900 mt-1">{formatPrice(item.harga)}</p>
                                 </div>
                             </div>
                         ))}
@@ -188,13 +205,13 @@ export default function OrderConfirmation({
     );
 
     const ConfirmButton = () => (
-        <Button 
+        <Button
             disabled={isSubmitting || isSuccess}
             onClick={onConfirm}
             className={cn(
                 "w-full h-14 md:h-16 rounded-2xl md:rounded-3xl font-bold text-[14px] uppercase tracking-widest md:tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl transition-all duration-500",
-                isSuccess 
-                    ? "bg-emerald-600 text-white shadow-emerald-200" 
+                isSuccess
+                    ? "bg-emerald-600 text-white shadow-emerald-200"
                     : "bg-neutral-base-900 text-white shadow-neutral-base-900/10 shadow-xl"
             )}
         >
@@ -237,7 +254,7 @@ export default function OrderConfirmation({
                     <DialogFooter className="p-6 pt-0">
                         <div className="flex flex-col gap-3 w-full">
                             <ConfirmButton />
-                            <button 
+                            <button
                                 disabled={isSubmitting}
                                 onClick={onClose}
                                 className="w-full h-10 text-[12px] font-bold text-neutral-base-300 hover:text-neutral-base-900 uppercase tracking-widest transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
@@ -270,7 +287,7 @@ export default function OrderConfirmation({
                     <ResumeContent />
                     <div className="mt-4">
                         <ConfirmButton />
-                        <button 
+                        <button
                             disabled={isSubmitting}
                             onClick={onClose}
                             className="w-full py-4 text-[13px] font-bold text-neutral-base-300 uppercase tracking-widest mt-2 disabled:opacity-30"

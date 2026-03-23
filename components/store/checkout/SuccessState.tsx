@@ -65,7 +65,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
         () => {
             // onSuccess - do nothing, keep user on page per request
         },
-        { 
+        {
             initialStatusOrder: orderResult.statusOrder,
             timeoutMins: orderResult.paymentVerificationTimeout
         }
@@ -281,9 +281,31 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                         </div>
                                         <div className="flex-1 py-0.5 flex flex-col justify-between min-w-0">
                                             <p className="text-[12px] md:text-[13px] font-semibold text-neutral-base-900 line-clamp-2 leading-snug">{item.namaProduk}</p>
-                                            <div className="flex items-center justify-between gap-2 mt-1">
-                                                <span className="text-[10px] md:text-[11px] font-bold text-neutral-base-400">Qty {item.qty} · {item.size}{item.variant ? ` · ${item.variant}` : ""}</span>
-                                                <span className="text-[12px] md:text-[13px] font-bold text-neutral-base-900 tabular-nums shrink-0">{formatPrice(Number(item.harga) * Number(item.qty))}</span>
+                                            <div className="flex flex-col gap-2 mt-2">
+                                                <div className="flex flex-wrap items-center gap-1.5">
+                                                    <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-100 text-neutral-base-700 text-[9px] md:text-[10px] font-bold tracking-wider">
+                                                        {item.qty} x
+                                                    </span>
+                                                    {(item.ukuran || item.size) && (
+                                                        <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
+                                                            {(item.ukuran || item.size)}
+                                                        </span>
+                                                    )}
+                                                    {item.warna && (
+                                                        <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
+                                                            {item.warna}
+                                                        </span>
+                                                    )}
+                                                    {item.variant && (
+                                                        <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
+                                                            {item.variant}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="text-[10px] md:text-[11px] font-medium text-neutral-base-400 italic">Total Item</span>
+                                                    <span className="text-[12px] md:text-[13px] font-bold text-neutral-base-900 tabular-nums shrink-0">{formatPrice(Number(item.harga) * Number(item.qty))}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

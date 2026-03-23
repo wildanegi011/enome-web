@@ -177,7 +177,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                         <Tooltip delayDuration={0}>
                             <TooltipTrigger asChild>
                                 <h3 className={cn(
-                                    "text-[15px] sm:text-[18px] font-bold leading-tight transition-colors duration-200 truncate font-montserrat tracking-tight",
+                                    "text-[13px] sm:text-[16px] font-bold leading-tight transition-colors duration-200 truncate font-montserrat tracking-tight",
                                     isCardHovered ? "text-amber-900" : "text-neutral-base-900"
                                 )}>
                                     {product.name}
