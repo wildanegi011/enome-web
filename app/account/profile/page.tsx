@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
+import { compressImage } from "@/lib/image-utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -31,6 +32,7 @@ export default function ProfilePage() {
     });
     const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+    const [isCompressing, setIsCompressing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { data: profile, isLoading } = useProfile();
@@ -51,19 +53,27 @@ export default function ProfilePage() {
         fileInputRef.current?.click();
     };
 
-    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 2 * 1024 * 1024) {
-                toast.error("Ukuran foto maksimal 2MB");
-                return;
+            try {
+                setIsCompressing(true);
+                // Compress image before preview and selection
+                const compressedFile = await compressImage(file, 1024, 1024, 0.7);
+                
+                setSelectedPhoto(compressedFile);
+                
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setPhotoPreview(reader.result as string);
+                };
+                reader.readAsDataURL(compressedFile);
+            } catch (error) {
+                console.error("Compression Error:", error);
+                toast.error("Gagal mengompres foto. Silakan coba lagi.");
+            } finally {
+                setIsCompressing(false);
             }
-            setSelectedPhoto(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPhotoPreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
         }
     };
 
@@ -133,7 +143,7 @@ export default function ProfilePage() {
                                 <div className="flex flex-col items-center sm:items-start text-center sm:text-left space-y-4">
                                     <div className="space-y-1">
                                         <h3 className="text-[18px] font-bold text-[#111827]">Foto Profil</h3>
-                                        <p className="text-[12px] text-neutral-base-400 font-medium leading-relaxed">Maksimal 2MB. Format JPG, PNG, atau GIF.</p>
+                                        <p className="text-[12px] text-neutral-base-400 font-medium leading-relaxed">Format JPG, PNG, atau GIF. Foto akan dioptimalkan secara otomatis.</p>
                                     </div>
                                     <input
                                         type="file"
@@ -145,9 +155,17 @@ export default function ProfilePage() {
                                     <Button
                                         type="button"
                                         onClick={handlePhotoClick}
+                                        disabled={isCompressing}
                                         className="h-9 md:h-10 px-6 bg-[#111827] text-white rounded-xl text-[14px] font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-900/10"
                                     >
-                                        Ubah Foto
+                                        {isCompressing ? (
+                                            <div className="flex items-center gap-2">
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Memproses...
+                                            </div>
+                                        ) : (
+                                            "Ubah Foto"
+                                        )}
                                     </Button>
                                 </div>
                             </div>
