@@ -14,8 +14,6 @@ try {
   console.warn("Invalid NEXT_PUBLIC_ASSET_URL, fallback to localhost");
 }
 
-console.log("NEXT.JS IMAGE CONFIG:", { assetProtocol, assetHostname });
-
 const nextConfig: NextConfig = {
   typescript: {
     // 🔥 ini penting kalau VPS RAM kecil
