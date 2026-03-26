@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { centralConfig, companyProfile } from "@/lib/db/schema";
+import { centralConfig, companyProfile, kota } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import logger from "@/lib/logger";
 
@@ -45,6 +45,23 @@ export class ConfigService {
             return row?.kecamatan ?? "";
         } catch (error) {
             logger.error("ConfigService Error: Failed to fetch company kecamatan", error);
+            return "";
+        }
+    }
+
+    /**
+     * Get the active company's origin name (City Name).
+     */
+    static async getOriginName(): Promise<string> {
+        try {
+            const [row]: any = await db.select({ cityName: kota.cityName })
+                .from(companyProfile)
+                .leftJoin(kota, eq(companyProfile.kota, kota.cityId))
+                .where(eq(companyProfile.isAktif, 1))
+                .limit(1);
+            return row?.cityName ?? "";
+        } catch (error) {
+            logger.error("ConfigService Error: Failed to fetch company origin name", error);
             return "";
         }
     }

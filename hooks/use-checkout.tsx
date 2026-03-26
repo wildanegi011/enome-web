@@ -80,6 +80,8 @@ export function useCheckout() {
 
     // Payment State
     const [paymentMethod, setPaymentMethod] = useState("");
+    const [paymentAccountName, setPaymentAccountName] = useState("");
+    const [paymentAccountNumber, setPaymentAccountNumber] = useState("");
     const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
     const [isLoadingPayments, setIsLoadingPayments] = useState(false);
     const [hasSetDefaultPayment, setHasSetDefaultPayment] = useState(false);
@@ -111,7 +113,7 @@ export function useCheckout() {
     useEffect(() => {
         const fetchConfig = async () => {
             try {
-                const config = await checkoutApi.getConfig(["biaya_packing", "packing_fee", "whatsapp_nomor", "kecamatan"]);
+                const config = await checkoutApi.getConfig(["biaya_packing", "packing_fee", "whatsapp_nomor", "kecamatan", "origin_name"]);
                 const pFee = config.biaya_packing || config.packing_fee;
                 if (pFee) {
                     const parsed = parseInt(pFee);
@@ -119,6 +121,7 @@ export function useCheckout() {
                 }
                 if (config.whatsapp_nomor) setWhatsappAdmin(config.whatsapp_nomor);
                 if (config.kecamatan) setOrigin(config.kecamatan);
+                if (config.origin_name) setOriginName(config.origin_name);
             } catch (err) {
                 console.error("Failed to fetch dynamic config:", err);
             }
@@ -191,7 +194,7 @@ export function useCheckout() {
         if (fetchPaymentMethodsQuery.data) {
             const methods = fetchPaymentMethodsQuery.data.methods || [];
             setPaymentMethods(methods);
-            
+
             // Auto-select last used payment method if available and no method is currently selected
             // Use fuzzy matching to handle variations like "BCA" vs "Transfer Bank BCA"
             if (fetchPaymentMethodsQuery.data.lastUsed && !paymentMethod && !hasSetDefaultPayment) {
@@ -206,6 +209,8 @@ export function useCheckout() {
 
                 if (found) {
                     setPaymentMethod(found.namaBank);
+                    setPaymentAccountName(found.namaPemilik || "");
+                    setPaymentAccountNumber(found.noRekening || "");
                     setHasSetDefaultPayment(true);
                 }
             }
@@ -367,7 +372,20 @@ export function useCheckout() {
         }
     }, [addresses, shippingForm.addressId]);
 
-    // Auto-select payment method logic
+    // Auto-sync payment account details when payment method changes
+    useEffect(() => {
+        if (paymentMethod && paymentMethods.length > 0) {
+            const method = paymentMethods.find(m => m.namaBank === paymentMethod);
+            if (method) {
+                setPaymentAccountName(method.namaPemilik || "");
+                setPaymentAccountNumber(method.noRekening || "");
+            }
+        } else if (paymentMethod === "wallet") {
+            setPaymentAccountName("");
+            setPaymentAccountNumber("");
+        }
+    }, [paymentMethod, paymentMethods]);
+
     useEffect(() => {
         if (useWallet && remainingBill === 0) {
             setPaymentMethod("wallet");
@@ -632,7 +650,9 @@ export function useCheckout() {
         couriers, isLoadingCouriers, shippingOptions, setShippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         errors, setErrors,
         packingFee, grandTotal, remainingBill, originName,
-        handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, 
+        paymentAccountName, paymentAccountNumber,
+        setPaymentAccountName, setPaymentAccountNumber,
+        handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher,
         initiateOrder, completeOrder,
         setVoucherData,
         refreshShipping: fetchShippingCost

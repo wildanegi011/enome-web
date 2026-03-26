@@ -65,7 +65,7 @@ function CourierGroup({
                     </div>
                     <div className="flex flex-col">
                         <h4 className="text-[12px] md:text-[15px] font-bold text-neutral-base-900 tracking-widest leading-none mb-1">
-                            {toTitleCase(group.name)}
+                            {group.name.toUpperCase()}
                         </h4>
                         <span className="text-[10px] md:text-[12px] font-medium text-neutral-base-400 tracking-widest">
                             {group.options.length} Layanan • Mulai {formatPrice(group.minPrice)}
@@ -122,7 +122,7 @@ function CourierGroup({
                                         <div className="flex-1 min-w-0 pr-6">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <h4 className="text-[11px] md:text-[14px] font-bold text-neutral-base-900 tracking-tight truncate leading-tight">
-                                                    {toTitleCase(opt.service)}
+                                                    {opt.service.toUpperCase()}
                                                 </h4>
                                             </div>
 
@@ -207,35 +207,33 @@ export default function CourierSection({
             </div>
 
             <div className="flex flex-col gap-4 px-3 md:px-5">
-                {(originName || totalWeight > 0) && (
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 md:p-4 bg-neutral-base-50/50 rounded-[20px] border border-neutral-base-100/50 mb-0.5 shadow-sm">
-                        <div className="flex items-center gap-2.5 md:gap-3.5 px-0.5">
-                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-neutral-base-100 shrink-0">
-                                <MapPin className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-neutral-base-600" />
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-[8px] md:text-[10px] font-bold text-neutral-base-400 uppercase tracking-widest mb-0.5">Dikirim Dari</span>
-                                <div className="flex items-center gap-1.5 md:gap-2 overflow-hidden">
-                                    <span className="text-[11px] md:text-[14px] font-bold text-neutral-base-900 truncate">
-                                        {toTitleCase(originName || "Pilih Asal")}
-                                    </span>
-                                </div>
-                            </div>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 md:p-4 bg-neutral-base-50/50 rounded-[20px] border border-neutral-base-100/50 mb-0.5 shadow-sm">
+                    <div className="flex items-center gap-2.5 md:gap-3.5 px-0.5">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-neutral-base-100 shrink-0">
+                            <MapPin className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-neutral-base-600" />
                         </div>
-                        <div className="h-px w-full bg-neutral-base-200/30 md:hidden" />
-                        <div className="flex items-center gap-2.5 md:gap-3.5 px-0.5 md:border-l md:border-neutral-base-200/50 md:pl-5">
-                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-neutral-base-100 shrink-0">
-                                <ShoppingBag className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-neutral-base-600" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[8px] md:text-[10px] font-bold text-neutral-base-400 uppercase tracking-widest mb-0.5">Total Berat</span>
-                                <span className="text-[11px] md:text-[14px] font-bold text-neutral-base-900 tabular-nums">
-                                    {totalWeight < 1000 ? `${totalWeight}g` : `${(totalWeight / 1000).toFixed(1)}kg`}
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-[8px] md:text-[10px] font-bold text-neutral-base-400 uppercase tracking-widest mb-0.5">Dikirim Dari</span>
+                            <div className="flex items-center gap-1.5 md:gap-2 overflow-hidden">
+                                <span className="text-[11px] md:text-[14px] font-bold text-neutral-base-900 truncate">
+                                    {toTitleCase(originName || "Pilih Asal")}
                                 </span>
                             </div>
                         </div>
                     </div>
-                )}
+                    <div className="h-px w-full bg-neutral-base-200/30 md:hidden" />
+                    <div className="flex items-center gap-2.5 md:gap-3.5 px-0.5 md:border-l md:border-neutral-base-200/50 md:pl-5">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-neutral-base-100 shrink-0">
+                            <ShoppingBag className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-neutral-base-600" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[8px] md:text-[10px] font-bold text-neutral-base-400 uppercase tracking-widest mb-0.5">Total Berat</span>
+                            <span className="text-[11px] md:text-[14px] font-bold text-neutral-base-900 tabular-nums">
+                                {totalWeight < 1000 ? `${totalWeight}g` : `${(totalWeight / 1000).toFixed(1)}kg`}
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
                 <div className="flex flex-col px-1.5 pt-1">
                     <label className="text-[10px] md:text-[12px] font-bold uppercase tracking-widest text-neutral-base-400">

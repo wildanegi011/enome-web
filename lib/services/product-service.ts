@@ -54,6 +54,9 @@ export class ProductService {
         const conditions: any[] = [];
         if (where) conditions.push(where);
 
+        // Hide out-of-stock products unless it's a pre-order
+        // conditions.push(sql`((SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail WHERE produk_id = ${produk.produkId}) > 0 OR ${produk.produkPreorder} = 1)`);
+
         if (options.categories && options.categories.length > 0) {
             conditions.push(sql`${produk.kategori} IN ${options.categories}`);
         }
@@ -100,6 +103,7 @@ export class ProductService {
         if (orderBy) {
             query = query.orderBy(orderBy) as any;
         }
+
 
         if (limit) {
             query = query.limit(limit) as any;

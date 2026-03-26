@@ -91,9 +91,9 @@ export default function ShippingInfoCard({
                     <div>
                         <p className="text-[10px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-1.5">Ekspedisi & layanan</p>
                         <p className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 flex items-center gap-2 font-montserrat tracking-tight">
-                            {toTitleCase(ekspedisi || "")}
+                            {ekspedisi}
                             <span className="w-1 h-1 rounded-full bg-neutral-base-200" />
-                            <span className="font-semibold text-neutral-base-800">{toTitleCase(service || "")}</span>
+                            <span className="font-semibold text-neutral-base-800">{service}</span>
                         </p>
                     </div>
                 </div>

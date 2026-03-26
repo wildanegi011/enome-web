@@ -55,7 +55,7 @@ interface OrderConfirmationProps {
     formatPrice: (price: number) => string;
 }
 
-{/* Standalone Sub-components to prevent re-mounting during parent re-renders */}
+{/* Standalone Sub-components to prevent re-mounting during parent re-renders */ }
 const ResumeContent = ({
     shippingForm,
     paymentMethod,
@@ -95,8 +95,8 @@ const ResumeContent = ({
                     <Truck className="w-3.5 h-3.5 text-neutral-base-900" />
                     <span className="text-[9px] font-bold uppercase tracking-widest text-neutral-base-400">Pengiriman</span>
                 </div>
-                <p className="text-[12px] font-bold text-neutral-base-900 truncate">
-                    {toTitleCase(shippingForm.courier || "Kurir")} {toTitleCase(shippingForm.service || "")}
+                <p className="text-[12px] font-bold text-neutral-base-900 truncate uppercase mt-0.5">
+                    {shippingForm.courier || "KURIR"} {shippingForm.service || ""}
                 </p>
             </div>
             <div className="bg-neutral-base-50/50 rounded-2xl p-3 border border-neutral-base-100/50">
@@ -104,14 +104,14 @@ const ResumeContent = ({
                     <CreditCard className="w-3.5 h-3.5 text-neutral-base-900" />
                     <span className="text-[9px] font-bold uppercase tracking-widest text-neutral-base-400">Pembayaran</span>
                 </div>
-                <p className="text-[12px] font-bold text-neutral-base-900 truncate">
-                    {paymentMethod === 'wallet' ? 'Enome Wallet' : toTitleCase(paymentMethod || "Metode")}
+                <p className="text-[12px] font-bold text-neutral-base-900 truncate uppercase mt-0.5">
+                    {paymentMethod === 'wallet' ? 'ENOME WALLET' : (paymentMethod || "METODE").toUpperCase()}
                 </p>
                 {paymentAccountNumber && (
                     <div className="flex flex-col mt-0.5">
-                        <span className="text-[10px] text-neutral-base-500 font-medium tabular-nums">{paymentAccountNumber}</span>
+                        <span className="text-[11px] text-neutral-base-900 font-bold tabular-nums mt-0.5 tracking-wider">{paymentAccountNumber}</span>
                         {paymentAccountName && (
-                            <span className="text-[10px] text-neutral-base-500 truncate uppercase mt-[-1px]">a.n. {paymentAccountName}</span>
+                            <span className="text-[10px] text-neutral-base-500 truncate uppercase font-bold mt-0.5">A.N. {paymentAccountName}</span>
                         )}
                     </div>
                 )}
@@ -140,28 +140,28 @@ const ResumeContent = ({
                                 />
                             </div>
                             <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                <h4 className="text-[12px] font-bold text-neutral-base-900 truncate mb-1">{toTitleCase(item.namaProduk || "")}</h4>
+                                <h4 className="text-[13px] font-bold text-neutral-base-900 truncate mb-1">{toTitleCase(item.namaProduk || "")}</h4>
                                 <div className="flex flex-wrap items-center gap-1.5">
-                                    <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-100 text-neutral-base-700 text-[9px] font-bold">
+                                    <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-100 text-neutral-base-700 text-[10px] font-bold">
                                         {item.qty}x
                                     </span>
                                     {item.size && (
-                                        <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[9px] font-bold uppercase">
+                                        <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[10px] font-bold uppercase">
                                             {item.size}
                                         </span>
                                     )}
                                     {(item.warnaName || item.warna) && (
-                                        <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[9px] font-bold uppercase">
+                                        <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[10px] font-bold uppercase">
                                             {toTitleCase(item.warnaName || item.warna || "")}
                                         </span>
                                     )}
                                     {item.variant && (
-                                        <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[9px] font-bold uppercase">
+                                        <span className="px-1.5 py-0.5 rounded-md bg-neutral-base-50 text-neutral-base-500 border border-neutral-base-100 text-[10px] font-bold uppercase">
                                             {item.variant}
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-[11px] font-bold text-neutral-base-900 mt-1">{formatPrice(item.harga)}</p>
+                                <p className="text-[13px] font-bold text-neutral-base-900 mt-1">{formatPrice(item.harga)}</p>
                             </div>
                         </div>
                     ))}
@@ -302,7 +302,7 @@ export default function OrderConfirmation({
     if (isDesktop) {
         return (
             <Dialog open={isOpen} onOpenChange={(open) => !open && !isSubmitting && onClose()}>
-                <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none rounded-[32px]">
+                <DialogContent className="sm:max-w-[650px] w-[95vw] p-0 overflow-hidden border-none rounded-[32px] shadow-2xl max-h-[96vh] flex flex-col">
                     <DialogHeader className="p-6 pb-0">
                         <div className="flex items-center gap-3 mb-1">
                             <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center">
@@ -314,10 +314,8 @@ export default function OrderConfirmation({
                             </div>
                         </div>
                     </DialogHeader>
-                    <div className="flex-1 overflow-hidden px-6">
-                        <ScrollArea className="max-h-[calc(85vh-200px)] pr-4">
-                            <ResumeContent {...activeProps} />
-                        </ScrollArea>
+                    <div className="flex-1 overflow-y-auto px-6 py-2 overscroll-contain custom-scrollbar">
+                        <ResumeContent {...activeProps} />
                     </div>
                     <DialogFooter className="p-6 pt-0">
                         <div className="flex flex-col md:flex-row-reverse items-center gap-4 w-full">

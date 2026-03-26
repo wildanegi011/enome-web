@@ -31,9 +31,10 @@ function CheckoutContent() {
         isSubmitting, isSuccess,
         couriers, isLoadingCouriers, shippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         packingFee, grandTotal, remainingBill, originName,
+        paymentAccountName, paymentAccountNumber,
         handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher,
         initiateOrder, completeOrder,
-        setShippingOptions, setVoucherData,
+        setVoucherData,
         isConfirmOpen, setIsConfirmOpen,
         errors, setErrors,
         refreshShipping,
@@ -286,6 +287,8 @@ function CheckoutContent() {
                 cartItems={cartItems}
                 shippingForm={shippingForm}
                 paymentMethod={paymentMethod}
+                paymentAccountName={paymentAccountName}
+                paymentAccountNumber={paymentAccountNumber}
                 grandTotal={grandTotal}
                 shippingPrice={shippingPrice}
                 packingFee={packingFee}

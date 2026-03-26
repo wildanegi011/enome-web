@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@/lib/auth-utils";
+import { withAuth, logout, verifyUser } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
 
 /**
@@ -14,6 +14,18 @@ import logger, { apiLogger } from "@/lib/logger";
 export const GET = withAuth(async (request: NextRequest, context: any, session: any) => {
     logger.debug("API Request: GET /api/auth/me");
     try {
+        // Cek apakah user masih ada di database dan belum dihapus
+        const currentUser = await verifyUser(session.user.id);
+
+        if (!currentUser) {
+            logger.warn("Auth Check: User not found or deleted /api/auth/me", { userId: session.user.id });
+            await logout();
+            return NextResponse.json({
+                message: "User tidak ditemukan atau sudah dihapus",
+                authenticated: false
+            }, { status: 401 });
+        }
+
         logger.debug("Auth Check: Success /api/auth/me", { userId: session.user.id });
         return NextResponse.json({
             authenticated: true,

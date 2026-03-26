@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ConfigService } from "@/lib/services/config-service";
 import logger from "@/lib/logger";
 
-const WHITELISTED_KEYS = ["packing_fee", "biaya_packing", "whatsapp_admin", "whatsapp_nomor", "batas_pembayaran", "origin_city", "kecamatan"];
+const WHITELISTED_KEYS = ["packing_fee", "biaya_packing", "whatsapp_admin", "whatsapp_nomor", "batas_pembayaran", "origin_city", "kecamatan", "origin_name"];
 
 export async function GET(request: NextRequest) {
     try {
@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
             if (WHITELISTED_KEYS.includes(key)) {
                 if (key === "kecamatan") {
                     result[key] = await ConfigService.getCompanyKecamatan();
+                } else if (key === "origin_name") {
+                    result[key] = await ConfigService.getOriginName();
                 } else {
                     result[key] = await ConfigService.get(key);
                 }
