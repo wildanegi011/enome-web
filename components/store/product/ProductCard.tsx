@@ -35,6 +35,7 @@ interface Product {
     totalStock?: number;
     isOnFlashSale?: boolean;
     isOnPreOrder?: boolean;
+    produkPreorder?: number;
     commission?: string;
     hasCommission?: boolean;
     discountPercentage?: number;
@@ -117,13 +118,18 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     </Link>
 
                     {/* Status Badges */}
-                    {product.isOnFlashSale && (
-                        <div className="absolute top-0 left-0 z-10 pointer-events-none">
-                            <span className="bg-red-600 text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-br-xl shadow-lg shadow-red-900/20">
+                    <div className="absolute top-0 left-0 z-10 pointer-events-none flex flex-col items-start">
+                        {product.isOnFlashSale && (
+                            <span className="bg-red-600 text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-br-xl shadow-lg shadow-red-900/20 mb-1">
                                 &nbsp; Flash Sale
                             </span>
-                        </div>
-                    )}
+                        )}
+                        {product.produkPreorder === 1 && (
+                            <span className="bg-amber-600 text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-br-xl shadow-lg shadow-amber-900/20">
+                                &nbsp; Pre Order
+                            </span>
+                        )}
+                    </div>
 
                     {/* Out of Stock Overlay (Cart-Aware) */}
                     {realStock === 0 && (

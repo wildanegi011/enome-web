@@ -43,6 +43,7 @@ export class ProductService {
                 isOnline: produk.isOnline,
                 isAktif: produk.isAktif,
                 isHighlighted: produk.isHighlighted,
+                produkPreorder: produk.produkPreorder,
                 brand: produk.brand,
                 gender: produk.gender,
                 colors: sql<string>`GROUP_CONCAT(DISTINCT CONCAT(COALESCE(${warna.warna}, ${produkDetail.warnaId}), '|', COALESCE(${warna.kodeWarna}, '#cccccc')) SEPARATOR ',')`,

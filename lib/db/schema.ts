@@ -81,6 +81,23 @@ export const produkDetail = mysqlTable("produkdetail", {
     variant: varchar("variant", { length: 50 }),
 });
 
+export const stok = mysqlTable("stok", {
+    id: serial("id").primaryKey(),
+    produkId: varchar("produk_id", { length: 20 }),
+    warna: varchar("warna", { length: 20 }),
+    size: varchar("size", { length: 20 }),
+    companyprofileId: int("companyprofile_id"),
+    masuk: int("masuk"),
+    keluar: int("keluar"),
+    stok: int("stok"),
+    keterangan: text("keterangan"),
+    createdAt: timestamp("created_at"),
+    updatedAt: timestamp("updated_at"),
+    createdBy: int("created_by"),
+    updatedBy: int("updated_by"),
+    isDeleted: int("is_deleted").default(0),
+});
+
 export const kategoriProduk = mysqlTable("kategoriproduk", {
     kategoriId: serial("kategori_id").primaryKey(),
     kategori: varchar("kategori", { length: 50 }).notNull(),

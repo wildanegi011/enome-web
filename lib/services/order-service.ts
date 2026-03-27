@@ -2,7 +2,7 @@ import { ASSET_URL } from "@/config/config";
 import { db } from "@/lib/db";
 import {
     keranjang, orders, orderdetail, produk, produkDetail,
-    preOrder, wallet, voucher, voucherHistory, payment as paymentTable, flashSale, centralConfig, rekeningPembayaran, companyProfile
+    preOrder, wallet, voucher, voucherHistory, payment as paymentTable, flashSale, centralConfig, rekeningPembayaran, companyProfile, stok
 } from "@/lib/db/schema";
 
 import { eq, and, sql, desc, like, or } from "drizzle-orm";
@@ -378,6 +378,23 @@ export class OrderService {
                 await tx.update(produkDetail)
                     .set({ stokNormal: sql`${produkDetail.stokNormal} - ${qty}` })
                     .where(eq(produkDetail.detailId, item.detail.detailId));
+
+                // 3. Log Stock Movement
+                await tx.insert(stok).values({
+                    produkId: item.produkId,
+                    warna: item.warna,
+                    size: item.size,
+                    companyprofileId: CONFIG.DEFAULT_COMPANY_PROFILE_ID,
+                    masuk: 0,
+                    keluar: qty,
+                    stok: (lockedDetail.stokNormal || 0) - qty,
+                    keterangan: `CHECKOUT ${orderId}`,
+                    createdAt: sql`${dhms}`,
+                    updatedAt: sql`${dhms}`,
+                    createdBy: Number(userId) || 1,
+                    updatedBy: Number(userId) || 1,
+                    isDeleted: 0,
+                });
             }
             logger.info("OrderService: Step B Success");
 

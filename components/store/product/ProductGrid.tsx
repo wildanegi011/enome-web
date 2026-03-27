@@ -52,6 +52,7 @@ export default function ProductGrid({ products, isRefreshing }: ProductGridProps
                             isOnFlashSale: p.isOnFlashSale,
                             discountPercentage: p.discountPercentage,
                             isOnPreOrder: p.isOnPreOrder,
+                            produkPreorder: p.produkPreorder,
                             commission: p.hasCommission ? formatPriceRange(p.commissionMin, p.commissionMax) : undefined,
                             hasCommission: p.hasCommission
                         };
