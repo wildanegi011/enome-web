@@ -26,10 +26,11 @@ export function useProduct(id: string) {
     });
 }
 
-export function useCategories(limit?: number) {
+export function useCategories(filters?: { brand?: string[], gender?: string[] }, limit?: number) {
     return useQuery<Category[]>({
-        queryKey: limit ? [...queryKeys.categories.all, limit] : queryKeys.categories.all,
-        queryFn: () => productApi.getCategories(limit),
+        queryKey: [...queryKeys.categories.all, filters, limit],
+        queryFn: () => productApi.getCategories(filters, limit),
+        placeholderData: keepPreviousData,
     });
 }
 

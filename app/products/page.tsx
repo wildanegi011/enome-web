@@ -36,6 +36,8 @@ function ProductsContent() {
         color: [],
         price: [],
         collection: categoryFromUrl ? [categoryFromUrl] : [],
+        brand: searchParams.get("brand")?.split(",")?.filter(Boolean) || [],
+        gender: searchParams.get("gender")?.split(",")?.filter(Boolean) || [],
         search: searchFromUrl || undefined
     });
 
@@ -43,7 +45,7 @@ function ProductsContent() {
     const [currentPage, setCurrentPage] = useState(1);
 
     const { data: rawProducts = [], isLoading: productsLoading, isFetching: productsFetching } = useProducts(activeFilters);
-    const { data: categoriesData = [], isLoading: categoriesLoading } = useCategories();
+    const { data: categoriesData = [], isLoading: categoriesLoading } = useCategories({ brand: activeFilters.brand, gender: activeFilters.gender });
     const { data: colorsData = [], isLoading: colorsLoading } = useColors();
     const { data: sizesData = [], isLoading: sizesLoading } = useSizes();
 
@@ -57,6 +59,8 @@ function ProductsContent() {
         if (activeFilters.search) params.set("search", activeFilters.search);
         if (activeFilters.color.length > 0) params.set("color", activeFilters.color.join(","));
         if (activeFilters.size.length > 0) params.set("size", activeFilters.size.join(","));
+        if (activeFilters.brand.length > 0) params.set("brand", activeFilters.brand.join(","));
+        if (activeFilters.gender.length > 0) params.set("gender", activeFilters.gender.join(","));
         if (activeFilters.price.length > 0) params.set("price", activeFilters.price.join(","));
 
         const qs = params.toString();
@@ -120,8 +124,6 @@ function ProductsContent() {
         if (viewport) viewport.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    if (isInitialLoading) return <ProductListSkeleton />;
-
     return (
         <TooltipProvider>
             <main className="h-screen overflow-hidden bg-white flex flex-col">
@@ -174,38 +176,52 @@ function ProductsContent() {
                                 </aside>
 
                                 {/* Main Content */}
-                                <div className="flex-1 relative">
-                                    <StickyHeader
-                                        currentPage={currentPage}
-                                        itemsPerPage={ITEMS_PER_PAGE}
-                                        totalItems={filteredProducts.length}
-                                        sortBy={sortBy}
-                                        onSortChange={setSortBy}
-                                        isRefreshing={isRefreshing}
-                                    />
-
-                                    {filteredProducts.length === 0 ? (
-                                        <EmptyState
-                                            icon={Search}
-                                            title="Tidak ada product"
-                                            description="Coba sesuaikan filter untuk melihat lebih banyak hasil."
-                                            actionLabel="Hapus Filter"
-                                            onActionClick={() => setActiveFilters({ size: [], color: [], price: [], collection: [], search: undefined })}
-                                            className="py-20 border-dashed"
-                                        />
-                                    ) : (
-                                        <ProductGrid products={paginatedProducts} isRefreshing={isRefreshing} />
-                                    )}
-
-                                    {totalPages > 1 && (
-                                        <div className="mt-16">
-                                            <Pagination
-                                                currentPage={currentPage}
-                                                totalItems={filteredProducts.length}
-                                                itemsPerPage={ITEMS_PER_PAGE}
-                                                onPageChange={handlePageChange}
-                                            />
+                                <div className="flex-1 relative min-h-[400px]">
+                                    {isInitialLoading ? (
+                                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {[...Array(6)].map((_, i) => (
+                                                <div key={i} className="space-y-4">
+                                                    <div className="aspect-3/4 bg-neutral-100 animate-pulse rounded-2xl" />
+                                                    <div className="h-4 bg-neutral-100 animate-pulse w-2/3 rounded" />
+                                                    <div className="h-4 bg-neutral-100 animate-pulse w-1/3 rounded" />
+                                                </div>
+                                            ))}
                                         </div>
+                                    ) : (
+                                        <>
+                                            <StickyHeader
+                                                currentPage={currentPage}
+                                                itemsPerPage={ITEMS_PER_PAGE}
+                                                totalItems={filteredProducts.length}
+                                                sortBy={sortBy}
+                                                onSortChange={setSortBy}
+                                                isRefreshing={isRefreshing}
+                                            />
+
+                                            {filteredProducts.length === 0 ? (
+                                                <EmptyState
+                                                    icon={Search}
+                                                    title="Tidak ada product"
+                                                    description="Coba sesuaikan filter untuk melihat lebih banyak hasil."
+                                                    actionLabel="Hapus Filter"
+                                                    onActionClick={() => setActiveFilters({ size: [], color: [], price: [], collection: [], brand: [], gender: [], search: undefined })}
+                                                    className="py-20 border-dashed"
+                                                />
+                                            ) : (
+                                                <ProductGrid products={paginatedProducts} isRefreshing={isRefreshing} />
+                                            )}
+
+                                            {totalPages > 1 && (
+                                                <div className="mt-16">
+                                                    <Pagination
+                                                        currentPage={currentPage}
+                                                        totalItems={filteredProducts.length}
+                                                        itemsPerPage={ITEMS_PER_PAGE}
+                                                        onPageChange={handlePageChange}
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>

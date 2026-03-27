@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { produk, produkDetail, warna } from "@/lib/db/schema";
-import { and, eq, sql, min, max, or, like } from "drizzle-orm";
+import { and, eq, sql, min, max, or, like, inArray } from "drizzle-orm";
 import { getJakartaDate } from "@/lib/date-utils";
 import { CustomerService } from "./customer-service";
 
@@ -13,6 +13,8 @@ export interface ProductQueryOptions {
     priceRanges?: string[];
     colors?: string[];
     sizes?: string[];
+    brand?: string[];
+    gender?: string[];
     search?: string;
 }
 
@@ -41,6 +43,8 @@ export class ProductService {
                 isOnline: produk.isOnline,
                 isAktif: produk.isAktif,
                 isHighlighted: produk.isHighlighted,
+                brand: produk.brand,
+                gender: produk.gender,
                 colors: sql<string>`GROUP_CONCAT(DISTINCT CONCAT(COALESCE(${warna.warna}, ${produkDetail.warnaId}), '|', COALESCE(${warna.kodeWarna}, '#cccccc')) SEPARATOR ',')`,
                 flashSaleId: sql<number>`(SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = produk.produk_id AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
                 preOrderId: sql<number>`(SELECT po.pre_order_id FROM pre_order po INNER JOIN pre_order_detail pod ON po.pre_order_id = pod.pre_order_id WHERE po.is_aktif = 1 AND pod.produk_id = produk.produk_id AND po.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
@@ -58,15 +62,23 @@ export class ProductService {
         // conditions.push(sql`((SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail WHERE produk_id = ${produk.produkId}) > 0 OR ${produk.produkPreorder} = 1)`);
 
         if (options.categories && options.categories.length > 0) {
-            conditions.push(sql`${produk.kategori} IN ${options.categories}`);
+            conditions.push(inArray(produk.kategori, options.categories));
         }
 
         if (options.colors && options.colors.length > 0) {
-            conditions.push(sql`${warna.warna} IN ${options.colors}`);
+            conditions.push(inArray(warna.warna, options.colors));
         }
 
         if (options.sizes && options.sizes.length > 0) {
-            conditions.push(sql`${produkDetail.size} IN ${options.sizes}`);
+            conditions.push(inArray(produkDetail.size, options.sizes));
+        }
+        
+        if (options.brand && options.brand.length > 0) {
+            conditions.push(inArray(produk.brand, options.brand));
+        }
+
+        if (options.gender && options.gender.length > 0) {
+            conditions.push(inArray(produk.gender, options.gender));
         }
 
         if (options.priceRanges && options.priceRanges.length > 0) {

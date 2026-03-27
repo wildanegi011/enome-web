@@ -26,6 +26,8 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
         const priceRanges = searchParams.get("priceRanges")?.split(",").filter(Boolean);
         const colors = searchParams.get("colors")?.split(",").filter(Boolean);
         const sizes = searchParams.get("sizes")?.split(",").filter(Boolean);
+        const brand = searchParams.get("brand")?.split(",").filter(Boolean);
+        const gender = searchParams.get("gender")?.split(",").filter(Boolean);
         const search = searchParams.get("search") || undefined;
 
         const kategoriId = await CustomerService.getKategoriId(session?.user?.id);
@@ -39,6 +41,8 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
             priceRanges,
             colors,
             sizes,
+            brand,
+            gender,
             search,
             where: eq(produk.isOnline, 1),
             // Urutkan berdasarkan stok terbanyak (sesuai logika legacy)

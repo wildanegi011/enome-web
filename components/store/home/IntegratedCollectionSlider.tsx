@@ -14,6 +14,38 @@ import ScrollIndicators from "./subcomponents/ScrollIndicators";
 import CollectionDots from "./subcomponents/CollectionDots";
 import SearchModal from "./subcomponents/SearchModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+
+const getPositionClasses = (position: string | undefined, isMobile: boolean) => {
+    if (!position) return isMobile ? "items-center bottom-24 text-center" : "items-start bottom-16 text-left left-12 md:left-20";
+
+    const pos = position.toLowerCase();
+
+    // Default mobile behavior is usually centered at the bottom unless specified
+    if (isMobile) {
+        if (pos.includes('top')) return "items-center top-24 text-center";
+        if (pos.includes('mid') || pos.includes('center')) return "items-center top-1/2 -translate-y-1/2 text-center";
+        return "items-center bottom-24 text-center";
+    }
+
+    // Desktop positioning
+    let vClasses = "";
+    let hClasses = "";
+
+    // Vertical keywords: top, bottom, mid, middle, center
+    if (pos.includes('top')) vClasses = "top-32 ";
+    else if (pos.includes('bottom')) vClasses = "bottom-16 ";
+    else if (pos.includes('mid') || (pos.includes('center') && !pos.includes('left') && !pos.includes('right'))) vClasses = "top-1/2 -translate-y-1/2 ";
+    else vClasses = "bottom-16 "; // default
+
+    // Horizontal keywords: left, right, center
+    if (pos.includes('right')) hClasses = "items-end text-right right-12 md:right-20 ";
+    else if (pos.includes('left')) hClasses = "items-start text-left left-12 md:left-20 ";
+    else if (pos.includes('center') || (pos.includes('middle') && !pos.includes('top') && !pos.includes('bottom'))) hClasses = "items-center text-center left-1/2 -translate-x-1/2 ";
+    else hClasses = "items-start text-left left-12 md:left-20 "; // default
+
+    return vClasses + hClasses;
+};
 
 interface Collection {
     id: string;
@@ -22,6 +54,10 @@ interface Collection {
         url: string;
         link: string | null;
         title?: string;
+        header?: string;
+        position?: string;
+        brand?: string;
+        tagline?: string;
         aspect: string;
         isMobile: boolean;
     }[];
@@ -153,7 +189,7 @@ export default function IntegratedCollectionSlider() {
 
     if (isLoading) {
         return (
-            <div className="w-full h-screen bg-neutral-950 flex flex-col items-center justify-center gap-8">
+            <div className="w-full h-screen bg-neutral-500 flex flex-col items-center justify-center gap-8">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: [0.1, 0.3, 0.1], scale: [0.95, 1, 0.95] }}
@@ -287,18 +323,35 @@ export default function IntegratedCollectionSlider() {
                                     </div>
                                 </motion.div> */}
 
-                                    {/* Collection Title - Centered on Mobile, Left on Desktop */}
-                                    <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
-                                        <div className="flex flex-col items-center md:items-start px-6 md:px-12 pb-24 md:pb-16">
-                                            <motion.p
-                                                initial={{ opacity: 0, y: 10 }}
-                                                whileInView={{ opacity: 1, y: 0 }}
-                                                transition={{ duration: 0.8, delay: 0.3 }}
-                                                viewport={{ once: false }}
-                                                className="font-montserrat text-[15px] md:text-[18px] text-center md:text-left text-white/70 tracking-[0.25em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
-                                            >
-                                                {img.title || filteredCollections[currentIndex]?.title}
-                                            </motion.p>
+                                    {/* Collection Title & Tagline - Dynamic Positioning */}
+                                    <div className={cn(
+                                        "absolute inset-0 z-10 pointer-events-none w-full h-full",
+                                        isMobile ? "p-8 pb-32" : "p-12 md:p-24"
+                                    )}>
+                                        <div className={cn(
+                                            "absolute flex flex-col transition-all duration-700",
+                                            getPositionClasses(img.position, isMobile)
+                                        )}>
+                                            {img.tagline ? (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 15 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    transition={{ duration: 0.8, delay: 0.2 }}
+                                                    viewport={{ once: false }}
+                                                    className="w-full md:max-w-3xl font-montserrat px-4 md:px-0"
+                                                    dangerouslySetInnerHTML={{ __html: img.tagline }}
+                                                />
+                                            ) : (
+                                                <motion.p
+                                                    initial={{ opacity: 0, y: 15 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    transition={{ duration: 0.8, delay: 0.2 }}
+                                                    viewport={{ once: false }}
+                                                    className="font-montserrat text-[14px] md:text-[18px] text-black/80 tracking-[0.2em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] max-w-2xl"
+                                                >
+                                                    {img.title || filteredCollections[currentIndex]?.title}
+                                                </motion.p>
+                                            )}
                                         </div>
                                     </div>
 

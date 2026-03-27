@@ -30,6 +30,10 @@ export class SlideService {
                 url: `${ASSET_URL}/img/slide/${s.image}`,
                 link: s.link,
                 title: s.text,
+                header: s.header,
+                position: s.position,
+                brand: s.brand,
+                tagline: s.tagline,
                 isMobile: s.isMobile === 1,
                 aspect: "1/1"
             });

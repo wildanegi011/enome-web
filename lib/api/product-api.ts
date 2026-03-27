@@ -88,6 +88,8 @@ export const productApi = {
             if (filters.price?.length) params.append("priceRanges", filters.price.join(","));
             if (filters.color?.length) params.append("colors", filters.color.join(","));
             if (filters.size?.length) params.append("sizes", filters.size.join(","));
+            if (filters.brand?.length) params.append("brand", filters.brand.join(","));
+            if (filters.gender?.length) params.append("gender", filters.gender.join(","));
             if (filters.search) params.append("search", filters.search);
             const qs = params.toString();
             if (qs) url += `?${qs}`;
@@ -97,7 +99,14 @@ export const productApi = {
     getNewArrivals: () => apiClient<Product[]>("/api/products/new-arrivals"),
     getHighlights: () => apiClient<Product[]>("/api/products/highlights"),
     getById: (id: string) => apiClient<ProductDetailResponse>(`/api/products/${id}`),
-    getCategories: (limit?: number) => apiClient<Category[]>(`/api/categories${limit ? `?limit=${limit}` : ""}`),
+    getCategories: (filters?: { brand?: string[], gender?: string[] }, limit?: number) => {
+        const params = new URLSearchParams();
+        if (limit) params.set("limit", limit.toString());
+        if (filters?.brand?.length) params.set("brand", filters.brand.join(","));
+        if (filters?.gender?.length) params.set("gender", filters.gender.join(","));
+        const qs = params.toString();
+        return apiClient<Category[]>(`/api/categories${qs ? `?${qs}` : ""}`);
+    },
     getColors: () => apiClient<Color[]>("/api/colors"),
     getSizes: () => apiClient<Size[]>("/api/sizes"),
 };

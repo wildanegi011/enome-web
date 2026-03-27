@@ -25,7 +25,7 @@ export default function ProductGrid({ products, isRefreshing }: ProductGridProps
                 layout
                 className={cn(
                     "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-8 sm:gap-y-12 transition-opacity duration-500",
-                    isRefreshing ? "opacity-40" : "opacity-100"
+                    isRefreshing ? "opacity-60" : "opacity-100"
                 )}
             >
                 <AnimatePresence mode="popLayout">

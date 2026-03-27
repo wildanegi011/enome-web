@@ -42,6 +42,16 @@ const DEFAULT_COLORS = [
     { name: "Olive", value: "#808000" },
 ];
 
+const GENDER_OPTIONS = [
+    { label: "Pria", value: "Pria" },
+    { label: "Wanita", value: "Wanita" }
+];
+const BRAND_OPTIONS = [
+    { label: "Enome", value: "enome" },
+    { label: "Enome Homme", value: "homme" },
+    { label: "Enome by nuna", value: "nuna" }
+];
+
 /** Rentang harga yang didukung backend */
 const PRICE_RANGES = [
     "Di bawah Rp 500rb",
@@ -58,6 +68,8 @@ export interface FilterState {
     color: string[];
     price: string[];
     collection: string[];
+    brand: string[];
+    gender: string[];
     search?: string;
 }
 
@@ -89,6 +101,8 @@ export default function FilterSidebar({
     // Status buka/tutup section (Kategori, Harga, dll)
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         collection: true,
+        brand: true,
+        gender: true,
         price: true,
         color: true,
         size: true,
@@ -137,7 +151,7 @@ export default function FilterSidebar({
         return (
             <button
                 onClick={() => toggleSection(section)}
-                className="flex items-center justify-between w-full py-2 group"
+                className="flex items-center justify-between w-full py-1.5 group transition-all duration-200 hover:opacity-80"
             >
                 <div className="flex items-center gap-2">
                     <h3 className="text-[11px] sm:text-[12px] font-semibold tracking-[0.08em] uppercase text-neutral-base-900 transition-colors group-hover:text-neutral-base-700 font-montserrat">
@@ -203,7 +217,7 @@ export default function FilterSidebar({
                         onClick={clearAllFilters}
                         className="flex items-center gap-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-neutral-base-400 hover:text-neutral-base-900 transition-all group"
                     >
-                        <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-neutral-base-50 flex items-center justify-center group-hover:bg-neutral-base-100 transition-colors">
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-neutral-base-100 flex items-center justify-center group-hover:bg-neutral-base-100 transition-colors">
                             <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         </div>
                         Hapus Filter
@@ -212,7 +226,85 @@ export default function FilterSidebar({
             </div>
 
             <ScrollArea className="h-[calc(100vh-220px)]">
-                <div className="space-y-6 sm:space-y-8 pb-12 pr-4">
+                <div className="space-y-4 sm:space-y-6 pb-12 pr-4">
+
+                    {/* --- Brand --- */}
+                    <div className="space-y-4">
+                        <SectionHeader title="Brand" section="brand" isOpen={openSections.brand} />
+                        <AnimatePresence initial={false}>
+                            {openSections.brand && (
+                                <motion.div {...sectionAnimation} className="overflow-hidden">
+                                    <div className="space-y-1 pt-1">
+                                        {BRAND_OPTIONS.map((brandObj) => {
+                                            const isActive = activeFilters.brand?.includes(brandObj.value);
+                                            return (
+                                                <button
+                                                    key={brandObj.value}
+                                                    onClick={() => onFilterChange("brand", brandObj.value)}
+                                                    className={cn(
+                                                        "flex items-center gap-3 w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg transition-all duration-200 text-[13px] sm:text-[14px] font-medium leading-5 group font-montserrat tracking-tight active:scale-[0.98]",
+                                                        isActive
+                                                            ? "bg-neutral-base-100 text-neutral-base-900 scale-[1.02]"
+                                                            : "text-neutral-base-600 hover:bg-neutral-base-100 hover:text-neutral-base-900"
+                                                    )}
+                                                >
+                                                    <div className={cn(
+                                                        "w-4 h-4 border-2 rounded-sm flex items-center justify-center transition-all",
+                                                        isActive ? "border-neutral-base-900 bg-neutral-base-900" : "border-neutral-base-200 group-hover:border-neutral-base-400"
+                                                    )}>
+                                                        {isActive && <Check className="w-2.5 h-2.5 text-white" strokeWidth={4} />}
+                                                    </div>
+                                                    <span className="flex-1 text-left truncate">
+                                                        {brandObj.label}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                        <div className="h-px bg-neutral-base-100 mt-5" />
+                    </div>
+
+                    {/* --- Gender --- */}
+                    <div className="space-y-4">
+                        <SectionHeader title="Untuk" section="gender" isOpen={openSections.gender} />
+                        <AnimatePresence initial={false}>
+                            {openSections.gender && (
+                                <motion.div {...sectionAnimation} className="overflow-hidden">
+                                    <div className="space-y-1 pt-1">
+                                        {GENDER_OPTIONS.map((genderObj) => {
+                                            const isActive = activeFilters.gender?.includes(genderObj.value);
+                                            return (
+                                                <button
+                                                    key={genderObj.value}
+                                                    onClick={() => onFilterChange("gender", genderObj.value)}
+                                                    className={cn(
+                                                        "flex items-center gap-3 w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg transition-all duration-200 text-[13px] sm:text-[14px] font-medium leading-5 group font-montserrat tracking-tight active:scale-[0.98]",
+                                                        isActive
+                                                            ? "bg-neutral-base-100 text-neutral-base-900 scale-[1.02]"
+                                                            : "text-neutral-base-600 hover:bg-neutral-base-100 hover:text-neutral-base-900"
+                                                    )}
+                                                >
+                                                    <div className={cn(
+                                                        "w-4 h-4 border-2 rounded-sm flex items-center justify-center transition-all",
+                                                        isActive ? "border-neutral-base-900 bg-neutral-base-900" : "border-neutral-base-200 group-hover:border-neutral-base-400"
+                                                    )}>
+                                                        {isActive && <Check className="w-2.5 h-2.5 text-white" strokeWidth={4} />}
+                                                    </div>
+                                                    <span className="flex-1 text-left truncate">
+                                                        {genderObj.label}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                        <div className="h-px bg-neutral-base-100 mt-5" />
+                    </div>
 
                     {/* --- Kategori (Collection) --- */}
                     {allCategories.length > 0 && (
@@ -225,7 +317,6 @@ export default function FilterSidebar({
                                             {visibleCategories.map((catItem) => {
                                                 const cat = catItem.name;
                                                 const isActive = activeFilters.collection.includes(cat);
-
                                                 return (
                                                     <button
                                                         key={cat}
@@ -256,7 +347,7 @@ export default function FilterSidebar({
                                     </motion.div>
                                 )}
                             </AnimatePresence>
-                            <div className="h-px bg-black/10 mt-8" />
+                            <div className="h-px bg-neutral-base-100 mt-5" />
                         </div>
                     )}
 
@@ -274,10 +365,10 @@ export default function FilterSidebar({
                                                     key={range}
                                                     onClick={() => onFilterChange("price", range)}
                                                     className={cn(
-                                                        "flex items-center gap-2 w-full px-2 py-2 sm:px-3 sm:py-2.5 rounded-lg text-left text-[13px] sm:text-[14px] font-normal transition-all duration-200 group font-montserrat tracking-tight active:scale-[0.98]",
+                                                        "flex items-center gap-3 w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg transition-all duration-200 text-[13px] sm:text-[14px] font-medium leading-5 group font-montserrat tracking-tight active:scale-[0.98]",
                                                         isActive
                                                             ? "bg-neutral-base-100 text-neutral-base-900 scale-[1.01]"
-                                                            : "text-neutral-base-600 hover:bg-neutral-base-50 hover:text-neutral-base-900"
+                                                            : "text-neutral-base-600 hover:bg-neutral-base-100 hover:text-neutral-base-900"
                                                     )}
                                                 >
                                                     <span className="flex items-center gap-3">
@@ -296,7 +387,7 @@ export default function FilterSidebar({
                                 </motion.div>
                             )}
                         </AnimatePresence>
-                        <div className="h-px bg-black/10 mt-8" />
+                        <div className="h-px bg-neutral-base-100 mt-5" />
                     </div>
 
                     {/* --- Warna --- */}
@@ -313,7 +404,7 @@ export default function FilterSidebar({
                                                     key={color.value}
                                                     onClick={() => onFilterChange("color", color.name)}
                                                     className={cn(
-                                                        "relative w-[25px] h-[25px] rounded-full border-2 transition-all duration-200 group ring-offset-2 active:scale-90",
+                                                        "relative w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 transition-all duration-200 group ring-offset-2 active:scale-95",
                                                         isActive
                                                             ? "border-neutral-base-900 ring-2 ring-neutral-base-900 scale-110"
                                                             : "border-neutral-base-100 hover:border-neutral-base-400 hover:scale-105"
@@ -340,7 +431,7 @@ export default function FilterSidebar({
                                 </motion.div>
                             )}
                         </AnimatePresence>
-                        <div className="h-px bg-black/10 mt-8" />
+                        <div className="h-px bg-neutral-base-100 mt-5" />
                     </div>
 
                     {/* --- Ukuran --- */}
@@ -357,7 +448,7 @@ export default function FilterSidebar({
                                                     key={s}
                                                     onClick={() => onFilterChange("size", s)}
                                                     className={cn(
-                                                        "h-8 sm:h-9 rounded-lg border text-[13px] sm:text-[14px] font-normal transition-all duration-200 font-montserrat active:scale-[0.95]",
+                                                        "h-8 sm:h-10 rounded-lg border text-[13px] sm:text-[14px] font-normal transition-all duration-200 font-montserrat active:scale-[0.95]",
                                                         isActive
                                                             ? "bg-neutral-base-100 border-neutral-base-200 text-neutral-base-900 scale-[1.05]"
                                                             : "bg-white border-neutral-base-200 text-neutral-base-600 hover:border-neutral-base-900 hover:text-neutral-base-900 hover:shadow-sm"
