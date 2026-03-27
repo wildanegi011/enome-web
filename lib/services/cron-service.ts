@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { orders, payment as paymentTable, orderdetail, produkDetail, preOrder, flashSale, produk, keranjang, customer, user } from "@/lib/db/schema";
+import { orders, payment as paymentTable, orderdetail, produkDetail, preOrder, flashSale, produk, keranjang, customer, user, stok } from "@/lib/db/schema";
 import { eq, and, lt, sql, inArray, lte, or, gte, desc } from "drizzle-orm";
 import { CONFIG } from "@/lib/config";
 import logger from "@/lib/logger";
@@ -106,6 +106,18 @@ export class CronService {
                         // C. Revert Stock ONLY if not PRE-ORDER AND status was OPEN
                         if (order.orderTipe !== "PRE-ORDER" && order.statusOrder === "OPEN") {
                             for (const item of items) {
+                                // 1. Get current stock for logging (with lock)
+                                const [currentDetail]: any = await tx.select({ stokNormal: produkDetail.stokNormal })
+                                    .from(produkDetail)
+                                    .where(and(
+                                        eq(produkDetail.produkId, item.produkId!),
+                                        eq(produkDetail.warnaId, item.warna!),
+                                        eq(produkDetail.size, item.ukuran!),
+                                        eq(produkDetail.variant, item.variant || "")
+                                    ))
+                                    .for("update");
+
+                                // 2. Update Stock
                                 await tx.update(produkDetail)
                                     .set({ stokNormal: sql`${produkDetail.stokNormal} + ${item.qty}` })
                                     .where(and(
@@ -114,6 +126,23 @@ export class CronService {
                                         eq(produkDetail.size, item.ukuran!),
                                         eq(produkDetail.variant, item.variant || "")
                                     ));
+
+                                // 3. Log Revert
+                                await tx.insert(stok).values({
+                                    produkId: item.produkId,
+                                    warna: item.warna,
+                                    size: item.ukuran,
+                                    companyprofileId: CONFIG.DEFAULT_COMPANY_PROFILE_ID,
+                                    masuk: item.qty || 0,
+                                    keluar: 0,
+                                    stok: (currentDetail?.stokNormal || 0) + (item.qty || 0),
+                                    keterangan: `CANCELLED / EXPIRED ${order.orderId}`,
+                                    createdAt: sql`${dhms}`,
+                                    updatedAt: sql`${dhms}`,
+                                    createdBy: 0,
+                                    updatedBy: 0,
+                                    isDeleted: 0,
+                                });
 
                                 logger.debug(`CronService: Reverted stock for ${item.produkId} (Qty: ${item.qty})`);
                             }
