@@ -384,6 +384,7 @@ export class OrderService {
                     produkId: item.produkId,
                     warna: item.warna,
                     size: item.size,
+                    variant: item.variant,
                     companyprofileId: CONFIG.DEFAULT_COMPANY_PROFILE_ID,
                     masuk: 0,
                     keluar: qty,
