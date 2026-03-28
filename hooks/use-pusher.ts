@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Pusher from "pusher-js";
 
 export const usePusher = (channelName: string, eventName: string, onEvent: (data: any) => void) => {
-    const [pusher, setPusher] = useState<Pusher | null>(null);
+    const [pusher, setPusher] = useState<any>(null);
     const onEventRef = useRef(onEvent);
 
     // Keep ref updated
@@ -18,23 +17,42 @@ export const usePusher = (channelName: string, eventName: string, onEvent: (data
             return;
         }
 
-        const pusherInstance = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-            cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
-        });
+        let pusherInstance: any = null;
+        let channel: any = null;
 
-        const channel = pusherInstance.subscribe(channelName);
-        channel.bind(eventName, (data: any) => {
-            onEventRef.current(data);
-        });
+        const initPusher = async () => {
+            try {
+                // Dynamic import to reduce bundle size
+                const PusherModule = await import("pusher-js");
+                const PusherClass = PusherModule.default;
+                
+                pusherInstance = new PusherClass(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
+                    cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+                });
 
-        setPusher(pusherInstance);
+                channel = pusherInstance.subscribe(channelName);
+                channel.bind(eventName, (data: any) => {
+                    onEventRef.current(data);
+                });
+
+                setPusher(pusherInstance);
+            } catch (error) {
+                console.error("Failed to initialize Pusher:", error);
+            }
+        };
+
+        initPusher();
 
         return () => {
-            channel.unbind(eventName);
-            pusherInstance.unsubscribe(channelName);
-            pusherInstance.disconnect();
+            if (pusherInstance) {
+                if (channel) {
+                    channel.unbind(eventName);
+                    pusherInstance.unsubscribe(channelName);
+                }
+                pusherInstance.disconnect();
+            }
         };
-    }, [channelName, eventName]); // onEvent removed from dependencies
+    }, [channelName, eventName]);
 
     return pusher;
 };

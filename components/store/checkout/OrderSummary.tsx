@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft, ChevronRight, CreditCard, Loader2, ShieldCheck, ShoppingBag, Tag, Truck, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 interface OrderSummaryProps {
     totalAmount: number;
@@ -21,6 +21,7 @@ interface OrderSummaryProps {
     setIsVoucherApplied: (applied: boolean) => void;
     setVoucherData: (data: any) => void;
     applyVoucher: () => Promise<void>;
+    clearVoucher: () => void;
     isVoucherLoading: boolean;
     remainingBill: number;
     isSubmitting: boolean;
@@ -48,6 +49,7 @@ export default function OrderSummary({
     setIsVoucherApplied,
     setVoucherData,
     applyVoucher,
+    clearVoucher,
     isVoucherLoading,
     remainingBill,
     isSubmitting,
@@ -101,7 +103,7 @@ export default function OrderSummary({
 
                     {/* Voucher Section */}
                     {isVoucherApplied ? (
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             className="bg-white border border-neutral-base-100 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between"
@@ -116,16 +118,12 @@ export default function OrderSummary({
                                 </div>
                             </div>
                             <button
-                                onClick={() => {
-                                    setIsVoucherApplied(false);
-                                    setVoucherData(null);
-                                    setVoucherCode("");
-                                }}
+                                onClick={clearVoucher}
                                 className="w-7 h-7 md:w-8 md:h-8 rounded-lg hover:bg-rose-50 text-neutral-base-300 hover:text-rose-500 transition-all flex items-center justify-center shrink-0"
                             >
                                 <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             </button>
-                        </motion.div>
+                        </m.div>
                     ) : (
                         <div className={`border border-neutral-base-100/50 rounded-[28px] p-4 md:p-5 flex flex-col gap-3 md:gap-4 transition-all duration-500 shadow-sm ${remainingBill === 0 ? "bg-neutral-base-50/20 opacity-60 grayscale" : "bg-white/50 backdrop-blur-xs"}`}>
                             <span className="text-[11px] md:text-[12px] font-bold text-neutral-base-900 uppercase tracking-widest ml-1">

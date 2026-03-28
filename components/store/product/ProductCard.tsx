@@ -3,7 +3,7 @@
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import {
     Tooltip,
     TooltipContent,
@@ -36,6 +36,7 @@ interface Product {
     isOnFlashSale?: boolean;
     isOnPreOrder?: boolean;
     produkPreorder?: number;
+    isHighlighted?: number | boolean;
     commission?: string;
     hasCommission?: boolean;
     discountPercentage?: number;
@@ -87,7 +88,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
             onMouseEnter={() => setHoverState('card')}
             onMouseLeave={() => setHoverState('none')}
         >
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{
                     opacity: 1,
@@ -102,7 +103,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                         href={`/products/${product.id || 'batik-elegance-123'}`}
                         className="absolute inset-0 z-1"
                     >
-                        <motion.div
+                        <m.div
                             className="absolute inset-0 z-1"
                             animate={{ scale: isCardHovered ? 1.05 : 1 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
@@ -114,19 +115,24 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                                 className="object-cover"
                                 sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                             />
-                        </motion.div>
+                        </m.div>
                     </Link>
 
                     {/* Status Badges */}
-                    <div className="absolute top-0 left-0 z-10 pointer-events-none flex flex-col items-start">
+                    <div className="absolute top-0 left-0 z-10 pointer-events-none flex flex-col items-start gap-1">
                         {product.isOnFlashSale && (
-                            <span className="bg-red-600 text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-br-xl shadow-lg shadow-red-900/20 mb-1">
-                                &nbsp; Flash Sale
+                            <span className="bg-red-600 text-white text-[9px] font-bold uppercase tracking-[0.15em] px-2.5 py-1.5 rounded-br-2xl shadow-lg shadow-red-900/20">
+                                Flash Sale
                             </span>
                         )}
                         {product.produkPreorder === 1 && (
-                            <span className="bg-amber-600 text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-br-xl shadow-lg shadow-amber-900/20">
-                                &nbsp; Pre Order
+                            <span className="bg-amber-600 text-white text-[9px] font-bold uppercase tracking-[0.15em] px-2.5 py-1.5 rounded-br-2xl shadow-lg shadow-amber-900/20">
+                                Pre Order
+                            </span>
+                        )}
+                        {(product.isHighlighted === 1 || product.isHighlighted === true) && (
+                            <span className="bg-indigo-600 text-white text-[9px] font-bold uppercase tracking-[0.15em] px-2.5 py-1.5 rounded-br-2xl shadow-lg shadow-indigo-900/20">
+                                Spesial
                             </span>
                         )}
                     </div>
@@ -142,7 +148,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
 
                     {/* Wishlist Icon */}
                     <div className="absolute top-3 right-3 z-10">
-                        <motion.button
+                        <m.button
                             type="button"
                             onClick={handleWishlist}
                             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-md shadow-sm"
@@ -161,7 +167,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                                     }`}
                                 strokeWidth={2}
                             />
-                        </motion.button>
+                        </m.button>
                     </div>
 
                     {/* Subtle Overlay on Hover */}
@@ -176,8 +182,8 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     href={`/products/${product.id || 'batik-elegance-123'}`}
                     className="flex justify-between items-start gap-4 px-1 hover:no-underline"
                 >
-                    <div className="flex-1 min-w-0 space-y-1 sm:space-y-1.5">
-                        <p className="text-[10px] sm:text-[12px] text-neutral-base-400 font-bold uppercase tracking-widest font-montserrat truncate">
+                    <div className="flex-1 min-w-0 flex flex-col">
+                        <p className="text-[10px] sm:text-[12px] text-neutral-base-400 font-bold uppercase tracking-widest font-montserrat truncate mb-0.5">
                             {product.category || "Kemeja"}
                         </p>
                         <Tooltip delayDuration={0}>
@@ -193,14 +199,15 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                                 {product.name}
                             </TooltipContent>
                         </Tooltip>
+
                         <div className="pt-0.5">
                             {product.originalPrice && product.isOnFlashSale && (
                                 <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className="text-[10px] sm:text-[12px] text-neutral-base-400 line-through font-montserrat">
+                                    <span className="text-[12px] sm:text-[14px] text-neutral-base-400 line-through font-montserrat">
                                         {product.originalPrice}
                                     </span>
                                     {!!product.discountPercentage && product.discountPercentage > 0 && (
-                                        <span className="text-[8px] sm:text-[9px] font-bold text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded">
+                                        <span className="text-[10px] sm:text-[12px] font-bold text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded">
                                             -{product.discountPercentage}%
                                         </span>
                                     )}
@@ -226,7 +233,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                             }}
                         >
                             <div className="h-6 flex items-center">
-                                <motion.div
+                                <m.div
                                     layout
                                     className="flex items-center"
                                     animate={{ gap: isColorsHovered ? 6 : 0 }}
@@ -236,7 +243,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                                         {(isColorsHovered ? colors : colors.slice(0, 2)).map((color, cIdx) => (
                                             <Tooltip key={`${color.name}-${cIdx}`} delayDuration={0}>
                                                 <TooltipTrigger asChild>
-                                                    <motion.div
+                                                    <m.div
                                                         layout
                                                         initial={{ opacity: 0, scale: 0, x: -4 }}
                                                         animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -263,11 +270,11 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                                             +{colors.length - 2}
                                         </div>
                                     )}
-                                </motion.div>
+                                </m.div>
                             </div>
                             <AnimatePresence>
                                 {isColorsHovered && colors.length > 2 && (
-                                    <motion.p
+                                    <m.p
                                         initial={{ opacity: 0, y: 4 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: 4 }}
@@ -275,13 +282,13 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                                         className="text-[9px] text-neutral-base-400 font-bold uppercase tracking-tighter mt-1"
                                     >
                                         {colors.length} Colors
-                                    </motion.p>
+                                    </m.p>
                                 )}
                             </AnimatePresence>
                         </div>
                     )}
                 </Link>
-            </motion.div >
+            </m.div >
         </div >
     );
 }

@@ -88,11 +88,13 @@ export interface OrderDetail {
     voucherInfo?: {
         kode: string;
         nominal: number;
+        syarat_dan_ketentuan?: string;
     } | null;
     uniqueCode?: number;
     expiredTime?: string | number | null;
     whatsappAdmin?: string;
     paymentVerificationTimeout?: number;
+    trackableCouriers?: string[];
 }
 
 export interface ProfileData {
@@ -141,6 +143,7 @@ export interface OrdersResponse {
     orders: Order[];
     total: number;
     tabs?: { label: string; value: string }[];
+    trackableCouriers?: string[];
 }
 
 export const userApi = {

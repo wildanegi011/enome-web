@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus, User, Phone, MapPin, Search, Loader2, AlertCircle, Truck } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import AddressSelectionModal from "@/components/store/address/AddressSelectionModal";
 import AddAddressModal from "@/components/store/address/AddAddressModal";
 import AddressCard from "@/components/store/address/AddressCard";

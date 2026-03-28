@@ -5,7 +5,7 @@ import SortDropdown from "@/components/store/product/SortDropdown";
 import { SortOption } from "@/components/store/product/ProductListHeader";
 
 import { Loader2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 
 interface ProductsHeaderProps {
     currentPage: number;
@@ -29,7 +29,7 @@ export default function StickyHeader({
             {/* Subtle Loading Overlay */}
             <AnimatePresence>
                 {isRefreshing && (
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -39,7 +39,7 @@ export default function StickyHeader({
                             <Loader2 className="w-3 h-3 animate-spin text-neutral-base-900" />
                             <span className="text-[9px] font-bold tracking-[0.2em] uppercase font-montserrat italic">Updating...</span>
                         </div>
-                    </motion.div>
+                    </m.div>
                 )}
             </AnimatePresence>
             <div className="flex items-center justify-between">

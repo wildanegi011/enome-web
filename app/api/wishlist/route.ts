@@ -1,19 +1,8 @@
-import { db } from "@/lib/db";
-import { keranjangLove, produk } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth, withOptionalAuth } from "@/lib/auth-utils";
 import logger, { apiLogger } from "@/lib/logger";
-import { ActivityService } from "@/lib/services/activity-service";
+import { WishlistService } from "@/lib/services/wishlist-service";
 
-/**
- * Mengambil daftar produk_id yang ada di wishlist user.
- *
- * @auth optional (anonymous → items kosong)
- * @method GET
- * @response 200 — { items: string[] } (array of produkId)
- * @response 500 — { error: "Gagal mengambil wishlist" }
- */
 export const GET = withOptionalAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: GET /api/wishlist");
     try {
@@ -22,100 +11,30 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
         }
 
         const custId = Number(session.user.id);
+        const items = await WishlistService.getWishlist(custId);
 
-        const items = await db
-            .select({ produkId: keranjangLove.produkId })
-            .from(keranjangLove)
-            .innerJoin(produk, eq(keranjangLove.produkId, produk.produkId))
-            .where(
-                and(
-                    eq(keranjangLove.custId, custId),
-                    eq(keranjangLove.isDeleted, 0),
-                    eq(produk.isOnline, 1)
-                )
-            );
-
-        const produkIds = [...new Set(items.map(i => i.produkId).filter(Boolean))];
-
-        logger.info("API Response: 200 /api/wishlist", { count: produkIds.length });
-        return NextResponse.json({ items: produkIds });
+        logger.info("API Response: 200 /api/wishlist", { count: items.length });
+        return NextResponse.json({ items });
     } catch (error: any) {
         apiLogger.error(request, error);
         return NextResponse.json({ error: "Gagal mengambil wishlist" }, { status: 500 });
     }
 });
-/**
- * Toggle wishlist item (add/remove) berdasarkan produk_id.
- *
- * @auth required
- * @method POST
- * @body {{ produkId: string }}
- * @response 200 (added)   — { action: "added", produkId: string }
- * @response 200 (removed) — { action: "removed", produkId: string }
- * @response 401 — { error: "Unauthorized" }
- * @response 400 — { error: "produkId is required" }
- * @response 500 — { error: "Gagal update wishlist" }
- */
+
 export const POST = withAuth(async (request: NextRequest, context: any, session: any) => {
     logger.info("API Request: POST /api/wishlist");
     try {
         const custId = Number(session.user.id);
-        const b = await request.json();
-        const { produkId } = b;
-
+        const { produkId } = await request.json();
 
         if (!produkId) {
             return NextResponse.json({ error: "produkId is required" }, { status: 400 });
         }
 
-        // Check if item already exists and is not deleted
-        const existing = await db
-            .select()
-            .from(keranjangLove)
-            .where(
-                and(
-                    eq(keranjangLove.produkId, produkId),
-                    eq(keranjangLove.custId, custId),
-                    eq(keranjangLove.isDeleted, 0)
-                )
-            )
-            .limit(1);
+        const result = await WishlistService.toggleWishlist(custId, produkId);
 
-        if (existing.length > 0) {
-            // Remove from wishlist (soft delete, sama seperti Yii)
-            await db
-                .update(keranjangLove)
-                .set({ isDeleted: 1 })
-                .where(
-                    and(
-                        eq(keranjangLove.produkId, produkId),
-                        eq(keranjangLove.custId, custId),
-                        eq(keranjangLove.isDeleted, 0)
-                    )
-                );
-
-            await ActivityService.log("Wishlist Remove", `User removed ${produkId} from wishlist`, custId);
-
-            logger.info("Wishlist: Removed", { produkId, custId });
-            return NextResponse.json({ action: "removed", produkId });
-        } else {
-            // Add to wishlist
-            await db.insert(keranjangLove).values({
-                produkId,
-                custId: custId,
-                qtyProduk: 1,
-                status: 0,
-                keterangan: "",
-                tipeDiskon: "allin",
-                isDeleted: 0,
-                createdBy: custId,
-            });
-
-            await ActivityService.log("Wishlist Add", `User added ${produkId} to wishlist`, custId);
-
-            logger.info("Wishlist: Added", { produkId, custId });
-            return NextResponse.json({ action: "added", produkId });
-        }
+        logger.info(`Wishlist: ${result.action}`, { produkId, custId });
+        return NextResponse.json(result);
     } catch (error: any) {
         apiLogger.error(request, error);
         return NextResponse.json({ error: "Gagal update wishlist" }, { status: 500 });

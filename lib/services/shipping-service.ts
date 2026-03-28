@@ -4,6 +4,7 @@ import { eq, and } from "drizzle-orm";
 import logger from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
 import { ConfigService } from "@/lib/services/config-service";
+import { CompanyService } from "@/lib/services/company-service";
 
 export interface ShippingOption {
     service: string;
@@ -30,24 +31,31 @@ export class ShippingService {
         const apiKey = await ConfigService.get(CONFIG.RAJAONGKIR_KEY_VAR);
         if (!apiKey) throw new Error("rajaongkir_key_not_found");
 
-        const companyData: any = await db.select({
-            kecamatan: companyProfile.kecamatan,
-            kota: companyProfile.kota,
-            subdistrictName: kecamatan.subdistrictName,
-            cityName: kota.cityName
-        })
-            .from(companyProfile)
-            .leftJoin(kecamatan, eq(companyProfile.kecamatan, kecamatan.subdistrictId))
-            .leftJoin(kota, eq(companyProfile.kota, kota.cityId))
-            .where(eq(companyProfile.isAktif, 1))
-            .limit(1);
+        const company = await CompanyService.getPrimary();
+        
+        // Fetch additional names (cityName, subdistrictName) if needed for origin display
+        let subdistrictName = "";
+        let cityName = "";
+        
+        if (company) {
+            const [geo]: any = await db.select({
+                subdistrictName: kecamatan.subdistrictName,
+                cityName: kota.cityName
+            })
+                .from(kecamatan)
+                .leftJoin(kota, eq(kecamatan.cityId, kota.cityId))
+                .where(eq(kecamatan.subdistrictId, company.kecamatan))
+                .limit(1);
+            
+            subdistrictName = geo?.subdistrictName || "";
+            cityName = geo?.cityName || "";
+        }
 
-        const company = companyData[0];
         // Strictly use kecamatan from company profile as origin
         const origin = company?.kecamatan || CONFIG.DEFAULT_ORIGIN_CITY;
 
         // Priority for display name: cityName from company profile's city ID
-        const originName = company?.cityName || company?.subdistrictName || company?.kota || company?.kecamatan || "Origin";
+        const originName = cityName || subdistrictName || company?.kota || company?.kecamatan || "Origin";
 
         // Fetch couriers that are active (1) and automated/non-manual (0)
         const activeCouriers = await db.select()
@@ -107,13 +115,7 @@ export class ShippingService {
         const apiKey = await ConfigService.get(CONFIG.RAJAONGKIR_KEY_VAR);
         if (!apiKey) throw new Error("rajaongkir_key_not_found");
 
-        const [company]: any = await db.select({
-            kecamatan: companyProfile.kecamatan,
-            kota: companyProfile.kota
-        })
-            .from(companyProfile)
-            .where(eq(companyProfile.isAktif, 1))
-            .limit(1);
+        const company = await CompanyService.getPrimary();
 
         const origin = company?.kecamatan || company?.kota || CONFIG.DEFAULT_ORIGIN_CITY;
         const cacheKey = `val-${origin}-${destination}-${weight}-${courier}`;
@@ -138,6 +140,38 @@ export class ShippingService {
         }
 
         return { valid, actualPrice };
+    }
+
+    /**
+     * Track a waybill using Komerce/RajaOngkir API.
+     */
+    static async trackShipping(awb: string, courier: string, phone: string) {
+        const apiKey = await ConfigService.get(CONFIG.RAJAONGKIR_KEY_VAR);
+        if (!apiKey) throw new Error("rajaongkir_key_not_found");
+
+        const courierCode = courier.toLowerCase();
+        const lastPhone = phone ? phone.slice(-5) : "";
+
+        const response = await fetch(CONFIG.TRACKING.RAJAONGKIR_TRACK_URL, {
+            method: "POST",
+            headers: {
+                "content-type": "application/x-www-form-urlencoded",
+                "key": apiKey
+            },
+            body: new URLSearchParams({
+                awb: awb,
+                courier: courierCode,
+                last_phone_number: lastPhone
+            }),
+            signal: AbortSignal.timeout(10000)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData?.message || "Gagal melacak resi");
+        }
+
+        return await response.json();
     }
 
     private static async fetchKomerce(apiKey: string, origin: string | number, destination: string | number, weight: number, courier: string): Promise<any[]> {

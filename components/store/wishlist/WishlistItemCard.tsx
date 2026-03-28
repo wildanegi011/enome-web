@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import Link from "next/link";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { Loader2, Trash2 } from "lucide-react";
@@ -40,7 +40,7 @@ const WishlistItemCard = ({ item, idx, isRemoving, onRemove, formatPriceRange }:
         : null;
 
     return (
-        <motion.div
+        <m.div
             layout
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: isRemoving ? 0 : 1, scale: isRemoving ? 0.9 : 1 }}
@@ -86,7 +86,7 @@ const WishlistItemCard = ({ item, idx, isRemoving, onRemove, formatPriceRange }:
                     <div className="absolute top-2.5 right-2.5 z-20">
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <motion.button
+                                <m.button
                                     type="button"
                                     onClick={(e) => onRemove(e, item.produk_id)}
                                     disabled={isRemoving}
@@ -99,7 +99,7 @@ const WishlistItemCard = ({ item, idx, isRemoving, onRemove, formatPriceRange }:
                                     ) : (
                                         <Trash2 className="w-3.5 h-3.5" />
                                     )}
-                                </motion.button>
+                                </m.button>
                             </TooltipTrigger>
                             <TooltipContent className="bg-neutral-base-900 text-white border-none text-[10px] font-bold py-1 px-2 mb-1">
                                 Hapus dari Wishlist
@@ -190,7 +190,7 @@ const WishlistItemCard = ({ item, idx, isRemoving, onRemove, formatPriceRange }:
                     )}
                 </Link>
             </div>
-        </motion.div>
+        </m.div>
     );
 };
 

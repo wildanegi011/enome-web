@@ -4,13 +4,16 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, ShoppingBag, User, Settings, LogOut, Package, Wallet, ChevronDown, Menu, X, MapPin, Heart, ShoppingCart } from "lucide-react";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import AuthModal from "@/components/store/auth/AuthModal";
+import { m, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { useLogo } from "@/hooks/use-logo";
 import { cn } from "@/lib/utils";
+import dynamic from "next/dynamic";
+
+const AuthModal = dynamic(() => import("@/components/store/auth/AuthModal"), { ssr: false });
+const SearchModal = dynamic(() => import("@/components/store/shared/SearchModal"), { ssr: false });
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -25,6 +28,7 @@ import FallbackImage from "@/components/store/shared/FallbackImage";
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [authModal, setAuthModal] = useState<{ open: boolean; tab: "login" | "register" }>({ open: false, tab: "login" });
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
     const { user, isAuthenticated, logout } = useAuth();
@@ -37,8 +41,18 @@ export default function Navbar() {
         const handleOpenAuth = (e: any) => {
             setAuthModal({ open: true, tab: e.detail?.tab || "login" });
         };
+        const down = (e: KeyboardEvent) => {
+            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                setIsSearchOpen((open) => !open);
+            }
+        };
         window.addEventListener("open-auth-modal", handleOpenAuth);
-        return () => window.removeEventListener("open-auth-modal", handleOpenAuth);
+        document.addEventListener("keydown", down);
+        return () => {
+            window.removeEventListener("open-auth-modal", handleOpenAuth);
+            document.removeEventListener("keydown", down);
+        };
     }, []);
 
     const navLinks = [
@@ -47,7 +61,7 @@ export default function Navbar() {
     ];
 
     return (
-        <motion.header
+        <m.header
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
@@ -84,7 +98,7 @@ export default function Navbar() {
                                     >
                                         {link.name}
                                         {isActive && (
-                                            <motion.div
+                                            <m.div
                                                 layoutId="activeNav"
                                                 className="absolute -bottom-2 left-0 right-0 h-[2px] bg-neutral-base-900"
                                                 initial={false}
@@ -99,6 +113,17 @@ export default function Navbar() {
                         {/* Separator */}
                         <div className="w-px h-5 bg-gray-200" />
 
+                        {/* Search Action */}
+                        <div className="flex items-center">
+                            <button
+                                onClick={() => setIsSearchOpen(true)}
+                                className="text-neutral-base-500 hover:text-neutral-base-900 transition-colors p-1 relative"
+                                aria-label="Search"
+                            >
+                                <Search className="w-[18px] h-[18px]" strokeWidth={1.2} />
+                            </button>
+                        </div>
+
                         {/* Wishlist Action */}
                         <div className="flex items-center">
                             <Link
@@ -109,14 +134,14 @@ export default function Navbar() {
                                 <Heart className="w-[18px] h-[18px]" strokeWidth={1.2} />
                                 <AnimatePresence>
                                     {wishlistCount > 0 && (
-                                        <motion.span
+                                        <m.span
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
                                             exit={{ scale: 0 }}
                                             className="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
                                         >
                                             {wishlistCount}
-                                        </motion.span>
+                                        </m.span>
                                     )}
                                 </AnimatePresence>
                             </Link>
@@ -135,14 +160,14 @@ export default function Navbar() {
                                 <ShoppingCart className="w-[18px] h-[18px]" strokeWidth={1.2} />
                                 <AnimatePresence>
                                     {cartCount > 0 && (
-                                        <motion.span
+                                        <m.span
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
                                             exit={{ scale: 0 }}
                                             className="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
                                         >
                                             {cartCount}
-                                        </motion.span>
+                                        </m.span>
                                     )}
                                 </AnimatePresence>
                             </Link>
@@ -236,6 +261,13 @@ export default function Navbar() {
 
                     {/* Mobile section */}
                     <div className="flex md:hidden items-center gap-4">
+                        <button
+                            onClick={() => setIsSearchOpen(true)}
+                            className="p-1 hover:text-neutral-base-900 transition-colors"
+                            aria-label="Search"
+                        >
+                            <Search className="w-5 h-5" strokeWidth={1.5} />
+                        </button>
                         <Link href="/account/wishlist" className="p-1 hover:text-neutral-base-900 transition-colors relative">
                             <Heart className="w-5 h-5" strokeWidth={1.5} />
                             {wishlistCount > 0 && (
@@ -265,7 +297,7 @@ export default function Navbar() {
             {/* Mobile Nav */}
             <AnimatePresence>
                 {mobileOpen && (
-                    <motion.nav
+                    <m.nav
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -324,7 +356,7 @@ export default function Navbar() {
                                 </div>
                             )}
                         </div>
-                    </motion.nav>
+                    </m.nav>
                 )}
             </AnimatePresence>
 
@@ -333,6 +365,11 @@ export default function Navbar() {
                 onClose={() => setAuthModal({ ...authModal, open: false })}
                 defaultTab={authModal.tab}
             />
-        </motion.header>
+            <SearchModal
+                isOpen={isSearchOpen}
+                onOpenChange={setIsSearchOpen}
+                router={router}
+            />
+        </m.header>
     );
 }

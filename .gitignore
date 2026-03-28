@@ -52,3 +52,6 @@ test_route.ts
 debug*
 
 public/img/*
+bun.lock
+logs/*
+.env.local

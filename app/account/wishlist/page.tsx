@@ -1,19 +1,14 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { cn, formatCurrency } from "@/lib/utils";
-import { Heart, Trash2, Loader2, Search, ChevronDown, X } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { m, AnimatePresence, LayoutGroup } from "framer-motion";
+import { formatCurrency } from "@/lib/utils";
+import { Heart, Search } from "lucide-react";
 import Navbar from "@/components/store/layout/Navbar";
 import UserSidebar from "@/components/store/layout/UserSidebar";
 import AccountHeader from "@/components/store/layout/AccountHeader";
-import { ASSET_URL } from "@/config/config";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import ResultsInfo from "@/components/store/shared/ResultsInfo";
-import SearchInput from "@/components/store/shared/SearchInput";
 import EmptyState from "@/components/store/shared/EmptyState";
 import Pagination from "@/components/store/shared/Pagination";
 
@@ -212,7 +207,7 @@ export default function WishlistPage() {
                             ) : (
                                 <>
                                     <LayoutGroup>
-                                        <motion.div
+                                        <m.div
                                             layout
                                             className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
                                         >
@@ -228,7 +223,7 @@ export default function WishlistPage() {
                                                     />
                                                 ))}
                                             </AnimatePresence>
-                                        </motion.div>
+                                        </m.div>
                                     </LayoutGroup>
 
                                     {/* Pagination */}

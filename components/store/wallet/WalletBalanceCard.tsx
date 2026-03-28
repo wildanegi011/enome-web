@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Wallet } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/utils";
@@ -15,7 +15,7 @@ interface WalletBalanceCardProps {
 
 const WalletBalanceCard = ({ balance, isLoading, onTopUpClick, mounted }: WalletBalanceCardProps) => {
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="relative overflow-hidden bg-neutral-base-900 rounded-[28px] md:rounded-[32px] p-6 md:p-8 text-white shadow-2xl shadow-neutral-base-900/20"
@@ -49,7 +49,7 @@ const WalletBalanceCard = ({ balance, isLoading, onTopUpClick, mounted }: Wallet
                     </button>
                 </div>
             </div>
-        </motion.div>
+        </m.div>
     );
 };
 

@@ -141,7 +141,7 @@ export default function OrderDetailPage() {
 
     if (!data) return null;
 
-    const { order, items, paymentInfo, voucherInfo, uniqueCode: uniqueCodeValue = 0, expiredTime, whatsappAdmin, paymentVerificationTimeout } = data;
+    const { order, items, paymentInfo, voucherInfo, uniqueCode: uniqueCodeValue = 0, expiredTime, whatsappAdmin, paymentVerificationTimeout, trackableCouriers = [] } = data;
 
     const sOrder = currentStatusOrder || order.statusOrder || "OPEN";
 
@@ -167,7 +167,7 @@ export default function OrderDetailPage() {
                         )}
 
 
-                        {order.statusOrder === "CLOSE" && order.statusTagihan !== "KADALUARSA" && CONFIG.TRACKABLE_COURIERS.includes(order.ekspedisi?.toLowerCase()) && (
+                        {order.statusOrder === "CLOSE" && order.statusTagihan !== "KADALUARSA" && trackableCouriers.includes(order.ekspedisi?.toLowerCase()) && (
                             <div className="bg-white border border-neutral-base-100 rounded-[28px] md:rounded-[32px] p-6 md:p-10 mb-8 shadow-sm overflow-hidden">
                                 <TrackingManifest
                                     awb={order.noResi}
@@ -208,6 +208,7 @@ export default function OrderDetailPage() {
                                         distrikKirim={order.distrikKirim}
                                         kotaKirim={order.kotaKirim}
                                         provinsiKirim={order.provinsiKirim}
+                                        trackableCouriers={trackableCouriers}
                                     />
                                 </div>
                             </div>

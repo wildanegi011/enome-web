@@ -33,6 +33,8 @@ export class SlideService {
                 header: s.header,
                 position: s.position,
                 brand: s.brand,
+                brandImageLink: s.brandImageLink ? s.brandImageLink : undefined,
+                brandPosition: s.brandPosition,
                 tagline: s.tagline,
                 isMobile: s.isMobile === 1,
                 aspect: "1/1"

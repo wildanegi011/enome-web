@@ -23,6 +23,7 @@ export function useProduct(id: string) {
         queryKey: queryKeys.products.detail(id),
         queryFn: () => productApi.getById(id),
         enabled: !!id,
+        staleTime: 2 * 60 * 1000, // Cache 2 menit
     });
 }
 

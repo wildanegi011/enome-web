@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { motion, Variants } from "framer-motion";
+import { m, Variants } from "framer-motion";
 import { Lock, Loader2, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -92,7 +92,7 @@ function ResetPasswordContent() {
             <div className="flex min-h-screen flex-col items-center justify-center space-y-6 bg-[#FAF9F6]">
                 <div className="relative">
                     <Loader2 className="h-12 w-12 animate-spin text-neutral-base-900 opacity-20" />
-                    <motion.div 
+                    <m.div
                         className="absolute inset-0 border-t-2 border-neutral-base-900 rounded-full"
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -130,7 +130,7 @@ function ResetPasswordContent() {
 
             <div className="relative z-10 w-full max-w-[450px] space-y-8">
                 {isSuccess ? (
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-[0_20px_80px_-15px_rgba(0,0,0,0.08)] border border-neutral-base-100/50 space-y-6"
@@ -147,10 +147,10 @@ function ResetPasswordContent() {
                         <Button asChild className="w-full h-14 bg-neutral-base-900 hover:bg-neutral-base-800 text-white rounded-2xl uppercase tracking-[0.2em] text-[10px] font-bold shadow-lg shadow-neutral-base-900/10 transition-all">
                             <Link href="/login">Kembali ke Masuk</Link>
                         </Button>
-                    </motion.div>
+                    </m.div>
                 ) : (
                     <>
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="space-y-4"
@@ -164,7 +164,7 @@ function ResetPasswordContent() {
                             <p className="text-neutral-base-500 text-base leading-relaxed text-center">
                                 Masukkan kata sandi baru untuk mengamankan kembali akun Énome Anda.
                             </p>
-                        </motion.div>
+                        </m.div>
 
                         <div className="bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-[0_20px_80px_-15px_rgba(0,0,0,0.08)] border border-neutral-base-100/50">
                             <Form {...form}>
@@ -255,12 +255,12 @@ function ResetPasswordContent() {
                                         ) : (
                                             <span className="flex items-center gap-2">
                                                 Ubah Kata Sandi
-                                                <motion.span
+                                                <m.span
                                                     animate={{ x: [0, 5, 0] }}
                                                     transition={{ repeat: Infinity, duration: 1.5 }}
                                                 >
                                                     →
-                                                </motion.span>
+                                                </m.span>
                                             </span>
                                         )}
                                     </Button>
@@ -268,7 +268,7 @@ function ResetPasswordContent() {
                             </Form>
                         </div>
 
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.5 }}
@@ -276,7 +276,7 @@ function ResetPasswordContent() {
                             <Link href="/login" className="inline-flex items-center gap-2 font-bold text-neutral-base-900 transition-colors hover:text-neutral-base-700 group">
                                 Kembali ke Halaman Masuk
                             </Link>
-                        </motion.div>
+                        </m.div>
                     </>
                 )}
             </div>

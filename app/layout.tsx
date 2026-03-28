@@ -58,6 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
+import MotionProvider from "@/components/providers/MotionProvider";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import ScrollToTop from "@/components/store/shared/ScrollToTop";
@@ -71,14 +72,15 @@ export default function RootLayout({
     <html lang="id" className={`${montserrat.variable} ${montserrat.className}`}>
       <body className="antialiased font-sans">
         <ReactQueryProvider>
-          <TooltipProvider>
-            <Suspense fallback={null}>
-              <ScrollToTop />
-            </Suspense>
-            {children}
-          </TooltipProvider>
+          <MotionProvider>
+            <TooltipProvider>
+              <Suspense fallback={null}>
+                <ScrollToTop />
+              </Suspense>
+              {children}
+            </TooltipProvider>
+          </MotionProvider>
         </ReactQueryProvider>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossOrigin="anonymous" referrerPolicy="no-referrer" />
         <Toaster position="bottom-center" richColors />
       </body>
     </html>

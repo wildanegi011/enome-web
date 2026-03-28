@@ -9,6 +9,8 @@ export const slide = mysqlTable("slide", {
     position: varchar("position", { length: 225 }),
     brand: varchar("brand", { length: 225 }),
     tagline: text("tagline"),
+    brandImageLink: varchar("brand_image_link", { length: 225 }),
+    brandPosition: varchar("position_brand", { length: 225 }),
     kategori: varchar("kategori", { length: 50 }),
     publish: int("publish").default(0),
     grid: int("grid"),
@@ -86,6 +88,7 @@ export const stok = mysqlTable("stok", {
     produkId: varchar("produk_id", { length: 20 }),
     warna: varchar("warna", { length: 20 }),
     size: varchar("size", { length: 20 }),
+    variant: varchar("variant", { length: 20 }),
     companyprofileId: int("companyprofile_id"),
     masuk: int("masuk"),
     keluar: int("keluar"),
@@ -421,6 +424,7 @@ export const companyProfile = mysqlTable("companyprofile", {
     email: varchar("email", { length: 100 }),
     logo: varchar("logo", { length: 50 }),
     isAktif: int("is_aktif").default(0),
+    isUtama: int("is_utama").default(0),
 });
 
 export const centralConfig = mysqlTable("central_config", {
@@ -473,6 +477,8 @@ export const voucher = mysqlTable("voucher", {
     kuotaVoucher: int("kuota_voucher"),
     deskripsiVoucher: text("deskripsi_voucher"),
     isAktif: int("is_aktif").default(1),
+    autoApply: int("auto_apply").default(0),
+    syaratDanKetentuan: text("syarat_dan_ketentuan"),
     createdAt: timestamp("created_at"),
     updatedAt: timestamp("updated_at"),
     createdBy: int("created_by"),

@@ -3,7 +3,7 @@
 import React from "react";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ShoppingBag, ChevronRight, MapPin, Truck } from "lucide-react";
 import { cn, formatCurrency, toTitleCase } from "@/lib/utils";
 import FormattedDate from "@/components/store/shared/FormattedDate";
@@ -34,9 +34,10 @@ export interface Order {
 
 interface OrderCardProps {
     order: Order;
+    trackableCouriers?: string[];
 }
 
-export default function OrderCard({ order }: OrderCardProps) {
+export default function OrderCard({ order, trackableCouriers = [] }: OrderCardProps) {
     const [isTrackingOpen, setIsTrackingOpen] = React.useState(false);
 
     const status = CONFIG.ORDER_STATUS.STYLES[order.statusOrder] || {
@@ -46,7 +47,7 @@ export default function OrderCard({ order }: OrderCardProps) {
     };
 
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white border border-neutral-base-100 rounded-[24px] md:rounded-3xl p-4 sm:p-5 md:p-8 hover:shadow-xl hover:shadow-neutral-base-900/5 transition-all group"
@@ -117,7 +118,7 @@ export default function OrderCard({ order }: OrderCardProps) {
                         Detail
                         <ChevronRight className="w-4 h-4 text-neutral-base-300 group-hover/btn:translate-x-0.5 group-hover/btn:text-neutral-base-900 transition-all" />
                     </Link>
-                    {order.statusOrder === "KIRIM" && order.noResi && CONFIG.TRACKABLE_COURIERS.includes(order.ekspedisi?.toLowerCase() || "") && (
+                    {order.statusOrder === "KIRIM" && order.noResi && trackableCouriers.includes(order.ekspedisi?.toLowerCase() || "") && (
                         <Button
                             onClick={() => setIsTrackingOpen(true)}
                             className="flex-1 md:flex-none h-11 md:h-12 px-6 md:px-8 bg-neutral-base-900 text-white rounded-[14px] md:rounded-xl text-[12px] font-black uppercase tracking-widest gap-2 shadow-lg shadow-neutral-base-900/10 hover:opacity-90 transition-all active:scale-[0.98]"
@@ -137,6 +138,6 @@ export default function OrderCard({ order }: OrderCardProps) {
                 courier={order.ekspedisi || ""}
                 phone={order.teleponPenerima || ""}
             />
-        </motion.div>
+        </m.div>
     );
 }

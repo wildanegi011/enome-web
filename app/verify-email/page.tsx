@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 function VerifyEmailContent() {
     const searchParams = useSearchParams();
@@ -42,7 +42,7 @@ function VerifyEmailContent() {
     }, [token]);
 
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-10 text-center"
@@ -80,7 +80,7 @@ function VerifyEmailContent() {
                     </Button>
                 </div>
             )}
-        </motion.div>
+        </m.div>
     );
 }
 

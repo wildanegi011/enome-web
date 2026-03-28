@@ -16,7 +16,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Check, Ruler, ShieldCheck, ShoppingBag, Plus, Minus, Loader2, Heart, Package, Info, Sparkles, Weight, List, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
@@ -52,8 +52,10 @@ interface ProductInfoProps {
         commission?: string;
         hasCommission?: boolean;
         isOnFlashSale?: boolean;
+        isOnPreOrder?: boolean;
         flashSaleEndTime?: string;
         discountPercentage?: number;
+        isHighlighted?: number | boolean;
         jenisProduk?: string | null;
         jenisBahan?: string | null;
         isFuring?: number | null;
@@ -195,9 +197,26 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
         <div id="product-info-top" className="flex flex-col lg:pl-8 xl:pl-12 font-montserrat min-w-0">
             {/* Header / Badges */}
             <div className="mb-4 md:mb-6">
-                <span className="inline-block px-2.5 py-0.5 bg-neutral-base-100 text-[10px] font-bold tracking-[0.15em] uppercase text-neutral-base-500 mb-2 md:mb-3 font-montserrat">
-                    {product.collection}
-                </span>
+                <div className="flex flex-wrap items-center gap-2 mb-2 md:mb-3">
+                    <span className="inline-block px-2.5 py-0.5 bg-neutral-base-100 text-[10px] font-bold tracking-[0.15em] uppercase text-neutral-base-500 font-montserrat">
+                        {product.collection}
+                    </span>
+                    {product.isOnPreOrder && (
+                        <span className="inline-block px-2.5 py-0.5 bg-amber-50 text-[10px] font-bold tracking-[0.15em] uppercase text-amber-600 border border-amber-100 font-montserrat">
+                            Pre Order
+                        </span>
+                    )}
+                    {product.isOnFlashSale && (
+                        <span className="inline-block px-2.5 py-0.5 bg-red-50 text-[10px] font-bold tracking-[0.15em] uppercase text-red-600 border border-red-100 font-montserrat">
+                            Flash Sale
+                        </span>
+                    )}
+                    {(product.isHighlighted === 1 || product.isHighlighted === true) && (
+                        <span className="inline-block px-2.5 py-0.5 bg-indigo-50 text-[10px] font-bold tracking-[0.15em] uppercase text-indigo-600 border border-indigo-100 font-montserrat">
+                            Spesial
+                        </span>
+                    )}
+                </div>
                 <h1 className="font-montserrat text-[22px] md:text-[32px] lg:text-[36px] font-bold text-neutral-base-900 leading-[1.15] mb-3 md:mb-6 tracking-tight">
                     {product.name}
                 </h1>
@@ -253,7 +272,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                     <span className="text-white/60">:</span>
                                     <div className="bg-red-600 backdrop-blur-md border border-red-500 w-7 md:w-9 py-0.5 md:py-1 rounded relative overflow-hidden h-[22px] md:h-[28px] flex items-center justify-center shadow-md">
                                         <AnimatePresence mode="popLayout">
-                                            <motion.span
+                                            <m.span
                                                 key={timeLeft.seconds}
                                                 initial={{ y: 15, opacity: 0 }}
                                                 animate={{ y: 0, opacity: 1 }}
@@ -262,7 +281,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                                 className="absolute"
                                             >
                                                 {formatTime(timeLeft.seconds)}
-                                            </motion.span>
+                                            </m.span>
                                         </AnimatePresence>
                                     </div>
                                 </div>
@@ -288,7 +307,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             Motif: <span className="font-medium text-neutral-base-500 ml-1 normal-case tracking-normal">{selectedVariant || "Pilih motif"}</span>
                         </span>
                     </div>
-                    <motion.div
+                    <m.div
                         key={`motif-${shakeKey}`}
                         animate={hintType === 'motif' ? { x: [0, -4, 4, -4, 4, 0] } : {}}
                         transition={{ duration: 0.4 }}
@@ -327,7 +346,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             );
                         })}
 
-                    </motion.div>
+                    </m.div>
                 </div>
             )}
 
@@ -338,7 +357,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                         Warna: <span className="font-medium text-neutral-base-500 ml-1 normal-case tracking-normal">{product.colors.find(c => c.id === selectedColor)?.name || "Pilih warna"}</span>
                     </span>
                 </div>
-                <motion.div
+                <m.div
                     key={`color-${shakeKey}`}
                     animate={hintType === 'color' ? { x: [0, -4, 4, -4, 4, 0] } : {}}
                     transition={{ duration: 0.4 }}
@@ -388,7 +407,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             </button>
                         );
                     })}
-                </motion.div>
+                </m.div>
             </div>
 
             {/* Size Selection with Inline Stock */}
@@ -402,7 +421,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                         Panduan ukuran
                     </button>
                 </div>
-                <motion.div
+                <m.div
                     key={`size-${shakeKey}`}
                     animate={hintType === 'size' ? { x: [0, -4, 4, -4, 4, 0] } : {}}
                     transition={{ duration: 0.4 }}
@@ -442,12 +461,12 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             </button>
                         );
                     })}
-                </motion.div>
+                </m.div>
 
                 {/* Elegant Stock Status Bar */}
                 <AnimatePresence mode="wait">
                     {selectedSize && (
-                        <motion.div
+                        <m.div
                             key={`${selectedColor}-${selectedSize}`}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -473,7 +492,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                     </span>
                                 </div>
                             </div>
-                        </motion.div>
+                        </m.div>
                     )}
                 </AnimatePresence>
             </div >
@@ -517,7 +536,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                 {/* Row 2: Main Actions */}
                 <div className="flex flex-row gap-3 flex-1">
                     {/* Add to Cart Button */}
-                    <motion.button
+                    <m.button
                         id="add-to-cart-button"
                         whileHover={canClickAddToCart ? { scale: 1.01, translateY: -1 } : {}}
                         whileTap={canClickAddToCart ? { scale: 0.98 } : {}}
@@ -536,7 +555,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                         ) : (
                             <div className="relative">
                                 <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
-                                <motion.div
+                                <m.div
                                     className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full"
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
@@ -545,10 +564,10 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             </div>
                         )}
                         <span className="relative z-10">{isAdding ? "Menambahkan..." : "Tambah ke Keranjang"}</span>
-                    </motion.button>
+                    </m.button>
 
                     {/* Wishlist Button */}
-                    <motion.button
+                    <m.button
                         whileHover={{ scale: 1.05, backgroundColor: isWishlisted ? "#fff1f2" : "#f8fafc" }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleWishlist}
@@ -562,7 +581,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                             className={`w-5 h-5 md:w-6 md:h-6 transition-all duration-300 ${isWishlisted ? "fill-rose-500" : ""}`}
                             strokeWidth={isWishlisted ? 2.5 : 2}
                         />
-                    </motion.button>
+                    </m.button>
                 </div>
             </div>
 

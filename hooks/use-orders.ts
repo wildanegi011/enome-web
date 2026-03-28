@@ -50,6 +50,7 @@ export function useOrders(initialLimit: number = 10) {
         orders: ordersQuery.data?.orders || [],
         total: ordersQuery.data?.total || 0,
         tabs: ordersQuery.data?.tabs || [{ label: "Semua", value: "ALL" }],
+        trackableCouriers: ordersQuery.data?.trackableCouriers || [],
         isLoading: ordersQuery.isLoading,
         isError: ordersQuery.isError,
         page,

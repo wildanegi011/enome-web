@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { m, AnimatePresence, Variants } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -112,33 +112,33 @@ export default function RegisterPage() {
             <div className="w-full max-w-[1100px] bg-white rounded-none sm:rounded-[2.5rem] shadow-none sm:shadow-[0_20px_80px_-15px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col lg:flex-row h-auto lg:min-h-[850px] lg:h-auto relative z-10 border-none sm:border border-neutral-base-100/80">
                 <AnimatePresence>
                     {isSuccess && (
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             className="absolute inset-0 z-100 bg-white/90 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center"
                         >
-                            <motion.div
+                            <m.div
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
                                 transition={{ type: "spring", damping: 20 }}
                                 className="space-y-6"
                             >
                                 <div className="w-24 h-24 rounded-full bg-emerald-50 flex items-center justify-center mx-auto ring-1 ring-emerald-100">
-                                    <motion.div
+                                    <m.div
                                         initial={{ pathLength: 0, opacity: 0 }}
                                         animate={{ pathLength: 1, opacity: 1 }}
                                         transition={{ duration: 0.8, delay: 0.5 }}
                                     >
                                         <svg viewBox="0 0 24 24" className="w-12 h-12 text-emerald-600 fill-none stroke-current" strokeWidth={2.5}>
-                                            <motion.path
+                                            <m.path
                                                 d="M20 6L9 17L4 12"
                                                 initial={{ pathLength: 0 }}
                                                 animate={{ pathLength: 1 }}
                                                 transition={{ duration: 0.6, delay: 0.4 }}
                                             />
                                         </svg>
-                                    </motion.div>
+                                    </m.div>
                                 </div>
                                 <div className="space-y-2">
                                     <h3 className="text-3xl font-bold text-neutral-base-900 tracking-tight">Pendaftaran Berhasil</h3>
@@ -151,8 +151,8 @@ export default function RegisterPage() {
                                 >
                                     Lanjutkan ke Login
                                 </Button>
-                            </motion.div>
-                        </motion.div>
+                            </m.div>
+                        </m.div>
                     )}
                 </AnimatePresence>
 
@@ -182,23 +182,23 @@ export default function RegisterPage() {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-                    <motion.div
+                    <m.div
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
                         className="w-full max-w-[440px] space-y-10 relative z-10"
                     >
-                        <motion.div variants={itemVariants} className="space-y-4">
+                        <m.div variants={itemVariants} className="space-y-4">
                             <h2 className="text-2xl sm:text-3xl font-bold text-neutral-base-900 tracking-tight">
                                 Buat Akun
                             </h2>
                             <p className="text-neutral-base-500 text-base sm:text-lg leading-relaxed">
                                 Mulailah perjalanan Anda dengan Énome untuk pengalaman belanja premium.
                             </p>
-                        </motion.div>
+                        </m.div>
 
-                        <motion.div variants={itemVariants} className="space-y-4">
-                            <motion.button
+                        <m.div variants={itemVariants} className="space-y-4">
+                            <m.button
                                 whileHover={{ scale: 1.01, backgroundColor: "#f9f9f9" }}
                                 whileTap={{ scale: 0.99 }}
                                 onClick={handleGoogleLogin}
@@ -219,7 +219,7 @@ export default function RegisterPage() {
                                         <div className="absolute inset-0 border-2 border-transparent group-hover:border-neutral-base-900/5 rounded-2xl transition-all" />
                                     </>
                                 )}
-                            </motion.button>
+                            </m.button>
 
                             <div className="relative">
                                 <div className="absolute inset-0 flex items-center">
@@ -376,7 +376,7 @@ export default function RegisterPage() {
                                         </div>
                                     </div>
 
-                                    <motion.div variants={itemVariants} className="pt-2">
+                                    <m.div variants={itemVariants} className="pt-2">
                                         <Button
                                             type="submit"
                                             disabled={form.formState.isSubmitting || isSuccess}
@@ -387,20 +387,20 @@ export default function RegisterPage() {
                                             ) : (
                                                 <span className="flex items-center gap-2">
                                                     Daftar
-                                                    <motion.span
+                                                    <m.span
                                                         animate={{ x: [0, 5, 0] }}
                                                         transition={{ repeat: Infinity, duration: 1.5 }}
                                                     >
                                                         →
-                                                    </motion.span>
+                                                    </m.span>
                                                 </span>
                                             )}
                                         </Button>
-                                    </motion.div>
+                                    </m.div>
                                 </form>
                             </Form>
 
-                            <motion.div variants={itemVariants} className="text-center pt-6 pb-4">
+                            <m.div variants={itemVariants} className="text-center pt-6 pb-4">
                                 <p className="text-neutral-base-500 text-sm">
                                     Sudah memiliki akun?{" "}
                                     <Link href="/login" className="font-bold text-neutral-base-900 hover:text-neutral-base-700 transition-colors relative group">
@@ -408,9 +408,9 @@ export default function RegisterPage() {
                                         <span className="absolute bottom-0 left-0 w-full h-[2px] bg-neutral-base-900 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                                     </Link>
                                 </p>
-                            </motion.div>
-                        </motion.div>
-                    </motion.div>
+                            </m.div>
+                        </m.div>
+                    </m.div>
                 </div>
             </div>
             {/* End Main Content Card */}

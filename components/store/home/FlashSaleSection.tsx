@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Timer, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "@/components/store/product/ProductCard";
@@ -121,7 +121,7 @@ export default function FlashSaleSection() {
                                     <div className="flex flex-col items-center justify-center w-12 h-14 bg-red-600 rounded-lg shadow-lg relative overflow-hidden">
                                         <div className="absolute inset-0 bg-white/20"></div>
                                         <AnimatePresence mode="popLayout">
-                                            <motion.span
+                                            <m.span
                                                 key={timeLeft.seconds}
                                                 initial={{ y: 20, opacity: 0 }}
                                                 animate={{ y: 0, opacity: 1 }}
@@ -130,7 +130,7 @@ export default function FlashSaleSection() {
                                                 className="text-2xl font-bold text-white tabular-nums leading-none absolute top-2.5"
                                             >
                                                 {formatTime(timeLeft.seconds)}
-                                            </motion.span>
+                                            </m.span>
                                         </AnimatePresence>
                                         <span className="text-[8px] text-red-100 font-bold uppercase tracking-widest absolute bottom-1.5">Dtk</span>
                                     </div>

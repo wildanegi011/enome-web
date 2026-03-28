@@ -23,7 +23,10 @@ export interface CartItem {
     namaProduk: string;
     gambar: string;
     stock?: number;
+    isPreorder?: number;
+    produkPreorder?: number;
     isOnline?: number;
+    isHighlighted?: number;
     isFlashsale?: number;
     isFlashsaleExpired?: number;
     keterangan?: string;

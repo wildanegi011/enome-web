@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { orders, payment as paymentTable, orderdetail, produkDetail, preOrder, flashSale, produk, keranjang, customer, user, stok } from "@/lib/db/schema";
+import { orders, payment as paymentTable, orderdetail, produkDetail, preOrder, flashSale, produk, keranjang, customer, user, stok, produkDetailCabangStok } from "@/lib/db/schema";
 import { eq, and, lt, sql, inArray, lte, or, gte, desc } from "drizzle-orm";
 import { CONFIG } from "@/lib/config";
 import logger from "@/lib/logger";
@@ -15,6 +15,7 @@ export class CronService {
      */
     static async cancelExpiredOrders() {
         const dhms = nowJakartaFull();
+        const companyProfileId = await ConfigService.getCompanyProfileId();
 
         logger.info(`CronService: Starting cancelExpiredOrders process at ${dhms}`);
 
@@ -58,7 +59,8 @@ export class CronService {
                         statusOrder: orders.statusOrder,
                         statusTagihan: orders.statusTagihan,
                         orderTipe: orders.orderTipe,
-                        customer: orders.customer
+                        customer: orders.customer,
+                        companyprofileId: orders.companyprofileId
                     })
                         .from(orders)
                         .where(and(
@@ -106,43 +108,67 @@ export class CronService {
                         // C. Revert Stock ONLY if not PRE-ORDER AND status was OPEN
                         if (order.orderTipe !== "PRE-ORDER" && order.statusOrder === "OPEN") {
                             for (const item of items) {
-                                // 1. Get current stock for logging (with lock)
-                                const [currentDetail]: any = await tx.select({ stokNormal: produkDetail.stokNormal })
+                                // 1. Get current branch stock for logging (with lock)
+                                // Join with produkDetail to get the detailId
+                                const [currentDetail]: any = await tx.select({
+                                    stokNormal: produkDetailCabangStok.stokNormal,
+                                    detailId: produkDetail.detailId
+                                })
                                     .from(produkDetail)
+                                    .innerJoin(produkDetailCabangStok, eq(produkDetail.detailId, produkDetailCabangStok.produkdetailId))
                                     .where(and(
                                         eq(produkDetail.produkId, item.produkId!),
-                                        eq(produkDetail.warnaId, item.warna!),
-                                        eq(produkDetail.size, item.ukuran!),
-                                        eq(produkDetail.variant, item.variant || "")
+                                        eq(produkDetail.warnaId, item.warna || ""),
+                                        eq(produkDetail.size, item.ukuran || ""),
+                                        eq(produkDetail.variant, item.variant || ""),
+                                        eq(produkDetailCabangStok.companyprofileId, order.companyprofileId || companyProfileId)
                                     ))
                                     .for("update");
 
-                                // 2. Update Stock
-                                await tx.update(produkDetail)
-                                    .set({ stokNormal: sql`${produkDetail.stokNormal} + ${item.qty}` })
-                                    .where(and(
-                                        eq(produkDetail.produkId, item.produkId!),
-                                        eq(produkDetail.warnaId, item.warna!),
-                                        eq(produkDetail.size, item.ukuran!),
-                                        eq(produkDetail.variant, item.variant || "")
-                                    ));
+                                if (currentDetail) {
+                                    // 2. Update Branch Stock
+                                    await tx.update(produkDetailCabangStok)
+                                        .set({ stokNormal: sql`${produkDetailCabangStok.stokNormal} + ${item.qty}` })
+                                        .where(and(
+                                            eq(produkDetailCabangStok.produkdetailId, currentDetail.detailId),
+                                            eq(produkDetailCabangStok.companyprofileId, order.companyprofileId || companyProfileId)
+                                        ));
 
-                                // 3. Log Revert
-                                await tx.insert(stok).values({
-                                    produkId: item.produkId,
-                                    warna: item.warna,
-                                    size: item.ukuran,
-                                    companyprofileId: CONFIG.DEFAULT_COMPANY_PROFILE_ID,
-                                    masuk: item.qty || 0,
-                                    keluar: 0,
-                                    stok: (currentDetail?.stokNormal || 0) + (item.qty || 0),
-                                    keterangan: `CANCELLED / EXPIRED ${order.orderId}`,
-                                    createdAt: sql`${dhms}`,
-                                    updatedAt: sql`${dhms}`,
-                                    createdBy: 0,
-                                    updatedBy: 0,
-                                    isDeleted: 0,
-                                });
+                                    // 3. Sync Main Tables (produkDetail & produk)
+                                    // Sesuai instruksi: sinkronisasi total stok dari cabang ke variant, lalu ke produk
+                                    await tx.execute(sql`
+                                        UPDATE produkdetail pd
+                                        SET 
+                                            stok_normal = (SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail_cabang_stok WHERE produkdetail_id = ${currentDetail.detailId}),
+                                            stok_rijek = (SELECT COALESCE(SUM(stok_rijek), 0) FROM produkdetail_cabang_stok WHERE produkdetail_id = ${currentDetail.detailId})
+                                        WHERE detail_id = ${currentDetail.detailId}
+                                    `);
+
+                                    await tx.execute(sql`
+                                        UPDATE produk p
+                                        SET 
+                                            qtystok_normal = (SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail WHERE produk_id = ${item.produkId}),
+                                            qtystok_rijek = (SELECT COALESCE(SUM(stok_rijek), 0) FROM produkdetail WHERE produk_id = ${item.produkId})
+                                        WHERE produk_id = ${item.produkId}
+                                    `);
+
+                                    // 4. Log Revert
+                                    await tx.insert(stok).values({
+                                        produkId: item.produkId,
+                                        warna: item.warna,
+                                        size: item.ukuran,
+                                        companyprofileId: order.companyprofileId || companyProfileId,
+                                        masuk: item.qty || 0,
+                                        keluar: 0,
+                                        stok: (currentDetail.stokNormal || 0) + (item.qty || 0),
+                                        keterangan: `CANCELLED / EXPIRED ${order.orderId}`,
+                                        createdAt: sql`${dhms}`,
+                                        updatedAt: sql`${dhms}`,
+                                        createdBy: 0,
+                                        updatedBy: 0,
+                                        isDeleted: 0,
+                                    });
+                                }
 
                                 logger.debug(`CronService: Reverted stock for ${item.produkId} (Qty: ${item.qty})`);
                             }
@@ -282,26 +308,44 @@ export class CronService {
         logger.info(`CronService: Starting syncProductStock process`);
 
         try {
-            const query = sql`
+            // Step 1: Sync produkDetail (Variation Level) from produkDetailCabangStok (Branch Level)
+            const queryDetail = sql`
+                UPDATE produkdetail pd
+                LEFT JOIN (
+                    SELECT 
+                        produkdetail_id, 
+                        SUM(stok_normal) as t_normal, 
+                        SUM(stok_rijek) as t_rijek
+                    FROM produkdetail_cabang_stok
+                    GROUP BY produkdetail_id
+                ) x ON pd.detail_id = x.produkdetail_id
+                SET 
+                    pd.stok_normal = COALESCE(x.t_normal, 0),
+                    pd.stok_rijek = COALESCE(x.t_rijek, 0)
+            `;
+
+            await db.execute(queryDetail);
+            logger.info(`CronService: produkDetail synced from branch stock.`);
+
+            // Step 2: Sync produk (Product Level) from produkDetail (Variation Level)
+            const queryProduk = sql`
                 UPDATE produk p
                 LEFT JOIN (
-                    SELECT
-                        pd.produk_id,
-                        COALESCE(SUM(pcs.stok_normal), 0) AS total_normal,
-                        COALESCE(SUM(pcs.stok_rijek), 0) AS total_rijek
-                    FROM produkdetail pd
-                    LEFT JOIN produkdetail_cabang_stok pcs
-                        ON pcs.produkdetail_id = pd.detail_id
-                    GROUP BY pd.produk_id
-                ) x ON p.produk_id = x.produk_id
-                SET
-                    p.qtystok_normal = COALESCE(x.total_normal, 0),
+                    SELECT 
+                        produk_id, 
+                        SUM(stok_normal) as total, 
+                        SUM(stok_rijek) as total_rijek
+                    FROM produkdetail
+                    GROUP BY produk_id
+                ) AS x ON p.produk_id = x.produk_id
+                SET 
+                    p.qtystok_normal = COALESCE(x.total, 0),
                     p.qtystok_rijek = COALESCE(x.total_rijek, 0)
             `;
 
-            await db.execute(query);
+            await db.execute(queryProduk);
+            logger.info(`CronService: produk synced from produkDetail.`);
 
-            logger.info(`CronService: Product stock synced from branch stock.`);
             return { success: true };
         } catch (error) {
             logger.error("CronService: Error in syncProductStock", error);
@@ -459,7 +503,7 @@ export class CronService {
         logger.info(`CronService: Starting actionSetclose tracking process`);
 
         try {
-            const couriers = CONFIG.TRACKABLE_COURIERS;
+            const couriers = await ConfigService.getTrackableCouriers();
             const shippedOrders = await db.select()
                 .from(orders)
                 .where(and(

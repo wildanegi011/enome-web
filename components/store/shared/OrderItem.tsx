@@ -6,7 +6,7 @@ import { Minus, Plus, Trash2, Zap, MessageSquare, ChevronRight, ShieldCheck } fr
 import { ASSET_URL } from "@/config/config";
 import Link from "next/link";
 import { cn, formatCurrency } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 
 export interface OrderItemType {
     id: number;
@@ -19,7 +19,10 @@ export interface OrderItemType {
     harga: number;
     qty: number;
     stock?: number; // This is already optional, so no change needed here.
+    isPreorder?: number;
+    produkPreorder?: number;
     isOnline?: number;
+    isHighlighted?: number;
     isFlashsale?: number;
     isFlashsaleExpired?: number;
     keterangan?: string;
@@ -92,7 +95,7 @@ export default function OrderItem({
                 </div>
             )}
 
-            <motion.div
+            <m.div
                 drag={!isCheckout ? "x" : false}
                 dragDirectionLock
                 dragConstraints={{ left: -100, right: 0 }}
@@ -107,18 +110,10 @@ export default function OrderItem({
                     isCheckout ? "" : "p-5 md:p-7 bg-white"
                 )}
             >
-                {/* Mobile Flash Sale Badge (Card Corner Top-Left) */}
-                {!isCheckout && item.isFlashsale === 1 && !isOffline && (
-                    <div className="absolute top-0 left-0 z-30 md:hidden">
-                        <div className="bg-red-600 text-white rounded-br-2xl px-2.5 py-1.5 flex items-center gap-1 shadow-lg shadow-red-900/20">
-                            <span className="text-[9px] font-bold uppercase tracking-widest leading-none font-montserrat">&nbsp; Flash Sale</span>
-                        </div>
-                    </div>
-                )}
 
                 {/* Mobile Checkbox (Card Overlay Top-Right) */}
                 {showCheckbox && (
-                    <motion.button
+                    <m.button
                         whileTap={{ scale: 0.8 }}
                         onClick={() => onToggleSelect && onToggleSelect(item.id)}
                         disabled={isOffline}
@@ -127,7 +122,7 @@ export default function OrderItem({
                             isOffline && "cursor-not-allowed opacity-30"
                         )}
                     >
-                        <motion.div
+                        <m.div
                             initial={false}
                             animate={{ scale: isSelected ? 1 : 0.9 }}
                             className={cn(
@@ -140,14 +135,14 @@ export default function OrderItem({
                             <svg className="w-4 h-4 fill-none stroke-current stroke-[3.5]" viewBox="0 0 24 24">
                                 <polyline points="20 6 9 17 4 12" />
                             </svg>
-                        </motion.div>
-                    </motion.button>
+                        </m.div>
+                    </m.button>
                 )}
                 {/* Top Layout Part: Image & Info */}
                 <div className="flex items-start gap-3 md:gap-8">
                     {/* 1. Desktop Checkbox (md+ only) */}
                     {showCheckbox && (
-                        <motion.button
+                        <m.button
                             whileTap={{ scale: 0.9 }}
                             onClick={() => onToggleSelect && onToggleSelect(item.id)}
                             disabled={isOffline}
@@ -166,7 +161,7 @@ export default function OrderItem({
                                     <polyline points="20 6 9 17 4 12" />
                                 </svg>
                             </div>
-                        </motion.button>
+                        </m.button>
                     )}
 
                     {/* 2. Image Wrapper */}
@@ -215,19 +210,35 @@ export default function OrderItem({
                                         </h3>
                                     </Link>
 
-                                    {/* Flash Sale Badge */}
-                                    {item.isFlashsale === 1 && (
-                                        <div className={cn(
-                                            "mt-1 inline-flex items-center px-1.5 py-0.5 border rounded transition-colors",
-                                            item.isFlashsaleExpired === 1
-                                                ? "bg-neutral-base-50 border-neutral-base-100 text-neutral-base-400"
-                                                : "bg-red-50 border-red-100 text-red-600"
-                                        )}>
-                                            <span className="text-[9px] font-bold uppercase tracking-widest leading-none">
-                                                {item.isFlashsaleExpired === 1 ? "Promo Berakhir" : "Flash Sale"}
-                                            </span>
-                                        </div>
-                                    )}
+                                    {/* Badges */}
+                                    <div className="flex flex-wrap gap-1.5 mt-1">
+                                        {item.isFlashsale === 1 && (
+                                            <div className={cn(
+                                                "inline-flex items-center px-1.5 py-0.5 border rounded transition-colors",
+                                                item.isFlashsaleExpired === 1
+                                                    ? "bg-neutral-base-50 border-neutral-base-100 text-neutral-base-400"
+                                                    : "bg-red-50 border-red-100 text-red-600"
+                                            )}>
+                                                <span className="text-[9px] font-bold uppercase tracking-widest leading-none">
+                                                    {item.isFlashsaleExpired === 1 ? "Promo Berakhir" : "Flash Sale"}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {(item.isPreorder === 1 || item.produkPreorder === 1) && (
+                                            <div className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 border border-amber-100 text-amber-600 rounded transition-colors">
+                                                <span className="text-[9px] font-bold uppercase tracking-widest leading-none">
+                                                    Pre Order
+                                                </span>
+                                            </div>
+                                        )}
+                                        {item.isHighlighted === 1 && (
+                                            <div className="inline-flex items-center px-1.5 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded transition-colors">
+                                                <span className="text-[9px] font-bold uppercase tracking-widest leading-none">
+                                                    Spesial
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
 
                                     {/* Status Badge (Below Title) */}
                                     {(isOffline || isStockInsufficient) && (
@@ -365,10 +376,24 @@ export default function OrderItem({
                                         </h3>
                                     </Link>
 
-                                    {/* Mobile Flash Sale Badge (Below Title - Checkout Only) */}
-                                    {isCheckout && item.isFlashsale === 1 && !isOffline && (
-                                        <div className="mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 bg-red-50 border border-red-100 rounded-md text-red-600 shadow-sm shadow-red-900/5">
-                                            <span className="text-[8px] font-bold uppercase tracking-widest leading-none font-montserrat">Flash Sale</span>
+                                    {/* Mobile Flash Sale & Pre Order Badges (Below Title) */}
+                                    {!isOffline && (
+                                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                            {item.isFlashsale === 1 && (
+                                                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-red-50 border border-red-100 rounded-md text-red-600 shadow-sm shadow-red-900/5">
+                                                    <span className="text-[8px] font-bold uppercase tracking-widest leading-none font-montserrat">Flash Sale</span>
+                                                </div>
+                                            )}
+                                            {(item.isPreorder === 1 || item.produkPreorder === 1) && (
+                                                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 border border-amber-100 rounded-md text-amber-600 shadow-sm shadow-amber-900/5">
+                                                    <span className="text-[8px] font-bold uppercase tracking-widest leading-none font-montserrat">Pre Order</span>
+                                                </div>
+                                            )}
+                                            {item.isHighlighted === 1 && (
+                                                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded-md text-indigo-600 shadow-sm shadow-indigo-900/5">
+                                                    <span className="text-[8px] font-bold uppercase tracking-widest leading-none font-montserrat">Spesial</span>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
@@ -414,7 +439,7 @@ export default function OrderItem({
 
                                         <AnimatePresence>
                                             {isVariationsExpanded && (
-                                                <motion.div
+                                                <m.div
                                                     initial={{ height: 0, opacity: 0 }}
                                                     animate={{ height: "auto", opacity: 1 }}
                                                     exit={{ height: 0, opacity: 0 }}
@@ -439,7 +464,7 @@ export default function OrderItem({
                                                             </div>
                                                         )}
                                                     </div>
-                                                </motion.div>
+                                                </m.div>
                                             )}
                                         </AnimatePresence>
                                     </div>
@@ -461,13 +486,13 @@ export default function OrderItem({
                                 </div>
 
                                 {!isCheckout && (
-                                    <motion.button
+                                    <m.button
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => onRemove(item.id)}
                                         className="p-2 -mr-2 text-neutral-base-300 hover:text-rose-500 transition-colors hidden md:block"
                                     >
                                         <Trash2 className="w-4 h-4" />
-                                    </motion.button>
+                                    </m.button>
                                 )}
                             </div>
                         </div>
@@ -506,33 +531,33 @@ export default function OrderItem({
                         <div className="flex items-center gap-2 shrink-0">
                             {/* Qty Controls */}
                             <div className="flex items-center bg-white border border-neutral-base-100 shadow-sm rounded-xl p-0.5 gap-0.5 h-10">
-                                <motion.button
+                                <m.button
                                     whileTap={{ scale: 0.9 }}
                                     onClick={(e) => { e.stopPropagation(); onUpdateQuantity(item.id, Number(item.qty) - 1, item.stock ?? 99); }}
                                     disabled={Number(item.qty) <= 1 || isOffline}
                                     className="w-9 h-9 flex items-center justify-center hover:bg-neutral-base-50 rounded-lg transition-all disabled:opacity-30"
                                 >
                                     <Minus className="w-4 h-4 text-neutral-base-600" />
-                                </motion.button>
+                                </m.button>
                                 <input
                                     type="number"
                                     value={item.qty}
                                     readOnly
                                     className="w-10 bg-transparent text-center font-bold text-neutral-base-900 tabular-nums text-[14px] outline-none"
                                 />
-                                <motion.button
+                                <m.button
                                     whileTap={{ scale: 0.9 }}
                                     onClick={(e) => { e.stopPropagation(); onUpdateQuantity(item.id, Number(item.qty) + 1, item.stock ?? 99); }}
                                     disabled={Number(item.qty) >= (item.stock || 99) || isOffline}
                                     className="w-9 h-9 flex items-center justify-center hover:bg-neutral-base-50 rounded-lg transition-all disabled:opacity-30"
                                 >
                                     <Plus className="w-4 h-4 text-neutral-base-600" />
-                                </motion.button>
+                                </m.button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </m.div>
         </div>
     );
 }

@@ -20,7 +20,7 @@
 "use client";
 
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 interface AccordionItemProps {
@@ -63,18 +63,18 @@ export default function AccordionItem({
                         {title}
                     </span>
                 </div>
-                <motion.div
+                <m.div
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
                 >
                     <ChevronDown className="w-4 h-4 text-neutral-base-400" />
-                </motion.div>
+                </m.div>
             </button>
 
             {/* Konten — animasi slide in/out */}
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
+                    <m.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -84,7 +84,7 @@ export default function AccordionItem({
                         <div className="pt-4 pb-2 text-[14px] text-neutral-base-500 leading-relaxed font-montserrat">
                             {children}
                         </div>
-                    </motion.div>
+                    </m.div>
                 )}
             </AnimatePresence>
         </div>

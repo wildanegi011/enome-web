@@ -3,7 +3,7 @@
 import Image, { ImageProps } from "next/image";
 import { useState, useEffect } from "react";
 import { ImageOff, Loader2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 
 
 interface FallbackImageProps extends ImageProps {
@@ -63,13 +63,13 @@ export default function FallbackImage({
             {/* Shimmer / Skeleton Loader */}
             <AnimatePresence>
                 {isLoading && (
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.5, ease: "easeInOut" }}
                         className="absolute inset-0 z-10 bg-neutral-base-50 overflow-hidden"
                     >
-                        <motion.div
+                        <m.div
                             animate={{
                                 x: ["-100%", "100%"],
                             }}
@@ -81,16 +81,16 @@ export default function FallbackImage({
                             className="absolute inset-0 bg-linear-to-r from-transparent via-white/40 to-transparent w-full h-full"
                         />
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                             <Loader2 className="w-6 h-6 text-neutral-base-300 animate-spin" strokeWidth={1.5} />
-                             <span className="text-[10px] font-black tracking-[0.4em] uppercase text-neutral-base-900 opacity-20 font-montserrat">Loading</span>
+                            <Loader2 className="w-6 h-6 text-neutral-base-300 animate-spin" strokeWidth={1.5} />
+                            <span className="text-[10px] font-black tracking-[0.4em] uppercase text-neutral-base-900 opacity-20 font-montserrat">Loading</span>
                         </div>
-                    </motion.div>
+                    </m.div>
                 )}
             </AnimatePresence>
 
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ 
+                animate={{
                     opacity: isLoading ? 0 : 1,
                     scale: isLoading ? 1.05 : 1
                 }}
@@ -109,7 +109,7 @@ export default function FallbackImage({
                         setIsLoading(false);
                     }}
                 />
-            </motion.div>
+            </m.div>
         </div>
     );
 }

@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, Variants } from "framer-motion";
+import { m, Variants } from "framer-motion";
 import { AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "next/navigation";
@@ -11,19 +11,19 @@ import { useSearchParams } from "next/navigation";
 function ExpiredContent() {
     const searchParams = useSearchParams();
     const errorType = searchParams.get("type"); // 'expired' | 'invalid'
-    
+
     const isExpired = errorType === "expired";
 
     return (
         <div className="bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-[0_20px_80px_-15px_rgba(0,0,0,0.08)] border border-neutral-base-100 flex flex-col items-center text-center space-y-7 relative overflow-hidden">
             {/* Background Decorative Element */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            
+
             <div className="relative">
                 <div className="w-20 h-20 rounded-full bg-rose-50 flex items-center justify-center relative z-10">
                     <AlertCircle className="w-10 h-10 text-rose-500" />
                 </div>
-                <motion.div 
+                <m.div
                     animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.1, 0.3] }}
                     transition={{ repeat: Infinity, duration: 2 }}
                     className="absolute inset-0 bg-rose-500 rounded-full blur-xl"
@@ -35,7 +35,7 @@ function ExpiredContent() {
                     {isExpired ? "Tautan Kedaluwarsa" : "Akses Tidak Valid"}
                 </h2>
                 <p className="text-neutral-base-500 text-sm sm:text-base leading-relaxed">
-                    {isExpired 
+                    {isExpired
                         ? "Tautan pemulihan ini sudah tidak berlaku karena telah melewati batas waktu keamanan 1 jam."
                         : "Halaman ini tidak dapat diakses, kemungkinan karena Anda telah meminta tautan pemulihan yang baru."
                     }
@@ -83,7 +83,7 @@ export default function ResetPasswordExpiredPage() {
 
             {/* Main Content */}
             <div className="w-full max-w-[450px] relative z-10 space-y-8">
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="space-y-4"
@@ -91,7 +91,7 @@ export default function ResetPasswordExpiredPage() {
                     <Link href="/" className="inline-block mb-4">
                         <span className="text-3xl font-bold tracking-tighter text-neutral-base-900 uppercase">Énome</span>
                     </Link>
-                </motion.div>
+                </m.div>
 
                 <Suspense fallback={<div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-neutral-base-900 shadow-sm" /></div>}>
                     <ExpiredContent />

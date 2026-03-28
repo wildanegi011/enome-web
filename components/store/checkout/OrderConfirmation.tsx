@@ -302,7 +302,7 @@ export default function OrderConfirmation({
     if (isDesktop) {
         return (
             <Dialog open={isOpen} onOpenChange={(open) => !open && !isSubmitting && onClose()}>
-                <DialogContent className="sm:max-w-[650px] w-[95vw] p-0 overflow-hidden border-none rounded-[32px] shadow-2xl max-h-[96vh] flex flex-col">
+                <DialogContent className="sm:max-w-[480px] w-[95vw] p-0 overflow-hidden border-none rounded-[32px] shadow-2xl max-h-[96vh] flex flex-col">
                     <DialogHeader className="p-6 pb-0">
                         <div className="flex items-center gap-3 mb-1">
                             <div className="w-10 h-10 rounded-xl bg-neutral-base-900 flex items-center justify-center">

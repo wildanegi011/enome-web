@@ -15,6 +15,7 @@ interface ShippingInfoCardProps {
     distrikKirim?: string;
     kotaKirim?: string;
     provinsiKirim?: string;
+    trackableCouriers?: string[];
 }
 
 export default function ShippingInfoCard({
@@ -28,6 +29,7 @@ export default function ShippingInfoCard({
     distrikKirim,
     kotaKirim,
     provinsiKirim,
+    trackableCouriers = [],
 }: ShippingInfoCardProps) {
     const [copiedResi, setCopiedResi] = useState(false);
     const [isTrackingOpen, setIsTrackingOpen] = useState(false);
@@ -38,7 +40,7 @@ export default function ShippingInfoCard({
         setTimeout(() => setCopiedResi(false), 2000);
     };
 
-    const isTrackable = noResi && CONFIG.TRACKABLE_COURIERS.includes(ekspedisi?.toLowerCase());
+    const isTrackable = noResi && trackableCouriers.includes(ekspedisi?.toLowerCase());
     const showTrackingButton = isTrackable && statusOrder === "KIRIM";
 
     return (

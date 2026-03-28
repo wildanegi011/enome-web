@@ -1,30 +1,65 @@
-"use client";
-
 import React from "react";
-import { cn } from "@/lib/utils";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/store/layout/Navbar";
 import UserSidebar from "@/components/store/layout/UserSidebar";
 import AccountHeader from "@/components/store/layout/AccountHeader";
 import { CONFIG } from "@/lib/config";
-import OrderCardList from "@/components/store/orders/OrderCardList";
-import OrderTabs from "@/components/store/orders/OrderTabs";
-import SearchInput from "@/components/store/shared/SearchInput";
-import DateRangeFilter from "@/components/store/shared/DateRangeFilter";
-import { useOrders } from "@/hooks/use-orders";
+import { queryKeys } from "@/lib/query-keys";
+import { UserService } from "@/lib/services/user-service";
+import { CustomerService } from "@/lib/services/customer-service";
+import { getSession } from "@/lib/auth-utils";
+import { redirect } from "next/navigation";
+import { subMonths } from "date-fns";
+import { getJakartaDate, formatJakarta } from "@/lib/date-utils";
+import OrdersClient from "@/components/store/orders/OrdersClient";
 
-export default function OrderHistoryPage() {
+export default async function OrderHistoryPage({
+    searchParams
+}: {
+    searchParams: { [key: string]: string | string[] | undefined }
+}) {
+    const session = await getSession();
+    if (!session?.user?.id) {
+        redirect("/auth/login?callbackUrl=/account/orders");
+    }
+
+    const userId = session.user.id;
+    const custId = await CustomerService.getCustId(userId);
     const limit = CONFIG.ORDER_HISTORY.PAGINATION_LIMIT;
-    const {
-        orders,
-        total: totalOrders,
-        tabs,
-        isLoading,
-        page: currentPage,
-        setPage: setCurrentPage,
-        filters,
-        setFilters,
-        datePresets
-    } = useOrders(limit);
+
+    const queryClient = new QueryClient();
+
+    // Default filters
+    const page = typeof searchParams.page === "string" ? parseInt(searchParams.page) : 1;
+    const search = typeof searchParams.search === "string" ? searchParams.search : "";
+    const statusOrder = typeof searchParams.status === "string" ? searchParams.status : "ALL";
+
+    // Date range handling (similar to hook logic)
+    const now = getJakartaDate();
+    let startDate = (typeof searchParams.startDate === "string" ? searchParams.startDate : undefined) ?? formatJakarta(subMonths(now, 3), "date");
+    let endDate = (typeof searchParams.endDate === "string" ? searchParams.endDate : undefined) ?? formatJakarta(now, "date");
+
+    const filters = {
+        search,
+        statusOrder,
+        dateRange: {
+            from: startDate,
+            to: endDate
+        }
+    };
+
+    await queryClient.prefetchQuery({
+        queryKey: [...queryKeys.user.orders, page, limit, filters],
+        queryFn: () => UserService.getOrders(userId, {
+            page,
+            limit,
+            search,
+            statusOrder,
+            startDate,
+            endDate,
+            custId: custId ?? undefined
+        }),
+    });
 
     return (
         <div className="min-h-screen bg-neutral-base-50/30 font-montserrat text-neutral-base-900">
@@ -43,47 +78,9 @@ export default function OrderHistoryPage() {
                             description="Lacak dan kelola semua pesanan Anda di sini."
                         />
 
-                        {/* Sticky Control Filters */}
-                        <div className="sticky top-[80px] z-30 -mx-3 sm:-mx-4 md:-mx-8 px-3 sm:px-4 md:px-8 py-2 md:py-6 bg-[#F9FAFB] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.1)] rounded-b-[24px] md:rounded-b-[32px] mb-4 md:mb-8">
-                            <div className="space-y-6">
-                                {/* Status Tabs */}
-                                <OrderTabs
-                                    tabs={tabs}
-                                    activeTab={filters.statusOrder}
-                                    onChange={(value) => setFilters({ statusOrder: value })}
-                                />
-
-                                {/* Search & Date Filter Bar */}
-                                <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4">
-                                    <div className="w-full sm:flex-1">
-                                        <SearchInput
-                                            placeholder="Cari Order ID..."
-                                            value={filters.search}
-                                            onChange={(value) => setFilters({ search: value })}
-                                        />
-                                    </div>
-
-                                    <div className="w-full sm:w-auto">
-                                        <DateRangeFilter
-                                            dateRange={filters.dateRange}
-                                            onSelect={(range) => setFilters({ dateRange: range })}
-                                            presets={datePresets}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Order Cards List Container */}
-                        <OrderCardList
-                            orders={orders}
-                            isLoading={isLoading}
-                            currentPage={currentPage}
-                            totalItems={totalOrders}
-                            itemsPerPage={limit}
-                            onPageChange={setCurrentPage}
-                            onEmptyActionClick={() => { }}
-                        />
+                        <HydrationBoundary state={dehydrate(queryClient)}>
+                            <OrdersClient initialLimit={limit} />
+                        </HydrationBoundary>
                     </div>
                 </div>
             </main>

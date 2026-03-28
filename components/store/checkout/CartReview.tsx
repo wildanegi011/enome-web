@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { Loader2, Trash2, AlertCircle, RefreshCw, XCircle, ShoppingBag } from "lucide-react";
 import ConfirmDialog from "@/components/store/shared/ConfirmDialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";

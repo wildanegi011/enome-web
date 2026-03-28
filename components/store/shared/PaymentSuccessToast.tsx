@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { CheckCircle2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ interface PaymentSuccessToastProps {
 
 export const PaymentSuccessToast = ({ title, message }: PaymentSuccessToastProps) => {
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -28,21 +28,21 @@ export const PaymentSuccessToast = ({ title, message }: PaymentSuccessToastProps
         >
             {/* Background Decorative Element */}
             <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-emerald-50 rounded-full blur-3xl opacity-50" />
-            
+
             {/* Icon Container */}
             <div className="relative shrink-0">
-                <motion.div
+                <m.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.1 }}
                     className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20"
                 >
                     <CheckCircle2 className="w-6 h-6 text-white" />
-                </motion.div>
-                
+                </m.div>
+
                 {/* Sparkles Micro-animation */}
-                <motion.div
-                    animate={{ 
+                <m.div
+                    animate={{
                         opacity: [0, 1, 0],
                         scale: [0.5, 1.2, 0.5],
                         rotate: [0, 45, 90]
@@ -51,7 +51,7 @@ export const PaymentSuccessToast = ({ title, message }: PaymentSuccessToastProps
                     className="absolute -top-1 -right-1"
                 >
                     <Sparkles className="w-4 h-4 text-emerald-400" />
-                </motion.div>
+                </m.div>
             </div>
 
             {/* Content */}
@@ -66,13 +66,13 @@ export const PaymentSuccessToast = ({ title, message }: PaymentSuccessToastProps
 
             {/* Success indicator line */}
             <div className="absolute bottom-0 left-5 right-5 h-0.5 bg-emerald-500/10 rounded-full overflow-hidden">
-                <motion.div
+                <m.div
                     initial={{ width: 0 }}
                     animate={{ width: "100%" }}
                     transition={{ duration: 4, ease: "linear" }}
                     className="h-full bg-emerald-500"
                 />
             </div>
-        </motion.div>
+        </m.div>
     );
 };

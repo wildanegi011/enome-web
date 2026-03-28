@@ -3,11 +3,12 @@
 import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useOrderDetail } from "@/hooks/use-order-detail";
-import SuccessState from "@/components/store/checkout/SuccessState";
+import dynamic from "next/dynamic";
+const SuccessState = dynamic(() => import("@/components/store/checkout/SuccessState"), { ssr: false });
 import { formatCurrency } from "@/lib/utils";
 import Navbar from "@/components/store/layout/Navbar";
 import { Loader2, Home, ArrowLeft, ShoppingBag } from "lucide-react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ASSET_URL } from "@/config/config";
@@ -63,22 +64,22 @@ function SuccessContent() {
                 <div className="absolute top-1/2 left-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-neutral-200/50 blur-[120px] dark:bg-white/5 opacity-50"></div>
 
                 {/* Main Content */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                     className="relative z-10 flex flex-col items-center"
                 >
                     <div className="relative">
-                        <motion.h1
+                        <m.h1
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                             className="font-heading text-[6rem] font-bold leading-none tracking-tighter text-neutral-base-900 dark:text-neutral-base-100 sm:text-[14rem]"
                         >
                             404
-                        </motion.h1>
-                        <motion.div
+                        </m.h1>
+                        <m.div
                             initial={{ width: 0 }}
                             animate={{ width: "100%" }}
                             transition={{ delay: 0.5, duration: 1 }}
@@ -86,7 +87,7 @@ function SuccessContent() {
                         />
                     </div>
 
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4, duration: 1 }}
@@ -124,11 +125,11 @@ function SuccessContent() {
                                 <span>Kembali</span>
                             </Button>
                         </div>
-                    </motion.div>
-                </motion.div>
+                    </m.div>
+                </m.div>
 
                 {/* Floating Decorative Orbs */}
-                <motion.div
+                <m.div
                     animate={{
                         y: [0, -20, 0],
                         opacity: [0.1, 0.2, 0.1]
@@ -136,7 +137,7 @@ function SuccessContent() {
                     transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                     className="absolute top-20 right-[10%] size-32 rounded-full bg-neutral-base-300/30 blur-3xl dark:bg-white/5"
                 />
-                <motion.div
+                <m.div
                     animate={{
                         y: [0, 20, 0],
                         opacity: [0.1, 0.2, 0.1]
@@ -146,14 +147,14 @@ function SuccessContent() {
                 />
 
                 {/* Footer Signature */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.4 }}
                     transition={{ delay: 1.2, duration: 2 }}
                     className="absolute bottom-12 text-xs font-light tracking-[0.3em] uppercase text-neutral-base-500 dark:text-neutral-base-600"
                 >
                     The Art of ÉNOMÉ &copy; 2026
-                </motion.div>
+                </m.div>
             </div>
         );
     }
@@ -175,9 +176,15 @@ function SuccessContent() {
         walletDeduction: detail.order.viaWallet,
         customerName: detail.order.namaPenerima,
         customerPhone: detail.order.teleponPenerima,
-        fullAddress: detail.order.alamatKirim,
+        fullAddress: [
+            detail.order.alamatKirim,
+            detail.order.distrikKirim,
+            detail.order.kotaKirim,
+            detail.order.provinsiKirim
+        ].filter(Boolean).join(", "),
         courierName: detail.order.ekspedisi,
         courierService: detail.order.service,
+        voucherTerms: detail.voucherInfo?.syarat_dan_ketentuan,
         expiredTime: detail.expiredTime,
         whatsappAdmin: detail.whatsappAdmin,
         statusOrder: detail.order.statusOrder,
@@ -185,7 +192,7 @@ function SuccessContent() {
     };
 
     return (
-        <motion.div 
+        <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -197,7 +204,7 @@ function SuccessContent() {
                 lastOrderedItems={detail.items}
                 formatPrice={formatCurrency}
             />
-        </motion.div>
+        </m.div>
     );
 }
 

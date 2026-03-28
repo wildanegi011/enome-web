@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { CheckSquare, Square, Zap, Minus, Plus, MessageSquare, Trash2 } from "lucide-react";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -43,7 +43,7 @@ export default function CartItem({
     };
 
     return (
-        <motion.div
+        <m.div
             layout
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -110,6 +110,13 @@ export default function CartItem({
                                         <Zap className={`w-2 h-2 md:w-2.5 md:h-2.5 ${item.isFlashsaleExpired === 1 ? "fill-neutral-base-400 text-neutral-base-400" : "fill-red-600 text-red-600"}`} />
                                         <span className={`text-[7px] md:text-[8px] font-black uppercase tracking-widest leading-none ${item.isFlashsaleExpired === 1 ? "text-neutral-base-400" : "text-red-600"}`}>
                                             {item.isFlashsaleExpired === 1 ? "Promo Berakhir" : "Flash Sales"}
+                                        </span>
+                                    </div>
+                                )}
+                                {item.isHighlighted === 1 && (
+                                    <div className="flex items-center gap-1 px-1.5 py-0.5 border border-indigo-100 bg-indigo-50 rounded">
+                                        <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest leading-none text-indigo-600">
+                                            Spesial
                                         </span>
                                     </div>
                                 )}
@@ -206,6 +213,6 @@ export default function CartItem({
                     </TooltipContent>
                 </Tooltip>
             </div>
-        </motion.div>
+        </m.div>
     );
 }

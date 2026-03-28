@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Compass } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -12,7 +12,7 @@ import NavOverlay from "./subcomponents/NavOverlay";
 import SliderControls from "./subcomponents/SliderControls";
 import ScrollIndicators from "./subcomponents/ScrollIndicators";
 import CollectionDots from "./subcomponents/CollectionDots";
-import SearchModal from "./subcomponents/SearchModal";
+import SearchModal from "@/components/store/shared/SearchModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -57,6 +57,8 @@ interface Collection {
         header?: string;
         position?: string;
         brand?: string;
+        brandImageLink?: string,
+        brandPosition?: string,
         tagline?: string;
         aspect: string;
         isMobile: boolean;
@@ -190,17 +192,17 @@ export default function IntegratedCollectionSlider() {
     if (isLoading) {
         return (
             <div className="w-full h-screen bg-neutral-500 flex flex-col items-center justify-center gap-8">
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: [0.1, 0.3, 0.1], scale: [0.95, 1, 0.95] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                     className="relative w-48 h-48"
                 >
                     <Image src="/logo-enome.png" alt="Loading" fill className="object-contain brightness-0 invert opacity-20" />
-                </motion.div>
+                </m.div>
                 <div className="flex flex-col items-center gap-2">
                     <div className="h-px w-24 bg-linear-to-r from-transparent via-white/20 to-transparent relative overflow-hidden">
-                        <motion.div
+                        <m.div
                             animate={{ x: ["-100%", "200%"] }}
                             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                             className="absolute inset-0 w-1/3 h-full bg-linear-to-r from-transparent via-white/60 to-transparent"
@@ -247,11 +249,7 @@ export default function IntegratedCollectionSlider() {
             <SearchModal
                 isOpen={isSearchOpen}
                 onOpenChange={setIsSearchOpen}
-                setDirection={setDirection}
-                setCurrentIndex={setCurrentIndex}
-                currentIndex={currentIndex}
                 router={router}
-                collections={filteredCollections}
             />
 
             {/* Pagination Controls */}
@@ -269,7 +267,7 @@ export default function IntegratedCollectionSlider() {
             />
 
             <AnimatePresence initial={false} custom={direction} mode="wait">
-                <motion.div
+                <m.div
                     key={`${currentIndex}-${isMobile}`} // Re-mount when device changes to reset ScrollArea
                     custom={direction}
                     variants={variants}
@@ -292,7 +290,7 @@ export default function IntegratedCollectionSlider() {
                             filteredCollections[currentIndex].images.map((img, i) => (
                                 <div key={i} className="relative w-full h-screen snap-start shrink-0 overflow-hidden bg-zinc-950">
                                     {/* True Fullscreen Layer - CSS Background Image (Cover mode) */}
-                                    <motion.div
+                                    <m.div
                                         initial={{ scale: 1.05, opacity: 0 }}
                                         whileInView={{ scale: 1, opacity: 1 }}
                                         transition={{ duration: 1.2, ease: "easeOut" }}
@@ -305,7 +303,7 @@ export default function IntegratedCollectionSlider() {
                                     <div className="absolute inset-0 bg-black/5 pointer-events-none" />
 
                                     {/* Vertical Side Logo - Left Center */}
-                                    {/* <motion.div
+                                    {/* <m.div
                                     initial={{ opacity: 0, x: -30 }}
                                     whileInView={{ opacity: 1, x: 0 }}
                                     transition={{ duration: 1, delay: 0.3 }}
@@ -321,7 +319,36 @@ export default function IntegratedCollectionSlider() {
                                             style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.15))" }}
                                         />
                                     </div>
-                                </motion.div> */}
+                                </m.div> */}
+
+                                    {/* Brand Logo - Dynamic Positioning */}
+                                    {img.brandImageLink && (
+                                        <div className={cn(
+                                            "absolute inset-0 z-10 pointer-events-none w-full h-full",
+                                            isMobile ? "p-8 pb-32" : "p-12 md:p-24"
+                                        )}>
+                                            <m.div
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                whileInView={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 1, delay: 0.4 }}
+                                                viewport={{ once: false }}
+                                                className={cn(
+                                                    "absolute flex flex-col transition-all duration-700",
+                                                    getPositionClasses(img.brandPosition, isMobile)
+                                                )}
+                                            >
+                                                <div className="relative w-24 h-24 md:w-96 md:h-96">
+                                                    <Image
+                                                        src={img.brandImageLink}
+                                                        alt={img.brand || "Brand Logo"}
+                                                        fill
+                                                        className="object-contain"
+                                                        priority
+                                                    />
+                                                </div>
+                                            </m.div>
+                                        </div>
+                                    )}
 
                                     {/* Collection Title & Tagline - Dynamic Positioning */}
                                     <div className={cn(
@@ -333,7 +360,7 @@ export default function IntegratedCollectionSlider() {
                                             getPositionClasses(img.position, isMobile)
                                         )}>
                                             {img.tagline ? (
-                                                <motion.div
+                                                <m.div
                                                     initial={{ opacity: 0, y: 15 }}
                                                     whileInView={{ opacity: 1, y: 0 }}
                                                     transition={{ duration: 0.8, delay: 0.2 }}
@@ -342,7 +369,7 @@ export default function IntegratedCollectionSlider() {
                                                     dangerouslySetInnerHTML={{ __html: img.tagline }}
                                                 />
                                             ) : (
-                                                <motion.p
+                                                <m.p
                                                     initial={{ opacity: 0, y: 15 }}
                                                     whileInView={{ opacity: 1, y: 0 }}
                                                     transition={{ duration: 0.8, delay: 0.2 }}
@@ -350,7 +377,7 @@ export default function IntegratedCollectionSlider() {
                                                     className="font-montserrat text-[14px] md:text-[18px] text-black/80 tracking-[0.2em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] max-w-2xl"
                                                 >
                                                     {img.title || filteredCollections[currentIndex]?.title}
-                                                </motion.p>
+                                                </m.p>
                                             )}
                                         </div>
                                     </div>
@@ -382,7 +409,7 @@ export default function IntegratedCollectionSlider() {
                             </div>
                         )}
                     </ScrollArea>
-                </motion.div>
+                </m.div>
             </AnimatePresence>
 
             {/* Collection Dots - Right Side */}

@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+// @ts-ignore
+import withBundleAnalyzer from '@next/bundle-analyzer';
+
 const rawAssetUrl =
   process.env.NEXT_PUBLIC_ASSET_URL || "http://localhost:3000";
 
@@ -16,8 +19,12 @@ try {
 
 const nextConfig: NextConfig = {
   typescript: {
-    // 🔥 ini penting kalau VPS RAM kecil
     ignoreBuildErrors: true,
+  },
+  modularizeImports: {
+    lodash: {
+      transform: 'lodash/{{member}}',
+    },
   },
   images: {
     unoptimized: true,
@@ -105,6 +112,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
+  },
 };
 
-export default nextConfig;
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+export default bundleAnalyzer(nextConfig);

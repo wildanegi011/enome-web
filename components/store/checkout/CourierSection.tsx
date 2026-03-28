@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Clock, Truck, Loader2, Zap, AlertCircle, MapPin, ShoppingBag } from "lucide-react";
 import { cn, toTitleCase } from "@/lib/utils";
 
@@ -72,7 +72,7 @@ function CourierGroup({
                         </span>
                     </div>
                 </div>
-                <motion.div
+                <m.div
                     animate={{ rotate: isExpanded ? 180 : 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="text-neutral-base-300"
@@ -80,12 +80,12 @@ function CourierGroup({
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                </motion.div>
+                </m.div>
             </button>
 
             <AnimatePresence>
                 {isExpanded && (
-                    <motion.div
+                    <m.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -154,7 +154,7 @@ function CourierGroup({
                                 );
                             })}
                         </div>
-                    </motion.div>
+                    </m.div>
                 )}
             </AnimatePresence>
         </div>

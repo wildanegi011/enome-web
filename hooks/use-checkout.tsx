@@ -8,6 +8,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useAddresses, Address } from "@/hooks/use-addresses";
 import { cartApi } from "@/lib/api/cart-api";
 import { userApi } from "@/lib/api/user-api";
+import { voucherApi } from "@/lib/api/voucher-api";
 import { checkoutApi } from "@/lib/api/checkout-api";
 import { queryKeys } from "@/lib/query-keys";
 import CONFIG from "@/lib/config";
@@ -67,10 +68,12 @@ export function useCheckout() {
     const [specialNotes, setSpecialNotes] = useState("");
     const [voucherCode, setVoucherCode] = useState("");
     const [isVoucherApplied, setIsVoucherApplied] = useState(false);
+    const [hasManuallyClearedVoucher, setHasManuallyClearedVoucher] = useState(false);
     const [voucherData, setVoucherData] = useState<{
         nilai_voucher: number;
         tipe_voucher: string;
         maksimal_nominal_voucher_persen: number;
+        syarat_dan_ketentuan?: string;
     } | null>(null);
 
     // Address Logic
@@ -499,10 +502,14 @@ export function useCheckout() {
                 setVoucherData({
                     nilai_voucher: result.nilai_voucher,
                     tipe_voucher: result.tipe_voucher,
-                    maksimal_nominal_voucher_persen: result.maksimal_nominal_voucher_persen
+                    maksimal_nominal_voucher_persen: result.maksimal_nominal_voucher_persen,
+                    syarat_dan_ketentuan: result.syarat_dan_ketentuan
                 });
                 setIsVoucherApplied(true);
-                toast.success("Voucher berhasil dipasang!");
+                setHasManuallyClearedVoucher(false); // Reset if they manually apply a valid one
+                toast.success("Voucher berhasil dipasang!", {
+                    description: result.syarat_dan_ketentuan || "Syarat dan ketentuan berlaku."
+                });
             } else {
                 toast.error(result.message || "Gagal memasang voucher");
             }
@@ -512,6 +519,49 @@ export function useCheckout() {
             setIsVoucherLoading(false);
         }
     };
+
+    // Auto-apply Voucher logic
+    useEffect(() => {
+        // Only auto-apply if:
+        // 1. We have a subtotal
+        // 2. No voucher is currently applied
+        // 3. User hasn't manually cleared a voucher in this session
+        // 4. We are not currently typing a voucher code (voucherCode is empty)
+        if (!totalAmount || isVoucherApplied || hasManuallyClearedVoucher || voucherCode) return;
+
+        const controller = new AbortController();
+        const autoApply = async () => {
+            try {
+                const orderTipe = (searchParams.get("type") === "preorder") ? 2 : 1;
+                const result = await voucherApi.getAutoApplyVoucher(totalAmount, orderTipe);
+
+                if (result.success && result.data) {
+                    const v = result.data;
+                    // Double check conditions before applying async result
+                    setVoucherCode(v.kode);
+                    setVoucherData({
+                        nilai_voucher: v.nilai_voucher,
+                        tipe_voucher: v.tipe_voucher,
+                        maksimal_nominal_voucher_persen: v.maksimal_nominal_voucher_persen,
+                        syarat_dan_ketentuan: v.syarat_dan_ketentuan
+                    });
+                    setIsVoucherApplied(true);
+                    toast.success(`Voucher ${v.kode} terpasang`, {
+                        // description: v.syarat_dan_ketentuan || "Syarat dan ketentuan berlaku."
+                        // description: "Syarat dan ketentuan berlaku." 
+                    });
+                }
+            } catch (error) {
+                console.error("Auto-apply voucher failed:", error);
+            }
+        };
+
+        const timer = setTimeout(autoApply, 1000); // 1s delay/debounce
+        return () => {
+            clearTimeout(timer);
+            controller.abort();
+        };
+    }, [totalAmount, isVoucherApplied, hasManuallyClearedVoucher, voucherCode, searchParams]);
 
     const validateCheckout = useCallback(() => {
         const newErrors: typeof errors = {};
@@ -653,6 +703,12 @@ export function useCheckout() {
         paymentAccountName, paymentAccountNumber,
         setPaymentAccountName, setPaymentAccountNumber,
         handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher,
+        clearVoucher: () => {
+            setIsVoucherApplied(false);
+            setVoucherData(null);
+            setVoucherCode("");
+            setHasManuallyClearedVoucher(true);
+        },
         initiateOrder, completeOrder,
         setVoucherData,
         refreshShipping: fetchShippingCost

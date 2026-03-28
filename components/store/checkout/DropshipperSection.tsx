@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Truck, User, Phone, MapPin } from "lucide-react";
 
 interface DropshipperSectionProps {
@@ -37,7 +37,7 @@ export default function DropshipperSection({
                     onClick={() => setIsDropshipper(!isDropshipper)}
                     className={`w-11 h-5.5 md:w-14 md:h-7 rounded-full transition-all relative shrink-0 ${isDropshipper ? "bg-amber-800 shadow-md shadow-amber-900/10" : "bg-neutral-base-200"}`}
                 >
-                    <motion.div
+                    <m.div
                         animate={{ x: isDropshipper ? 22 : 4 }}
                         className="absolute top-1 w-3.5 h-3.5 md:w-4.5 md:h-4.5 bg-white rounded-full shadow-sm"
                     />
@@ -46,7 +46,7 @@ export default function DropshipperSection({
 
             <AnimatePresence>
                 {isDropshipper && (
-                    <motion.div
+                    <m.div
                         initial={{ height: 0, opacity: 0, marginTop: 0 }}
                         animate={{ height: "auto", opacity: 1, marginTop: 12 }}
                         exit={{ height: 0, opacity: 0, marginTop: 0 }}
@@ -57,8 +57,8 @@ export default function DropshipperSection({
                                 <div className="flex items-center gap-2 px-1">
                                     <User className="w-3 h-3 text-amber-800" />
                                     <div className="flex flex-col gap-1.5">
-                                    <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-neutral-base-400">Nama Pengirim</label>
-                                </div>
+                                        <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-neutral-base-400">Nama Pengirim</label>
+                                    </div>
                                 </div>
                                 <input
                                     type="text"
@@ -75,8 +75,8 @@ export default function DropshipperSection({
                                 <div className="flex items-center gap-2 px-1">
                                     <Phone className="w-3 h-3 text-amber-800" />
                                     <div className="flex flex-col gap-1.5">
-                                    <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-neutral-base-400">Nomor Telepon</label>
-                                </div>
+                                        <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-neutral-base-400">Nomor Telepon</label>
+                                    </div>
                                 </div>
                                 <input
                                     type="text"
@@ -93,8 +93,8 @@ export default function DropshipperSection({
                                 <div className="flex items-center gap-2 px-1">
                                     <MapPin className="w-3 h-3 text-amber-800" />
                                     <div className="flex flex-col gap-1.5">
-                                    <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-neutral-base-400">Alamat Pengirim</label>
-                                </div>
+                                        <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-neutral-base-400">Alamat Pengirim</label>
+                                    </div>
                                 </div>
                                 <input
                                     type="text"
@@ -108,7 +108,7 @@ export default function DropshipperSection({
                                 />
                             </div>
                         </div>
-                    </motion.div>
+                    </m.div>
                 )}
             </AnimatePresence>
         </div>

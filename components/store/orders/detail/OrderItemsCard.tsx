@@ -6,7 +6,7 @@ import FallbackImage from "@/components/store/shared/FallbackImage";
 import { ASSET_URL } from "@/config/config";
 import { formatCurrency, toTitleCase } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 interface OrderItem {
     id: number;

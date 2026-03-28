@@ -5,7 +5,7 @@ import { Loader2, Lock, Eye, EyeOff, ShieldCheck, AlertCircle } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useChangePassword } from "@/hooks/use-profile";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -56,7 +56,7 @@ export default function ChangePasswordForm() {
     };
 
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-[24px] md:rounded-[32px] p-6 sm:p-8 md:p-12 border border-neutral-base-100 shadow-sm transition-all duration-300 hover:shadow-md"
@@ -113,7 +113,7 @@ export default function ChangePasswordForm() {
                                 </div>
                                 <AnimatePresence>
                                     {errors.newPassword && (
-                                        <motion.p
+                                        <m.p
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             exit={{ opacity: 0, height: 0 }}
@@ -121,7 +121,7 @@ export default function ChangePasswordForm() {
                                         >
                                             <AlertCircle className="w-3.5 h-3.5" />
                                             {errors.newPassword.message}
-                                        </motion.p>
+                                        </m.p>
                                     )}
                                 </AnimatePresence>
                             </div>
@@ -149,7 +149,7 @@ export default function ChangePasswordForm() {
                                 </div>
                                 <AnimatePresence>
                                     {errors.confirmPassword && (
-                                        <motion.p
+                                        <m.p
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             exit={{ opacity: 0, height: 0 }}
@@ -157,7 +157,7 @@ export default function ChangePasswordForm() {
                                         >
                                             <AlertCircle className="w-3.5 h-3.5" />
                                             {errors.confirmPassword.message}
-                                        </motion.p>
+                                        </m.p>
                                     )}
                                 </AnimatePresence>
                             </div>
@@ -176,12 +176,12 @@ export default function ChangePasswordForm() {
                                     ) : (
                                         <>
                                             <span>Simpan Password Baru</span>
-                                            <motion.div
+                                            <m.div
                                                 animate={{ x: [0, 4, 0] }}
                                                 transition={{ repeat: Infinity, duration: 1.5 }}
                                             >
                                                 <Lock className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
-                                            </motion.div>
+                                            </m.div>
                                         </>
                                     )}
                                 </Button>
@@ -190,6 +190,6 @@ export default function ChangePasswordForm() {
                     </form>
                 </div>
             </div>
-        </motion.div>
+        </m.div>
     );
 }

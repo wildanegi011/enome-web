@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Clock, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { WalletTransaction } from "@/lib/api/user-api";
@@ -17,7 +17,7 @@ const WalletTransactionItem = ({ tx }: WalletTransactionItemProps) => {
     const Icon = isCredit ? ArrowUpRight : ArrowDownLeft;
 
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -62,7 +62,7 @@ const WalletTransactionItem = ({ tx }: WalletTransactionItemProps) => {
                     Saldo: {formatCurrency(tx.saldo).replace("Rp", "").trim()}
                 </p>
             </div>
-        </motion.div>
+        </m.div>
     );
 };
 

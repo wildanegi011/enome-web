@@ -40,18 +40,13 @@ interface Collection {
 interface SearchModalProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    setDirection: (dir: number) => void;
-    setCurrentIndex: (idx: number) => void;
-    currentIndex: number;
     router: any;
-    collections: Collection[];
 }
 
 export default function SearchModal({
     isOpen,
     onOpenChange,
     router,
-    collections
 }: SearchModalProps) {
     const isMobile = useIsMobile();
     const [searchValue, setSearchValue] = useState("");
@@ -86,7 +81,7 @@ export default function SearchModal({
         { search: debouncedSearch },
         { enabled: isSearching }
     );
-    const { data: categories = [] } = useCategories(8);
+    const { data: categories = [] } = useCategories(undefined, 8);
     const { searches: recentSearches, addSearch, removeSearch, clearAll } = useRecentSearches();
 
     const inputRef = useRef<HTMLInputElement>(null);
@@ -268,7 +263,12 @@ export default function SearchModal({
                                         <div className="flex flex-col min-w-0 flex-1 gap-1.5">
                                             <span className="font-bold text-[13px] sm:text-[14px] text-neutral-600 truncate leading-tight tracking-tight font-montserrat">{product.namaProduk}</span>
                                             <div className="flex flex-col gap-1">
-                                                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-montserrat leading-none w-fit">{product.kategori}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-montserrat leading-none w-fit">{product.kategori}</span>
+                                                    {product.isHighlighted === 1 && (
+                                                        <span className="text-[8px] font-bold text-white uppercase tracking-widest font-montserrat leading-none bg-indigo-600 px-1.5 py-0.5 rounded-full">Spesial</span>
+                                                    )}
+                                                </div>
                                                 <span className="text-[14px] font-black text-neutral-600 font-montserrat tracking-tight leading-tight">
                                                     {product.finalMinPrice ? formatCurrency(Number(product.finalMinPrice)) : "—"}
                                                 </span>

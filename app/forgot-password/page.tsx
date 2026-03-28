@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { m, AnimatePresence, Variants } from "framer-motion";
 import { Mail, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -128,13 +128,13 @@ export default function ForgotPasswordPage() {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-neutral-base-900/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-                    <motion.div
+                    <m.div
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
                         className="w-full max-w-[420px] space-y-8 relative z-10"
                     >
-                        <motion.div variants={itemVariants} className="space-y-4">
+                        <m.div variants={itemVariants} className="space-y-4">
                             {/* <Link href="/" className="inline-block mb-4">
                             <span className="text-2xl font-bold tracking-tighter text-neutral-base-900 uppercase">Énome</span>
                         </Link> */}
@@ -147,11 +147,11 @@ export default function ForgotPasswordPage() {
                                     : "Masukkan email terdaftar Anda untuk menerima tautan pengaturan ulang kata sandi."
                                 }
                             </p>
-                        </motion.div>
+                        </m.div>
 
                         <AnimatePresence mode="wait">
                             {!isSuccess ? (
-                                <motion.div
+                                <m.div
                                     key="forgot-form"
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
@@ -190,7 +190,7 @@ export default function ForgotPasswordPage() {
                                                 )}
                                             />
 
-                                            <motion.div variants={itemVariants}>
+                                            <m.div variants={itemVariants}>
                                                 <Button
                                                     type="submit"
                                                     disabled={form.formState.isSubmitting}
@@ -201,21 +201,21 @@ export default function ForgotPasswordPage() {
                                                     ) : (
                                                         <span className="flex items-center gap-2">
                                                             Kirim Email
-                                                            <motion.span
+                                                            <m.span
                                                                 animate={{ x: [0, 5, 0] }}
                                                                 transition={{ repeat: Infinity, duration: 1.5 }}
                                                             >
                                                                 →
-                                                            </motion.span>
+                                                            </m.span>
                                                         </span>
                                                     )}
                                                 </Button>
-                                            </motion.div>
+                                            </m.div>
                                         </form>
                                     </Form>
-                                </motion.div>
+                                </m.div>
                             ) : (
-                                <motion.div
+                                <m.div
                                     key="success-state"
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
@@ -252,22 +252,22 @@ export default function ForgotPasswordPage() {
                                             )}
                                         </Button>
                                     </div>
-                                </motion.div>
+                                </m.div>
                             )}
                         </AnimatePresence>
 
-                        <motion.div variants={itemVariants} className="text-center pt-6">
+                        <m.div variants={itemVariants} className="text-center pt-6">
                             <Link href="/login" className="inline-flex items-center gap-2 font-bold text-neutral-base-900 hover:text-neutral-base-700 transition-colors group">
-                                <motion.span
+                                <m.span
                                     whileHover={{ x: -3 }}
                                     className="text-lg"
                                 >
                                     ←
-                                </motion.span>
+                                </m.span>
                                 Kembali ke Halaman Login
                             </Link>
-                        </motion.div>
-                    </motion.div>
+                        </m.div>
+                    </m.div>
                 </div>
             </div>
             {/* End Main Content Card */}

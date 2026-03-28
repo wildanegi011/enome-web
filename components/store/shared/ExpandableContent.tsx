@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface ExpandableContentProps {
@@ -22,7 +22,7 @@ export default function ExpandableContent({ content, maxHeight = 400 }: Expandab
 
     return (
         <div className="relative">
-            <motion.div
+            <m.div
                 initial={false}
                 animate={{ height: isExpanded ? "auto" : maxHeight }}
                 className="overflow-hidden relative"
@@ -39,7 +39,7 @@ export default function ExpandableContent({ content, maxHeight = 400 }: Expandab
                 {!isExpanded && shouldShowButton && (
                     <div className="absolute bottom-0 left-0 right-0 h-40 bg-linear-to-t from-white via-white/80 to-transparent pointer-events-none" />
                 )}
-            </motion.div>
+            </m.div>
 
             {shouldShowButton && (
                 <div className="mt-4 flex justify-center">

@@ -4,7 +4,7 @@ import { usePaymentVerification } from "@/hooks/use-payment-verification";
 import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle2, ChevronLeft, Copy, ShieldCheck, Clock, Truck, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ASSET_URL } from "@/config/config";
 import { toast } from "sonner";
 import { cn, toTitleCase, handleWhatsAppConfirm } from "@/lib/utils";
@@ -26,6 +26,7 @@ interface SuccessStateProps {
         shippingPrice?: number,
         packingFee?: number,
         voucherDiscount?: number,
+        voucherTerms?: string,
         walletDeduction?: number,
         customerName?: string,
         customerPhone?: string,
@@ -98,7 +99,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
 
     return (
         <div className="max-w-5xl mx-auto py-6 md:py-16 px-4 md:px-8">
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -106,14 +107,14 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
             >
                 {/* ===== HEADER ===== */}
                 <div className="text-center mb-6 md:mb-12">
-                    <motion.div
+                    <m.div
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                         className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 md:mb-5 border-2 border-emerald-100"
                     >
                         <CheckCircle2 className="w-7 h-7 md:w-10 md:h-10" />
-                    </motion.div>
+                    </m.div>
                     <h1 className="text-[22px] md:text-[36px] font-bold text-neutral-base-900 tracking-tight leading-snug">
                         {isTransfer && sOrder === "OPEN" ? "Instruksi Pembayaran" : "Pesanan Berhasil!"}
                     </h1>
@@ -360,10 +361,17 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                     </div>
                                 )}
                                 {(orderResult.voucherDiscount || 0) > 0 && (
-                                    <div className="flex justify-between text-[11px] md:text-[12px] text-emerald-600">
-                                        <span>Diskon Voucher</span>
-                                        <span className="font-medium tabular-nums">-{formatPrice(orderResult.voucherDiscount || 0)}</span>
-                                    </div>
+                                    <>
+                                        <div className="flex justify-between text-[11px] md:text-[12px] text-emerald-600">
+                                            <span>Diskon Voucher</span>
+                                            <span className="font-medium tabular-nums">-{formatPrice(orderResult.voucherDiscount || 0)}</span>
+                                        </div>
+                                        {/* {orderResult.voucherTerms && (
+                                            <div className="text-[10px] md:text-[11px] text-neutral-base-400 italic font-medium leading-relaxed pl-3 border-l-2 border-emerald-100/50 mt-[-8px]">
+                                                {orderResult.voucherTerms}
+                                            </div>
+                                        )} */}
+                                    </>
                                 )}
                                 {(orderResult.walletDeduction || 0) > 0 && (
                                     <div className="flex justify-between text-[11px] md:text-[12px] text-amber-600">
@@ -396,7 +404,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                     </div>
 
                 </div>
-            </motion.div>
+            </m.div>
         </div>
     );
 }

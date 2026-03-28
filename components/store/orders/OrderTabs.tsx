@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface Tab {
@@ -34,7 +34,7 @@ const OrderTabs = ({ tabs, activeTab, onChange }: OrderTabsProps) => {
                             >
                                 {tab.label}
                                 {activeTab === tab.value && (
-                                    <motion.div
+                                    <m.div
                                         layoutId="activeStatus"
                                         className="absolute bottom-0 left-6 right-6 h-0.5 bg-neutral-base-900"
                                     />

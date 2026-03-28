@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-keys";
 
@@ -332,7 +332,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
 
                         <AnimatePresence>
                             {showResults && locationQuery.length >= 2 && (
-                                <motion.div
+                                <m.div
                                     initial={{ opacity: 0, y: -10, scale: 0.98 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -10, scale: 0.98 }}
@@ -364,7 +364,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                                             <p className="text-[12px] font-bold text-neutral-base-400">Lokasi tidak ditemukan</p>
                                         </div>
                                     )}
-                                </motion.div>
+                                </m.div>
                             )}
                         </AnimatePresence>
                     </div>

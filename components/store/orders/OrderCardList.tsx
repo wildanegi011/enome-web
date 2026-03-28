@@ -15,6 +15,7 @@ interface OrderCardListProps {
     totalItems?: number;
     itemsPerPage?: number;
     onPageChange?: (page: number) => void;
+    trackableCouriers?: string[];
 }
 
 const OrderCardSkeleton = () => (
@@ -60,6 +61,7 @@ export default function OrderCardList({
     totalItems = 0,
     itemsPerPage = 10,
     onPageChange,
+    trackableCouriers = [],
 }: OrderCardListProps) {
     if (isLoading) {
         return (
@@ -98,7 +100,7 @@ export default function OrderCardList({
 
             <div className="space-y-4">
                 {orders.map((order) => (
-                    <OrderCard key={order.orderId} order={order} />
+                    <OrderCard key={order.orderId} order={order} trackableCouriers={trackableCouriers} />
                 ))}
             </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Loader2, MapPin, Package, X } from "lucide-react";
 import { Address, useAddresses } from "@/hooks/use-addresses";
 import AddressCard from "./AddressCard";
@@ -56,7 +56,7 @@ export default function AddressSelectionModal({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-20 md:pb-0">
                         <AnimatePresence mode="popLayout">
                             {addresses.map((addr, idx) => (
-                                <motion.div
+                                <m.div
                                     key={addr.id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -76,7 +76,7 @@ export default function AddressSelectionModal({
                                         onSetPrimary={setPrimary}
                                         className="p-5 md:p-6 h-full bg-white shadow-sm border border-neutral-base-100/60"
                                     />
-                                </motion.div>
+                                </m.div>
                             ))}
                         </AnimatePresence>
                     </div>

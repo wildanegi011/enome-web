@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { m, AnimatePresence, LayoutGroup } from "framer-motion";
 import ProductCard from "@/components/store/product/ProductCard";
 import { ASSET_URL } from "@/config/config";
 import { formatCurrency } from "@/lib/utils";
@@ -21,7 +21,7 @@ export default function ProductGrid({ products, isRefreshing }: ProductGridProps
 
     return (
         <LayoutGroup>
-            <motion.div
+            <m.div
                 layout
                 className={cn(
                     "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-8 sm:gap-y-12 transition-opacity duration-500",
@@ -54,11 +54,12 @@ export default function ProductGrid({ products, isRefreshing }: ProductGridProps
                             isOnPreOrder: p.isOnPreOrder,
                             produkPreorder: p.produkPreorder,
                             commission: p.hasCommission ? formatPriceRange(p.commissionMin, p.commissionMax) : undefined,
-                            hasCommission: p.hasCommission
+                            hasCommission: p.hasCommission,
+                            isHighlighted: p.isHighlighted
                         };
 
                         return (
-                            <motion.div
+                            <m.div
                                 key={p.produkId}
                                 layout
                                 initial={{ opacity: 0, scale: 0.95 }}
@@ -67,11 +68,11 @@ export default function ProductGrid({ products, isRefreshing }: ProductGridProps
                                 transition={{ duration: 0.3, ease: "easeOut" }}
                             >
                                 <ProductCard product={mappedProduct as any} index={idx} />
-                            </motion.div>
+                            </m.div>
                         );
                     })}
                 </AnimatePresence>
-            </motion.div>
+            </m.div>
         </LayoutGroup>
     );
 }

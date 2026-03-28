@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, Mail, Lock, User, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -129,7 +129,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }: Aut
 
                 <AnimatePresence mode="wait">
                     <TabsContent value="login">
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0.5, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
@@ -175,11 +175,11 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }: Aut
                                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "SIGN IN"}
                                 </Button>
                             </form>
-                        </motion.div>
+                        </m.div>
                     </TabsContent>
 
                     <TabsContent value="register">
-                        <motion.div
+                        <m.div
                             initial={{ opacity: 0.5, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
@@ -243,7 +243,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }: Aut
                                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "CREATE ACCOUNT"}
                                 </Button>
                             </form>
-                        </motion.div>
+                        </m.div>
                     </TabsContent>
                 </AnimatePresence>
             </Tabs>

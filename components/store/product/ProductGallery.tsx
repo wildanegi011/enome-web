@@ -1,16 +1,17 @@
 "use client";
 
 import FallbackImage from "@/components/store/shared/FallbackImage";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Zap } from "lucide-react";
 
 interface ProductGalleryProps {
     images: string[];
     isSoldOut?: boolean;
     isOnFlashSale?: boolean;
+    isOnPreOrder?: boolean;
 }
 
-export default function ProductGallery({ images, isSoldOut, isOnFlashSale }: ProductGalleryProps) {
+export default function ProductGallery({ images, isSoldOut, isOnFlashSale, isOnPreOrder }: ProductGalleryProps) {
     return (
         <div className="flex flex-col gap-4 md:gap-8 w-full min-w-0">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
@@ -18,7 +19,7 @@ export default function ProductGallery({ images, isSoldOut, isOnFlashSale }: Pro
                     const isFeatureImage = idx === 0;
 
                     return (
-                        <motion.div
+                        <m.div
                             key={idx}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -43,18 +44,6 @@ export default function ProductGallery({ images, isSoldOut, isOnFlashSale }: Pro
                             {/* Badges and Overlays for primary image */}
                             {idx === 0 && (
                                 <>
-                                    <div className="absolute top-0 left-0 z-20">
-                                        {isOnFlashSale && (
-                                            <motion.div
-                                                initial={{ scale: 0.8, opacity: 0 }}
-                                                animate={{ scale: 1, opacity: 1 }}
-                                                className="bg-red-600 px-5 py-2.5 rounded-br-3xl flex items-center shadow-2xl"
-                                            >
-                                                <span className="text-[14px] font-bold uppercase tracking-[0.2em] text-white drop-shadow-sm font-montserrat">&nbsp; Flash Sale</span>
-                                            </motion.div>
-                                        )}
-                                    </div>
-
                                     {/* Out of Stock Overlay - Matches ProductCard exactly */}
                                     {isSoldOut && (
                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 pointer-events-none">
@@ -65,7 +54,7 @@ export default function ProductGallery({ images, isSoldOut, isOnFlashSale }: Pro
                                     )}
                                 </>
                             )}
-                        </motion.div>
+                        </m.div>
                     );
                 })}
             </div>

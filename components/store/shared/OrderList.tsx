@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import OrderItem, { OrderItemType } from "./OrderItem";
 
 interface OrderListProps {
@@ -28,7 +28,7 @@ export default function OrderList({
         <div className={className || "flex-1 w-full flex flex-col gap-2 md:gap-3 min-w-0"}>
             <AnimatePresence mode="popLayout">
                 {items.map((item) => (
-                    <motion.div
+                    <m.div
                         key={item.id}
                         layout
                         initial={{ opacity: 0, y: 10 }}
@@ -45,7 +45,7 @@ export default function OrderList({
                             onUpdateNotes={onUpdateNotes}
                             onRemove={onRemove}
                         />
-                    </motion.div>
+                    </m.div>
                 ))}
             </AnimatePresence>
         </div>

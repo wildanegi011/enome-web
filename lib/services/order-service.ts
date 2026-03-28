@@ -10,6 +10,7 @@ import { CONFIG } from "@/lib/config";
 import logger from "@/lib/logger";
 import { nowJakartaYYMMDD, nowJakartaDate, nowJakartaFull, getJakartaDate, parseJakarta } from "@/lib/date-utils";
 import { ConfigService } from "./config-service";
+import { CompanyService } from "./company-service";
 import { sendNewOrderAdminNotification, sendOrderConfirmationEmail } from "@/lib/mail";
 import pusher from "@/lib/pusher";
 
@@ -232,16 +233,11 @@ export class OrderService {
         const [activePreOrder]: any = await db.select().from(preOrder).where(eq(preOrder.isAktif, 1)).limit(1);
         const orderTipe = activePreOrder ? "PRE-ORDER" : "ORDER";
         const statusOrder = finalBankAmount <= 0 ? "PROSES PACKING" : "OPEN";
+        const companyProfileId = await ConfigService.getCompanyProfileId();
 
-        // Fetch Company Name from companyprofile table
-        const [company]: any = await db.select({
-            namaPerusahaan: companyProfile.namaPerusahaan
-        })
-            .from(companyProfile)
-            .where(eq(companyProfile.id, CONFIG.DEFAULT_COMPANY_PROFILE_ID))
-            .limit(1);
-
-        const companyName = company?.namaPerusahaan || "SYLLA HIJAB";
+        // Fetch Company Name from CompanyService
+        const company = await CompanyService.getPrimary();
+        const companyName = company?.namaPerusahaan || "BATIK ENOME";
 
         const result = await db.transaction(async (tx) => {
             // A. Insert Master Order
@@ -283,7 +279,7 @@ export class OrderService {
                     timestamp: sql`${dhms}`,
                     viaWallet: Math.round(finalWalletAmount),
                     viaBank: Math.round(finalBankAmount),
-                    companyprofileId: CONFIG.DEFAULT_COMPANY_PROFILE_ID,
+                    companyprofileId: companyProfileId,
                     customerAlamatIdPenerima: Number(shipping.addressId) || 0,
                     shipto: (shipping.customerId && shipping.customerId !== 0 && shipping.customerId !== "0") ? shipping.customerId.toString() : (customerData.custId || ""),
                     provinsiKirim: shipping.provinceId || shipping.provinsi || "",
@@ -327,24 +323,25 @@ export class OrderService {
             // B. Insert Details & Update Stock
             logger.info("OrderService: Step B - Inserting Details & Updating Stock");
             for (const item of verifiedItems) {
-                // 1. KUNCI BARIS STOK: Gunakan FOR UPDATE pada produkDetail agar tidak ada 
-                // transaksi lain yang bisa mengubah stok varian ini secara bersamaan.
-                const [lockedDetailRows]: any = await tx.execute(sql`
-                    SELECT stok_normal as stokNormal, produk_id as produkId 
-                    FROM produkdetail 
-                    WHERE detail_id = ${item.detail.detailId} 
+                // 1. KUNCI BARIS STOK CABANG: Gunakan FOR UPDATE pada produkDetailCabangStok 
+                // agar tidak ada transaksi lain yang bisa mengubah stok varian ini di cabang ini secara bersamaan.
+                const [lockedBranchRows]: any = await tx.execute(sql`
+                    SELECT stok_normal as stokNormal 
+                    FROM produkdetail_cabang_stok 
+                    WHERE produkdetail_id = ${item.detail.detailId} 
+                    AND companyprofile_id = ${companyProfileId}
                     FOR UPDATE
                 `);
-                const lockedDetail = lockedDetailRows[0];
+                const lockedBranchDetail = lockedBranchRows[0];
 
-                if (!lockedDetail) {
-                    throw new Error(`Maaf, data stok untuk ${item.namaProduk} tidak ditemukan.`);
+                if (!lockedBranchDetail) {
+                    throw new Error(`Maaf, data stok untuk ${item.namaProduk} di cabang ini tidak ditemukan.`);
                 }
 
                 // 2. CEK STATUS ONLINE: Ambil status produk secara fresh
                 const [productInfo]: any = await tx.select({ isOnline: produk.isOnline })
                     .from(produk)
-                    .where(eq(produk.produkId, lockedDetail.produkId))
+                    .where(eq(produk.produkId, item.produkId))
                     .limit(1);
 
                 if (!productInfo || productInfo.isOnline === 0) {
@@ -352,7 +349,7 @@ export class OrderService {
                 }
 
                 const qty = item.qty || 0;
-                if ((lockedDetail.stokNormal || 0) < qty) {
+                if ((lockedBranchDetail.stokNormal || 0) < qty) {
                     throw new Error("Mohon maaf, stok produk di keranjang Anda baru saja berkurang atau tidak tersedia lagi.");
                 }
 
@@ -375,29 +372,46 @@ export class OrderService {
 
                 await tx.insert(orderdetail).values(detailValues);
 
-                // await tx.update(produkDetail)
-                //     .set({ stokNormal: sql`${produkDetail.stokNormal} - ${qty}` })
-                //     .where(eq(produkDetail.detailId, item.detail.detailId));
-
+                // 3. Update Branch Stock
                 await tx.update(produkDetailCabangStok)
-                .set({
-                    stokNormal: sql`${produkDetailCabangStok.stokNormal} - ${qty}`,
-                })
-                .where(and(
-                    eq(produkDetailCabangStok.produkdetailId, item.detail.detailId),
-                    eq(produkDetailCabangStok.companyprofileId, CONFIG.DEFAULT_COMPANY_PROFILE_ID)
-                ));
+                    .set({
+                        stokNormal: sql`${produkDetailCabangStok.stokNormal} - ${qty}`,
+                    })
+                    .where(and(
+                        eq(produkDetailCabangStok.produkdetailId, item.detail.detailId),
+                        eq(produkDetailCabangStok.companyprofileId, companyProfileId)
+                    ));
 
-                // 3. Log Stock Movement
+                // 4. Update Main Product Detail (Sync)
+                // Sesuai instruksi: stok_normal di tabel produkdetail adalah SUM dari semua cabang
+                await tx.execute(sql`
+                    UPDATE produkdetail pd
+                    SET 
+                        stok_normal = (SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail_cabang_stok WHERE produkdetail_id = ${item.detail.detailId}),
+                        stok_rijek = (SELECT COALESCE(SUM(stok_rijek), 0) FROM produkdetail_cabang_stok WHERE produkdetail_id = ${item.detail.detailId})
+                    WHERE detail_id = ${item.detail.detailId}
+                `);
+
+                // 5. Update Product Total Stock (Sync)
+                // Sesuai instruksi: qtystok_normal di tabel produk adalah SUM dari semua produkdetail
+                await tx.execute(sql`
+                    UPDATE produk p
+                    SET 
+                        qtystok_normal = (SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail WHERE produk_id = ${item.produkId}),
+                        qtystok_rijek = (SELECT COALESCE(SUM(stok_rijek), 0) FROM produkdetail WHERE produk_id = ${item.produkId})
+                    WHERE produk_id = ${item.produkId}
+                `);
+
+                // 6. Log Stock Movement
                 await tx.insert(stok).values({
                     produkId: item.produkId,
                     warna: item.warna,
                     size: item.size,
                     variant: item.variant,
-                    companyprofileId: CONFIG.DEFAULT_COMPANY_PROFILE_ID,
+                    companyprofileId: companyProfileId,
                     masuk: 0,
                     keluar: qty,
-                    stok: (lockedDetail.stokNormal || 0) - qty,
+                    stok: (lockedBranchDetail.stokNormal || 0) - qty,
                     keterangan: `CHECKOUT ${orderId}`,
                     createdAt: sql`${dhms}`,
                     updatedAt: sql`${dhms}`,

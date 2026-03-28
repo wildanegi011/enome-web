@@ -16,7 +16,7 @@
 
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Box, ChevronDown, Check, ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -233,7 +233,7 @@ export default function FilterSidebar({
                         <SectionHeader title="Brand" section="brand" isOpen={openSections.brand} />
                         <AnimatePresence initial={false}>
                             {openSections.brand && (
-                                <motion.div {...sectionAnimation} className="overflow-hidden">
+                                <m.div {...sectionAnimation} className="overflow-hidden">
                                     <div className="space-y-1 pt-1">
                                         {BRAND_OPTIONS.map((brandObj) => {
                                             const isActive = activeFilters.brand?.includes(brandObj.value);
@@ -261,7 +261,7 @@ export default function FilterSidebar({
                                             );
                                         })}
                                     </div>
-                                </motion.div>
+                                </m.div>
                             )}
                         </AnimatePresence>
                         <div className="h-px bg-neutral-base-100 mt-5" />
@@ -272,7 +272,7 @@ export default function FilterSidebar({
                         <SectionHeader title="Untuk" section="gender" isOpen={openSections.gender} />
                         <AnimatePresence initial={false}>
                             {openSections.gender && (
-                                <motion.div {...sectionAnimation} className="overflow-hidden">
+                                <m.div {...sectionAnimation} className="overflow-hidden">
                                     <div className="space-y-1 pt-1">
                                         {GENDER_OPTIONS.map((genderObj) => {
                                             const isActive = activeFilters.gender?.includes(genderObj.value);
@@ -300,7 +300,7 @@ export default function FilterSidebar({
                                             );
                                         })}
                                     </div>
-                                </motion.div>
+                                </m.div>
                             )}
                         </AnimatePresence>
                         <div className="h-px bg-neutral-base-100 mt-5" />
@@ -312,7 +312,7 @@ export default function FilterSidebar({
                             <SectionHeader title="Kategori" section="collection" isOpen={openSections.collection} />
                             <AnimatePresence initial={false}>
                                 {openSections.collection && (
-                                    <motion.div {...sectionAnimation} className="overflow-hidden">
+                                    <m.div {...sectionAnimation} className="overflow-hidden">
                                         <div className="space-y-1 pt-1">
                                             {visibleCategories.map((catItem) => {
                                                 const cat = catItem.name;
@@ -344,7 +344,7 @@ export default function FilterSidebar({
                                             })}
                                         </div>
                                         <ShowMoreButton section="collection" totalCount={allCategories.length} />
-                                    </motion.div>
+                                    </m.div>
                                 )}
                             </AnimatePresence>
                             <div className="h-px bg-neutral-base-100 mt-5" />
@@ -356,7 +356,7 @@ export default function FilterSidebar({
                         <SectionHeader title="Harga" section="price" isOpen={openSections.price} />
                         <AnimatePresence initial={false}>
                             {openSections.price && (
-                                <motion.div {...sectionAnimation} className="overflow-hidden">
+                                <m.div {...sectionAnimation} className="overflow-hidden">
                                     <div className="space-y-1 pt-1">
                                         {PRICE_RANGES.map((range) => {
                                             const isActive = activeFilters.price.includes(range);
@@ -384,7 +384,7 @@ export default function FilterSidebar({
                                             );
                                         })}
                                     </div>
-                                </motion.div>
+                                </m.div>
                             )}
                         </AnimatePresence>
                         <div className="h-px bg-neutral-base-100 mt-5" />
@@ -395,7 +395,7 @@ export default function FilterSidebar({
                         <SectionHeader title="Warna" section="color" isOpen={openSections.color} />
                         <AnimatePresence initial={false}>
                             {openSections.color && (
-                                <motion.div {...sectionAnimation} className="overflow-hidden">
+                                <m.div {...sectionAnimation} className="overflow-hidden">
                                     <div className="flex flex-wrap gap-3 p-1">
                                         {visibleColors.map((color) => {
                                             const isActive = activeFilters.color.includes(color.name);
@@ -428,7 +428,7 @@ export default function FilterSidebar({
                                         })}
                                     </div>
                                     <ShowMoreButton section="color" totalCount={allColors.length} visibleCount={8} />
-                                </motion.div>
+                                </m.div>
                             )}
                         </AnimatePresence>
                         <div className="h-px bg-neutral-base-100 mt-5" />
@@ -439,7 +439,7 @@ export default function FilterSidebar({
                         <SectionHeader title="Ukuran" section="size" isOpen={openSections.size} />
                         <AnimatePresence initial={false}>
                             {openSections.size && (
-                                <motion.div {...sectionAnimation} className="overflow-hidden">
+                                <m.div {...sectionAnimation} className="overflow-hidden">
                                     <div className="grid grid-cols-4 gap-2 pt-1">
                                         {visibleSizes.map((s) => {
                                             const isActive = activeFilters.size.includes(s);
@@ -460,7 +460,7 @@ export default function FilterSidebar({
                                         })}
                                     </div>
                                     <ShowMoreButton section="size" totalCount={allSizes.length} visibleCount={8} />
-                                </motion.div>
+                                </m.div>
                             )}
                         </AnimatePresence>
                     </div>

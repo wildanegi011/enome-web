@@ -12,7 +12,8 @@ import {
     payment as paymentTable,
     provinsi,
     kota,
-    kecamatan
+    kecamatan,
+    voucher as voucherTable
 } from "@/lib/db/schema";
 import { eq, and, or, sql, like } from "drizzle-orm";
 import { withAuth } from "@/lib/auth-utils";
@@ -180,8 +181,10 @@ export const GET = withAuth(async (
             voucherNominal: paymentTable.voucherNominal,
             uniqueCode: paymentTable.uniqueCode,
             expiredTime: paymentTable.expiredTime,
+            syaratDanKetentuan: voucherTable.syaratDanKetentuan,
         })
             .from(paymentTable)
+            .leftJoin(voucherTable, eq(paymentTable.voucherKode, voucherTable.kodeVoucher))
             .where(like(paymentTable.paymentTransactionId, `%${orderId}%`))
             .limit(1);
 
@@ -189,6 +192,7 @@ export const GET = withAuth(async (
             voucherInfo = {
                 kode: paymentRow.voucherKode,
                 nominal: paymentRow.voucherNominal || 0,
+                syarat_dan_ketentuan: paymentRow.syaratDanKetentuan,
             };
         }
 
@@ -215,6 +219,7 @@ export const GET = withAuth(async (
             expiredTime: paymentRow?.expiredTime ? formatJakartaISO(new Date(paymentRow.expiredTime)) : null,
             whatsappAdmin: await ConfigService.get("whatsapp_nomor", "628997279308"),
             paymentVerificationTimeout: await ConfigService.getInt("PAYMENT_VERIFICATION_TIMEOUT_MINS", CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS),
+            trackableCouriers: await ConfigService.getTrackableCouriers(),
         });
 
     } catch (error: any) {

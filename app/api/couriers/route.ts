@@ -1,7 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { cargo } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
+import { CheckoutService } from "@/lib/services/checkout-service";
 import logger, { apiLogger } from "@/lib/logger";
 
 /**
@@ -13,16 +11,13 @@ import logger, { apiLogger } from "@/lib/logger";
  * @response 200 — Cargo[] (array of active courier objects)
  * @response 500 — { message: "error", error: "Terjadi kesalahan sistem" }
  */
-export async function GET() {
+export async function GET(request: Request) {
     logger.debug("API Request: GET /api/couriers");
     try {
-        const couriers = await db.select()
-            .from(cargo)
-            .where(eq(cargo.isAktif, 1));
-
+        const couriers = await CheckoutService.getCouriers();
         return NextResponse.json(couriers);
     } catch (error: any) {
-        apiLogger.error(null, error, { route: "/api/couriers" });
+        apiLogger.error(request, error, { route: "/api/couriers" });
         return NextResponse.json({ message: "error", error: "Terjadi kesalahan sistem" }, { status: 500 });
     }
 }

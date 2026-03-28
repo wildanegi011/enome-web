@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { AlertCircle, Trash2, RefreshCw, Loader2 } from "lucide-react";
 
 interface CartStockAlertProps {
@@ -20,17 +20,17 @@ export default function CartStockAlert({
     const [isFixing, setIsFixing] = useState(false);
 
     // Identify problematic items based on the logic in CartReview/OrderItem
-    const unavailableItems = items.filter(item => 
-        item.isOnline === 0 || 
+    const unavailableItems = items.filter(item =>
+        item.isOnline === 0 ||
         (item.stock !== undefined && item.stock !== null && item.stock <= 0) ||
         (item.stock === null)
     );
-    
-    const insufficientStockItems = items.filter(item => 
-        item.isOnline !== 0 && 
-        item.stock !== undefined && 
-        item.stock !== null && 
-        item.stock > 0 && 
+
+    const insufficientStockItems = items.filter(item =>
+        item.isOnline !== 0 &&
+        item.stock !== undefined &&
+        item.stock !== null &&
+        item.stock > 0 &&
         Number(item.qty) > item.stock
     );
 
@@ -58,7 +58,7 @@ export default function CartStockAlert({
 
     return (
         <AnimatePresence mode="popLayout">
-            <motion.div
+            <m.div
                 initial={{ opacity: 0, y: -20, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: "auto" }}
                 exit={{ opacity: 0, y: -20, height: 0 }}
@@ -72,7 +72,7 @@ export default function CartStockAlert({
                         <div className="flex items-start gap-4 md:gap-5">
                             {/* Animated Icon Container */}
                             <div className="relative shrink-0">
-                                <motion.div
+                                <m.div
                                     animate={{
                                         scale: [1, 1.1, 1],
                                         opacity: [0.5, 0.8, 0.5]
@@ -104,7 +104,7 @@ export default function CartStockAlert({
 
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
                             {unavailableItems.length > 0 && (
-                                <motion.button
+                                <m.button
                                     whileHover={{ y: -1, scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     disabled={isLoading || isFixing}
@@ -113,10 +113,10 @@ export default function CartStockAlert({
                                 >
                                     {isFixing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />}
                                     <span>hapus</span>
-                                </motion.button>
+                                </m.button>
                             )}
                             {insufficientStockItems.length > 0 && (
-                                <motion.button
+                                <m.button
                                     whileHover={{ y: -1, scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     disabled={isLoading || isFixing}
@@ -125,12 +125,12 @@ export default function CartStockAlert({
                                 >
                                     {isFixing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4" />}
                                     <span>sesuaikan</span>
-                                </motion.button>
+                                </m.button>
                             )}
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </m.div>
         </AnimatePresence>
     );
 }

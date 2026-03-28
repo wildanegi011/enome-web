@@ -1,5 +1,5 @@
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Search, User, ShoppingCart, Compass } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
@@ -18,7 +18,7 @@ export default function NavOverlay({ setIsSearchOpen }: NavOverlayProps) {
         <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none">
             <div className="flex items-center justify-between md:justify-start md:gap-2.5 px-6 py-6 md:px-12 md:py-10">
                 {/* Left Side: Explore */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, delay: 0.3 }}
@@ -30,10 +30,10 @@ export default function NavOverlay({ setIsSearchOpen }: NavOverlayProps) {
                         <Compass className="size-[18px] stroke-[1.5px] text-white group-hover:rotate-45 transition-transform duration-500" />
                         <span className="hidden md:block text-[12px] font-black uppercase tracking-[0.2em] font-montserrat text-white">Jelajahi Produk</span>
                     </button>
-                </motion.div>
+                </m.div>
 
                 {/* Right Side: Utilities */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, delay: 0.3 }}
@@ -69,7 +69,7 @@ export default function NavOverlay({ setIsSearchOpen }: NavOverlayProps) {
                     >
                         <User className="size-[17px] stroke-[1.5px]" />
                     </button>
-                </motion.div>
+                </m.div>
             </div>
         </div>
     );

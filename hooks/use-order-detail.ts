@@ -7,5 +7,6 @@ export function useOrderDetail(id: string) {
         queryKey: queryKeys.user.orderDetail(id),
         queryFn: () => userApi.getOrderDetail(id),
         enabled: !!id,
+        retry: false
     });
 }

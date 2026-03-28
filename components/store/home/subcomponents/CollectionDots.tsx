@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 interface Collection {
     id: string;
@@ -18,13 +18,13 @@ export default function CollectionDots({ currentIndex, collections, setDirection
             {collections.map((collection, idx) => (
                 <div key={collection.id || idx} className="group relative flex items-center justify-end">
                     {/* Tooltip */}
-                    <motion.span
+                    <m.span
                         initial={{ opacity: 0, x: 8 }}
                         whileHover={{ opacity: 1, x: 0 }}
                         className="absolute right-6 text-[9px] font-medium uppercase tracking-[0.25em] text-white/30 whitespace-nowrap pointer-events-none"
                     >
                         {collection.title}
-                    </motion.span>
+                    </m.span>
 
                     <button
                         onClick={() => {
@@ -33,7 +33,7 @@ export default function CollectionDots({ currentIndex, collections, setDirection
                         }}
                         className="relative p-1.5 cursor-pointer"
                     >
-                        <motion.div
+                        <m.div
                             animate={{
                                 height: currentIndex === idx ? 28 : 5,
                                 backgroundColor: currentIndex === idx ? "rgba(255, 255, 255, 0.9)" : "rgba(255, 255, 255, 0.2)",
