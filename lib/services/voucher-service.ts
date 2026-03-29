@@ -47,7 +47,7 @@ export class VoucherService {
                 return { success: 0, message: `Voucher ${kode} tidak ditemukan` };
             }
             if (existingVoucher.isAktif !== 1) {
-                return { success: 0, message: `Voucher ${kode} tidak aktif` };
+                return { success: 0, message: `Voucher ${kode} sudah tidak tersedia` };
             }
             return { success: 0, message: `Voucher ${kode} sudah tidak tersedia (kadaluarsa)` };
         }
@@ -137,7 +137,7 @@ export class VoucherService {
 
         for (const v of vouchersData) {
             // Validation Logic (same as validateVoucher but returns boolean instead of message)
-            
+
             // Quota
             if (v.kuotaVoucher !== null && v.kuotaVoucher <= 0) continue;
 
