@@ -157,6 +157,7 @@ export class CronService {
                                         produkId: item.produkId,
                                         warna: item.warna,
                                         size: item.ukuran,
+                                        variant: item.variant,
                                         companyprofileId: order.companyprofileId || companyProfileId,
                                         masuk: item.qty || 0,
                                         keluar: 0,
