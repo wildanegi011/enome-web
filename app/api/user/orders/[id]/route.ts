@@ -144,13 +144,12 @@ export const GET = withAuth(async (
 
         // 3. Fetch Payment Details if applicable (e.g., Bank Transfer info)
         let paymentInfo = null;
-        const isBcaTransfer = order.metodebayar && (
-            order.metodebayar.toUpperCase().includes("BCA") ||
-            order.metodebayar.toUpperCase().includes("MANUAL") ||
-            order.metodebayar === "SPLIT"
+        const isManualBankTransfer = order.metodebayar && (
+            order.viaBank === 1 || 
+            !order.metodebayar.toUpperCase().includes("WALLET")
         );
 
-        if (isBcaTransfer) {
+        if (isManualBankTransfer) {
             const [bank]: any = await db.select()
                 .from(rekeningPembayaran)
                 .where(and(

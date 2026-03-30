@@ -45,9 +45,6 @@ interface SuccessStateProps {
 }
 
 export default function SuccessState({ orderResult, lastOrderedItems, formatPrice }: SuccessStateProps) {
-    const router = useRouter();
-
-    console.log("orderResultxxx", orderResult);
 
     const isTransfer = !!orderResult.bankAccount;
     const [isCopied, setIsCopied] = useState<{ [key: string]: boolean }>({});
@@ -76,19 +73,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
         startVerification();
     };
 
-    // Granular status logic for real-time feel
-    const sTagihan = currentStatusTagihan || (orderResult.bankAccount ? "BELUM BAYAR" : "PAID");
     const sOrder = currentStatusOrder || "OPEN";
-
-    const isPaymentDiterima = sTagihan !== "BELUM BAYAR" && sTagihan !== "UNPAID";
-    const isDataMatched = sTagihan === "BAYAR" || sTagihan === "SUDAH BAYAR";
-    const isOrderProcessed = sOrder !== "OPEN";
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
-    };
 
     const copyToClipboard = (text: string, id: string) => {
         navigator.clipboard.writeText(text);

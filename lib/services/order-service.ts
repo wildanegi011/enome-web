@@ -630,6 +630,22 @@ export class OrderService {
                     } catch (pusherError) {
                         console.error("Pusher trigger error:", pusherError);
                     }
+
+                    // 5. Trigger WhatsApp Notification via External API (Dynamic URL)
+                    try {
+                        const backendUrl = await ConfigService.get("backend_url", "https://sys.batik-enome.com/backend/web");
+                        const whatsappApiUrl = `${backendUrl}/payment/send-whatsapp-notification`;
+                        const response = await fetch(whatsappApiUrl, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ orderId })
+                        });
+                        if (!response.ok) {
+                            console.error(`WhatsApp notification failed (${whatsappApiUrl}): ${response.statusText}`);
+                        }
+                    } catch (whatsappError) {
+                        console.error("WhatsApp trigger error:", whatsappError);
+                    }
                 } catch (emailError) {
                     logger.error("OrderService: Failed to send notification emails", emailError);
                 }
