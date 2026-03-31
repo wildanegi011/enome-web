@@ -48,7 +48,7 @@ export default function ProductGallery({ images, isSoldOut, isOnFlashSale, isOnP
                                     {isSoldOut && (
                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 pointer-events-none">
                                             <span className="text-white text-[12px] md:text-[14px] font-bold uppercase tracking-widest font-montserrat">
-                                                Habis
+                                                Out Of Stock
                                             </span>
                                         </div>
                                     )}

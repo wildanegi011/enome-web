@@ -539,10 +539,10 @@ export class OrderService {
                 paymentTransactionId: `${orderId};`,
                 createdAt: sql`${dhms}`,
                 createdBy: Number(userId) || 1,
-                tujuanAtasNama: bankData ? bankData.namaPemilik : (payment === "Transfer Bank BCA" ? "TRY SETYO UTOMO" : "-"),
-                tujuanNamaBank: bankData ? bankData.namaBank : (payment === "Transfer Bank BCA" ? "BCA" : (payment || "-")),
-                tujuanLogoBank: bankData ? `${ASSET_URL}/img/rekening_pembayaran/${bankData.logoBank}` : "-",
-                tujuanNoRekening: bankData ? bankData.noRekening : (payment === "Transfer Bank BCA" ? "2810377740" : "-"),
+                tujuanAtasNama: bankData ? bankData.namaPemilik : "-",
+                tujuanNamaBank: bankData ? bankData.namaBank : (payment || "-"),
+                tujuanLogoBank: bankData?.logoBank ? `${ASSET_URL}/img/rekening_pembayaran/${bankData.logoBank}` : "-",
+                tujuanNoRekening: bankData ? bankData.noRekening : "-",
                 paymentType: finalWalletAmount > 0 && finalBankAmount > 0 ? "SPLIT" : (finalWalletAmount > 0 ? "WALLET" : payment),
                 isDp: 0,
                 voucherKode: orderData.voucherCode || "",
@@ -592,16 +592,9 @@ export class OrderService {
 
                         if (bank) {
                             emailPayload.paymentInfo = {
-                                bankName: `Bank ${bank.namaBank}`,
+                                bankName: bank.namaBank.toUpperCase().includes("BANK") ? bank.namaBank : `Bank ${bank.namaBank}`,
                                 bankAccount: bank.noRekening,
                                 bankOwner: bank.namaPemilik
-                            };
-                        } else {
-                            // Default Fallback
-                            emailPayload.paymentInfo = {
-                                bankName: "Transfer Bank BCA",
-                                bankAccount: "2810377740",
-                                bankOwner: "TRY SETYO UTOMO"
                             };
                         }
                     }

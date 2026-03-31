@@ -141,7 +141,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     {realStock === 0 && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 pointer-events-none">
                             <span className="text-white text-[9px] font-bold uppercase tracking-widest">
-                                {qtyInCart > 0 && qtyInCart >= (Number(product.totalStock) || 0) ? "In Cart" : "Habis"}
+                                {qtyInCart > 0 && qtyInCart >= (Number(product.totalStock) || 0) ? "In Cart" : "Out Of Stock"}
                             </span>
                         </div>
                     )}
