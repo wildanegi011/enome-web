@@ -110,10 +110,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         const discountAmount = voucherDiscount || 0;
         let baseTagihan = serverTotalAmount + shippingCost + packingFee - discountAmount;
 
-        const isTransferPayment = payment.toUpperCase().includes("BCA") ||
-            payment.toUpperCase().includes("MANUAL") ||
-            payment.toUpperCase().includes("TRANSFER") ||
-            payment === "SPLIT";
+        const isTransferPayment = payment.toLowerCase() !== "wallet";
 
         let uniqueCode = 0;
         let totalTagihan = baseTagihan;
@@ -186,15 +183,15 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 result.paymentMethod = bankData.namaBank;
                 result.bankAccount = bankData.noRekening;
                 result.bankOwner = bankData.namaPemilik;
-                result.bankName = `Bank ${bankData.namaBank}`;
+                result.bankName = bankData.namaBank.toUpperCase().includes("BANK") ? bankData.namaBank : `Bank ${bankData.namaBank}`;
                 result.bankLogo = bankData.logoBank ? `rekening_pembayaran/${bankData.logoBank}` : "rekening_pembayaran/bca.png";
             } else {
                 // Fallback if not found in DB
                 result.paymentMethod = payment;
-                result.bankAccount = "2810377740";
-                result.bankOwner = "TRY SETYO UTOMO";
-                result.bankName = "Transfer Bank BCA";
-                result.bankLogo = "rekening_pembayaran/20260307225156.png";
+                result.bankAccount = "-";
+                result.bankOwner = "-";
+                result.bankName = payment;
+                result.bankLogo = "rekening_pembayaran/bca.png";
             }
 
         }

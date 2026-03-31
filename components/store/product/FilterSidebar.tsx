@@ -17,14 +17,11 @@
 "use client";
 
 import { m, AnimatePresence } from "framer-motion";
-import { Box, ChevronDown, Check, ChevronRight, X } from "lucide-react";
+import { ChevronDown, Check, ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { GiClothes } from "react-icons/gi";
-import { FaTshirt } from "react-icons/fa";
-import { MdOutlineCheckroom } from "react-icons/md";
 import { CategoryIcon } from "./CategoryIcon";
 
 /** Type untuk item kategori/koleksi */
@@ -230,7 +227,7 @@ export default function FilterSidebar({
 
                     {/* --- Brand --- */}
                     <div className="space-y-4">
-                        <SectionHeader title="Brand" section="brand" isOpen={openSections.brand} />
+                        <SectionHeader title="Brands" section="brand" isOpen={openSections.brand} />
                         <AnimatePresence initial={false}>
                             {openSections.brand && (
                                 <m.div {...sectionAnimation} className="overflow-hidden">
@@ -269,7 +266,7 @@ export default function FilterSidebar({
 
                     {/* --- Gender --- */}
                     <div className="space-y-4">
-                        <SectionHeader title="Untuk" section="gender" isOpen={openSections.gender} />
+                        <SectionHeader title="Gender" section="gender" isOpen={openSections.gender} />
                         <AnimatePresence initial={false}>
                             {openSections.gender && (
                                 <m.div {...sectionAnimation} className="overflow-hidden">

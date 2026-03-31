@@ -404,7 +404,7 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                                     {isOutOfStock && <div className="absolute inset-0 flex items-center justify-center"><div className="w-full h-px bg-red-500 rotate-45"></div></div>}
                                 </span>
                                 {isOutOfStock && (
-                                    <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Habis</span>
+                                    <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Out Of Stock</span>
                                 )}
                             </button>
                         );
