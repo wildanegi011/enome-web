@@ -10,44 +10,62 @@ const montserrat = Montserrat({
 
 import type { Metadata } from "next";
 
-import { SlideService } from "@/lib/services/slide-service";
+import { ConfigService } from "@/lib/services/config-service";
+import { siteConfig } from "@/lib/site-config";
+import { unstable_cache } from "next/cache";
 
 export const revalidate = 0;
 
+// Cached metadata getter to avoid database calls on every navigation
+const getCachedMetadata = unstable_cache(
+  async (key: string, defaultValue: string) => ConfigService.get(key, defaultValue),
+  ["site-metadata"],
+  { revalidate: 3600, tags: ["metadata"] }
+);
+
 export async function generateMetadata(): Promise<Metadata> {
-  // const logoUrl = await SlideService.getFrontendLogo();
-  // const timestamp = new Date().getTime();
-  const faviconUrl = "/favicon.ico";
+  const [dbTitle, dbDescription, dbKeywords, dbFavicon] = await Promise.all([
+    getCachedMetadata("META_TITLE", `${siteConfig.name} - Fashion & Batik Collection 2026`),
+    getCachedMetadata("META_DESCRIPTION", siteConfig.description),
+    getCachedMetadata("META_KEYWORDS", siteConfig.keywords.join(", ")),
+    getCachedMetadata("SITE_FAVICON", siteConfig.assets.favicon)
+  ]);
+
+  const faviconUrl = dbFavicon;
+  const keywordsArray = dbKeywords.split(",").map((k) => k.trim());
 
   return {
-    title: "ÉNOMÉ - Fashion & Batik Collection 2026",
-    description: "Discover the finest batik and fashion collections at ÉNOMÉ. Shop the latest 2026 arrivals, deals of the month, and exclusive kain batik panjang.",
-    keywords: ["Batik", "Fashion", "ÉNOMÉ", "Koleksi 2026", "Kain Batik", "Pakaian Wanita", "Pakaian Pria"],
-    authors: [{ name: "ÉNOMÉ" }],
-    creator: "ÉNOMÉ",
-    publisher: "ÉNOMÉ",
+    title: {
+      default: dbTitle,
+      template: `%s | ${siteConfig.name}`,
+    },
+    description: dbDescription,
+    keywords: keywordsArray,
+    authors: siteConfig.authors,
+    creator: siteConfig.creator,
+    publisher: siteConfig.publisher,
     openGraph: {
       type: "website",
       locale: "id_ID",
-      url: "https://batik-enome.com",
-      title: "ÉNOMÉ - Fashion & Batik Collection 2026",
-      description: "Discover the finest batik and fashion collections at ÉNOMÉ. Shop the latest 2026 arrivals, deals of the month, and exclusive kain batik panjang.",
-      siteName: "ÉNOMÉ",
+      url: siteConfig.url,
+      title: dbTitle,
+      description: dbDescription,
+      siteName: siteConfig.name,
       images: [
         {
           url: faviconUrl,
           width: 800,
           height: 600,
-          alt: "ÉNOMÉ Logo",
+          alt: `${siteConfig.name} Logo`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: "ÉNOMÉ - Fashion & Batik Collection 2026",
-      description: "Discover the finest batik and fashion collections at ÉNOMÉ. Shop the latest arrivals and exclusive kain batik panjang.",
+      title: dbTitle,
+      description: dbDescription,
       images: [faviconUrl],
-      creator: "@enome",
+      creator: siteConfig.twitter.creator,
     },
     icons: {
       icon: faviconUrl,

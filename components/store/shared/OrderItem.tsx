@@ -98,16 +98,17 @@ export default function OrderItem({
             <m.div
                 drag={!isCheckout ? "x" : false}
                 dragDirectionLock
-                dragConstraints={{ left: -100, right: 0 }}
-                dragElastic={0.05}
+                dragConstraints={{ left: -120, right: 0 }}
+                dragElastic={0.15}
+                dragTransition={{ bounceStiffness: 300, bounceDamping: 25 }}
                 onDragEnd={(e, info) => {
-                    if (info.offset.x < -70) {
+                    if (info.offset.x < -60 || info.velocity.x < -400) {
                         onRemove(item.id);
                     }
                 }}
                 className={cn(
-                    "relative h-full w-full transition-all duration-300",
-                    isCheckout ? "" : "p-5 md:p-7 bg-white"
+                    "relative h-full w-full bg-white",
+                    isCheckout ? "" : "p-5 md:p-7"
                 )}
             >
 

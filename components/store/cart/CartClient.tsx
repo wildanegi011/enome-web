@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
-    Trash2,
+    Trash2, Info,
     Loader2, ShoppingCart,
     CheckSquare, Square
 } from "lucide-react";
@@ -174,13 +174,13 @@ export default function CartClient() {
                             <m.div
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="lg:hidden bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm"
+                                className="lg:hidden bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm"
                             >
                                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
-                                    <Trash2 className="w-5 h-5 text-amber-800" />
+                                    <Info className="w-5 h-5 text-blue-600" />
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-[11px] font-bold text-amber-900 leading-tight">Tips: Geser (Swipe) koleksi barang ke kiri untuk menghapus dari keranjang.</p>
+                                    <p className="text-[11px] font-bold text-blue-900 leading-tight">Geser produk ke kiri untuk menghapusnya dari keranjang.</p>
                                 </div>
                             </m.div>
 

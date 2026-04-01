@@ -68,11 +68,23 @@ interface ProductInfoProps {
     selectedColor: string;
     setSelectedColor: (color: string) => void;
     activeImage?: string;
+    whatsappNomor?: string;
+    selectedSize: string;
+    setSelectedSize: (size: string) => void;
 }
 
-export default function ProductInfo({ product, selectedVariant, setSelectedVariant, selectedColor, setSelectedColor, activeImage }: ProductInfoProps) {
+export default function ProductInfo({
+    product,
+    selectedVariant,
+    setSelectedVariant,
+    selectedColor,
+    setSelectedColor,
+    activeImage,
+    whatsappNomor,
+    selectedSize,
+    setSelectedSize
+}: ProductInfoProps) {
     // -- Local State --
-    const [selectedSize, setSelectedSize] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [openAccordion, setOpenAccordion] = useState<string | null>("details");
     const [shakeKey, setShakeKey] = useState(0);       // Trigger animasi shake saat validasi gagal
@@ -106,8 +118,13 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
     );
 
     const isSoldOut = parseInt(product.totalStock || "0") === 0;
-    const rawStock = currentCombination?.stock ?? 0;
-    const currentStock = Math.max(0, rawStock - qtyInCartForVariant);
+
+    // Gunakan getStockForSize agar konsisten dengan tampilan tombol ukuran (mendukung aggregat & robust matching)
+    const currentStock = getStockForSize(
+        product.matrix, cartItems, product.id, selectedColor, selectedSize, selectedVariant
+    );
+
+    const rawStock = currentCombination?.stock ?? currentStock;
 
     const isSelectionComplete = (!!selectedVariant || !product.types || product.types.length === 0) && !!selectedColor && !!selectedSize;
     const isOutOfStockCombination = isSelectionComplete && currentStock <= 0;
@@ -565,7 +582,6 @@ export default function ProductInfo({ product, selectedVariant, setSelectedVaria
                         <span className="relative z-10">{isAdding ? "Menambahkan..." : "Tambah ke Keranjang"}</span>
                     </m.button>
 
-                    {/* Wishlist Button */}
                     <m.button
                         whileHover={{ scale: 1.05, backgroundColor: isWishlisted ? "#fff1f2" : "#f8fafc" }}
                         whileTap={{ scale: 0.95 }}

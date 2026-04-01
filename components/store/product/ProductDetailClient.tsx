@@ -15,6 +15,7 @@ import Link from "next/link";
 import FallbackImage from "@/components/store/shared/FallbackImage";
 import { m, AnimatePresence } from "framer-motion";
 import { formatCurrency } from "@/lib/utils";
+import FloatingChat from "@/components/store/product/FloatingChat";
 
 export function ProductDetailSkeleton() {
     return (
@@ -69,11 +70,12 @@ export function ProductDetailSkeleton() {
     );
 }
 
-export default function ProductDetailClient({ productData }: { productData: any }) {
+export default function ProductDetailClient({ productData, whatsappNomor }: { productData: any; whatsappNomor?: string }) {
     const { product, stats, variants, images, additionalImages, relatedProducts } = productData;
 
     const [selectedVariant, setSelectedVariant] = useState("");
     const [selectedColor, setSelectedColor] = useState("");
+    const [selectedSize, setSelectedSize] = useState("");
     const [showSticky, setShowSticky] = useState(false);
 
     useEffect(() => {
@@ -181,7 +183,10 @@ export default function ProductDetailClient({ productData }: { productData: any 
                                     setSelectedVariant={setSelectedVariant}
                                     selectedColor={selectedColor}
                                     setSelectedColor={setSelectedColor}
+                                    selectedSize={selectedSize}
+                                    setSelectedSize={setSelectedSize}
                                     activeImage={mainGalleryImages[0]}
+                                    whatsappNomor={whatsappNomor}
                                 />
                             </div>
                         </div>
@@ -324,6 +329,14 @@ export default function ProductDetailClient({ productData }: { productData: any 
                         </m.div>
                     )}
                 </AnimatePresence>
+
+                <FloatingChat
+                    whatsappNomor={whatsappNomor}
+                    productName={product.namaProduk}
+                    selectedVariant={selectedVariant}
+                    selectedColorName={variants.colors.find((c: any) => c.id === selectedColor)?.name}
+                    selectedSize={selectedSize}
+                />
             </main>
         </TooltipProvider>
     );
