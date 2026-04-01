@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ConfigService } from "@/lib/services/config-service";
 import logger from "@/lib/logger";
+import { revalidateTag } from "next/cache";
 
 const WHITELISTED_KEYS = ["packing_fee", "biaya_packing", "whatsapp_admin", "whatsapp_nomor", "batas_pembayaran", "origin_city", "kecamatan", "origin_name"];
 
@@ -27,5 +28,24 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         logger.error("API GET /api/config error:", error);
         return NextResponse.json({ message: "error" }, { status: 500 });
+    }
+}
+
+export async function POST(request: NextRequest) {
+    try {
+        // Trigger revalidation for the "metadata" tag
+        (revalidateTag as any)("metadata");
+        
+        logger.info("Metadata cache invalidated via API");
+        return NextResponse.json({ 
+            success: true, 
+            message: "Metadata cache invalidated successfully" 
+        });
+    } catch (error) {
+        logger.error("API POST /api/config error:", error);
+        return NextResponse.json({ 
+            success: false, 
+            message: "Failed to invalidate cache" 
+        }, { status: 500 });
     }
 }

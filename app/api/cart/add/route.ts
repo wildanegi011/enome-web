@@ -87,7 +87,15 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 WHERE pd.produk_id = ${id_produk} 
                 AND (pd.warna = ${colorId} OR pd.warna = ${color_sylla})
                 AND pd.size = ${size_sylla} 
-                AND (pd.variant = ${variant} OR (pd.variant IS NULL AND ${variant || ""} = ""))
+                AND (
+                    pd.variant = ${variant} 
+                    OR pd.variant LIKE ${"%" + (variant || "") + "%"}
+                    OR ${variant || ""} LIKE CONCAT('%', pd.variant, '%')
+                    OR (pd.variant IS NULL AND ${variant || ""} = "")
+                    OR (pd.variant = "" AND ${variant || ""} = "")
+                )
+                ORDER BY pd.stok_normal DESC
+                LIMIT 1
                 FOR UPDATE
             `);
             const freshDetail = freshDetailRows[0];
@@ -160,10 +168,13 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
                 AND TRIM(k.size) = ${size_sylla} 
                 AND (
                     TRIM(k.variant) = ${variant} 
-                    OR (TRIM(k.variant) IS NULL AND (${variant || ""} = ""))
-                    OR (TRIM(k.variant) = "" AND (${variant || ""} = ""))
+                    OR k.variant LIKE ${"%" + (variant || "") + "%"}
+                    OR ${variant || ""} LIKE CONCAT('%', k.variant, '%')
+                    OR (k.variant IS NULL AND ${variant || ""} = "")
+                    OR (k.variant = "" AND ${variant || ""} = "")
                 )
                 AND k.is_deleted = 0 
+                ORDER BY k.id DESC
                 LIMIT 1
                 FOR UPDATE
             `);

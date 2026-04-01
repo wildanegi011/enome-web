@@ -12,6 +12,7 @@ import Navbar from "@/components/store/layout/Navbar";
 import ProductDetailClient from "@/components/store/product/ProductDetailClient";
 import { Skeleton } from "@/components/ui/skeleton";
 import { notFound } from "next/navigation";
+import { ConfigService } from "@/lib/services/config-service";
 
 export default async function ProductDetailPage(props: { params: Promise<{ id: string }> }) {
     const { id: encodedId } = await props.params;
@@ -21,6 +22,8 @@ export default async function ProductDetailPage(props: { params: Promise<{ id: s
 
     const kategoriId = await CustomerService.getKategoriId(session?.user?.id);
     const productData = await ProductService.getProductDetail(id, kategoriId);
+
+    const whatsappNomor = await ConfigService.get("whatsapp_nomor", "62895627727196"); // Fallback to provided number or empty
 
     if (!productData) {
         notFound();
@@ -33,7 +36,7 @@ export default async function ProductDetailPage(props: { params: Promise<{ id: s
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ProductDetailClient productData={productData} />
+            <ProductDetailClient productData={productData} whatsappNomor={whatsappNomor} />
         </HydrationBoundary>
     );
 }

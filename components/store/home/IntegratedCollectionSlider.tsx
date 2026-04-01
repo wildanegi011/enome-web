@@ -17,32 +17,32 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 const getPositionClasses = (position: string | undefined, isMobile: boolean) => {
-    if (!position) return isMobile ? "items-center bottom-24 text-center" : "items-start bottom-16 text-left left-12 md:left-20";
+    if (!position) return isMobile ? "items-center bottom-28 text-center" : "items-start bottom-20 text-left left-10 sm:left-16 md:left-24 lg:left-32";
 
     const pos = position.toLowerCase();
 
-    // Default mobile behavior is usually centered at the bottom unless specified
+    // Mobile specific logic (simplified)
     if (isMobile) {
-        if (pos.includes('top')) return "items-center top-24 text-center";
+        if (pos.includes('top')) return "items-center top-20 text-center";
         if (pos.includes('mid') || pos.includes('center')) return "items-center top-1/2 -translate-y-1/2 text-center";
         return "items-center bottom-24 text-center";
     }
 
-    // Desktop positioning
+    // Responsive Desktop positioning
     let vClasses = "";
     let hClasses = "";
 
-    // Vertical keywords: top, bottom, mid, middle, center
-    if (pos.includes('top')) vClasses = "top-32 ";
-    else if (pos.includes('bottom')) vClasses = "bottom-16 ";
+    // Vertical keywords
+    if (pos.includes('top')) vClasses = "top-20 sm:top-28 md:top-36 lg:top-40 ";
+    else if (pos.includes('bottom')) vClasses = "bottom-12 sm:bottom-20 md:bottom-24 ";
     else if (pos.includes('mid') || (pos.includes('center') && !pos.includes('left') && !pos.includes('right'))) vClasses = "top-1/2 -translate-y-1/2 ";
-    else vClasses = "bottom-16 "; // default
+    else vClasses = "bottom-20 sm:bottom-24 "; // default
 
-    // Horizontal keywords: left, right, center
-    if (pos.includes('right')) hClasses = "items-end text-right right-12 md:right-20 ";
-    else if (pos.includes('left')) hClasses = "items-start text-left left-12 md:left-20 ";
+    // Horizontal keywords
+    if (pos.includes('right')) hClasses = "items-end text-right right-10 sm:right-16 md:right-24 lg:right-32 ";
+    else if (pos.includes('left')) hClasses = "items-start text-left left-10 sm:left-16 md:left-24 lg:left-32 ";
     else if (pos.includes('center') || (pos.includes('middle') && !pos.includes('top') && !pos.includes('bottom'))) hClasses = "items-center text-center left-1/2 -translate-x-1/2 ";
-    else hClasses = "items-start text-left left-12 md:left-20 "; // default
+    else hClasses = "items-start text-left left-10 sm:left-16 md:left-24 lg:left-32 "; // default
 
     return vClasses + hClasses;
 };
@@ -325,10 +325,10 @@ export default function IntegratedCollectionSlider() {
                                     {img.brandImageLink && (
                                         <div className={cn(
                                             "absolute inset-0 z-10 pointer-events-none w-full h-full",
-                                            isMobile ? "p-8 pb-32" : "p-12 md:p-24"
+                                            isMobile ? "p-6 pb-28" : "p-10 sm:p-16 lg:p-32"
                                         )}>
                                             <m.div
-                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                initial={{ opacity: 0, scale: 1 }}
                                                 whileInView={{ opacity: 1, scale: 1 }}
                                                 transition={{ duration: 1, delay: 0.4 }}
                                                 viewport={{ once: false }}
@@ -337,7 +337,7 @@ export default function IntegratedCollectionSlider() {
                                                     getPositionClasses(img.brandPosition, isMobile)
                                                 )}
                                             >
-                                                <div className="relative w-24 h-24 md:w-96 md:h-96">
+                                                <div className="relative w-28 h-28 sm:w-40 sm:h-40 md:w-[350px] md:h-[350px] lg:w-[500px] lg:h-[500px]">
                                                     <Image
                                                         src={img.brandImageLink}
                                                         alt={img.brand || "Brand Logo"}
@@ -353,7 +353,7 @@ export default function IntegratedCollectionSlider() {
                                     {/* Collection Title & Tagline - Dynamic Positioning */}
                                     <div className={cn(
                                         "absolute inset-0 z-10 pointer-events-none w-full h-full",
-                                        isMobile ? "p-8 pb-32" : "p-12 md:p-24"
+                                        isMobile ? "p-6 pb-28" : "p-10 sm:p-16 lg:p-32"
                                     )}>
                                         <div className={cn(
                                             "absolute flex flex-col transition-all duration-700",
@@ -365,7 +365,7 @@ export default function IntegratedCollectionSlider() {
                                                     whileInView={{ opacity: 1, y: 0 }}
                                                     transition={{ duration: 0.8, delay: 0.2 }}
                                                     viewport={{ once: false }}
-                                                    className="w-full md:max-w-3xl font-montserrat px-4 md:px-0"
+                                                    className="w-full md:max-w-3xl font-montserrat px-6 md:px-0 text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px]"
                                                     dangerouslySetInnerHTML={{ __html: img.tagline }}
                                                 />
                                             ) : (
@@ -374,7 +374,7 @@ export default function IntegratedCollectionSlider() {
                                                     whileInView={{ opacity: 1, y: 0 }}
                                                     transition={{ duration: 0.8, delay: 0.2 }}
                                                     viewport={{ once: false }}
-                                                    className="font-montserrat text-[14px] md:text-[18px] text-black/80 tracking-[0.2em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] max-w-2xl"
+                                                    className="font-montserrat text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] text-black/80 tracking-[0.2em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] max-w-2xl"
                                                 >
                                                     {img.title || filteredCollections[currentIndex]?.title}
                                                 </m.p>

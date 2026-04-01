@@ -36,6 +36,18 @@ export interface MatrixEntry {
 // ---- Matrix / Stock Utilities ----
 
 /**
+ * Helper internal untuk pengecekan match variant yang robust.
+ * Menangani case-insensitive, trim whitespace, dan partial match.
+ */
+function isVariantMatch(matrixVariant: string, targetVariant: string): boolean {
+    const mv = (matrixVariant || "").trim().toLowerCase();
+    const tv = (targetVariant || "").trim().toLowerCase();
+
+    if (!tv) return true; // Jika target kosong, anggap match (untuk aggregat)
+    return mv === tv || mv.includes(tv) || tv.includes(mv);
+}
+
+/**
  * Cari entry matrix yang cocok berdasarkan colorId, size, dan variant.
  * Digunakan untuk mendapatkan stok & harga dari kombinasi yang dipilih user.
  */
@@ -47,9 +59,9 @@ export function findMatrixCombination(
 ): MatrixEntry | undefined {
     return matrix.find(
         (m) =>
-            m.colorId === colorId &&
-            m.size === size &&
-            (m.variant || "") === (variant || "")
+            String(m.colorId) === String(colorId) &&
+            String(m.size).trim().toLowerCase() === String(size).trim().toLowerCase() &&
+            isVariantMatch(m.variant, variant)
     );
 }
 
@@ -66,15 +78,11 @@ export function getQtyInCartForVariant(
 ): number {
     return cartItems
         .filter((item) => {
-            const variantMatch =
-                !variant ||
-                (item.variant || "") === (variant || "") ||
-                item.keterangan?.includes(variant);
             return (
                 item.produkId === productId &&
                 String(item.warna) === String(colorId) &&
-                item.size === size &&
-                variantMatch
+                String(item.size).trim().toLowerCase() === String(size).trim().toLowerCase() &&
+                isVariantMatch((item.variant || ""), variant)
             );
         })
         .reduce((sum, item) => sum + Number(item.qty || 0), 0);
@@ -82,7 +90,7 @@ export function getQtyInCartForVariant(
 
 /**
  * Hitung stok tersedia untuk ukuran tertentu.
- * Stok = stok matrix - qty yang sudah di keranjang.
+ * Stok = stok matrix (aggregat jika variant kosong) - qty yang sudah di keranjang.
  */
 export function getStockForSize(
     matrix: MatrixEntry[],
@@ -92,8 +100,14 @@ export function getStockForSize(
     size: string,
     variant: string
 ): number {
-    const entry = findMatrixCombination(matrix, colorId, size, variant);
-    const rawStock = entry?.stock ?? 0;
+    // Jika variant kosong, cari aggregat stok untuk kombinasi color + size di SEMUA variant
+    const matchingEntries = matrix.filter(
+        m => String(m.colorId) === String(colorId) && 
+             String(m.size).trim().toLowerCase() === String(size).trim().toLowerCase() && 
+             isVariantMatch(m.variant, variant)
+    );
+    const rawStock = matchingEntries.reduce((sum, m) => sum + m.stock, 0);
+
     const qtyInCart = getQtyInCartForVariant(cartItems, productId, colorId, size, variant);
     return Math.max(0, rawStock - qtyInCart);
 }
@@ -120,14 +134,10 @@ export function isColorAvailableForVariant(
     colorId: string,
     selectedVariant: string
 ): boolean {
-    const matchingMatrices = matrix.filter((m) => m.colorId === colorId);
-    return matchingMatrices.some(
+    return matrix.some(
         (m) =>
-            (!m.variant ||
-                !selectedVariant ||
-                m.variant === selectedVariant ||
-                m.variant.includes(selectedVariant) ||
-                selectedVariant.includes(m.variant)) &&
+            String(m.colorId) === String(colorId) &&
+            isVariantMatch(m.variant, selectedVariant) &&
             m.stock > 0
     );
 }
