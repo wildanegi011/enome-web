@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "./db";
 import { user as userTable } from "./db/schema";
-import { eq, and, or, isNull } from "drizzle-orm";
+import { eq, and, or, isNull, sql } from "drizzle-orm";
 
 const secretKey = "secret";
 const key = new TextEncoder().encode(process.env.JWT_SECRET || secretKey);
@@ -24,6 +24,11 @@ export async function decrypt(input: string): Promise<any> {
 }
 
 export async function login(user: any) {
+    // Update last activity
+    await db.update(userTable)
+        .set({ lastActivity: sql`NOW()` })
+        .where(eq(userTable.id, user.id));
+
     // Create the session
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
     const session = await encrypt({ user, expires });
@@ -34,6 +39,14 @@ export async function login(user: any) {
 }
 
 export async function logout() {
+    const session = await getSession();
+    if (session?.user?.id) {
+        // Set last activity to 10 minutes ago to immediately appear offline in admin
+        await db.update(userTable)
+            .set({ lastActivity: sql`DATE_SUB(NOW(), INTERVAL 10 MINUTE)` })
+            .where(eq(userTable.id, session.user.id));
+    }
+
     // Destroy the session
     const cookieStore = await cookies();
     cookieStore.set("session", "", { expires: new Date(0) });
@@ -79,7 +92,11 @@ export async function updateSession(request: NextRequest) {
         return;
     }
 
-    // Verify user still exists
+    // Verify user still exists and update last activity
+    await db.update(userTable)
+        .set({ lastActivity: sql`NOW()` })
+        .where(eq(userTable.id, parsed.user.id));
+
     const validUser = await verifyUser(parsed.user.id);
     if (!validUser) {
         const res = NextResponse.next();

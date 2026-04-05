@@ -1,9 +1,9 @@
-
 import { m } from "framer-motion";
-import { Search, User, ShoppingCart, Compass } from "lucide-react";
+import { Search, User, ShoppingCart, Compass, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
+import { useTransition } from "react";
 
 interface NavOverlayProps {
     setIsSearchOpen: (open: boolean) => void;
@@ -13,6 +13,13 @@ export default function NavOverlay({ setIsSearchOpen }: NavOverlayProps) {
     const router = useRouter();
     const { isAuthenticated } = useAuth();
     const { count } = useCart();
+    const [isPending, startTransition] = useTransition();
+
+    const handleExplore = () => {
+        startTransition(() => {
+            router.push("/products");
+        });
+    };
 
     return (
         <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none">
@@ -24,11 +31,19 @@ export default function NavOverlay({ setIsSearchOpen }: NavOverlayProps) {
                     transition={{ duration: 0.8, delay: 0.3 }}
                 >
                     <button
-                        onClick={() => router.push("/products")}
-                        className="pointer-events-auto size-10 md:w-auto md:h-10 md:px-6 rounded-full bg-black/75 backdrop-blur-md border border-white/30 flex items-center justify-center gap-2.5 text-white hover:bg-black/95 hover:border-white/60 transition-all duration-300 cursor-pointer shadow-[0_2px_10px_rgba(0,0,0,0.3)] group"
+                        onClick={handleExplore}
+                        onMouseEnter={() => router.prefetch("/products")}
+                        disabled={isPending}
+                        className="pointer-events-auto size-10 md:w-auto md:h-10 md:px-6 rounded-full bg-black/75 backdrop-blur-md border border-white/30 flex items-center justify-center gap-2.5 text-white hover:bg-black/95 hover:border-white/60 transition-all duration-300 cursor-pointer shadow-[0_2px_10_rgba(0,0,0,0.3)] group disabled:opacity-70 disabled:cursor-wait"
                     >
-                        <Compass className="size-[18px] stroke-[1.5px] text-white group-hover:rotate-45 transition-transform duration-500" />
-                        <span className="hidden md:block text-[12px] font-black uppercase tracking-[0.2em] font-montserrat text-white">Jelajahi Produk</span>
+                        {isPending ? (
+                            <Loader2 className="size-[18px] animate-spin text-white" />
+                        ) : (
+                            <Compass className="size-[18px] stroke-[1.5px] text-white group-hover:rotate-45 transition-transform duration-500" />
+                        )}
+                        <span className="hidden md:block text-[12px] font-black uppercase tracking-[0.2em] font-montserrat text-white">
+                            {isPending ? "Memuat data..." : "Jelajahi Produk"}
+                        </span>
                     </button>
                 </m.div>
 

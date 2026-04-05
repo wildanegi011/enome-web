@@ -1,6 +1,7 @@
 import { Montserrat } from "next/font/google";
 import React, { Suspense } from "react";
 import "./globals.css";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -24,11 +25,12 @@ const getCachedMetadata = unstable_cache(
 );
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [dbTitle, dbDescription, dbKeywords, dbFavicon] = await Promise.all([
+  const [dbTitle, dbDescription, dbKeywords, dbFavicon, gaId] = await Promise.all([
     getCachedMetadata("META_TITLE", `${siteConfig.name} - Fashion & Batik Collection 2026`),
     getCachedMetadata("META_DESCRIPTION", siteConfig.description),
     getCachedMetadata("META_KEYWORDS", siteConfig.keywords.join(", ")),
-    getCachedMetadata("SITE_FAVICON", siteConfig.assets.favicon)
+    getCachedMetadata("SITE_FAVICON", siteConfig.assets.favicon),
+    getCachedMetadata("ga_google", "")
   ]);
 
   const faviconUrl = dbFavicon;
@@ -81,14 +83,17 @@ import { Toaster } from "sonner";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import ScrollToTop from "@/components/store/shared/ScrollToTop";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaId = await getCachedMetadata("ga_google", "");
+
   return (
     <html lang="id" className={`${montserrat.variable} ${montserrat.className}`}>
       <body className="antialiased font-sans">
+        {gaId && <GoogleAnalytics gaId={gaId} />}
         <ReactQueryProvider>
           <MotionProvider>
             <TooltipProvider>
