@@ -500,24 +500,27 @@ export class OrderService {
             logger.info("OrderService: Step F - Payment Insertion");
 
             // Ambil batas pembayaran dari ConfigService (cached)
-            const rawInterval = await ConfigService.get("batas_pembayaran", "1");
-            const isDays = /^\d+$/.test(rawInterval);
-            const paymentInterval = isDays ? `${rawInterval} DAY` : rawInterval;
+            const rawInterval = await ConfigService.get("batas_pembayaran", "60");
+            const isNumeric = /^\d+$/.test(rawInterval);
+            const paymentInterval = isNumeric ? `${rawInterval} MINUTE` : rawInterval;
 
             // Calculate expiredTime value for frontend response
             let expiredTimeValue = null;
             if (finalBankAmount > 0) {
                 const now = getJakartaDate();
-                if (isDays) {
-                    now.setDate(now.getDate() + parseInt(rawInterval));
+                if (isNumeric) {
+                    now.setMinutes(now.getMinutes() + parseInt(rawInterval));
                 } else if (rawInterval.toUpperCase().includes("HOUR")) {
                     const hours = parseInt(rawInterval);
                     now.setHours(now.getHours() + hours);
                 } else if (rawInterval.toUpperCase().includes("MINUTE")) {
                     const minutes = parseInt(rawInterval);
                     now.setMinutes(now.getMinutes() + minutes);
+                } else if (rawInterval.toUpperCase().includes("DAY")) {
+                    const days = parseInt(rawInterval);
+                    now.setDate(now.getDate() + days);
                 } else {
-                    now.setDate(now.getDate() + 1); // Fallback 1 day
+                    now.setHours(now.getHours() + 1); // Fallback 1 hour
                 }
                 const { formatJakarta } = await import("@/lib/date-utils");
                 expiredTimeValue = formatJakarta(now, 'full').replace(' ', 'T') + '+07:00';

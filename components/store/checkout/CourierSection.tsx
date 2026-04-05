@@ -277,7 +277,7 @@ export default function CourierSection({
                             className="flex items-center gap-2 bg-neutral-base-900 text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-neutral-base-800 transition-all shadow-lg active:scale-95 group"
                         >
                             <Zap className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-                            Refresh Pengiriman
+                            Muat ulang Ekspedisi
                         </button>
                     </div>
                 )}
