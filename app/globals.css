@@ -63,9 +63,15 @@
   --radius-4xl: calc(var(--radius) + 16px);
 
   @keyframes shimmer {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(100%); }
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(100%);
+    }
   }
+
   --animate-shimmer: shimmer 2.5s infinite;
 }
 
@@ -214,4 +220,16 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+}
+
+.ql-size-large {
+  @apply text-xl;
+}
+
+.ql-size-huge {
+  @apply text-2xl;
+}
+
+.ql-size-small {
+  @apply text-sm;
 }
