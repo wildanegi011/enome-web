@@ -24,6 +24,7 @@ import { useWishlist, useToggleWishlist } from "@/hooks/use-wishlist";
 import { useCartItems } from "@/hooks/use-cart-items";
 import { useAddToCart } from "@/hooks/use-add-to-cart";
 import { useFlashSaleTimer } from "@/hooks/use-flash-sale-timer";
+import { Share2, Link as LinkIcon, Facebook, Instagram } from "lucide-react";
 import {
     findMatrixCombination,
     getQtyInCartForVariant,
@@ -89,6 +90,7 @@ export default function ProductInfo({
     const [openAccordion, setOpenAccordion] = useState<string | null>("details");
     const [shakeKey, setShakeKey] = useState(0);       // Trigger animasi shake saat validasi gagal
     const [hintType, setHintType] = useState<"motif" | "color" | "size" | null>(null); // Highlight section mana yang perlu diisi
+    const [isShareOpen, setIsShareOpen] = useState(false);
 
     // -- Auth --
     const { isAuthenticated } = useAuth();
@@ -210,6 +212,38 @@ export default function ProductInfo({
                 image: activeImage || undefined
             }
         });
+    };
+
+    /** Logic sharing social media */
+    const handleShare = async (platform: 'whatsapp' | 'facebook' | 'share' | 'copy') => {
+        const productUrl = window.location.href;
+        const shareText = `Lihat produk menarik ini di ÉNOMÉ: ${product.name}`;
+        const encodedUrl = encodeURIComponent(productUrl);
+        const encodedText = encodeURIComponent(`${shareText}\n${productUrl}`);
+
+        if (platform === 'whatsapp') {
+            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+        } else if (platform === 'facebook') {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank');
+        } else if (platform === 'share') {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: product.name,
+                        text: shareText,
+                        url: productUrl,
+                    });
+                } catch (err) {
+                    handleShare('copy');
+                }
+            } else {
+                handleShare('copy');
+            }
+        } else if (platform === 'copy') {
+            navigator.clipboard.writeText(productUrl);
+            toast.success("Tautan produk berhasil disalin!");
+            // window.open('https://www.instagram.com/', '_blank');
+        }
     };
 
     return (
@@ -582,6 +616,7 @@ export default function ProductInfo({
                         <span className="relative z-10">{isAdding ? "Menambahkan..." : "Tambah ke Keranjang"}</span>
                     </m.button>
 
+                    {/* Wishlist Button */}
                     <m.button
                         whileHover={{ scale: 1.05, backgroundColor: isWishlisted ? "#fff1f2" : "#f8fafc" }}
                         whileTap={{ scale: 0.95 }}
@@ -597,11 +632,97 @@ export default function ProductInfo({
                             strokeWidth={isWishlisted ? 2.5 : 2}
                         />
                     </m.button>
+
+                    {/* Share Button with Dropdown */}
+                    <div className="relative shrink-0">
+                        <m.button
+                            whileHover={{ scale: 1.05, backgroundColor: isShareOpen ? undefined : "#f8fafc" }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setIsShareOpen(!isShareOpen)}
+                            className={`w-12 h-12 md:w-14 md:h-14 shrink-0 flex items-center justify-center rounded-xl border transition-all duration-300 shadow-sm ${isShareOpen
+                                ? "bg-neutral-base-50 border-neutral-base-200 text-neutral-base-900"
+                                : "bg-white border-neutral-base-100 text-neutral-base-400 hover:text-neutral-base-900 hover:border-neutral-base-300"
+                                }`}
+                            aria-label="Bagikan produk"
+                            aria-expanded={isShareOpen}
+                        >
+                            <Share2
+                                className={`w-5 h-5 md:w-6 md:h-6 transition-all duration-300`}
+                                strokeWidth={2}
+                            />
+                        </m.button>
+
+                        {/* Share Dropdown Popover */}
+                        <AnimatePresence>
+                            {isShareOpen && (
+                                <>
+                                    {/* Backdrop to close */}
+                                    <div
+                                        className="fixed inset-0 z-40"
+                                        onClick={() => setIsShareOpen(false)}
+                                    />
+                                    <m.div
+                                        initial={{ opacity: 0, scale: 0.9, y: 8 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.9, y: 8 }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                        className="absolute right-0 bottom-full mb-3 z-50 bg-white rounded-2xl shadow-xl border border-neutral-base-100/80 p-2 min-w-[200px]"
+                                    >
+                                        {/* Arrow */}
+                                        <div className="absolute -bottom-1.5 right-5 w-3 h-3 bg-white border-r border-b border-neutral-base-100/80 rotate-45" />
+
+                                        <button
+                                            onClick={() => { handleShare('whatsapp'); setIsShareOpen(false); }}
+                                            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left hover:bg-emerald-50 transition-colors group"
+                                        >
+                                            <span className="w-8 h-8 flex items-center justify-center rounded-full bg-emerald-50 text-[#25D366] group-hover:bg-[#25D366] group-hover:text-white transition-all">
+                                                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72 1.103 3.724 1.687 5.77 1.687h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                                                </svg>
+                                            </span>
+                                            <span className="text-[13px] font-semibold text-neutral-base-700">WhatsApp</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => { handleShare('facebook'); setIsShareOpen(false); }}
+                                            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left hover:bg-blue-50 transition-colors group"
+                                        >
+                                            <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-[#1877F2] group-hover:bg-[#1877F2] group-hover:text-white transition-all">
+                                                <Facebook className="w-4 h-4" />
+                                            </span>
+                                            <span className="text-[13px] font-semibold text-neutral-base-700">Facebook</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => { handleShare('share'); setIsShareOpen(false); }}
+                                            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left hover:bg-rose-50 transition-colors group"
+                                        >
+                                            <span className="w-8 h-8 flex items-center justify-center rounded-full bg-linear-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white">
+                                                <Instagram className="w-4 h-4" />
+                                            </span>
+                                            <span className="text-[13px] font-semibold text-neutral-base-700">Instagram</span>
+                                        </button>
+
+                                        <div className="my-1 border-t border-neutral-base-50" />
+
+                                        <button
+                                            onClick={() => { handleShare('copy'); setIsShareOpen(false); }}
+                                            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left hover:bg-neutral-base-50 transition-colors group"
+                                        >
+                                            <span className="w-8 h-8 flex items-center justify-center rounded-full bg-neutral-base-50 text-neutral-base-500 group-hover:bg-neutral-base-900 group-hover:text-white transition-all">
+                                                <LinkIcon className="w-4 h-4" />
+                                            </span>
+                                            <span className="text-[13px] font-semibold text-neutral-base-700">Salin Tautan</span>
+                                        </button>
+                                    </m.div>
+                                </>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
             </div>
-
             {/* Accordions */}
-            <div className="border-t border-neutral-base-100">
+            <div className="mt-8 md:mt-12 border-t border-neutral-base-100">
                 <AccordionItem id="shipping" title="Spesifikasi Produk" icon={Info} openAccordion={openAccordion} toggleAccordion={toggleAccordion}>
                     <div className="grid grid-cols-2 gap-y-5 gap-x-6">
                         <div className="flex flex-col gap-1.5">

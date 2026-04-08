@@ -70,7 +70,7 @@ export default function Navbar() {
             <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                 <div className="flex items-center justify-between h-[80px]">
                     <Link href="/" className="relative flex items-center h-full">
-                        <div className="relative w-14 h-14 md:w-20 md:h-20 transition-all duration-500 hover:scale-105 active:scale-95 group">
+                        <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 landscape:w-10 landscape:h-10 landscape:sm:w-12 landscape:sm:h-12 landscape:md:w-14 landscape:md:h-14 landscape:lg:w-18 landscape:lg:h-18 transition-all duration-500 hover:scale-105 active:scale-95 group">
                             <FallbackImage
                                 src={logoUrl || "/logo-enome.png"}
                                 alt="Logo Enome"

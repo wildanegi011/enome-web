@@ -17,7 +17,7 @@ export default function Footer() {
                     {/* Brand/Logo Section */}
                     <div className="md:col-span-4 flex flex-col items-center md:items-start space-y-4">
                         <Link href="/" className="relative block group">
-                            <div className="relative w-32 h-20 transition-transform duration-500 group-hover:scale-105">
+                            <div className="relative w-24 h-15 md:w-32 md:h-20 landscape:w-20 landscape:h-12 landscape:md:w-28 landscape:md:h-16 transition-transform duration-500 group-hover:scale-105">
                                 <FallbackImage
                                     src={logoUrl || "/logo-enome.png"}
                                     alt="ÉNOMÉ"

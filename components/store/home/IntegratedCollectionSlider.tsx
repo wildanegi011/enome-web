@@ -196,7 +196,7 @@ export default function IntegratedCollectionSlider() {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: [0.1, 0.3, 0.1], scale: [0.95, 1, 0.95] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative w-48 h-48"
+                    className="relative w-32 h-32 md:w-48 md:h-48 landscape:w-20 landscape:h-20 landscape:md:w-32 landscape:md:h-32"
                 >
                     <Image src="/logo-enome.png" alt="Loading" fill className="object-contain brightness-0 invert opacity-20" />
                 </m.div>
@@ -337,7 +337,7 @@ export default function IntegratedCollectionSlider() {
                                                     getPositionClasses(img.brandPosition, isMobile)
                                                 )}
                                             >
-                                                <div className="relative w-28 h-28 sm:w-40 sm:h-40 md:w-[350px] md:h-[350px] lg:w-[500px] lg:h-[500px]">
+                                                <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-64 md:h-64 lg:w-[400px] lg:h-[400px] xl:w-[500px] xl:h-[500px] landscape:w-16 landscape:h-16 landscape:sm:w-24 landscape:sm:h-24 landscape:md:w-40 landscape:md:h-40 landscape:lg:w-64 landscape:lg:h-64 landscape:xl:w-80 landscape:xl:h-80">
                                                     <Image
                                                         src={img.brandImageLink}
                                                         alt={img.brand || "Brand Logo"}
