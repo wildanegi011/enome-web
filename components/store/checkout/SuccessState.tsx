@@ -364,12 +364,12 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                         <span className="font-medium tabular-nums">-{formatPrice(orderResult.walletDeduction || 0)}</span>
                                     </div>
                                 )}
-                                {/* {orderResult.uniqueCode && orderResult.uniqueCode > 0 && (
+                                {orderResult.uniqueCode && orderResult.uniqueCode > 0 && (
                                     <div className="flex justify-between text-[11px] md:text-[12px] text-amber-600">
-                                        <span>Kode Unik</span>
+                                        <span>Biaya Kode Unik</span>
                                         <span className="font-medium tabular-nums">+{formatPrice(orderResult.uniqueCode)}</span>
                                     </div>
-                                )} */}
+                                )}
 
                                 {/* Total */}
                                 <div className="mt-2 pt-3.5 md:pt-4 border-t border-dashed border-neutral-base-200 flex justify-between items-center">

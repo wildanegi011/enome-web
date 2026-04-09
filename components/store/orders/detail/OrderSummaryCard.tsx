@@ -55,7 +55,7 @@ export default function OrderSummaryCard({
         orderId,
         statusTagihan,
         onSuccess,
-        { 
+        {
             initialStatusOrder: statusOrder,
             timeoutMins: paymentVerificationTimeout
         }
@@ -129,14 +129,14 @@ export default function OrderSummaryCard({
                     </div>
                 )}
 
-                {/* {uniqueCodeValue > 0 && (
-                    <div className="flex items-center justify-between text-[13px]">
-                        <span className="text-amber-600 font-medium">Kode Unik</span>
-                        <span className="text-amber-600 font-medium">
+                {uniqueCodeValue > 0 && (
+                    <div className="flex items-center justify-between">
+                        <span className="text-amber-600 text-[10px] md:text-[11px] font-black uppercase tracking-[0.12em] font-montserrat">Biaya Kode Unik</span>
+                        <span className="text-amber-600 text-[13px] md:text-[14px] font-bold font-montserrat">
                             +{formatCurrency(uniqueCodeValue)}
                         </span>
                     </div>
-                )} */}
+                )}
             </div>
 
             <div className="py-6 md:py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
