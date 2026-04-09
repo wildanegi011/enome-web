@@ -98,6 +98,8 @@ export function useCheckout() {
     const [isLoadingShipping, setIsLoadingShipping] = useState(false);
     const [originName, setOriginName] = useState("");
     const [origin, setOrigin] = useState("");
+    const [uniqueCode, setUniqueCode] = useState(0);
+    const [uniqueCodeConfig, setUniqueCodeConfig] = useState({ min: 1, max: 222 });
 
     // Dynamic Options State
     const [couriers, setCouriers] = useState<any[]>([]);
@@ -116,7 +118,7 @@ export function useCheckout() {
     useEffect(() => {
         const fetchConfig = async () => {
             try {
-                const config = await checkoutApi.getConfig(["biaya_packing", "packing_fee", "whatsapp_nomor", "kecamatan", "origin_name"]);
+                const config = await checkoutApi.getConfig(["biaya_packing", "packing_fee", "whatsapp_nomor", "kecamatan", "origin_name", "code_uniq_payment_min", "code_uniq_payment_max"]);
                 const pFee = config.biaya_packing || config.packing_fee;
                 if (pFee) {
                     const parsed = parseInt(pFee);
@@ -125,6 +127,13 @@ export function useCheckout() {
                 if (config.whatsapp_nomor) setWhatsappAdmin(config.whatsapp_nomor);
                 if (config.kecamatan) setOrigin(config.kecamatan);
                 if (config.origin_name) setOriginName(config.origin_name);
+
+                if (config.code_uniq_payment_min || config.code_uniq_payment_max) {
+                    setUniqueCodeConfig({
+                        min: parseInt(config.code_uniq_payment_min) || 1,
+                        max: parseInt(config.code_uniq_payment_max) || 222
+                    });
+                }
             } catch (err) {
                 console.error("Failed to fetch dynamic config:", err);
             }
@@ -377,15 +386,23 @@ export function useCheckout() {
 
     // Auto-sync payment account details when payment method changes
     useEffect(() => {
-        if (paymentMethod && paymentMethods.length > 0) {
+        if (paymentMethod && paymentMethod !== "wallet" && paymentMethods.length > 0) {
             const method = paymentMethods.find(m => m.namaBank === paymentMethod);
             if (method) {
                 setPaymentAccountName(method.namaPemilik || "");
                 setPaymentAccountNumber(method.noRekening || "");
+
+                // Generate unique code if it's a bank transfer and not yet set
+                if (uniqueCode === 0) {
+                    const { min, max } = uniqueCodeConfig;
+                    const randomCode = Math.floor(Math.random() * (max - min + 1)) + min;
+                    setUniqueCode(randomCode);
+                }
             }
-        } else if (paymentMethod === "wallet") {
+        } else if (paymentMethod === "wallet" || !paymentMethod) {
             setPaymentAccountName("");
             setPaymentAccountNumber("");
+            setUniqueCode(0);
         }
     }, [paymentMethod, paymentMethods]);
 
@@ -621,7 +638,8 @@ export function useCheckout() {
                     walletAmount: appliedWalletAmount,
                     addressId: shippingForm.addressId,
                     shippingPrice: shippingPrice,
-                    itemIds: selectedIds
+                    itemIds: selectedIds,
+                    uniqueCode: uniqueCode > 0 ? uniqueCode : null
                 })
             });
 
@@ -700,6 +718,7 @@ export function useCheckout() {
         couriers, isLoadingCouriers, shippingOptions, setShippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         errors, setErrors,
         packingFee, grandTotal, remainingBill, originName,
+        uniqueCode,
         paymentAccountName, paymentAccountNumber,
         setPaymentAccountName, setPaymentAccountNumber,
         handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher,

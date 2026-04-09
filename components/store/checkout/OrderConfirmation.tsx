@@ -52,6 +52,7 @@ interface OrderConfirmationProps {
     appliedWalletAmount: number;
     remainingBill: number;
     subtotal: number;
+    uniqueCode?: number;
     formatPrice: (price: number) => string;
 }
 
@@ -69,6 +70,7 @@ const ResumeContent = ({
     appliedWalletAmount,
     remainingBill,
     subtotal,
+    uniqueCode,
     formatPrice
 }: any) => (
     <div className="flex flex-col gap-6 py-4">
@@ -192,6 +194,12 @@ const ResumeContent = ({
                         <span className="text-[13px]">-{formatPrice(appliedWalletAmount)}</span>
                     </div>
                 )}
+                {uniqueCode > 0 && (
+                    <div className="flex justify-between items-center px-1 text-amber-600 font-bold">
+                        <span className="text-[12px]">Biaya Kode Unik</span>
+                        <span className="text-[13px]">+{formatPrice(uniqueCode)}</span>
+                    </div>
+                )}
                 <div className="flex justify-between items-center px-1 pt-2 border-t border-neutral-base-50">
                     <span className="text-[14px] font-bold text-neutral-base-900 uppercase tracking-widest">Total Bayar</span>
                     <span className="text-[20px] font-bold text-neutral-base-900 tracking-tight">{formatPrice(remainingBill)}</span>
@@ -254,6 +262,7 @@ export default function OrderConfirmation({
     appliedWalletAmount,
     remainingBill,
     subtotal,
+    uniqueCode,
     formatPrice
 }: OrderConfirmationProps) {
     const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -276,6 +285,7 @@ export default function OrderConfirmation({
                 appliedWalletAmount,
                 remainingBill,
                 subtotal,
+                uniqueCode,
                 formatPrice
             });
         } else if (!isOpen) {
@@ -296,6 +306,7 @@ export default function OrderConfirmation({
         appliedWalletAmount,
         remainingBill,
         subtotal,
+        uniqueCode,
         formatPrice
     };
 

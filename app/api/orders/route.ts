@@ -34,7 +34,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
             shipping, payment, totalAmount, voucherCode,
             voucherDiscount, walletAmount, shippingPrice,
             specialNotes, resi, catatan, isDropshipper, dropshipper,
-            itemIds
+            itemIds, uniqueCode
         } = body;
 
         if (!shipping || !payment) {
@@ -112,18 +112,22 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
 
         const isTransferPayment = payment.toLowerCase() !== "wallet";
 
-        let uniqueCode = 0;
+        let uniqueCodeFinal = 0;
         let totalTagihan = baseTagihan;
 
         if (isTransferPayment) {
-            const result = await OrderService.generateUniqueCode(baseTagihan);
-            totalTagihan = baseTagihan + result.adjustment;
-            uniqueCode = result.targetCode;
+            if (body.uniqueCode && !isNaN(parseInt(body.uniqueCode))) {
+                uniqueCodeFinal = parseInt(body.uniqueCode);
+            } else {
+                const result = await OrderService.generateUniqueCode(baseTagihan);
+                uniqueCodeFinal = result.targetCode;
+            }
+            totalTagihan = baseTagihan + uniqueCodeFinal;
         }
 
         logger.info("Order total calculation details:", {
             base: baseTagihan,
-            uniqueCode: uniqueCode,
+            uniqueCode: uniqueCodeFinal,
             final: totalTagihan
         });
 
@@ -173,11 +177,11 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         }
 
         // 6. Create Order — pass targetCode as uniqueCode for display in keterangan
-        const result: any = await OrderService.createOrder(orderData, stockResult.verifiedItems || [], finalWalletAmount, uniqueCode, bankData);
+        const result: any = await OrderService.createOrder(orderData, stockResult.verifiedItems || [], finalWalletAmount, uniqueCodeFinal, bankData);
 
         // Add unique code and bank info to result for frontend
         if (isTransferPayment) {
-            result.uniqueCode = uniqueCode;
+            result.uniqueCode = uniqueCodeFinal;
 
             if (bankData) {
                 result.paymentMethod = bankData.namaBank;

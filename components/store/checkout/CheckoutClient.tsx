@@ -30,6 +30,7 @@ export default function CheckoutClient() {
         isSubmitting, isSuccess,
         shippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         packingFee, grandTotal, remainingBill, originName,
+        uniqueCode,
         paymentAccountName, paymentAccountNumber,
         handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher, clearVoucher,
         initiateOrder, completeOrder,
@@ -302,6 +303,7 @@ export default function CheckoutClient() {
                 appliedWalletAmount={appliedWalletAmount}
                 remainingBill={remainingBill}
                 subtotal={totalAmount}
+                uniqueCode={uniqueCode}
                 formatPrice={formatCurrency}
             />
         </div>
