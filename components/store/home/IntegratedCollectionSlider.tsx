@@ -53,6 +53,56 @@ const getPositionClasses = (position: string | undefined, isMobile: boolean) => 
     return vClasses + hClasses;
 };
 
+const getBrandPositionClasses = (position: string | undefined, isMobile: boolean) => {
+    if (!position) {
+        return isMobile
+            ? "items-center bottom-10 text-center"
+            : "items-start bottom-10 sm:bottom-12 md:bottom-16 lg:bottom-20 text-left left-10 sm:left-12 md:left-16 lg:left-20";
+    }
+
+    const pos = position.toLowerCase();
+    let vClasses = "";
+    let hClasses = "";
+
+    // Vertical Positioning
+    if (pos.includes('top')) {
+        vClasses = "top-0 ";
+    } else if (pos.includes('bottom')) {
+        vClasses = "bottom-0 ";
+    } else if (pos.includes('mid') || pos.includes('center')) {
+        vClasses = "top-1/2 -translate-y-1/2 ";
+    } else {
+        vClasses = isMobile ? "bottom-20 " : "bottom-20 sm:bottom-24 md:bottom-28 ";
+    }
+
+    // Horizontal Positioning
+    if (pos.includes('right')) {
+        // Safe distance from CollectionDots and SliderControls
+        hClasses = isMobile
+            ? "items-center text-center left-1/2 -translate-x-1/2 "
+            : "items-end text-right right-14 sm:right-16 md:right-20 lg:right-24 ";
+        if (isMobile && pos.includes('right') && !pos.includes('center')) {
+            hClasses = "items-end text-right right-10 ";
+        }
+    } else if (pos.includes('left')) {
+        // Safe distance from SliderControls
+        hClasses = isMobile
+            ? "items-center text-center left-1/2 -translate-x-1/2 "
+            : "items-start text-left left-10 sm:left-12 md:left-16 lg:left-20 ";
+        if (isMobile && pos.includes('left') && !pos.includes('center')) {
+            hClasses = "items-start text-left left-10 ";
+        }
+    } else if (pos.includes('center') || pos.includes('middle')) {
+        hClasses = "items-center text-center left-1/2 -translate-x-1/2 ";
+    } else {
+        hClasses = isMobile
+            ? "items-center text-center left-1/2 -translate-x-1/2 "
+            : "items-start text-left left-10 sm:left-12 md:left-16 lg:left-20 ";
+    }
+
+    return vClasses + hClasses;
+};
+
 interface Collection {
     id: string;
     title: string;
@@ -331,7 +381,7 @@ export default function IntegratedCollectionSlider() {
                                     {img.brandImageLink && (
                                         <div className={cn(
                                             "absolute inset-0 z-10 pointer-events-none w-full h-full",
-                                            isMobile ? "p-4 pb-28" : "p-6 sm:p-10 lg:p-16"
+                                            isMobile ? "px-4 py-0" : "px-6 sm:px-10 lg:px-16 py-0"
                                         )}>
                                             <m.div
                                                 initial={{ opacity: 0, scale: 1 }}
@@ -340,7 +390,7 @@ export default function IntegratedCollectionSlider() {
                                                 viewport={{ once: false }}
                                                 className={cn(
                                                     "absolute flex flex-col transition-all duration-700",
-                                                    getPositionClasses(img.brandPosition, isMobile)
+                                                    getBrandPositionClasses(img.brandPosition, isMobile)
                                                 )}
                                             >
                                                 <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-64 md:h-64 lg:w-[400px] lg:h-[400px] xl:w-[500px] xl:h-[500px] landscape:w-16 landscape:h-16 landscape:sm:w-24 landscape:sm:h-24 landscape:md:w-40 landscape:md:h-40 landscape:lg:w-64 landscape:lg:h-64 landscape:xl:w-80 landscape:xl:h-80">
