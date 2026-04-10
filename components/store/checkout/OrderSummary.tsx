@@ -24,6 +24,8 @@ interface OrderSummaryProps {
     clearVoucher: () => void;
     isVoucherLoading: boolean;
     remainingBill: number;
+    grandTotal: number;
+    uniqueCode: number;
     isSubmitting: boolean;
     cartItemsCount: number;
     hasStockProblems?: boolean;
@@ -40,6 +42,8 @@ export default function OrderSummary({
     isVoucherApplied,
     voucherDiscount,
     packingFee,
+    uniqueCode,
+    grandTotal,
     useWallet,
     setUseWallet,
     walletBalance,
@@ -98,6 +102,12 @@ export default function OrderSummary({
                         <span>Biaya Packing</span>
                         <span className="text-neutral-base-900 tabular-nums font-bold text-[13px] md:text-[15px] leading-none">{formatPrice(packingFee)}</span>
                     </div>
+                    {uniqueCode > 0 && (
+                        <div className="flex justify-between items-center text-[11px] md:text-[13px] font-bold text-amber-600 uppercase tracking-widest leading-none">
+                            <span>Biaya Kode Unik</span>
+                            <span className="tabular-nums font-bold text-[13px] md:text-[15px] leading-none">+{formatPrice(uniqueCode)}</span>
+                        </div>
+                    )}
 
                     <div className="h-px bg-neutral-base-50 my-0.5 md:my-2" />
 
@@ -156,7 +166,7 @@ export default function OrderSummary({
                             <span className="text-[12px] md:text-[14px] font-bold uppercase tracking-widest text-neutral-base-400 leading-none">Total Tagihan</span>
                         </div>
                         <span className="text-[22px] md:text-[28px] font-bold text-neutral-base-900 tracking-tighter tabular-nums leading-none">
-                            {formatPrice(totalAmount + shippingPrice + packingFee - voucherDiscount)}
+                            {formatPrice(grandTotal)}
                         </span>
                     </div>
 

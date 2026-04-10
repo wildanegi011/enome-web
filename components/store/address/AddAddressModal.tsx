@@ -31,7 +31,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { m, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, joinAddress } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-keys";
 
 interface LocationResult {
@@ -99,7 +99,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                 kodePos: initialData.postalCode,
                 isPrimary: initialData.isPrimary === 1 ? 1 : 0
             });
-            const locStr = `${initialData.province}, ${initialData.city}, ${initialData.district}`;
+            const locStr = joinAddress(initialData.province, initialData.city, initialData.district);
             setLocationQuery(locStr);
 
             // Fix: Initialize selectedLocation from initialData to prevent ID loss on edit
@@ -349,7 +349,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                                                 <div className="w-8 h-8 rounded-full bg-neutral-base-50 flex items-center justify-center group-hover:bg-white transition-colors">
                                                     <Navigation2 className="w-3.5 h-3.5 text-neutral-base-400 group-hover:text-amber-800 transition-colors" />
                                                 </div>
-                                                <span className="text-[13px] font-bold text-neutral-base-900">{loc.label}</span>
+                                                <span className="text-[13px] font-bold text-neutral-base-900">{joinAddress(loc.subdistrict, loc.city, loc.province)}</span>
                                             </div>
                                             {selectedLocation?.subdistrictId === loc.subdistrictId && (
                                                 <div className="w-5 h-5 rounded-full bg-amber-800 flex items-center justify-center">

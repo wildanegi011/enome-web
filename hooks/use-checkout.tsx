@@ -155,7 +155,7 @@ export function useCheckout() {
         return 0;
     }, [isVoucherApplied, voucherData, totalAmount]);
 
-    const grandTotal = totalAmount + shippingPrice + packingFee - voucherDiscount;
+    const grandTotal = totalAmount + shippingPrice + packingFee - voucherDiscount + uniqueCode;
     const appliedWalletAmount = useWallet ? Math.min(walletBalance, grandTotal) : 0;
     const remainingBill = Math.max(0, grandTotal - appliedWalletAmount);
 
@@ -258,14 +258,14 @@ export function useCheckout() {
                             shippingType: exists.type || "automated"
                         };
                     } else {
-                        const firstService = costs[0];
+                        // Don't auto-select if nothing is selected or if previously selected service is no longer available
                         return {
                             ...prev,
-                            service: firstService.service,
-                            courier: firstService.courierCode || firstService.courierName || "Kurir",
-                            courierName: firstService.courierName || firstService.courierCode || "Kurir",
-                            shippingPrice: firstService.cost[0].value,
-                            shippingType: firstService.type || "automated"
+                            service: "",
+                            courier: "",
+                            courierName: "",
+                            shippingPrice: 0,
+                            shippingType: "automated"
                         };
                     }
                 });

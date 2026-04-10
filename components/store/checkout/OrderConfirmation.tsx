@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { toTitleCase, cn } from "@/lib/utils";
+import { toTitleCase, cn, joinAddress } from "@/lib/utils";
 import {
     ShoppingBag,
     MapPin,
@@ -85,7 +85,13 @@ const ResumeContent = ({
                     {toTitleCase(shippingForm.name || "")}
                 </p>
                 <p className="text-[12px] text-neutral-base-600 leading-relaxed line-clamp-2">
-                    {toTitleCase(shippingForm.address || "")}, {toTitleCase(shippingForm.kecamatan || "")}, {toTitleCase(shippingForm.kota || "")}, {toTitleCase(shippingForm.provinsi || "")} {shippingForm.kodePos}
+                    {joinAddress(
+                        toTitleCase(shippingForm.address || ""),
+                        toTitleCase(shippingForm.kecamatan || ""),
+                        toTitleCase(shippingForm.kota || ""),
+                        toTitleCase(shippingForm.provinsi || ""),
+                        shippingForm.kodePos
+                    ) || "Alamat pengiriman belum dipilih"}
                 </p>
             </div>
         </div>

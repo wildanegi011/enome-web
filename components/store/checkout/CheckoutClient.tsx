@@ -221,6 +221,8 @@ export default function CheckoutClient() {
                             isVoucherApplied={isVoucherApplied}
                             voucherDiscount={voucherDiscount}
                             packingFee={packingFee}
+                            uniqueCode={uniqueCode}
+                            grandTotal={grandTotal}
                             useWallet={useWallet}
                             setUseWallet={setUseWallet}
                             walletBalance={walletBalance}

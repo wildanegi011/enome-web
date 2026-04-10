@@ -8,7 +8,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { cn, toTitleCase } from "@/lib/utils";
+import { cn, toTitleCase, joinAddress } from "@/lib/utils";
 import { Address } from "@/hooks/use-addresses";
 
 export type AddressCardVariant = "account" | "selection" | "checkout";
@@ -139,7 +139,12 @@ export default function AddressCard({
                         "font-bold text-neutral-base-600 leading-relaxed tracking-tight",
                         isCheckout ? "text-[13px] md:text-[14px]" : "text-[13px] md:text-[14px]"
                     )}>
-                        {toTitleCase(`${address.fullAddress}, ${address.city}, ${address.province}, ${address.postalCode}`)}
+                        {(() => {
+                            const addrStr = joinAddress(address.fullAddress, address.city, address.province, address.postalCode);
+                            return addrStr ? toTitleCase(addrStr) : (
+                                <span className="text-amber-700/60 italic font-medium">Alamat belum dilengkapi</span>
+                            );
+                        })()}
                     </p>
                 </div>
             </div>

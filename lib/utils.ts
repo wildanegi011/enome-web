@@ -25,3 +25,7 @@ export function toTitleCase(str: string) {
     if (!str) return "";
     return str.toLowerCase().replace(/(?:^|\s)\w/g, (match) => match.toUpperCase());
 }
+
+export function joinAddress(...parts: (string | undefined | null)[]) {
+    return parts.filter(part => part && part.trim()).join(", ");
+}
