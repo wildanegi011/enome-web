@@ -16,15 +16,30 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
 
     // Fetch central description as fallback
     const centralDescription = await ConfigService.get("META_DESCRIPTION", siteConfig.description);
+    const productDescription = (productData.product.deskripsi && productData.product.deskripsi !== "-")
+        ? productData.product.deskripsi
+        : centralDescription;
+
+    const title = productData.product.namaProduk;
 
     return {
-        title: productData.product.namaProduk,
-        description: productData.product.deskripsi || centralDescription,
+        title: title,
+        description: productDescription,
+        // Explicitly set metadata for various platforms
+        other: {
+            title: title,
+        },
         openGraph: {
-            title: productData.product.namaProduk,
-            description: productData.product.deskripsi || centralDescription,
+            title: title,
+            description: productDescription,
             images: productData.product.gambar ? [`${ASSET_URL}/img/produk/${productData.product.gambar}`] : [],
         },
+        twitter: {
+            card: "summary_large_image",
+            title: title,
+            description: productDescription,
+            images: productData.product.gambar ? [`${ASSET_URL}/img/produk/${productData.product.gambar}`] : [],
+        }
     };
 }
 
