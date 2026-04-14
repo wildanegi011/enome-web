@@ -157,9 +157,9 @@ export default function ProductsClient() {
                                 </Sheet>
                             </div>
 
-                            <div className="flex flex-col lg:flex-row gap-16">
+                            <div className="flex flex-col lg:flex-row items-start gap-16">
                                 {/* Desktop Sidebar */}
-                                <aside className="hidden lg:block w-80 shrink-0 sticky top-[120px] h-[calc(100vh-140px)] z-50">
+                                <aside className="hidden lg:block w-80 shrink-0 sticky top-[80px] h-[calc(100vh-80px)] z-50">
                                     <FilterSidebar
                                         activeFilters={activeFilters}
                                         onFilterChange={handleFilterChange}

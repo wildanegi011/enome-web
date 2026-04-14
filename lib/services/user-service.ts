@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { user as userTable, customer, customerKategori, customerAlamat, wallet, provinsi, kota, kecamatan } from "@/lib/db/schema";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, or } from "drizzle-orm";
 import { getJakartaDate } from "@/lib/date-utils";
 import { CustomerService } from "./customer-service";
 
@@ -43,7 +43,7 @@ export class UserService {
 
         return legacyAddresses.map(addr => ({
             id: addr.id,
-            label: addr.label || "Alamat",
+            label: addr.label === "Alamat Utama" && addr.isPrimary !== 1 ? "Alamat" : (addr.label || "Alamat"),
             receiverName: addr.name || "",
             phoneNumber: addr.phone || "",
             fullAddress: addr.address || "",
@@ -318,7 +318,7 @@ export class UserService {
 
         const [result]: any = await db.insert(customerAlamat).values({
             custId,
-            labelAlamat: isPrimary === 1 ? "Alamat Utama" : (addressInfo.labelAlamat || "Alamat"),
+            labelAlamat: addressInfo.labelAlamat || (isPrimary === 1 ? "Alamat Utama" : "Alamat"),
             namaPenerima: addressInfo.namaPenerima,
             namaToko: addressInfo.namaToko,
             alamatLengkap: addressInfo.alamatLengkap,
@@ -352,11 +352,27 @@ export class UserService {
 
         if (isPrimary === 1) {
             await db.update(customerAlamat)
-                .set({ isPrimary: 0 })
-                .where(eq(customerAlamat.custId, custId));
+                .set({ 
+                    isPrimary: 0,
+                    labelAlamat: sql`CASE WHEN label_alamat = 'Alamat Utama' THEN 'Alamat' ELSE label_alamat END`
+                })
+                .where(and(
+                    eq(customerAlamat.custId, custId),
+                    or(
+                        eq(customerAlamat.isPrimary, 1),
+                        eq(customerAlamat.labelAlamat, "Alamat Utama")
+                    )
+                ));
+
+            // Set new primary and only update label if it was previously "Alamat" or empty
+            const targetAddr = await db.select().from(customerAlamat).where(eq(customerAlamat.id, addressId)).limit(1);
+            const needsLabelUpdate = !targetAddr[0]?.labelAlamat || targetAddr[0]?.labelAlamat === "Alamat";
 
             await db.update(customerAlamat)
-                .set({ isPrimary: 1, labelAlamat: "Alamat Utama" })
+                .set({
+                    isPrimary: 1,
+                    ...(needsLabelUpdate && { labelAlamat: "Alamat Utama" })
+                })
                 .where(eq(customerAlamat.id, addressId));
 
             await this.syncPrimaryAddressToCustomer(custId, addr[0]);

@@ -154,7 +154,7 @@ export class ProductService {
      * Note: Not cached with unstable_cache because options may contain non-serializable Drizzle SQL objects.
      */
     static async getProducts(options: ProductQueryOptions) {
-        const { kategoriId, limit = 9, page = 1, where, orderBy } = options;
+        const { kategoriId, limit = 12, page = 1, where, orderBy } = options;
         const offset = (page - 1) * limit;
         const priceColumn = CustomerService.getPriceColumn(kategoriId);
         const now = getJakartaDate();

@@ -222,7 +222,7 @@ export default function FilterSidebar({
                 )}
             </div>
 
-            <ScrollArea className="h-[calc(100vh-220px)]">
+            <ScrollArea className="h-[calc(100vh-160px)]">
                 <div className="space-y-4 sm:space-y-6 pb-12 pr-4">
 
                     {/* --- Brand --- */}
