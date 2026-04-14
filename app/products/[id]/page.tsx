@@ -56,7 +56,6 @@ import { siteConfig } from "@/lib/site-config";
 import { ASSET_URL } from "@/config/config";
 import CONFIG from "@/lib/config";
 
-export const revalidate = 3600; // Cache for 1 hour
 
 /* 
 export async function generateStaticParams() {
