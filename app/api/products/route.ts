@@ -32,7 +32,7 @@ export const GET = withOptionalAuth(async (request: NextRequest, context: any, s
         
         // Pagination
         const page = parseInt(searchParams.get("page") || "1");
-        const limit = parseInt(searchParams.get("limit") || "9");
+        const limit = parseInt(searchParams.get("limit") || "12");
         
         // Sorting
         const sort = searchParams.get("sort") || "newest";

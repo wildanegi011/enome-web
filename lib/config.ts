@@ -20,7 +20,7 @@ export const CONFIG = {
     // Pagination Defaults
     PAGINATION: {
         DEFAULT_PAGE: 1,
-        DEFAULT_LIMIT: 9,
+        DEFAULT_LIMIT: 12,
     },
 
     // Log Rotation Settings

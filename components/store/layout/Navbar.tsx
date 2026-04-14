@@ -65,7 +65,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-neutral-base-50/50"
+            className="sticky top-0 z-[100] bg-white/80 backdrop-blur-xl border-b border-neutral-base-50/50"
         >
             <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                 <div className="flex items-center justify-between h-[80px]">
