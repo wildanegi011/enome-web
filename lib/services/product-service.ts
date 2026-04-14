@@ -147,14 +147,6 @@ async function fetchProductDetailInternal(id: string, kategoriId: number) {
     };
 }
 
-/**
- * Cached version of fetchProductDetailInternal
- */
-const getCachedProductDetail = unstable_cache(
-    async (id: string, kategoriId: number) => fetchProductDetailInternal(id, kategoriId),
-    ["product-detail"],
-    { revalidate: 3600, tags: ["products"] }
-);
 
 export class ProductService {
     /**
@@ -271,10 +263,10 @@ export class ProductService {
 
     /**
      * Get single product detail with stats, variants, and related products.
-     * Uses unstable_cache internally.
+     * Fetches directly from the database without caching.
      */
     static async getProductDetail(id: string, kategoriId: number) {
-        return getCachedProductDetail(id, kategoriId);
+        return fetchProductDetailInternal(id, kategoriId);
     }
 
     /**
