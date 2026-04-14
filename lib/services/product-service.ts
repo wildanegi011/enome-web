@@ -233,7 +233,7 @@ export class ProductService {
                 maxPrice: max(priceColumn),
                 baseMinPrice: min(produkDetail.hargaJual),
                 baseMaxPrice: max(produkDetail.hargaJual),
-                totalStock: sql<number>`(SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail WHERE produk_id = produk.produk_id)`,
+                totalStock: sql<number>`SUM(DISTINCT CASE WHEN ${produkDetail.produkId} = ${produk.produkId} THEN ${produkDetail.stokNormal} ELSE 0 END)`,
                 isOnline: produk.isOnline,
                 isAktif: produk.isAktif,
                 isHighlighted: produk.isHighlighted,
@@ -250,7 +250,7 @@ export class ProductService {
             .leftJoin(warna, or(eq(produkDetail.warnaId, warna.warnaId), eq(produkDetail.warnaId, warna.warna)))
             .where(whereClause)
             .groupBy(produk.produkId)
-            .orderBy(orderBy || sql`SUM(${produkDetail.stokNormal}) DESC`)
+            .orderBy(orderBy || sql`MAX(${produkDetail.stokNormal}) DESC`)
             .limit(limit)
             .offset(offset)
         ]);
@@ -334,17 +334,27 @@ export class ProductService {
 
     /**
      * Get all available colors.
+     * Cached for 1 hour to reduce DB load.
      */
-    static async getColors() {
-        return await db.select().from(warna);
-    }
+    static getColors = unstable_cache(
+        async () => {
+            return await db.select().from(warna);
+        },
+        ["all-colors"],
+        { revalidate: 3600, tags: ["colors"] }
+    );
 
     /**
      * Get all available sizes.
+     * Cached for 1 hour to reduce DB load.
      */
-    static async getSizes() {
-        return await db.select().from(size);
-    }
+    static getSizes = unstable_cache(
+        async () => {
+            return await db.select().from(size);
+        },
+        ["all-sizes"],
+        { revalidate: 3600, tags: ["sizes"] }
+    );
 
     /**
      * Process product data to calculate final prices and commissions.
