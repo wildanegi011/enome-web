@@ -213,16 +213,25 @@ export class ProductService {
         const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
         // --- Execute Queries in Parallel ---
-        const [totalResult, data] = await Promise.all([
-            // 1. Get Total Count
-            db.select({ count: sql<number>`COUNT(DISTINCT ${produk.produkId})` })
-                .from(produk)
-                .leftJoin(produkDetail, eq(produk.produkId, produkDetail.produkId))
-                .leftJoin(warna, or(eq(produkDetail.warnaId, warna.warnaId), eq(produkDetail.warnaId, warna.warna)))
-                .where(whereClause),
+        // --- Execute Queries in Parallel ---
+        const hasDetailFilters = (options.sizes && options.sizes.length > 0) || 
+                                 (options.priceRanges && options.priceRanges.length > 0);
+        const hasColorFilters = options.colors && options.colors.length > 0;
 
-            // 2. Get Paginated Data
-            db.select({
+        let countQuery: any = db.select({ count: sql<number>`COUNT(DISTINCT ${produk.produkId})` })
+            .from(produk)
+            .$dynamic();
+
+        if (hasDetailFilters || hasColorFilters) {
+            countQuery = countQuery.leftJoin(produkDetail, eq(produk.produkId, produkDetail.produkId));
+        }
+        if (hasColorFilters) {
+            countQuery = countQuery.leftJoin(warna, or(eq(produkDetail.warnaId, warna.warnaId), eq(produkDetail.warnaId, warna.warna)));
+        }
+
+        countQuery = countQuery.where(whereClause);
+
+        let dataQuery: any = db.select({
                 produkId: produk.produkId,
                 namaProduk: produk.namaProduk,
                 kategori: produk.kategori,
@@ -233,26 +242,42 @@ export class ProductService {
                 maxPrice: max(priceColumn),
                 baseMinPrice: min(produkDetail.hargaJual),
                 baseMaxPrice: max(produkDetail.hargaJual),
-                totalStock: sql<number>`SUM(DISTINCT CASE WHEN ${produkDetail.produkId} = ${produk.produkId} THEN ${produkDetail.stokNormal} ELSE 0 END)`,
+                totalStock: sql<number>`(SELECT COALESCE(SUM(stok_normal), 0) FROM produkdetail WHERE produk_id = produk.produk_id)`,
                 isOnline: produk.isOnline,
                 isAktif: produk.isAktif,
                 isHighlighted: produk.isHighlighted,
                 produkPreorder: produk.produkPreorder,
                 brand: produk.brand,
                 gender: produk.gender,
-                colors: sql<string>`GROUP_CONCAT(DISTINCT CONCAT(COALESCE(${warna.warna}, ${produkDetail.warnaId}), '|', COALESCE(${warna.kodeWarna}, '#cccccc')) SEPARATOR ',')`,
+                colors: sql<string>`(
+                    SELECT GROUP_CONCAT(DISTINCT CONCAT(COALESCE(w.warna, pd.warna), '|', COALESCE(w.kode_warna, '#cccccc')) SEPARATOR ',')
+                    FROM produkdetail pd
+                    LEFT JOIN warna w ON (w.warna_id = pd.warna OR w.warna = pd.warna)
+                    WHERE pd.produk_id = produk.produk_id
+                )`,
                 flashSaleId: sql<number>`(SELECT fs.id FROM flash_sale fs INNER JOIN flash_sale_detail fsd ON fs.id = fsd.flash_sale_id WHERE fs.is_aktif = 1 AND fsd.produk_id = produk.produk_id AND ${now} BETWEEN fs.waktu_mulai AND fs.waktu_selesai AND fs.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
                 preOrderId: sql<number>`(SELECT po.pre_order_id FROM pre_order po INNER JOIN pre_order_detail pod ON po.pre_order_id = pod.pre_order_id WHERE po.is_aktif = 1 AND pod.produk_id = produk.produk_id AND po.customer_kategori_id LIKE ${"%" + kategoriId + "%"} LIMIT 1)`,
                 flashSaleDiscount: sql<number>`(SELECT ck.diskon_flash_sale FROM customer_kategori ck WHERE ck.id = ${kategoriId} LIMIT 1)`,
             })
             .from(produk)
             .leftJoin(produkDetail, eq(produk.produkId, produkDetail.produkId))
-            .leftJoin(warna, or(eq(produkDetail.warnaId, warna.warnaId), eq(produkDetail.warnaId, warna.warna)))
+            .$dynamic();
+
+        if (hasColorFilters) {
+            dataQuery = dataQuery.leftJoin(warna, or(eq(produkDetail.warnaId, warna.warnaId), eq(produkDetail.warnaId, warna.warna)));
+        }
+
+        dataQuery = dataQuery
             .where(whereClause)
             .groupBy(produk.produkId)
             .orderBy(orderBy || sql`MAX(${produkDetail.stokNormal}) DESC`)
             .limit(limit)
-            .offset(offset)
+            .offset(offset);
+
+        // Execute parallel
+        const [totalResult, data] = await Promise.all([
+            countQuery,
+            dataQuery
         ]);
 
         return {
