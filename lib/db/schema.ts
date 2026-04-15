@@ -162,6 +162,7 @@ export const user = mysqlTable("user", {
     createdAt: int("created_at").notNull(),
     updatedAt: int("updated_at").notNull(),
     verificationToken: varchar("verification_token", { length: 255 }),
+    verificationTokenCreatedAt: timestamp("verificationTokenCreatedAt"),
     nama: varchar("nama", { length: 100 }).notNull(),
     alamat: varchar("alamat", { length: 255 }).notNull(),
     photo: varchar("photo", { length: 100 }).notNull(),
