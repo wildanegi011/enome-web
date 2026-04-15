@@ -150,6 +150,7 @@ export async function POST(request: NextRequest) {
                 status: 10, // Active
                 isDeleted: 2, // Pending Verification
                 verificationToken: verificationToken,
+                verificationTokenCreatedAt: sql`NOW()`,
                 createdAt: now,
                 updatedAt: now,
                 alamat: "",
@@ -213,8 +214,13 @@ export async function POST(request: NextRequest) {
 
         });
 
-        // Kirim email aktivasi dalam background menggunakan after()
         const activationLink = `${process.env.NEXT_PUBLIC_URL}/verify-email?token=${verificationToken}`;
+
+        // Kirim email aktivasi dalam background
+        after(async () => {
+            logger.info("Background job: Sending activation email", { email: trimmedEmail });
+            await sendActivationEmail(trimmedEmail, activationLink);
+        });
 
         // Log activity
         const { ActivityService } = await import("@/lib/services/activity-service");

@@ -120,7 +120,7 @@ export async function sendActivationEmail(to: string, activationLink: string, at
                 "Terima kasih telah memilih Énome. Untuk mengaktifkan akun Anda dan mulai menjelajahi koleksi eksklusif kami, silakan konfirmasi email Anda.",
                 "Konfirmasi Email",
                 activationLink,
-                "Jika Anda tidak merasa melakukan pendaftaran ini, Anda dapat mengabaikan email ini dengan aman."
+                "Tautan ini akan kedaluwarsa dalam 24 jam. Jika Anda tidak merasa melakukan pendaftaran ini, Anda dapat mengabaikan email ini dengan aman."
             ),
             attachments: [
                 {

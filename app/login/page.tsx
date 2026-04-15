@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { m, AnimatePresence, Variants } from "framer-motion";
-import { Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,7 +52,10 @@ function LoginContent() {
         if (errorParam === "deleted") {
             setError("Akun Anda telah dihapus. Silakan hubungi admin untuk informasi lebih lanjut.");
         } else if (errorParam === "unactivated") {
-            setError("Akun Anda belum aktif. Silakan cek email Anda untuk melakukan aktivasi.");
+            const emailParam = searchParams.get("email");
+            setNeedsVerification(true);
+            if (emailParam) setVerificationEmail(emailParam);
+            setError("Akun Anda belum diverifikasi. Silakan cek email Anda atau kirim ulang email verifikasi.");
         }
 
         if (registeredParam === "true") {
@@ -79,8 +82,22 @@ function LoginContent() {
         window.location.href = url;
     };
 
+    const [needsVerification, setNeedsVerification] = useState(false);
+    const [verificationEmail, setVerificationEmail] = useState("");
+    const [isResending, setIsResending] = useState(false);
+    const [resendSuccess, setResendSuccess] = useState(false);
+    const [resendCountdown, setResendCountdown] = useState(0);
+
+    // Countdown timer for resend cooldown
+    useEffect(() => {
+        if (resendCountdown <= 0) return;
+        const timer = setTimeout(() => setResendCountdown(resendCountdown - 1), 1000);
+        return () => clearTimeout(timer);
+    }, [resendCountdown]);
+
     const onLogin = async (data: LoginFormValues) => {
         setError(null);
+        setNeedsVerification(false);
         try {
             await login(data);
 
@@ -101,7 +118,51 @@ function LoginContent() {
                 }
             }, 1200);
         } catch (error: any) {
+            // Cek apakah error karena akun belum verifikasi — perlu direct fetch untuk mendapat detail
+            try {
+                const res = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data),
+                });
+                const body = await res.json();
+                if (body.needsVerification) {
+                    setNeedsVerification(true);
+                    setVerificationEmail(body.email || data.email);
+                    setError("Akun Anda belum diverifikasi. Silakan cek email Anda atau kirim ulang email verifikasi.");
+                    return;
+                }
+            } catch {
+                // ignore, fall through to generic error
+            }
             setError("Email atau password yang Anda masukkan salah. Silakan coba lagi.");
+        }
+    };
+
+    const handleResendVerification = async () => {
+        if (!verificationEmail || isResending || resendCountdown > 0) return;
+        setIsResending(true);
+        try {
+            const res = await fetch("/api/auth/resend-verification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: verificationEmail }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setResendSuccess(true);
+                setResendCountdown(60);
+                toast.success("Email verifikasi berhasil dikirim ulang!");
+            } else if (res.status === 429 && data.remainingSeconds) {
+                setResendCountdown(data.remainingSeconds);
+                toast.error(data.error);
+            } else {
+                toast.error(data.error || "Gagal mengirim ulang email verifikasi.");
+            }
+        } catch {
+            toast.error("Terjadi kesalahan. Silakan coba lagi.");
+        } finally {
+            setIsResending(false);
         }
     };
 
@@ -275,7 +336,7 @@ function LoginContent() {
                                         </div>
                                     </m.div>
                                 )}
-                                {error && (
+                                {error && !needsVerification && (
                                     <m.div
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: "auto" }}
@@ -289,6 +350,43 @@ function LoginContent() {
                                             <p className="text-sm font-bold text-red-600 leading-tight">Gagal Masuk</p>
                                             <p className="text-[11px] text-red-500 font-medium leading-relaxed">{error}</p>
                                         </div>
+                                    </m.div>
+                                )}
+                                {needsVerification && (
+                                    <m.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3"
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center shrink-0 mt-0.5">
+                                                <Mail className="w-3 h-3 text-white" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-bold text-amber-700 leading-tight">Email Belum Diverifikasi</p>
+                                                <p className="text-[11px] text-amber-600 font-medium leading-relaxed">
+                                                    {resendSuccess
+                                                        ? "Email verifikasi baru telah dikirim. Silakan cek inbox atau folder spam Anda."
+                                                        : "Akun Anda belum diverifikasi. Silakan cek email Anda atau kirim ulang email verifikasi."
+                                                    }
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleResendVerification}
+                                            disabled={isResending || resendCountdown > 0}
+                                            className="w-full h-10 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-300 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-[0.15em]"
+                                        >
+                                            {isResending ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : resendCountdown > 0 ? (
+                                                <>Kirim Ulang ({resendCountdown}s)</>
+                                            ) : (
+                                                <><RefreshCw className="w-3.5 h-3.5" /> Kirim Ulang Email Verifikasi</>
+                                            )}
+                                        </button>
                                     </m.div>
                                 )}
                             </AnimatePresence>

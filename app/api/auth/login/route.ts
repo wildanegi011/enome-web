@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         // actionLoginapp logic at line 870: else if ($Users['is_deleted'] == 2)
         else if (currentUser.isDeleted === 2) {
             logger.warn("Auth Warning: User not verified", { username, userId: currentUser.id });
-            return NextResponse.json({ msg: "error", pesan: "Anda belum verifikasi email", url: "Back" }, { status: 401 });
+            return NextResponse.json({ msg: "error", pesan: "Anda belum verifikasi email", url: "Back", needsVerification: true, email: currentUser.email }, { status: 401 });
         }
         else if (currentUser.isDeleted === 1) {
             logger.warn("Auth Warning: User account is deleted", { username, userId: currentUser.id });

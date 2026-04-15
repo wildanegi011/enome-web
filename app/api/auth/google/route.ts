@@ -241,6 +241,14 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: "Akun Anda telah dihapus" }, { status: 401 });
             }
 
+            if (currentUser.isDeleted === 2) {
+                logger.warn("Auth Warning: User not verified", { userId: currentUser.id });
+                if (isRedirect) {
+                    return NextResponse.redirect(new URL(`/login?error=unactivated&email=${encodeURIComponent(currentUser.email)}`, process.env.NEXT_PUBLIC_URL!));
+                }
+                return NextResponse.json({ msg: "error", pesan: "Anda belum verifikasi email", url: "Back", needsVerification: true, email: currentUser.email }, { status: 401 });
+            }
+
             // 2. Check for Role 3 restriction
             if (currentUser.role === 3) {
                 logger.warn("Auth Warning: Access denied (Role 3) via Google", { email: trimmedEmail, userId: currentUser.id });

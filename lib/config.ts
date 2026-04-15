@@ -17,6 +17,10 @@ export const CONFIG = {
     // Payment Configurations (Fallback for Central Config)
     PAYMENT_VERIFICATION_TIMEOUT_MINS: 15,
 
+    // Email Verification Token Configurations
+    VERIFICATION_TOKEN_EXPIRY_HOURS: 24,
+    RESEND_VERIFICATION_COOLDOWN_SECS: 60,
+
     // Pagination Defaults
     PAGINATION: {
         DEFAULT_PAGE: 1,
