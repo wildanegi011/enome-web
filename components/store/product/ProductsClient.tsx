@@ -94,6 +94,23 @@ export default function ProductsClient() {
 
     const dynamicSizes = useMemo(() => sizesData.map((s: Size) => s.size).filter(Boolean) as string[], [sizesData]);
 
+    // Ensure selected categories are still valid after dynamicCollections updates
+    // (e.g. when brand or gender filters change, available categories might change)
+    useEffect(() => {
+        if (!categoriesLoading && activeFilters.collection.length > 0) {
+            const validCollectionNames = dynamicCollections.map(c => c.name);
+            const validSelectedCollections = activeFilters.collection.filter(c => validCollectionNames.includes(c));
+            
+            if (validSelectedCollections.length !== activeFilters.collection.length) {
+                setActiveFilters(prev => ({
+                    ...prev,
+                    collection: validSelectedCollections
+                }));
+                setCurrentPage(1);
+            }
+        }
+    }, [dynamicCollections, categoriesLoading, activeFilters.collection]);
+
     const handleFilterChange = useCallback((category: keyof FilterStateWithSearch, value: string) => {
         setActiveFilters(prev => {
             const current = prev[category];
