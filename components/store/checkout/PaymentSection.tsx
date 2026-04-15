@@ -10,7 +10,9 @@ interface PaymentSectionProps {
     isLoadingPayments: boolean;
     paymentMethods: any[];
     paymentMethod: string;
+    paymentMethodId: number | null;
     setPaymentMethod: (method: string) => void;
+    setPaymentMethodId: (id: number | null) => void;
     hasError?: boolean;
     onFieldChange?: () => void;
 }
@@ -21,7 +23,9 @@ export default function PaymentSection({
     isLoadingPayments,
     paymentMethods,
     paymentMethod,
+    paymentMethodId,
     setPaymentMethod,
+    setPaymentMethodId,
     hasError,
     onFieldChange
 }: PaymentSectionProps) {
@@ -72,12 +76,13 @@ export default function PaymentSection({
                                         disabled={isDisabled}
                                         onClick={() => {
                                             setPaymentMethod(method.namaBank);
+                                            setPaymentMethodId(method.id);
                                             onFieldChange?.();
                                         }}
-                                        className={`bg-white/70 backdrop-blur-xs border p-3.5 md:p-4 rounded-[24px] md:rounded-[28px] flex items-center justify-between hover:shadow-xl hover:shadow-neutral-base-900/5 transition-all group relative overflow-hidden ${paymentMethod === method.namaBank ? "border-amber-800 bg-amber-50/30" : "border-neutral-base-100/50"} ${isDisabled ? "opacity-50 grayscale cursor-not-allowed" : ""}`}
+                                        className={`bg-white/70 backdrop-blur-xs border p-3.5 md:p-4 rounded-[24px] md:rounded-[28px] flex items-center justify-between hover:shadow-xl hover:shadow-neutral-base-900/5 transition-all group relative overflow-hidden ${paymentMethodId === method.id ? "border-amber-800 bg-amber-50/30" : "border-neutral-base-100/50"} ${isDisabled ? "opacity-50 grayscale cursor-not-allowed" : ""}`}
                                     >
                                         <div className="flex items-center gap-3 md:gap-4">
-                                            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all font-bold text-[11px] ${paymentMethod === method.namaBank ? "bg-white text-amber-800" : "bg-neutral-base-50 text-neutral-base-400 group-hover:bg-amber-50 group-hover:text-amber-800"}`}>
+                                            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-all font-bold text-[11px] ${paymentMethodId === method.id ? "bg-white text-amber-800" : "bg-neutral-base-50 text-neutral-base-400 group-hover:bg-amber-50 group-hover:text-amber-800"}`}>
                                                 {method.logoBank ? (
                                                     <img src={`${ASSET_URL}/img/rekening_pembayaran/${method.logoBank}`} alt={method.namaBank} className="w-6 h-6 md:w-8 md:h-8 object-contain" />
                                                 ) : (
@@ -95,8 +100,8 @@ export default function PaymentSection({
                                                 )}
                                             </div>
                                         </div>
-                                        <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full border-2 transition-all flex items-center justify-center shrink-0 ${paymentMethod === method.namaBank ? "border-amber-800" : "border-neutral-base-200"}`}>
-                                            {paymentMethod === method.namaBank && <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-amber-800" />}
+                                        <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full border-2 transition-all flex items-center justify-center shrink-0 ${paymentMethodId === method.id ? "border-amber-800" : "border-neutral-base-200"}`}>
+                                            {paymentMethodId === method.id && <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-amber-800" />}
                                         </div>
                                     </button>
                                 );

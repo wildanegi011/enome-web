@@ -31,7 +31,7 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
         logger.info("API Request: POST /api/orders", { body });
 
         const {
-            shipping, payment, totalAmount, voucherCode,
+            shipping, payment, paymentId, totalAmount, voucherCode,
             voucherDiscount, walletAmount, shippingPrice,
             specialNotes, resi, catatan, isDropshipper, dropshipper,
             itemIds, uniqueCode
@@ -166,14 +166,25 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
 
         let bankData: any = null;
         if (isTransferPayment) {
-            const [bank]: any = await db.select()
-                .from(rekeningPembayaran)
-                .where(or(
-                    eq(rekeningPembayaran.namaBank, payment),
-                    like(rekeningPembayaran.namaBank, `%${payment}%`)
-                ))
-                .limit(1);
-            bankData = bank;
+            // Use paymentId (precise lookup by primary key) if available
+            if (paymentId) {
+                const [bank]: any = await db.select()
+                    .from(rekeningPembayaran)
+                    .where(eq(rekeningPembayaran.id, Number(paymentId)))
+                    .limit(1);
+                bankData = bank;
+            }
+            // Fallback: name-based matching for backward compatibility
+            if (!bankData) {
+                const [bank]: any = await db.select()
+                    .from(rekeningPembayaran)
+                    .where(or(
+                        eq(rekeningPembayaran.namaBank, payment),
+                        like(rekeningPembayaran.namaBank, `%${payment}%`)
+                    ))
+                    .limit(1);
+                bankData = bank;
+            }
         }
 
         // 6. Create Order — pass targetCode as uniqueCode for display in keterangan

@@ -83,6 +83,7 @@ export function useCheckout() {
 
     // Payment State
     const [paymentMethod, setPaymentMethod] = useState("");
+    const [paymentMethodId, setPaymentMethodId] = useState<number | null>(null);
     const [paymentAccountName, setPaymentAccountName] = useState("");
     const [paymentAccountNumber, setPaymentAccountNumber] = useState("");
     const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
@@ -221,6 +222,7 @@ export function useCheckout() {
 
                 if (found) {
                     setPaymentMethod(found.namaBank);
+                    setPaymentMethodId(found.id);
                     setPaymentAccountName(found.namaPemilik || "");
                     setPaymentAccountNumber(found.noRekening || "");
                     setHasSetDefaultPayment(true);
@@ -387,7 +389,10 @@ export function useCheckout() {
     // Auto-sync payment account details when payment method changes
     useEffect(() => {
         if (paymentMethod && paymentMethod !== "wallet" && paymentMethods.length > 0) {
-            const method = paymentMethods.find(m => m.namaBank === paymentMethod);
+            // Match by ID first (precise), fallback to namaBank for backward compat
+            const method = paymentMethodId
+                ? paymentMethods.find(m => m.id === paymentMethodId)
+                : paymentMethods.find(m => m.namaBank === paymentMethod);
             if (method) {
                 setPaymentAccountName(method.namaPemilik || "");
                 setPaymentAccountNumber(method.noRekening || "");
@@ -404,7 +409,7 @@ export function useCheckout() {
             setPaymentAccountNumber("");
             setUniqueCode(0);
         }
-    }, [paymentMethod, paymentMethods, uniqueCodeConfig, uniqueCode]);
+    }, [paymentMethod, paymentMethodId, paymentMethods, uniqueCodeConfig, uniqueCode]);
 
     useEffect(() => {
         if (useWallet && remainingBill === 0) {
@@ -629,6 +634,7 @@ export function useCheckout() {
                 body: JSON.stringify({
                     shipping: shippingForm,
                     payment: paymentMethod,
+                    paymentId: paymentMethodId,
                     totalAmount: totalAmount,
                     specialNotes,
                     isDropshipper,
@@ -713,7 +719,7 @@ export function useCheckout() {
         specialNotes, setSpecialNotes,
         voucherCode, setVoucherCode, isVoucherApplied, setIsVoucherApplied, voucherDiscount, isVoucherLoading,
         addresses, isLoadingAddresses, isSelectionModalOpen, setIsSelectionModalOpen, isAddAddressModalOpen, setIsAddAddressModalOpen,
-        paymentMethod, setPaymentMethod, paymentMethods, isLoadingPayments,
+        paymentMethod, setPaymentMethod, paymentMethodId, setPaymentMethodId, paymentMethods, isLoadingPayments,
         isSubmitting, isSuccess, isConfirmOpen, setIsConfirmOpen,
         couriers, isLoadingCouriers, shippingOptions, setShippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         errors, setErrors,

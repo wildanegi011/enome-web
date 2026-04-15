@@ -26,7 +26,7 @@ export default function CheckoutClient() {
         specialNotes, setSpecialNotes,
         voucherCode, setVoucherCode, isVoucherApplied, setIsVoucherApplied, voucherDiscount, isVoucherLoading,
         addresses, isLoadingAddresses, isSelectionModalOpen, setIsSelectionModalOpen, isAddAddressModalOpen, setIsAddAddressModalOpen,
-        paymentMethod, setPaymentMethod, paymentMethods, isLoadingPayments,
+        paymentMethod, setPaymentMethod, paymentMethodId, setPaymentMethodId, paymentMethods, isLoadingPayments,
         isSubmitting, isSuccess,
         shippingOptions, isLoadingShipping, shippingPrice, setShippingPrice,
         packingFee, grandTotal, remainingBill, originName,
@@ -205,7 +205,9 @@ export default function CheckoutClient() {
                                     isLoadingPayments={isLoadingPayments}
                                     paymentMethods={paymentMethods}
                                     paymentMethod={paymentMethod}
+                                    paymentMethodId={paymentMethodId}
                                     setPaymentMethod={setPaymentMethod}
+                                    setPaymentMethodId={setPaymentMethodId}
                                     hasError={errors?.payment}
                                     onFieldChange={() => setErrors(prev => ({ ...prev, payment: false }))}
                                 />
