@@ -54,7 +54,8 @@ export class UserService {
             provinceId: addr.prov || "",
             districtId: addr.kec || "",
             postalCode: addr.kodePos || "",
-            shopName: addr.namaToko || "",
+            shopName: "-",
+            // shopName: addr.namaToko || "",
             isPrimary: addr.isPrimary,
             type: addr.isPrimary === 1 ? "Utama" : "Alamat Tersimpan"
         }));
@@ -175,7 +176,7 @@ export class UserService {
         if (endDate) whereConditions.push(lte(orders.tglOrder, sql`${endDate}`));
         if (statusOrder && statusOrder !== "ALL") whereConditions.push(eq(orders.statusOrder, statusOrder));
         if (statusTagihan && statusTagihan !== "ALL") whereConditions.push(eq(orders.statusTagihan, statusTagihan));
-        
+
         if (search) {
             const searchPattern = `%${search}%`;
             whereConditions.push(or(
@@ -352,7 +353,7 @@ export class UserService {
 
         if (isPrimary === 1) {
             await db.update(customerAlamat)
-                .set({ 
+                .set({
                     isPrimary: 0,
                     labelAlamat: sql`CASE WHEN label_alamat = 'Alamat Utama' THEN 'Alamat' ELSE label_alamat END`
                 })
@@ -380,7 +381,7 @@ export class UserService {
 
         if (Object.keys(updates).length > 0) {
             await db.update(customerAlamat).set(updates).where(eq(customerAlamat.id, addressId));
-            
+
             // Re-sync if this was already primary
             const updatedAddr = await db.select().from(customerAlamat).where(eq(customerAlamat.id, addressId)).limit(1);
             if (updatedAddr[0].isPrimary === 1) {

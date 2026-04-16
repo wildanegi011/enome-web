@@ -31,7 +31,8 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
             gender: formData.get("gender") as string,
             brithdate: formData.get("brithdate") as string,
             noHandphone: formData.get("noHandphone") as string,
-            namaToko: formData.get("namaToko") as string,
+            namaToko: "-",
+            // namaToko: formData.get("namaToko") as string,
             alamat: formData.get("alamat") as string,
             alamatLengkap: formData.get("alamatLengkap") as string,
             kecamatan: formData.get("kecamatan") as string,
@@ -52,8 +53,8 @@ export const POST = withAuth(async (request: NextRequest, context: any, session:
             await fs.mkdir(uploadDir, { recursive: true });
             const filePath = join(uploadDir, fileName);
             await fs.writeFile(filePath, buffer);
-            
-            try { await fs.chmod(filePath, 0o644); } catch {}
+
+            try { await fs.chmod(filePath, 0o644); } catch { }
 
             const assetUrl = process.env.NEXT_PUBLIC_URL || "";
             data.photo = fileName;

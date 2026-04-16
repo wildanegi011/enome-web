@@ -81,7 +81,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
     const [formData, setFormData] = useState({
         labelAlamat: "",
         namaPenerima: "",
-        namaToko: "",
+        namaToko: "-",
         noHandphone: "",
         alamatLengkap: "",
         kodePos: "",
@@ -93,7 +93,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
             setFormData({
                 labelAlamat: initialData.label,
                 namaPenerima: initialData.receiverName,
-                namaToko: initialData.shopName || "",
+                namaToko: initialData.shopName || "-",
                 noHandphone: initialData.phoneNumber,
                 alamatLengkap: initialData.fullAddress,
                 kodePos: initialData.postalCode,
@@ -182,7 +182,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
         setFormData({
             labelAlamat: "",
             namaPenerima: "",
-            namaToko: "",
+            namaToko: "-",
             noHandphone: "",
             alamatLengkap: "",
             kodePos: "",
@@ -300,7 +300,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                         />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="hidden">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-base-500 ml-1">Nama Toko (Opsional)</Label>
                         <Input
                             placeholder="Nama Toko Anda"
