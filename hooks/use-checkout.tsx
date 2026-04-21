@@ -411,6 +411,12 @@ export function useCheckout() {
         }
     }, [paymentMethod, paymentMethodId, paymentMethods, uniqueCodeConfig, uniqueCode]);
 
+    const isPaymentMaintenance = useMemo(() => {
+        if (!paymentMethodId || paymentMethods.length === 0) return false;
+        const selected = paymentMethods.find(m => m.id === paymentMethodId);
+        return !!(selected && Number(selected.is_maintenance || selected.isMaintenance) === 1);
+    }, [paymentMethodId, paymentMethods]);
+
     useEffect(() => {
         if (useWallet && remainingBill === 0) {
             setPaymentMethod("wallet");
@@ -606,7 +612,7 @@ export function useCheckout() {
         }
 
         // 3. Payment Validation
-        if (!paymentMethod) {
+        if (!paymentMethod || isPaymentMaintenance) {
             newErrors.payment = true;
         }
 
@@ -618,6 +624,10 @@ export function useCheckout() {
         const isValid = validateCheckout();
 
         if (!isValid) {
+            if (isPaymentMaintenance) {
+                toast.error("Metode pembayaran sedang dalam maintenance. Silakan pilih metode lain.");
+                return;
+            }
             toast.error("Lengkapi data yang masih kosong (ditandai merah)");
             return;
         }
@@ -728,6 +738,7 @@ export function useCheckout() {
         paymentAccountName, paymentAccountNumber,
         setPaymentAccountName, setPaymentAccountNumber,
         handleSelectAddress, updateQuantity, removeItem, updateNotes, removeAllItems, applyVoucher,
+        isPaymentMaintenance,
         clearVoucher: () => {
             setIsVoucherApplied(false);
             setVoucherData(null);

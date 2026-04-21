@@ -38,6 +38,7 @@ export default function CheckoutClient() {
         isConfirmOpen, setIsConfirmOpen,
         errors, setErrors,
         refreshShipping,
+        isPaymentMaintenance,
     } = useCheckout();
 
     const addressRef = useRef<HTMLDivElement>(null);
@@ -244,6 +245,7 @@ export default function CheckoutClient() {
                                 (item.stock !== undefined && (item.stock <= 0 || Number(item.qty) > item.stock))
                             )}
                             initiateOrder={initiateOrder}
+                            isPaymentMaintenance={isPaymentMaintenance}
                             formatPrice={formatCurrency}
                         />
                     </div>
@@ -267,7 +269,7 @@ export default function CheckoutClient() {
                                 </span>
                             </div>
                             <button
-                                disabled={isSubmitting || cartItems.length === 0 || cartItems.some(item =>
+                                disabled={isSubmitting || cartItems.length === 0 || isPaymentMaintenance || cartItems.some(item =>
                                     item.isOnline === 0 ||
                                     (item.stock !== undefined && (item.stock <= 0 || Number(item.qty) > item.stock))
                                 )}
