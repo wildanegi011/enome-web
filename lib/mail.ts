@@ -381,7 +381,7 @@ export async function sendOrderStatusUpdateEmail(to: string, orderData: any) {
             buttonText = "Lacak Pesanan";
         } else if (upperStatus.includes("CLOSE") || upperStatus.includes("SELESAI")) {
             title = "Pesanan Selesai";
-            message = `Pesanan #${orderId} telah dinyatakan selesai. Kami harap Anda puas dengan produk Énome. Jangan lupa untuk memberikan ulasan terbaik Anda!`;
+            message = `Pesanan #${orderId} telah dinyatakan selesai. Kami harap Anda puas dengan produk Énome.`;
         } else if (upperStatus.includes("KADALUARSA") || upperStatus.includes("EXPIRE")) {
             title = "Pesanan Kedaluwarsa";
             message = `Pesanan #${orderId} telah dibatalkan secara otomatis oleh sistem karena kami tidak menerima konfirmasi pembayaran hingga batas waktu yang ditentukan. Silakan lakukan pemesanan ulang jika Anda masih menginginkan produk tersebut.`;

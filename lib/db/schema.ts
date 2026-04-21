@@ -453,6 +453,7 @@ export const rekeningPembayaran = mysqlTable("rekening_pembayaran", {
     noRekening: varchar("no_rekening", { length: 100 }),
     logoBank: varchar("logo_bank", { length: 255 }),
     isAktif: int("is_aktif").default(1),
+    isMaintenance: int("is_maintenance").default(0),
 });
 
 export const cargo = mysqlTable("cargo", {
