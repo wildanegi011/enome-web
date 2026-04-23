@@ -208,6 +208,7 @@ export const customer = mysqlTable("customer", {
     alamat: varchar("alamat", { length: 255 }),
     alamatLengkap: varchar("alamat_lengkap", { length: 50 }),
     namaToko: varchar("nama_toko", { length: 100 }),
+    desa: varchar("desa", { length: 100 }),
     kecamatan: varchar("kecamatan", { length: 100 }),
     kota: varchar("kota", { length: 100 }),
     provinsi: varchar("provinsi", { length: 100 }),
@@ -394,6 +395,7 @@ export const kota = mysqlTable("kota", {
     cityName: varchar("city_name", { length: 255 }).notNull(),
     jneOriginCityCode: varchar("Jne_Origin_City_Code", { length: 255 }),
     jneOriginCityName: varchar("Jne_Origin_City_Name", { length: 255 }),
+    zipCode: varchar("zip_code", { length: 20 }),
 });
 
 export const kecamatan = mysqlTable("kecamatan", {
@@ -402,6 +404,7 @@ export const kecamatan = mysqlTable("kecamatan", {
     subdistrictName: varchar("subdistrict_name", { length: 255 }).notNull(),
     jneDestinationCityCode: varchar("Jne_Destination_City_Code", { length: 255 }),
     jneDestinationCityName: varchar("Jne_Destination_City_Name", { length: 255 }),
+    zipCode: varchar("zip_code", { length: 20 }),
 });
 
 export const wallet = mysqlTable("wallet", {
@@ -579,4 +582,11 @@ export const produkDetailCabangStok = mysqlTable("produkdetail_cabang_stok", {
     createdAt: int("created_at"),
     updatedAt: int("updated_at"),
     updatedBy: int("updated_by"),
+});
+
+export const desa = mysqlTable("desa", {
+    id: serial("id").primaryKey(),
+    subdistrictId: char("subdistrict_id", { length: 7 }).notNull(),
+    villageName: varchar("village_name", { length: 255 }).notNull(),
+    zipCode: varchar("zip_code", { length: 20 }),
 });

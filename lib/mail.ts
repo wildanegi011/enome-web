@@ -371,10 +371,10 @@ export async function sendOrderStatusUpdateEmail(to: string, orderData: any) {
         const upperStatus = status.toUpperCase();
         if (upperStatus.includes("BAYAR") || upperStatus.includes("PAID")) {
             title = "Pembayaran Diterima";
-            message = `Terima kasih! Pembayaran untuk pesanan #${orderId} telah kami terima. Pesanan Anda akan segera kami proses untuk pengemasan.`;
+            message = `Terima kasih! Pembayaran untuk pesanan #${orderId} telah kami terima dengan baik. Pesanan Anda saat ini sudah masuk ke tahap pengemasan.`;
         } else if (upperStatus.includes("PROSES")) {
-            title = "Pesanan Sedang Diproses";
-            message = `Pesanan #${orderId} saat ini sedang dalam tahap pengemasan. Kami akan mengabari Anda kembali saat pesanan siap dikirim.`;
+            title = "Pesanan Sedang Dikemas";
+            message = `Kabar baik! Pesanan #${orderId} sudah kami terima dengan baik dan saat ini sedang dalam proses pengemasan. Kami akan segera menginformasikan nomor resi setelah pesanan dikirimkan.`;
         } else if (upperStatus.includes("KIRIM")) {
             title = "Pesanan Telah Dikirim";
             message = `Kabar gembira! Pesanan #${orderId} telah dikirim melalui kurir ${ekspedisi || "ekspedisi pilihan"}. Anda dapat melacaknya dengan nomor resi: <strong>${noResi || "-"}</strong>`;

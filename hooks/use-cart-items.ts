@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cartApi, CartItem, CartResponse } from "@/lib/api/cart-api";
 import { queryKeys } from "@/lib/query-keys";
@@ -9,6 +9,7 @@ export function useCartItems() {
     const queryClient = useQueryClient();
     const { refreshCart } = useCart();
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const hasAutoSelected = useRef(false);
 
     const { data, isLoading, refetch } = useQuery({
         queryKey: queryKeys.cart.all,
@@ -17,6 +18,17 @@ export function useCartItems() {
     });
 
     const cartItems = data || [];
+
+    // Auto-select all items on initial load
+    useEffect(() => {
+        if (!isLoading && cartItems.length > 0 && !hasAutoSelected.current) {
+            const selectableIds = cartItems
+                .filter(item => item.isOnline !== 0 && (item.stock || 0) > 0)
+                .map(item => item.id);
+            setSelectedIds(selectableIds);
+            hasAutoSelected.current = true;
+        }
+    }, [isLoading, cartItems]);
 
     const selectedItems = useMemo(() => {
         return cartItems.filter(item => selectedIds.includes(item.id));

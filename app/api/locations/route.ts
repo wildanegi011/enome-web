@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { provinsi, kota, kecamatan } from "@/lib/db/schema";
-import { eq, or, like } from "drizzle-orm";
+import { eq, or, like, and } from "drizzle-orm";
 import logger, { apiLogger } from "@/lib/logger";
 
 /**
@@ -27,6 +27,16 @@ export async function GET(request: NextRequest) {
     }
 
     try {
+        const queryParts = query.split(/[\s,]+/).filter(Boolean);
+        const searchConditions = queryParts.map(part => {
+            const pattern = `%${part}%`;
+            return or(
+                like(kecamatan.subdistrictName, pattern),
+                like(kota.cityName, pattern),
+                like(provinsi.province, pattern)
+            );
+        });
+
         // Melakukan pencarian lokasi dengan join antara kecamatan, kota, dan provinsi
         const results = await db
             .select({
@@ -40,12 +50,7 @@ export async function GET(request: NextRequest) {
             .from(kecamatan)
             .innerJoin(kota, eq(kecamatan.cityId, kota.cityId))
             .innerJoin(provinsi, eq(kota.provinceId, provinsi.provinceId))
-            .where(
-                or(
-                    like(kecamatan.subdistrictName, `%${query}%`),
-                    like(kota.cityName, `%${query}%`)
-                )
-            )
+            .where(and(...searchConditions))
             .limit(20);
 
         // Memformat hasil pencarian menjadi objek terstruktur

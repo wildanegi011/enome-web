@@ -26,13 +26,27 @@ import { Button } from "@/components/ui/button";
 import {
     MapPin, Search, Loader2,
     User, Phone, Navigation2,
-    Check, AlertCircle, X
+    Check, AlertCircle, X,
+    ChevronsUpDown
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { m, AnimatePresence } from "framer-motion";
 import { cn, joinAddress } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-keys";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface LocationResult {
     label: string;
@@ -77,6 +91,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
     const [locationQuery, setLocationQuery] = useState("");
     const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null);
     const [showResults, setShowResults] = useState(false);
+    const [villageOpen, setVillageOpen] = useState(false);
 
     const [formData, setFormData] = useState({
         labelAlamat: "",
@@ -84,6 +99,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
         namaToko: "-",
         noHandphone: "",
         alamatLengkap: "",
+        kelurahan: "",
         kodePos: "",
         isPrimary: 0
     });
@@ -96,6 +112,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                 namaToko: initialData.shopName || "-",
                 noHandphone: initialData.phoneNumber,
                 alamatLengkap: initialData.fullAddress,
+                kelurahan: initialData.kelurahan || "",
                 kodePos: initialData.postalCode,
                 isPrimary: initialData.isPrimary === 1 ? 1 : 0
             });
@@ -131,6 +148,18 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
         enabled: locationQuery.length >= 2 && locationQuery !== (selectedLocation?.label || ""),
     });
 
+    const { data: villages = [], isLoading: isLoadingVillages } = useQuery({
+        queryKey: ["villages", selectedLocation?.subdistrictId],
+        queryFn: async () => {
+            if (!selectedLocation?.subdistrictId) return [];
+            const res = await fetch(`/api/locations/villages?subdistrictId=${selectedLocation.subdistrictId}`);
+            if (!res.ok) throw new Error("Failed to fetch villages");
+            const data = await res.json();
+            return data.villages as { villageName: string, zipCode: string }[];
+        },
+        enabled: !!selectedLocation?.subdistrictId,
+    });
+
     const mutation = useMutation({
         mutationFn: async (data: any) => {
             const method = mode === "edit" ? "PATCH" : "POST";
@@ -160,6 +189,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                     shopName: formData.namaToko,
                     phoneNumber: formData.noHandphone,
                     fullAddress: formData.alamatLengkap,
+                    kelurahan: formData.kelurahan,
                     postalCode: formData.kodePos,
                     isPrimary: formData.isPrimary,
                     province: selectedLocation?.province || initialData?.province || "",
@@ -185,6 +215,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
             namaToko: "-",
             noHandphone: "",
             alamatLengkap: "",
+            kelurahan: "",
             kodePos: "",
             isPrimary: 0
         });
@@ -196,6 +227,12 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
         setSelectedLocation(loc);
         setLocationQuery(loc.label);
         setShowResults(false);
+        // Reset kelurahan and kodePos when location changes
+        setFormData(prev => ({
+            ...prev,
+            kelurahan: "",
+            kodePos: ""
+        }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -319,8 +356,18 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                                 placeholder="Cari lokasi..."
                                 value={locationQuery}
                                 onChange={(e) => {
-                                    setLocationQuery(e.target.value);
+                                    const val = e.target.value;
+                                    setLocationQuery(val);
                                     setShowResults(true);
+                                    if (val !== selectedLocation?.label) {
+                                        setSelectedLocation(null);
+                                        // Also reset kelurahan and kodePos when input is changed
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            kelurahan: "",
+                                            kodePos: ""
+                                        }));
+                                    }
                                 }}
                                 onFocus={() => setShowResults(true)}
                                 className="h-14 bg-neutral-base-50/30 border-neutral-base-100/60 rounded-[20px] pl-12 pr-6 font-bold text-[14px] focus:bg-white focus:border-amber-800 focus:ring-4 focus:ring-amber-50/50 transition-all placeholder:text-neutral-base-300"
@@ -331,7 +378,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                         </div>
 
                         <AnimatePresence>
-                            {showResults && locationQuery.length >= 2 && (
+                            {showResults && locationQuery.length >= 2 && locationQuery !== selectedLocation?.label && (
                                 <m.div
                                     initial={{ opacity: 0, y: -10, scale: 0.98 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -368,6 +415,78 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                             )}
                         </AnimatePresence>
                     </div>
+
+                    <AnimatePresence>
+                        {selectedLocation && (
+                            <m.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="md:col-span-2 space-y-2 overflow-hidden"
+                            >
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-base-500 ml-1">Kelurahan / Desa <span className="text-red-500">*</span></Label>
+                                <Popover open={villageOpen} onOpenChange={setVillageOpen}>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            aria-expanded={villageOpen}
+                                            className="w-full h-14 bg-neutral-base-50/30 border-neutral-base-100/60 rounded-[20px] px-6 font-bold text-[14px] justify-between hover:bg-neutral-base-50 transition-all border shadow-none"
+                                        >
+                                            {formData.kelurahan || "Pilih Kelurahan / Desa"}
+                                            {isLoadingVillages ? (
+                                                <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin opacity-50" />
+                                            ) : (
+                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            )}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-[24px] shadow-2xl border-neutral-base-100 bg-white" align="start">
+                                        <Command className="rounded-[24px]">
+                                            <CommandInput placeholder="Cari kelurahan..." className="h-12 border-none focus:ring-0" />
+                                            <CommandList 
+                                                className="max-h-[300px] overflow-y-auto"
+                                                onWheel={(e) => e.stopPropagation()}
+                                                onTouchStart={(e) => e.stopPropagation()}
+                                                onTouchMove={(e) => e.stopPropagation()}
+                                            >
+                                                <CommandEmpty>Kelurahan tidak ditemukan.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {villages.map((v, i) => (
+                                                        <CommandItem
+                                                            key={i}
+                                                            value={v.villageName}
+                                                            onSelect={(currentValue) => {
+                                                                const selected = villages.find(v => v.villageName === currentValue);
+                                                                setFormData({
+                                                                    ...formData,
+                                                                    kelurahan: currentValue,
+                                                                    kodePos: selected?.zipCode || formData.kodePos
+                                                                });
+                                                                setVillageOpen(false);
+                                                            }}
+                                                            className="flex items-center justify-between py-3 px-4"
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <Check
+                                                                    className={cn(
+                                                                        "mr-2 h-4 w-4",
+                                                                        formData.kelurahan === v.villageName ? "opacity-100" : "opacity-0"
+                                                                    )}
+                                                                />
+                                                                {v.villageName}
+                                                            </div>
+                                                            <span className="text-[10px] text-neutral-base-400 font-bold">{v.zipCode}</span>
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                            </m.div>
+                        )}
+                    </AnimatePresence>
 
                     <div className="md:col-span-2 space-y-2">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-base-500 ml-1">Alamat Lengkap <span className="text-red-500">*</span></Label>

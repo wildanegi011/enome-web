@@ -3,6 +3,7 @@ import { orders, user as userTable, customer as customerTable, orderdetail as or
 import { eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { sendOrderStatusUpdateEmail } from "@/lib/mail";
+import { ConfigService } from "@/lib/services/config-service";
 import logger from "@/lib/logger";
 
 /**
@@ -86,9 +87,10 @@ export async function POST(req: Request) {
         // Use status from payload if provided, fallback to DB status
         const effectiveStatus = status || data.statusOrder;
 
-        // Trigger email in background
+        // Trigger notifications in background
         (async () => {
             try {
+                // 1. Email Notification
                 await sendOrderStatusUpdateEmail(data.email, {
                     orderId: data.orderId,
                     customerName: data.customerName || "Pelanggan",
@@ -100,8 +102,31 @@ export async function POST(req: Request) {
                         namaProduk: item.namaProduk || item.produkId
                     }))
                 });
+
+                // 2. WhatsApp Notification
+                // Trigger for Payment Received or Packing status
+                const upperStatus = effectiveStatus.toUpperCase();
+                if (upperStatus.includes("BAYAR") || upperStatus.includes("PAID") || upperStatus.includes("PROSES")) {
+                    try {
+                        const backendUrl = await ConfigService.get("backend_url", "https://sys.batik-enome.com/backend/web");
+                        const whatsappApiUrl = `${backendUrl}/payment/send-whatsapp-notification`;
+                        const response = await fetch(whatsappApiUrl, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ orderId })
+                        });
+                        
+                        if (!response.ok) {
+                            logger.error(`WhatsApp notification failed (${whatsappApiUrl}): ${response.statusText}`);
+                        } else {
+                            logger.info(`WhatsApp notification triggered successfully for Order ${orderId}`);
+                        }
+                    } catch (whatsappError) {
+                        logger.error("WhatsApp trigger error:", whatsappError);
+                    }
+                }
             } catch (err) {
-                logger.error(`Background Email Notification Failed for Order ${orderId}:`, err);
+                logger.error(`Background Notification Failed for Order ${orderId}:`, err);
             }
         })();
 

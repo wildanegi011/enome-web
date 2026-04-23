@@ -47,6 +47,7 @@ export class UserService {
             receiverName: addr.name || "",
             phoneNumber: addr.phone || "",
             fullAddress: addr.address || "",
+            kelurahan: addr.kelurahan || "",
             city: addr.cityName || addr.kot || "",
             province: addr.provName || addr.prov || "",
             district: addr.districtName || addr.kec || "",
@@ -327,6 +328,7 @@ export class UserService {
             provinsi: addressInfo.provinsi,
             kota: addressInfo.kota,
             kecamatan: addressInfo.kecamatan,
+            kelurahan: addressInfo.kelurahan,
             kodePos: addressInfo.kodePos,
             isPrimary: isPrimary === 1 ? 1 : 0,
             createdBy: 1,
@@ -406,7 +408,7 @@ export class UserService {
         const {
             nama, gender, brithdate,
             noHandphone, namaToko, alamat,
-            alamatLengkap, kecamatan, kota,
+            alamatLengkap, kecamatan, kelurahan, kota,
             provinsi, kodepos,
             photo, urlphoto
         } = data;
@@ -431,6 +433,7 @@ export class UserService {
                 telp: noHandphone || undefined,
                 alamat: alamat || undefined,
                 alamatLengkap: alamatLengkap || undefined,
+                desa: kelurahan || undefined,
                 kecamatan: kecamatan || undefined,
                 kota: kota || undefined,
                 provinsi: provinsi || undefined,
@@ -451,6 +454,7 @@ export class UserService {
                     namaToko: namaToko || undefined,
                     alamatLengkap: alamatLengkap || undefined,
                     kecamatan: kecamatan || undefined,
+                    kelurahan: data.kelurahan || undefined,
                     kota: kota || undefined,
                     provinsi: provinsi || undefined,
                     kodePos: kodepos || undefined,
@@ -473,6 +477,7 @@ export class UserService {
             telp: addressData.noHandphone || typeof addressData.noHandphone === 'string' ? addressData.noHandphone : undefined,
             alamat: addressData.alamatLengkap || undefined,
             alamatLengkap: (addressData.alamatLengkap || "").substring(0, 50),
+            desa: addressData.kelurahan || undefined,
             kecamatan: addressData.kecamatan || undefined,
             kota: addressData.kota || undefined,
             provinsi: addressData.provinsi || undefined,
