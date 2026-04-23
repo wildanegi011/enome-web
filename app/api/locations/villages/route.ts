@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
 
         const results = await db
             .select({
+                villageId: desa.id,
                 villageName: desa.villageName,
                 zipCode: desa.zipCode,
             })

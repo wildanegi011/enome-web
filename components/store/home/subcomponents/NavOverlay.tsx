@@ -34,15 +34,18 @@ export default function NavOverlay({ setIsSearchOpen }: NavOverlayProps) {
                         onClick={handleExplore}
                         onMouseEnter={() => router.prefetch("/products")}
                         disabled={isPending}
-                        className="pointer-events-auto size-10 md:w-auto md:h-10 md:px-6 rounded-full bg-black/75 backdrop-blur-md border border-white/30 flex items-center justify-center gap-2.5 text-white hover:bg-black/95 hover:border-white/60 transition-all duration-300 cursor-pointer shadow-[0_2px_10_rgba(0,0,0,0.3)] group disabled:opacity-70 disabled:cursor-wait"
+                        className="pointer-events-auto h-10 px-4 md:px-6 rounded-full bg-black/75 backdrop-blur-md border border-white/30 flex items-center justify-center gap-2.5 text-white hover:bg-black/95 hover:border-white/60 transition-all duration-300 cursor-pointer shadow-[0_2px_10_rgba(0,0,0,0.3)] group disabled:opacity-70 disabled:cursor-wait"
                     >
                         {isPending ? (
                             <Loader2 className="size-[18px] animate-spin text-white" />
                         ) : (
                             <Compass className="size-[18px] stroke-[1.5px] text-white group-hover:rotate-45 transition-transform duration-500" />
                         )}
+                        <span className="md:hidden block text-[12px] font-black uppercase tracking-[0.2em] font-montserrat text-white">
+                            {isPending ? "Loading..." : "Explore"}
+                        </span>
                         <span className="hidden md:block text-[12px] font-black uppercase tracking-[0.2em] font-montserrat text-white">
-                            {isPending ? "Memuat data..." : "Jelajahi Produk"}
+                            {isPending ? "Memuat..." : "Jelajahi Produk"}
                         </span>
                     </button>
                 </m.div>

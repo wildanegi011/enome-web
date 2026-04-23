@@ -140,7 +140,7 @@ export default function AddressCard({
                         isCheckout ? "text-[13px] md:text-[14px]" : "text-[13px] md:text-[14px]"
                     )}>
                         {(() => {
-                            const addrStr = joinAddress(address.fullAddress, address.city, address.province, address.postalCode);
+                            const addrStr = joinAddress(address.fullAddress, address.kelurahanName, address.district, address.city, address.province, address.postalCode);
                             return addrStr ? toTitleCase(addrStr) : (
                                 <span className="text-amber-700/60 italic font-medium">Alamat belum dilengkapi</span>
                             );

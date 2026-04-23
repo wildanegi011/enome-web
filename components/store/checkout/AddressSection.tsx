@@ -123,6 +123,8 @@ export default function AddressSection({
                             cityId: newAddr.cityId || "",
                             kecamatan: newAddr.district,
                             districtId: newAddr.districtId || newAddr.district,
+                            kelurahan: newAddr.kelurahan || "",
+                            kelurahanName: newAddr.kelurahanName || newAddr.kelurahan || "",
                             kodePos: newAddr.postalCode,
                             customerId: parseInt(newAddr.customerId || "0"),
                         });

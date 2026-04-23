@@ -17,6 +17,8 @@ export interface Address {
     districtId?: string;
     postalCode: string;
     shopName: string;
+    kelurahan?: string;
+    kelurahanName?: string;
     isPrimary: number;
     type?: string;
     customerId?: string;

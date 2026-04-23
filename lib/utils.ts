@@ -21,9 +21,10 @@ export function handleWhatsAppConfirm(orderId: string, totalAmount: number, paym
   window.open(whatsappUrl, "_blank");
 }
 
-export function toTitleCase(str: string) {
+export function toTitleCase(str: any) {
     if (!str) return "";
-    return str.toLowerCase().replace(/(?:^|\s)\w/g, (match) => match.toUpperCase());
+    const s = String(str);
+    return s.toLowerCase().replace(/(?:^|\s)\w/g, (match) => match.toUpperCase());
 }
 
 export function joinAddress(...parts: (string | undefined | null)[]) {

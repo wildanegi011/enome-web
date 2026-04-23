@@ -87,6 +87,7 @@ const ResumeContent = ({
                 <p className="text-[12px] text-neutral-base-600 leading-relaxed line-clamp-2">
                     {joinAddress(
                         toTitleCase(shippingForm.address || ""),
+                        toTitleCase(shippingForm.kelurahanName || ""),
                         toTitleCase(shippingForm.kecamatan || ""),
                         toTitleCase(shippingForm.kota || ""),
                         toTitleCase(shippingForm.provinsi || ""),

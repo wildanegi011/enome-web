@@ -72,6 +72,8 @@ interface Address {
     districtId?: string;
     postalCode: string;
     shopName: string;
+    kelurahan?: string;
+    kelurahanName?: string;
     isPrimary: number;
     customerId?: string;
 }
@@ -100,6 +102,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
         noHandphone: "",
         alamatLengkap: "",
         kelurahan: "",
+        kelurahanName: "",
         kodePos: "",
         isPrimary: 0
     });
@@ -113,6 +116,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                 noHandphone: initialData.phoneNumber,
                 alamatLengkap: initialData.fullAddress,
                 kelurahan: initialData.kelurahan || "",
+                kelurahanName: (initialData as any).kelurahanName || initialData.kelurahan || "",
                 kodePos: initialData.postalCode,
                 isPrimary: initialData.isPrimary === 1 ? 1 : 0
             });
@@ -155,7 +159,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
             const res = await fetch(`/api/locations/villages?subdistrictId=${selectedLocation.subdistrictId}`);
             if (!res.ok) throw new Error("Failed to fetch villages");
             const data = await res.json();
-            return data.villages as { villageName: string, zipCode: string }[];
+            return data.villages as { villageId: number, villageName: string, zipCode: string }[];
         },
         enabled: !!selectedLocation?.subdistrictId,
     });
@@ -190,6 +194,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                     phoneNumber: formData.noHandphone,
                     fullAddress: formData.alamatLengkap,
                     kelurahan: formData.kelurahan,
+                    kelurahanName: formData.kelurahanName,
                     postalCode: formData.kodePos,
                     isPrimary: formData.isPrimary,
                     province: selectedLocation?.province || initialData?.province || "",
@@ -216,6 +221,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
             noHandphone: "",
             alamatLengkap: "",
             kelurahan: "",
+            kelurahanName: "",
             kodePos: "",
             isPrimary: 0
         });
@@ -231,6 +237,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
         setFormData(prev => ({
             ...prev,
             kelurahan: "",
+            kelurahanName: "",
             kodePos: ""
         }));
     };
@@ -365,6 +372,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                                         setFormData(prev => ({
                                             ...prev,
                                             kelurahan: "",
+                                            kelurahanName: "",
                                             kodePos: ""
                                         }));
                                     }
@@ -437,7 +445,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                                                 "line-clamp-1 text-left",
                                                 !formData.kelurahan ? "text-neutral-base-300" : "text-neutral-base-900"
                                             )}>
-                                                {formData.kelurahan ? toTitleCase(formData.kelurahan) : "Pilih Kelurahan / Desa"}
+                                                {formData.kelurahanName ? toTitleCase(formData.kelurahanName) : "Pilih Kelurahan / Desa"}
                                             </span>
                                             {isLoadingVillages ? (
                                                 <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin opacity-50" />
@@ -465,7 +473,8 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                                                                 const selected = villages.find(v => v.villageName === currentValue);
                                                                 setFormData({
                                                                     ...formData,
-                                                                    kelurahan: currentValue,
+                                                                    kelurahan: selected?.villageId.toString() || "",
+                                                                    kelurahanName: currentValue,
                                                                     kodePos: selected?.zipCode || formData.kodePos
                                                                 });
                                                                 setVillageOpen(false);
@@ -476,7 +485,7 @@ export default function AddAddressModal({ open, onOpenChange, initialData, onSuc
                                                                 <Check
                                                                     className={cn(
                                                                         "mr-2 h-4 w-4",
-                                                                        formData.kelurahan === v.villageName ? "opacity-100" : "opacity-0"
+                                                                        formData.kelurahanName === v.villageName ? "opacity-100" : "opacity-0"
                                                                     )}
                                                                 />
                                                                 <span className="text-[13px] font-bold text-neutral-base-900">

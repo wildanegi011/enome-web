@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { user as userTable, customer, customerKategori, customerAlamat, wallet, provinsi, kota, kecamatan } from "@/lib/db/schema";
+import { user as userTable, customer, customerKategori, customerAlamat, wallet, provinsi, kota, kecamatan, desa } from "@/lib/db/schema";
 import { eq, desc, sql, and, or } from "drizzle-orm";
 import { getJakartaDate } from "@/lib/date-utils";
 import { CustomerService } from "./customer-service";
@@ -32,12 +32,14 @@ export class UserService {
             isPrimary: customerAlamat.isPrimary,
             provName: provinsi.province,
             cityName: kota.cityName,
-            districtName: kecamatan.subdistrictName
+            districtName: kecamatan.subdistrictName,
+            villageName: desa.villageName
         })
             .from(customerAlamat)
             .leftJoin(provinsi, eq(customerAlamat.provinsi, provinsi.provinceId))
             .leftJoin(kota, eq(customerAlamat.kota, kota.cityId))
             .leftJoin(kecamatan, eq(customerAlamat.kecamatan, kecamatan.subdistrictId))
+            .leftJoin(desa, sql`CAST(${customerAlamat.kelurahan} AS UNSIGNED) = ${desa.id}`)
             .where(eq(customerAlamat.custId, custId))
             .orderBy(desc(customerAlamat.id));
 
@@ -48,6 +50,7 @@ export class UserService {
             phoneNumber: addr.phone || "",
             fullAddress: addr.address || "",
             kelurahan: addr.kelurahan || "",
+            kelurahanName: addr.villageName || addr.kelurahan || "",
             city: addr.cityName || addr.kot || "",
             province: addr.provName || addr.prov || "",
             district: addr.districtName || addr.kec || "",
@@ -346,7 +349,7 @@ export class UserService {
      * Update existing address.
      */
     static async updateAddress(addressId: number, data: any) {
-        const { isPrimary, ...updates } = data;
+        const { isPrimary, kelurahanName, ...updates } = data;
 
         const addr = await db.select().from(customerAlamat).where(eq(customerAlamat.id, addressId)).limit(1);
         if (addr.length === 0) throw new Error("Address not found");
