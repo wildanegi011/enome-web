@@ -29,7 +29,6 @@ interface OrderSummaryProps {
     isSubmitting: boolean;
     cartItemsCount: number;
     hasStockProblems?: boolean;
-    isPaymentMaintenance?: boolean;
     submitOrder?: () => Promise<void>;
     initiateOrder: () => void;
     formatPrice: (price: number) => string;
@@ -60,7 +59,6 @@ export default function OrderSummary({
     isSubmitting,
     cartItemsCount,
     hasStockProblems,
-    isPaymentMaintenance,
     submitOrder,
     initiateOrder,
     formatPrice
@@ -191,7 +189,7 @@ export default function OrderSummary({
                 </div>
 
                 <button
-                    disabled={isSubmitting || cartItemsCount === 0 || hasStockProblems || isPaymentMaintenance}
+                    disabled={isSubmitting || cartItemsCount === 0 || hasStockProblems}
                     onClick={initiateOrder}
                     className={`hidden md:flex w-full h-14 md:h-16 rounded-[24px] md:rounded-3xl text-[14px] font-bold uppercase tracking-[0.2em] items-center justify-center gap-3 md:gap-4 transition-all shadow-2xl group mb-6 md:mb-8 overflow-hidden relative bg-neutral-base-900 text-white hover:bg-neutral-base-800 shadow-neutral-base-900/10 disabled:opacity-50 disabled:cursor-not-allowed`}
                 >

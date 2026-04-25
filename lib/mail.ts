@@ -143,7 +143,7 @@ export async function sendActivationEmail(to: string, activationLink: string, at
 
 export async function sendNewOrderAdminNotification(adminEmail: string, orderData: any) {
     try {
-        const { orderId, customerName, totalTagihan, items, shippingAddress } = orderData;
+        const { orderId, customerName, totalTagihan, items, shippingAddress, kelurahan, kecamatan, kota, provinsi, kodePos } = orderData;
 
         const itemsList = items.map((item: any) => `
             <tr>
@@ -191,7 +191,11 @@ export async function sendNewOrderAdminNotification(adminEmail: string, orderDat
 
                     <div style="margin-bottom: 25px;">
                         <p style="margin: 0 0 8px 0; font-size: 11px; color: #a3a3a3; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Alamat Pengiriman</p>
-                        <p style="margin: 0; font-size: 13px; color: #525252; line-height: 1.6;">${shippingAddress}</p>
+                        <p style="margin: 0; font-size: 13px; color: #525252; line-height: 1.6;">
+                            ${shippingAddress}<br>
+                            ${kelurahan && kelurahan !== "-" ? `Kel. ${kelurahan}, ` : ""}${kecamatan && kecamatan !== "-" ? `Kec. ${kecamatan}` : ""}<br>
+                            ${kota && kota !== "-" ? kota : ""}${provinsi && provinsi !== "-" ? `, ${provinsi}` : ""} ${kodePos && kodePos !== "-" ? kodePos : ""}
+                        </p>
                     </div>
                     
                     <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
@@ -253,7 +257,7 @@ export async function sendNewOrderAdminNotification(adminEmail: string, orderDat
 
 export async function sendOrderConfirmationEmail(to: string, orderData: any) {
     try {
-        const { orderId, customerName, totalTagihan, items, paymentInfo } = orderData;
+        const { orderId, customerName, totalTagihan, items, paymentInfo, shippingAddress, kelurahan, kecamatan, kota, provinsi, kodePos } = orderData;
 
         const itemsList = items.map((item: any) => `
             <tr>
@@ -321,6 +325,15 @@ export async function sendOrderConfirmationEmail(to: string, orderData: any) {
                     </tbody>
                 </table>
             </div>
+            
+            <div style="text-align: left; background-color: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <p style="margin: 0 0 8px 0; font-size: 11px; color: #a3a3a3; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Alamat Pengiriman</p>
+                <p style="margin: 0; font-size: 13px; color: #525252; line-height: 1.6;">
+                    ${shippingAddress || "-"}<br>
+                    ${kelurahan && kelurahan !== "-" ? `Kel. ${kelurahan}, ` : ""}${kecamatan && kecamatan !== "-" ? `Kec. ${kecamatan}` : ""}<br>
+                    ${kota && kota !== "-" ? kota : ""}${provinsi && provinsi !== "-" ? `, ${provinsi}` : ""} ${kodePos && kodePos !== "-" ? kodePos : ""}
+                </p>
+            </div>
             ${paymentInstructionsHtml}
         `;
 
@@ -358,7 +371,7 @@ export async function sendOrderConfirmationEmail(to: string, orderData: any) {
 
 export async function sendOrderStatusUpdateEmail(to: string, orderData: any) {
     try {
-        const { orderId, customerName, status, noResi, ekspedisi, items } = orderData;
+        const { orderId, customerName, status, noResi, ekspedisi, items, shippingAddress, kelurahan, kecamatan, kota, provinsi, kodePos } = orderData;
         let title = "Update Status Pesanan";
         let message = `Pesanan Anda #${orderId} telah berubah status menjadi ${status}.`;
         let buttonText = "Lihat Detail Pesanan";
@@ -429,6 +442,15 @@ export async function sendOrderStatusUpdateEmail(to: string, orderData: any) {
                             ${itemsList}
                         </tbody>
                     </table>
+                </div>
+
+                <div style="text-align: left; background-color: #f9f9f9; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                    <p style="margin: 0 0 8px 0; font-size: 11px; color: #a3a3a3; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Alamat Pengiriman</p>
+                    <p style="margin: 0; font-size: 13px; color: #525252; line-height: 1.6;">
+                        ${shippingAddress || "-"}<br>
+                        ${kelurahan && kelurahan !== "-" ? `Kel. ${kelurahan}, ` : ""}${kecamatan && kecamatan !== "-" ? `Kec. ${kecamatan}` : ""}<br>
+                        ${kota && kota !== "-" ? kota : ""}${provinsi && provinsi !== "-" ? `, ${provinsi}` : ""} ${kodePos && kodePos !== "-" ? kodePos : ""}
+                    </p>
                 </div>
             `;
         }

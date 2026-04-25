@@ -178,9 +178,11 @@ function SuccessContent() {
         customerPhone: detail.order.teleponPenerima,
         fullAddress: [
             detail.order.alamatKirim,
+            detail.kelurahanKirim,
             detail.order.distrikKirim,
             detail.order.kotaKirim,
-            detail.order.provinsiKirim
+            detail.order.provinsiKirim,
+            detail.kodePosKirim
         ].filter(Boolean).join(", "),
         courierName: detail.order.ekspedisi,
         courierService: detail.order.service,
@@ -189,6 +191,7 @@ function SuccessContent() {
         whatsappAdmin: detail.whatsappAdmin,
         statusOrder: detail.order.statusOrder,
         paymentVerificationTimeout: detail.paymentVerificationTimeout,
+        isMaintenance: Number(detail.paymentInfo?.isMaintenance) === 1,
     };
 
     return (

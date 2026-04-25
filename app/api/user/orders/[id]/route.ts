@@ -13,7 +13,9 @@ import {
     provinsi,
     kota,
     kecamatan,
-    voucher as voucherTable
+    voucher as voucherTable,
+    desa,
+    customerAlamat
 } from "@/lib/db/schema";
 import { eq, and, or, sql, like } from "drizzle-orm";
 import { withAuth } from "@/lib/auth-utils";
@@ -84,11 +86,15 @@ export const GET = withAuth(async (
             provinsiName: provinsi.province,
             cityName: kota.cityName,
             distrikName: kecamatan.subdistrictName,
+            kelurahanName: desa.villageName,
+            kodePos: customerAlamat.kodePos,
         })
             .from(orders)
             .leftJoin(provinsi, eq(orders.provinsiKirim, provinsi.provinceId))
             .leftJoin(kota, eq(orders.kotaKirim, kota.cityId))
             .leftJoin(kecamatan, eq(orders.distrikKirim, kecamatan.subdistrictId))
+            .leftJoin(customerAlamat, eq(orders.customerAlamatIdPenerima, customerAlamat.id))
+            .leftJoin(desa, sql`CAST(${customerAlamat.kelurahan} AS UNSIGNED) = ${desa.id}`)
             .where(and(eq(orders.orderId, orderId), userCondition as any, eq(orders.isDeleted, 0)))
             .limit(1);
 
@@ -215,6 +221,8 @@ export const GET = withAuth(async (
             paymentInfo,
             voucherInfo,
             uniqueCode,
+            kelurahanKirim: order.kelurahanName,
+            kodePosKirim: order.kodePos,
             expiredTime: paymentRow?.expiredTime ? formatJakartaISO(new Date(paymentRow.expiredTime)) : null,
             whatsappAdmin: await ConfigService.get("whatsapp_nomor", "628997279308"),
             paymentVerificationTimeout: await ConfigService.getInt("PAYMENT_VERIFICATION_TIMEOUT_MINS", CONFIG.PAYMENT_VERIFICATION_TIMEOUT_MINS),

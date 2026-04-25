@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { orders, payment as paymentTable, orderdetail, produkDetail, preOrder, flashSale, produk, keranjang, customer, user, stok, produkDetailCabangStok } from "@/lib/db/schema";
+import { orders, payment as paymentTable, orderdetail, produkDetail, preOrder, flashSale, produk, keranjang, customer, user, stok, produkDetailCabangStok, customerAlamat as customerAlamatTable, desa as desaTable, provinsi as provinsiTable, kota as kotaTable, kecamatan as kecamatanTable } from "@/lib/db/schema";
 import { eq, and, lt, sql, inArray, lte, or, gte, desc } from "drizzle-orm";
 import { CONFIG } from "@/lib/config";
 import logger from "@/lib/logger";
@@ -60,9 +60,20 @@ export class CronService {
                         statusTagihan: orders.statusTagihan,
                         orderTipe: orders.orderTipe,
                         customer: orders.customer,
-                        companyprofileId: orders.companyprofileId
+                        companyprofileId: orders.companyprofileId,
+                        shippingAddress: orders.alamatKirim,
+                        kelurahan: sql<string>`COALESCE(${desaTable.villageName}, ${customerAlamatTable.kelurahan})`,
+                        kecamatan: sql<string>`COALESCE(${kecamatanTable.subdistrictName}, ${orders.distrikKirim})`,
+                        kota: sql<string>`COALESCE(${kotaTable.cityName}, ${orders.kotaKirim})`,
+                        provinsi: sql<string>`COALESCE(${provinsiTable.province} , ${orders.provinsiKirim})`,
+                        kodePos: sql<string>`COALESCE(${desaTable.zipCode}, ${customerAlamatTable.kodePos})`
                     })
                         .from(orders)
+                        .leftJoin(customerAlamatTable, eq(orders.customerAlamatIdPenerima, customerAlamatTable.id))
+                        .leftJoin(desaTable, eq(customerAlamatTable.kelurahan, sql`CAST(${desaTable.id} AS CHAR)`))
+                        .leftJoin(kecamatanTable, eq(orders.distrikKirim, kecamatanTable.subdistrictId))
+                        .leftJoin(kotaTable, eq(orders.kotaKirim, kotaTable.cityId))
+                        .leftJoin(provinsiTable, eq(orders.provinsiKirim, provinsiTable.provinceId))
                         .where(and(
                             inArray(orders.orderId, orderIds),
                             inArray(orders.statusOrder, ["OPEN", "BATAL", "CLOSE"]),
@@ -191,7 +202,13 @@ export class CronService {
                                     email: customerData.email,
                                     name: customerData.nama,
                                     orderId: order.orderId,
-                                    items: items
+                                    items: items,
+                                    shippingAddress: order.shippingAddress,
+                                    kelurahan: order.kelurahan,
+                                    kecamatan: order.kecamatan,
+                                    kota: order.kota,
+                                    provinsi: order.provinsi,
+                                    kodePos: order.kodePos
                                 });
                             }
                         } catch (emailErr) {
@@ -228,7 +245,13 @@ export class CronService {
                         orderId: note.orderId,
                         customerName: note.name,
                         status: "KADALUARSA (Expired)",
-                        items: note.items
+                        items: note.items,
+                        shippingAddress: note.shippingAddress,
+                        kelurahan: note.kelurahan,
+                        kecamatan: note.kecamatan,
+                        kota: note.kota,
+                        provinsi: note.provinsi,
+                        kodePos: note.kodePos
                     });
                 } catch (sendErr) {
                     logger.error(`CronService: Failed to send background email for order ${note.orderId}`, sendErr);

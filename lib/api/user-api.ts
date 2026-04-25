@@ -86,6 +86,7 @@ export interface OrderDetail {
         noRekening: string;
         namaPemilik: string;
         logoBank?: string;
+        isMaintenance?: number;
     };
     voucherInfo?: {
         kode: string;
@@ -97,6 +98,8 @@ export interface OrderDetail {
     whatsappAdmin?: string;
     paymentVerificationTimeout?: number;
     trackableCouriers?: string[];
+    kelurahanKirim?: string;
+    kodePosKirim?: string;
 }
 
 export interface ProfileData {

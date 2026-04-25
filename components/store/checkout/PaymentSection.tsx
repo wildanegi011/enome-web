@@ -66,11 +66,10 @@ export default function PaymentSection({
                     ) : (
                         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                             {paymentMethods.map((method) => {
-                                const isMaintenance = Number(method.isMaintenance || method.is_maintenance) === 1;
                                 const isBcaMandiri = method.namaBank?.toUpperCase().includes("BCA") || method.namaBank?.toUpperCase().includes("MANDIRI");
                                 const isUnderLimit = remainingBill < 10000;
                                 const isBcaMandiriUnderLimit = isBcaMandiri && isUnderLimit;
-                                const isDisabled = isBcaMandiriUnderLimit || isMaintenance;
+                                const isDisabled = isBcaMandiriUnderLimit;
 
                                 return (
                                     <button
@@ -101,15 +100,18 @@ export default function PaymentSection({
                                                 {isBcaMandiriUnderLimit ? (
                                                     <p className="text-[11px] md:text-[12px] font-bold text-red-500 uppercase tracking-widest mt-0.5 md:mt-1">Min. Transfer Rp 10.000</p>
                                                 ) : (
-                                                    <>
+                                                    <div className="flex flex-col items-start mt-0.5 md:mt-1">
                                                         <p className={cn(
-                                                            "text-[11px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-widest mt-0.5 md:mt-1 truncate max-w-[120px] md:max-w-none",
+                                                            "text-[11px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-widest truncate max-w-[120px] md:max-w-none",
                                                             isDisabled && "opacity-40"
                                                         )}>{method.namaPemilik}</p>
-                                                        {isMaintenance && (
-                                                            <p className="text-[10px] md:text-[11px] font-bold text-red-300 uppercase tracking-widest mt-0.5">Sedang dalam maintenance</p>
+                                                        {Number(method.isMaintenance) === 1 && (
+                                                            <div className="flex items-center gap-1.5 mt-1">
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                                                <p className="text-[9px] md:text-[9px] font-black text-amber-600 uppercase tracking-wider">Verifikasi Otomatis Terkendala</p>
+                                                            </div>
                                                         )}
-                                                    </>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>

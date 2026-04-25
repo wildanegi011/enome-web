@@ -580,7 +580,12 @@ export class OrderService {
                             qty: item.qty,
                             harga: item.harga
                         })),
-                        shippingAddress: orderData.shipping?.address || "-"
+                        shippingAddress: orderData.shipping?.address || "-",
+                        kelurahan: orderData.shipping?.kelurahanName || orderData.shipping?.kelurahan || "-",
+                        kecamatan: orderData.shipping?.kecamatan || "-",
+                        kota: orderData.shipping?.kota || "-",
+                        provinsi: orderData.shipping?.provinsi || "-",
+                        kodePos: orderData.shipping?.kodePos || "-"
                     };
 
                     // 1. Fetch Payment Info if it's a bank transfer

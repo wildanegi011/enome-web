@@ -11,10 +11,9 @@ interface ShippingInfoCardProps {
     phone: string;
     statusOrder?: string;
     namaPenerima?: string;
-    alamatKirim?: string;
-    distrikKirim?: string;
-    kotaKirim?: string;
     provinsiKirim?: string;
+    kelurahanKirim?: string;
+    kodePosKirim?: string;
     trackableCouriers?: string[];
 }
 
@@ -29,6 +28,8 @@ export default function ShippingInfoCard({
     distrikKirim,
     kotaKirim,
     provinsiKirim,
+    kelurahanKirim,
+    kodePosKirim,
     trackableCouriers = [],
 }: ShippingInfoCardProps) {
     const [copiedResi, setCopiedResi] = useState(false);
@@ -78,7 +79,14 @@ export default function ShippingInfoCard({
                     <div className="flex-1">
                         <p className="text-[11px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-1.5">Alamat tujuan</p>
                         <p className="text-[13px] md:text-[14px] font-semibold text-neutral-base-800 leading-relaxed font-montserrat tracking-tight max-w-[500px]">
-                            {toTitleCase(alamatKirim || "")}, {toTitleCase(distrikKirim || "")}, {toTitleCase(kotaKirim || "")}, {toTitleCase(provinsiKirim || "")}
+                            {[
+                                alamatKirim,
+                                kelurahanKirim,
+                                distrikKirim,
+                                kotaKirim,
+                                provinsiKirim,
+                                kodePosKirim
+                            ].filter(Boolean).map(s => toTitleCase(s)).join(", ")}
                         </p>
                     </div>
                 </div>

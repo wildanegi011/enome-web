@@ -25,6 +25,7 @@ interface OrderSummaryCardProps {
     onSuccess?: () => void;
     statusOrder?: string;
     paymentVerificationTimeout?: number;
+    isMaintenance?: boolean;
 }
 
 export default function OrderSummaryCard({
@@ -41,7 +42,8 @@ export default function OrderSummaryCard({
     whatsappAdmin,
     onSuccess,
     statusOrder,
-    paymentVerificationTimeout
+    paymentVerificationTimeout,
+    isMaintenance
 }: OrderSummaryCardProps) {
     const {
         timeLeft,
@@ -162,6 +164,7 @@ export default function OrderSummaryCard({
                             statusTagihan={currentStatusTagihan || statusTagihan}
                             onStartVerification={handleStartVerification}
                             showAction={true}
+                            isMaintenance={isMaintenance}
                             onClickWA={() => handleWhatsAppConfirm(orderId, totalTagihan, metodebayar, whatsappAdmin || "")}
                             timeoutMins={paymentVerificationTimeout}
                         />

@@ -39,6 +39,7 @@ interface SuccessStateProps {
         whatsappAdmin?: string,
         statusOrder?: string,
         paymentVerificationTimeout?: number,
+        isMaintenance?: boolean,
     };
     lastOrderedItems: any[];
     formatPrice: (price: number) => string;
@@ -132,6 +133,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                     )}
                                 </div>
 
+
                                 <div className="p-5 md:p-8 flex flex-col gap-5 md:gap-7">
                                     {/* Amount to pay */}
                                     <div>
@@ -215,6 +217,7 @@ export default function SuccessState({ orderResult, lastOrderedItems, formatPric
                                                 orderResult.whatsappAdmin || ""
                                             )}
                                             timeoutMins={orderResult.paymentVerificationTimeout}
+                                            isMaintenance={orderResult.isMaintenance}
                                         />
                                     )}
                                 </div>

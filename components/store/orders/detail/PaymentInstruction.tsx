@@ -12,9 +12,11 @@ interface PaymentInstructionProps {
         namaBank: string;
         noRekening: string;
         namaPemilik: string;
+        isMaintenance?: boolean;
     };
     uniqueCodeValue?: number;
     expiredTime?: string | number | null;
+    isMaintenance?: boolean;
 }
 
 export default function PaymentInstruction({
@@ -23,6 +25,7 @@ export default function PaymentInstruction({
     paymentInfo,
     uniqueCodeValue = 0,
     expiredTime,
+    isMaintenance,
 }: PaymentInstructionProps) {
     const [copiedRekening, setCopiedRekening] = useState(false);
 
@@ -77,6 +80,8 @@ export default function PaymentInstruction({
                         a.n {toTitleCase(paymentInfo.namaPemilik || "")}
                     </p>
                 </div>
+
+
 
                 {uniqueCodeValue > 0 && (
                     <div className="pt-6 border-t border-amber-200/50">

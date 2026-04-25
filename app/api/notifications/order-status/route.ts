@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { orders, user as userTable, customer as customerTable, orderdetail as orderDetailTable, produk } from "@/lib/db/schema";
+import { orders, user as userTable, customer as customerTable, orderdetail as orderDetailTable, produk, customerAlamat as customerAlamatTable, desa as desaTable, provinsi as provinsiTable, kota as kotaTable, kecamatan as kecamatanTable } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { sendOrderStatusUpdateEmail } from "@/lib/mail";
@@ -47,10 +47,21 @@ export async function POST(req: Request) {
             ekspedisi: orders.ekspedisi,
             customerName: customerTable.namaCustomer,
             email: userTable.email,
+            shippingAddress: orders.alamatKirim,
+            kelurahan: sql<string>`COALESCE(${desaTable.villageName}, ${customerAlamatTable.kelurahan})`,
+            kecamatan: sql<string>`COALESCE(${kecamatanTable.subdistrictName}, ${orders.distrikKirim})`,
+            kota: sql<string>`COALESCE(${kotaTable.cityName}, ${orders.kotaKirim})`,
+            provinsi: sql<string>`COALESCE(${provinsiTable.province}, ${orders.provinsiKirim})`,
+            kodePos: sql<string>`COALESCE(${desaTable.zipCode}, ${customerAlamatTable.kodePos})`
         })
             .from(orders)
             .leftJoin(customerTable, eq(orders.userId, customerTable.custId))
             .leftJoin(userTable, eq(customerTable.userId, userTable.id))
+            .leftJoin(customerAlamatTable, eq(orders.customerAlamatIdPenerima, customerAlamatTable.id))
+            .leftJoin(desaTable, eq(customerAlamatTable.kelurahan, sql`CAST(${desaTable.id} AS CHAR)`))
+            .leftJoin(kecamatanTable, eq(orders.distrikKirim, kecamatanTable.subdistrictId))
+            .leftJoin(kotaTable, eq(orders.kotaKirim, kotaTable.cityId))
+            .leftJoin(provinsiTable, eq(orders.provinsiKirim, provinsiTable.provinceId))
             .where(eq(orders.orderId, orderId))
             .limit(1);
 
@@ -100,7 +111,13 @@ export async function POST(req: Request) {
                     items: items.map(item => ({
                         ...item,
                         namaProduk: item.namaProduk || item.produkId
-                    }))
+                    })),
+                    shippingAddress: data.shippingAddress,
+                    kelurahan: data.kelurahan,
+                    kecamatan: data.kecamatan,
+                    kota: data.kota,
+                    provinsi: data.provinsi,
+                    kodePos: data.kodePos
                 });
 
                 // 2. WhatsApp Notification

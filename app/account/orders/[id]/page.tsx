@@ -184,6 +184,7 @@ export default function OrderDetailPage() {
                                 statusTagihan={order.statusTagihan}
                                 totalTagihan={order.totalTagihan}
                                 paymentInfo={paymentInfo}
+                                isMaintenance={Number(paymentInfo?.isMaintenance) === 1}
                                 uniqueCodeValue={uniqueCodeValue}
                                 expiredTime={expiredTime}
                             />
@@ -205,9 +206,11 @@ export default function OrderDetailPage() {
                                         statusOrder={order.statusOrder}
                                         namaPenerima={order.namaPenerima}
                                         alamatKirim={order.alamatKirim}
+                                        kelurahanKirim={data.kelurahanKirim}
                                         distrikKirim={order.distrikKirim}
                                         kotaKirim={order.kotaKirim}
                                         provinsiKirim={order.provinsiKirim}
+                                        kodePosKirim={data.kodePosKirim}
                                         trackableCouriers={trackableCouriers}
                                     />
                                 </div>
@@ -229,6 +232,7 @@ export default function OrderDetailPage() {
                                     onSuccess={() => refetch()}
                                     statusOrder={order.statusOrder}
                                     paymentVerificationTimeout={paymentVerificationTimeout}
+                                    isMaintenance={Number(paymentInfo?.isMaintenance) === 1}
                                 />
                             </div>
                         </div>

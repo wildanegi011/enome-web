@@ -18,6 +18,7 @@ interface PaymentVerificationStatusProps {
     // For WA button
     onClickWA?: () => void;
     timeoutMins?: number;
+    isMaintenance?: boolean;
 }
 
 export default function PaymentVerificationStatus({
@@ -31,7 +32,8 @@ export default function PaymentVerificationStatus({
     onStartVerification,
     showAction = false,
     onClickWA,
-    timeoutMins
+    timeoutMins,
+    isMaintenance = false
 }: PaymentVerificationStatusProps) {
     const isFull = variant === "full";
     
@@ -52,9 +54,11 @@ export default function PaymentVerificationStatus({
                 "overflow-hidden border rounded-2xl transition-all duration-500",
                 isSuccess
                     ? "bg-emerald-50 border-emerald-200 shadow-md scale-[1.01]"
-                    : isVerifying
-                        ? (isTimeout ? "bg-rose-50 border-rose-200" : "bg-amber-50/50 border-amber-200 shadow-sm")
-                        : "bg-emerald-50/60 border-emerald-100"
+                    : isMaintenance
+                        ? "bg-amber-50 border-amber-200 shadow-sm"
+                        : isVerifying
+                            ? (isTimeout ? "bg-rose-50 border-rose-200" : "bg-amber-50/50 border-amber-200 shadow-sm")
+                            : "bg-emerald-50/60 border-emerald-100"
             )}>
                 {/* Header Info */}
                 <div className={cn(
@@ -72,13 +76,17 @@ export default function PaymentVerificationStatus({
                         isFull && (
                             isSuccess
                                 ? "bg-emerald-100"
-                                : isVerifying
-                                    ? (isTimeout ? "bg-rose-100" : "bg-amber-100")
-                                    : "bg-emerald-100"
+                                : isMaintenance
+                                    ? "bg-amber-100"
+                                    : isVerifying
+                                        ? (isTimeout ? "bg-rose-100" : "bg-amber-100")
+                                        : "bg-emerald-100"
                         )
                     )}>
                         {isSuccess ? (
                             <CheckCircle2 className={cn("text-emerald-600", isFull ? "w-5 h-5" : "w-4 h-4")} />
+                        ) : isMaintenance ? (
+                             <AlertCircle className={cn("text-amber-600", isFull ? "w-4.5 h-4.5" : "w-4 h-4")} />
                         ) : isVerifying ? (
                             isTimeout ? (
                                 <AlertCircle className={cn("text-rose-600", isFull ? "w-4.5 h-4.5" : "w-4 h-4")} />
@@ -95,30 +103,36 @@ export default function PaymentVerificationStatus({
                             isFull ? "text-[13px] md:text-[14px]" : "text-[12px] mb-0.5",
                             isSuccess
                                 ? "text-emerald-900"
-                                : isVerifying
+                                : (isMaintenance || isVerifying)
                                     ? (isTimeout ? "text-rose-900" : "text-amber-900")
                                     : "text-emerald-900"
                         )}>
                             {isSuccess
                                 ? "Pembayaran Terdeteksi!"
-                                : isVerifying
-                                    ? (isTimeout 
-                                        ? (isFull ? "Verifikasi Melewati Batas Waktu" : "Gagal Verifikasi Otomatis")
-                                        : (isFull ? "Verifikasi Sedang Berjalan" : <>Verifikasi: <span className="text-amber-900">{formatTime(timeLeft || 0)}</span></>)
-                                      )
-                                    : "Verifikasi Otomatis Tersedia"}
+                                : isMaintenance
+                                    ? "Verifikasi Otomatis Terkendala"
+                                    : isVerifying
+                                        ? (isTimeout 
+                                            ? (isFull ? "Verifikasi Melewati Batas Waktu" : "Gagal Verifikasi Otomatis")
+                                            : (isFull ? "Verifikasi Sedang Berjalan" : <>Verifikasi: <span className="text-amber-900">{formatTime(timeLeft || 0)}</span></>)
+                                          )
+                                        : "Verifikasi Otomatis Tersedia"}
                         </p>
                         <div className={cn(
                             "font-medium leading-relaxed opacity-80",
                             isFull ? "text-[12px] md:text-[13px]" : "text-[12px]",
                             isSuccess
                                 ? "text-emerald-800"
-                                : isVerifying
+                                : (isMaintenance || isVerifying)
                                     ? (isTimeout ? "text-rose-800" : "text-amber-800")
                                     : "text-emerald-800"
                         )}>
                             {isSuccess ? (
                                 isFull ? "Pembayaran Anda berhasil diverifikasi! Menyiapkan detail pesanan..." : "Dana diterima! Pesanan diproses."
+                            ) : isMaintenance ? (
+                                isFull
+                                    ? "Karena bank sedang maintenance, mohon gunakan Konfirmasi Manual WhatsApp di bawah agar pesanan cepat diproses."
+                                    : "Gunakan konfirmasi WhatsApp manual."
                             ) : isVerifying ? (
                                 isTimeout ? (
                                     isFull 
@@ -218,7 +232,7 @@ export default function PaymentVerificationStatus({
                             <CheckCircle2 className={isFull ? "w-4 h-4 md:w-5 md:h-5" : "w-3.5 h-3.5"} />
                             {isFull ? "Pembayaran Sukses!" : "Dikonfirmasi"}
                         </div>
-                    ) : isVerifying && !isTimeout ? (
+                    ) : isVerifying && !isTimeout && !isMaintenance ? (
                         <div className={cn(
                             "flex items-center justify-center gap-2.5 h-12 rounded-xl bg-amber-50 border border-amber-200 font-bold uppercase tracking-wider text-amber-700",
                             isFull ? "md:h-14 text-[13px] md:text-[14px] md:rounded-2xl" : "text-[12px]"
@@ -226,7 +240,7 @@ export default function PaymentVerificationStatus({
                             <Clock className={cn("animate-spin-slow", isFull ? "w-4 h-4 md:w-5 md:h-5" : "w-3.5 h-3.5")} />
                             Mengecek Status...
                         </div>
-                    ) : !isTimeout ? (
+                    ) : !isTimeout && !isMaintenance ? (
                         <button
                             onClick={onStartVerification}
                             className={cn(
@@ -245,7 +259,7 @@ export default function PaymentVerificationStatus({
                             className={cn(
                                 "flex items-center justify-center gap-2.5 h-12 rounded-xl border transition-all active:scale-[0.98] font-bold uppercase tracking-wider",
                                 isFull ? "md:h-14 text-[13px] md:text-[14px] md:rounded-2xl" : "text-[12px]",
-                                isTimeout
+                                (isTimeout || isMaintenance)
                                     ? "bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700 shadow-lg col-span-full"
                                     : "border-emerald-500 text-emerald-600 bg-white hover:bg-emerald-50"
                             )}
