@@ -124,11 +124,11 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                         )}
                     </div>
 
-                    {/* Out of Stock Overlay (Cart-Aware) */}
+                    {/* Sold Out Overlay (Cart-Aware) */}
                     {realStock === 0 && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 pointer-events-none">
                             <span className="text-white text-[9px] font-bold uppercase tracking-widest">
-                                {qtyInCart > 0 && qtyInCart >= (Number(product.totalStock) || 0) ? "In Cart" : "Out Of Stock"}
+                                {qtyInCart > 0 && qtyInCart >= (Number(product.totalStock) || 0) ? "In Cart" : "Sold Out"}
                             </span>
                         </div>
                     )}

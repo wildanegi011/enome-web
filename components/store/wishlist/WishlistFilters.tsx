@@ -96,7 +96,7 @@ const WishlistFilters = ({
                                     : "bg-white text-neutral-base-500 border-neutral-base-100 hover:border-rose-300"
                             )}
                         >
-                            Out Of Stock
+                            Sold Out
                         </button>
 
                         {/* Separator */}

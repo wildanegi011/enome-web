@@ -73,11 +73,11 @@ const WishlistItemCard = ({ item, idx, isRemoving, onRemove, formatPriceRange }:
                         </div>
                     )}
 
-                    {/* Out of Stock Overlay */}
+                    {/* Sold Out Overlay */}
                     {stock === 0 && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 pointer-events-none">
                             <span className="text-white text-[9px] font-bold uppercase tracking-widest">
-                                Out Of Stock
+                                Sold Out
                             </span>
                         </div>
                     )}
