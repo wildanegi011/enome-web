@@ -199,12 +199,13 @@ export default function OrderDetailPage() {
 
                                 <div className="space-y-8 md:space-y-10">
                                     <ShippingInfoCard
-                                        ekspedisi={order.ekspedisi}
-                                        service={order.service}
-                                        noResi={order.noResi}
-                                        phone={order.teleponPenerima}
-                                        statusOrder={order.statusOrder}
-                                        namaPenerima={order.namaPenerima}
+                                         ekspedisi={order.ekspedisi}
+                                         service={order.service}
+                                         noResi={order.noResi}
+                                         phone={order.teleponPenerima}
+                                         statusOrder={order.statusOrder}
+                                         statusTagihan={order.statusTagihan}
+                                         namaPenerima={order.namaPenerima}
                                         alamatKirim={order.alamatKirim}
                                         kelurahanKirim={data.kelurahanKirim}
                                         distrikKirim={order.distrikKirim}

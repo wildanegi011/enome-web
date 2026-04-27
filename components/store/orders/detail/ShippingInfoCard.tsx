@@ -10,7 +10,11 @@ interface ShippingInfoCardProps {
     noResi: string;
     phone: string;
     statusOrder?: string;
+    statusTagihan?: string;
     namaPenerima?: string;
+    alamatKirim?: string;
+    distrikKirim?: string;
+    kotaKirim?: string;
     provinsiKirim?: string;
     kelurahanKirim?: string;
     kodePosKirim?: string;
@@ -23,6 +27,7 @@ export default function ShippingInfoCard({
     noResi,
     phone,
     statusOrder,
+    statusTagihan,
     namaPenerima,
     alamatKirim,
     distrikKirim,
@@ -108,50 +113,54 @@ export default function ShippingInfoCard({
                     </div>
                 </div>
 
-                <div className="h-px bg-neutral-base-100 ml-12.5 md:ml-14" />
+                {statusTagihan !== "KADALUARSA" && (
+                    <>
+                        <div className="h-px bg-neutral-base-100 ml-12.5 md:ml-14" />
 
-                {/* 4. Nomor Resi & Tombol Lacak */}
-                <div className="flex items-start gap-4 md:gap-5">
-                    <div className="w-10 h-10 rounded-xl bg-neutral-base-50 flex items-center justify-center shrink-0">
-                        <Search className="w-5 h-5 text-neutral-base-400" />
-                    </div>
-                    <div className="flex-1">
-                        <p className="text-[10px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-2">Nomor resi</p>
-                        <div className="flex items-center gap-3">
-                            <p className={cn(
-                                "text-[13px] md:text-[14px] font-black tracking-widest font-mono",
-                                noResi ? "text-neutral-base-800" : "text-neutral-base-300 font-montserrat font-bold tracking-tight"
-                            )}>
-                                {noResi || "menunggu update"}
-                            </p>
-                            {noResi && (
-                                <button
-                                    onClick={() => handleCopy(noResi)}
-                                    className="p-1.5 rounded-xl bg-white border border-neutral-base-100 shadow-sm hover:bg-neutral-base-900 hover:text-white transition-all active:scale-95"
-                                    title="Salin Resi"
-                                >
-                                    {copiedResi ? (
-                                        <Check className="w-3.5 h-3.5 text-emerald-500" />
-                                    ) : (
-                                        <Copy className="w-3.5 h-3.5" />
-                                    )}
-                                </button>
-                            )}
-                        </div>
-
-                        {showTrackingButton && (
-                            <div className="mt-4">
-                                <button
-                                    onClick={() => setIsTrackingOpen(true)}
-                                    className="w-full md:w-auto px-10 h-14 bg-neutral-base-900 text-white rounded-2xl text-[12px] font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-[0.98]"
-                                >
-                                    <Search className="w-4 h-4" />
-                                    Lacak Pesanan
-                                </button>
+                        {/* 4. Nomor Resi & Tombol Lacak */}
+                        <div className="flex items-start gap-4 md:gap-5">
+                            <div className="w-10 h-10 rounded-xl bg-neutral-base-50 flex items-center justify-center shrink-0">
+                                <Search className="w-5 h-5 text-neutral-base-400" />
                             </div>
-                        )}
-                    </div>
-                </div>
+                            <div className="flex-1">
+                                <p className="text-[10px] md:text-[12px] font-bold text-neutral-base-400 uppercase tracking-[0.12em] font-montserrat mb-2">Nomor resi</p>
+                                <div className="flex items-center gap-3">
+                                    <p className={cn(
+                                        "text-[13px] md:text-[14px] font-black tracking-widest font-mono",
+                                        noResi ? "text-neutral-base-800" : "text-neutral-base-300 font-montserrat font-bold tracking-tight"
+                                    )}>
+                                        {noResi || "menunggu update"}
+                                    </p>
+                                    {noResi && (
+                                        <button
+                                            onClick={() => handleCopy(noResi)}
+                                            className="p-1.5 rounded-xl bg-white border border-neutral-base-100 shadow-sm hover:bg-neutral-base-900 hover:text-white transition-all active:scale-95"
+                                            title="Salin Resi"
+                                        >
+                                            {copiedResi ? (
+                                                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                                            ) : (
+                                                <Copy className="w-3.5 h-3.5" />
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {showTrackingButton && (
+                                    <div className="mt-4">
+                                        <button
+                                            onClick={() => setIsTrackingOpen(true)}
+                                            className="w-full md:w-auto px-10 h-14 bg-neutral-base-900 text-white rounded-2xl text-[12px] font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-neutral-base-800 transition-all shadow-xl shadow-neutral-base-900/10 active:scale-[0.98]"
+                                        >
+                                            <Search className="w-4 h-4" />
+                                            Lacak Pesanan
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
 
             <TrackingModal
